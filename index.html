@@ -23,6 +23,8 @@
     --correct-color: #10b981;
     --wrong-color: #ef4444;
     --accent: #f59e0b;
+    --radius: 16px;
+    --radius-lg: 24px;
     --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
     --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
     --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
@@ -43,6 +45,8 @@
     --correct-color: #34d399;
     --wrong-color: #f87171;
     --accent: #fbbf24;
+    --radius: 16px;
+    --radius-lg: 24px;
     --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
     --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.4);
     --shadow-lg: 0 15px 25px -5px rgba(0,0,0,0.5);
@@ -73,7 +77,6 @@
     padding: 15px 0;
     position: sticky;
     top: 0;
-    z-height: 100;
     box-shadow: var(--shadow-sm);
     z-index: 50;
   }
@@ -123,14 +126,14 @@
   .subject-card p { color: var(--text-secondary); font-size: 0.95rem; }
   .subject-icon { position: absolute; right: 20px; bottom: 20px; font-size: 4rem; opacity: 0.1; }
 
-  .grade-card { text-align: center; padding: 40px 20px; }
+  .grade-card { text-align: center; padding: 40px 20px; cursor: pointer; }
   .grade-card h2 { font-size: 3rem; color: var(--primary-color); margin-bottom: 5px; }
   .grade-card span { color: var(--text-secondary); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
 
   .lesson-card { display: flex; align-items: center; gap: 20px; padding: 20px; cursor: pointer; }
   .lesson-icon {
     width: 60px; height: 60px; border-radius: 12px;
-    background: var(--science-light); color: var(--science-color);
+    background: var(--border-color); color: var(--primary-color);
     display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;
   }
   .lesson-info h4 { font-size: 1.2rem; margin-bottom: 5px; }
@@ -236,6 +239,16 @@
   /* Animations */
   @keyframes popIn { 0% { opacity: 0; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
   .animate-pop { animation: popIn 0.3s ease forwards; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .quiz-container { padding: 20px; }
+    .question-text { font-size: 1.1rem; }
+    .option-btn { font-size: 0.95rem; padding: 14px 16px; }
+    .page-title { font-size: 1.8rem; }
+    .grid-2 { grid-template-columns: 1fr; }
+    .grid-auto { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  }
 </style>
 </head>
 <body>
@@ -312,7 +325,9 @@
   const SUBJECTS = {
     science: { key:'science', name:'Science', sinhala:'විද්‍යාව', icon:'fa-flask', desc:'Explore the world of Science.' }
   };
-  const GRADES = ['9']; // Focus on Grade 9
+  
+  // UPDATED: Support both Grade 8 and Grade 9
+  const GRADES = ['8', '9']; 
 
   let appState = {
     content: null,
@@ -420,8 +435,8 @@
       </header>
       <main class="animate-pop">${bodyHtml}</main>
       <footer>
-        <p>Learning Quiz Hub </p>
-        <p class="dev-credit">🦊Developed by Lakshan Dulip</p>
+        <p>Learning Quiz Hub</p>
+        <p class="dev-credit">🦊 Developed by Lakshan Dulip</p>
       </footer>
     `;
   }
@@ -446,14 +461,22 @@
 
   function renderGrades(subject){
     const meta = subjectMeta(subject);
+    // Sort grades numerically
+    const sortedGrades = [...GRADES].sort((a,b) => parseInt(a) - parseInt(b));
+    
     return `
       <div class="breadcrumb"><a href="#/" onclick="playClickSound()">Home</a> <span>/</span> ${escapeHtml(meta.sinhala)}</div>
       <h2 class="page-title">ශ්‍රේණිය තෝරන්න</h2>
+      <p class="page-sub">ප්‍රශ්නාවලිය ආරම්භ කිරීමට ඔබගේ ශ්‍රේණිය තෝරන්න.</p>
       <div class="grid-auto" style="margin-top:30px;">
-        ${GRADES.map(g => `
+        ${sortedGrades.map(g => `
           <div class="card grade-card" onclick="navigate('#/subject/${meta.key}/grade/${g}')">
             <h2>${g}</h2>
             <span>ශ්‍රේණිය</span>
+            <div style="margin-top:10px; font-size:0.8rem; color:var(--text-secondary);">
+              <i class="fas fa-book"></i> 
+              ${getLessons(subject, g).length} පාඩම්
+            </div>
           </div>
         `).join('')}
       </div>
@@ -469,14 +492,14 @@
         <a href="#/subject/${meta.key}" onclick="playClickSound()">${escapeHtml(meta.sinhala)}</a> <span>/</span> 
         ${grade} ශ්‍රේණිය
       </div>
-      <h2 class="page-title">පාඩම් ලැයිස්තුව</h2>
+      <h2 class="page-title">${grade} ශ්‍රේණිය - පාඩම් ලැයිස්තුව</h2>
       <p class="page-sub">ප්‍රශ්නාවලිය ආරම්භ කිරීමට පාඩමක් තෝරන්න.</p>
       
       <div style="display:flex; flex-direction:column; gap:15px;">
-        ${lessons.length === 0 ? `<div class="card" style="text-align:center;">පාඩම් ඇතුළත් කර නොමැත.</div>` : 
+        ${lessons.length === 0 ? `<div class="card" style="text-align:center;">මෙම ශ්‍රේණිය සඳහා පාඩම් ඇතුළත් කර නොමැත.</div>` : 
           lessons.map((l, i) => `
           <div class="card lesson-card" onclick="navigate('#/subject/${meta.key}/grade/${grade}/quiz/${l.id}')">
-            <div class="lesson-icon">${i+1}</div>
+            <div class="lesson-icon"><i class="fas fa-book"></i></div>
             <div class="lesson-info">
               <h4>${escapeHtml(l.title)}</h4>
               <span class="q-badge"><i class="fas fa-question-circle"></i> ප්‍රශ්න ${l.questions.length} යි</span>
@@ -493,6 +516,13 @@
     const meta = subjectMeta(subject);
     const lesson = findLesson(subject, grade, lessonId);
     
+    if(!lesson) {
+      return `<div class="card" style="text-align:center; max-width:500px; margin:50px auto;">
+        <h3>පාඩම සොයාගත නොහැක</h3>
+        <button class="btn btn-primary" onclick="navigate('#/subject/${meta.key}/grade/${grade}')">පාඩම් වෙත ආපසු</button>
+      </div>`;
+    }
+
     if(!appState.quiz || appState.quiz.lessonId !== lessonId){
       appState.quiz = {
         subject, grade, lessonId,
@@ -519,10 +549,10 @@
             <h1>${pct}%</h1>
             <span>ප්‍රතිඵලය</span>
           </div>
-          <h2 style="margin-bottom:10px;"><i class="fas ${icon} style="color:var(--accent);"></i> ${remark}</h2>
+          <h2 style="margin-bottom:10px;"><i class="fas ${icon}" style="color:var(--accent);"></i> ${remark}</h2>
           <p class="page-sub">ඔබ ප්‍රශ්න ${total} න් ${qz.score} කට නිවැරදිව පිළිතුරු ලබා දී ඇත.</p>
           
-          <div style="display:flex; justify-content:center; gap:15px; margin-top:30px;">
+          <div style="display:flex; justify-content:center; gap:15px; margin-top:30px; flex-wrap:wrap;">
             <button class="btn btn-outline" onclick="navigate('#/subject/${meta.key}/grade/${grade}')"><i class="fas fa-list"></i> පාඩම් ලැයිස්තුව</button>
             <button class="btn btn-primary" onclick="appState.quiz=null; render(); playClickSound();"><i class="fas fa-redo"></i> නැවත කරන්න</button>
           </div>
@@ -591,7 +621,7 @@
     
     icon.className = `modal-icon ${isCorrect ? 'success fas fa-check-circle' : 'fail fas fa-times-circle'}`;
     
-    setTimeout(() => { modal.classList.add('active'); }, 600); // Wait a bit before showing pop-up
+    setTimeout(() => { modal.classList.add('active'); }, 600);
   }
 
   window.closeModalAndNext = function() {
