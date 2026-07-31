@@ -20,6 +20,8 @@
     --science-light: rgba(77, 182, 172, 0.15);
     --stamp: #e57373;           /* Accent color (Light Red) */
     --stamp-light: rgba(229, 115, 115, 0.15);
+    --select: #ffd54f;          /* Selection Yellow */
+    --select-light: rgba(255, 213, 79, 0.15);
     --line: rgba(255, 255, 255, 0.12); /* Borders */
     --shadow: 0 8px 28px rgba(0, 0, 0, 0.6);
     --shadow-sm: 0 3px 10px rgba(0, 0, 0, 0.4);
@@ -41,7 +43,7 @@
   #app{min-height:100vh; display:flex; flex-direction:column;}
   a{color:inherit;}
   button{font-family:inherit;}
-  :focus-visible{outline:3px solid var(--stamp); outline-offset:2px;}
+  :focus-visible{outline:3px solid var(--select); outline-offset:2px;}
   @media (prefers-reduced-motion: reduce){ *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;} }
 
   /* ============ HEADER ============ */
@@ -182,12 +184,12 @@
     transition: border-color .12s ease, background .12s ease; color:var(--ink);
   }
   .option-btn:hover{border-color:var(--ink-soft); background:var(--card);}
-  .option-btn.selected{border-color:var(--stamp); background:var(--stamp-light); font-weight:600;}
+  .option-btn.selected{border-color:var(--select); background:var(--select-light); font-weight:600;}
   .option-btn .letter{
     width:26px; height:26px; border-radius:50%; border:1.5px solid var(--line); flex:none;
     display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:12px;
   }
-  .option-btn.selected .letter{border-color:var(--stamp); color:var(--stamp);}
+  .option-btn.selected .letter{border-color:var(--select); color:var(--select);}
   .quiz-nav{display:flex; justify-content:space-between; gap:10px;}
 
   .result-wrap{text-align:center;}
