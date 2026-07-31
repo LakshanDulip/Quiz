@@ -29,6 +29,7 @@
     --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
     --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
     --modal-overlay: rgba(255, 255, 255, 0.8);
+    --emoji-shadow: 0 8px 20px rgba(0,0,0,0.15);
   }
 
   :root[data-theme="dark"] {
@@ -51,6 +52,7 @@
     --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.4);
     --shadow-lg: 0 15px 25px -5px rgba(0,0,0,0.5);
     --modal-overlay: rgba(15, 23, 42, 0.85);
+    --emoji-shadow: 0 8px 30px rgba(0,0,0,0.4);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', 'Noto Sans Sinhala', sans-serif; }
@@ -89,6 +91,17 @@
     display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 1.4rem; color: var(--primary-color);
     animation: pulse 2s infinite;
   }
+  .logo-emoji {
+    font-size: 2.2rem;
+    display: inline-block;
+    animation: float3D 3s ease-in-out infinite;
+    filter: drop-shadow(var(--emoji-shadow));
+    transform-style: preserve-3d;
+    perspective: 500px;
+  }
+  .logo-emoji:hover {
+    animation: spin3D 1s ease-in-out;
+  }
   .logo i { font-size: 1.8rem; }
   
   .controls { display: flex; gap: 15px; align-items: center; }
@@ -103,6 +116,97 @@
     transform: scale(1.1) rotate(180deg); 
     background: var(--primary-color);
     color: white;
+  }
+
+  /* ============ 3D EMOJI STYLES ============ */
+  .emoji-3d {
+    font-size: 3rem;
+    display: inline-block;
+    filter: drop-shadow(var(--emoji-shadow));
+    transform-style: preserve-3d;
+    perspective: 500px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    cursor: default;
+  }
+  .emoji-3d:hover {
+    transform: rotateY(180deg) scale(1.2);
+    filter: drop-shadow(0 12px 30px rgba(0,0,0,0.3));
+  }
+  .emoji-3d.small { font-size: 2rem; }
+  .emoji-3d.large { font-size: 4.5rem; }
+  .emoji-3d.xlarge { font-size: 6rem; }
+  
+  .emoji-3d.glow {
+    animation: glowPulse 2s ease-in-out infinite;
+  }
+  
+  .emoji-3d.float {
+    animation: float3D 3s ease-in-out infinite;
+  }
+  
+  .emoji-3d.bounce {
+    animation: bounce3D 2s ease-in-out infinite;
+  }
+  
+  .emoji-3d.spin {
+    animation: spin3D 4s linear infinite;
+  }
+  
+  .emoji-3d.tilt {
+    animation: tilt3D 3s ease-in-out infinite;
+  }
+  
+  .emoji-3d.wobble {
+    animation: wobble3D 2.5s ease-in-out infinite;
+  }
+
+  /* ============ 3D EMOJI ANIMATIONS ============ */
+  @keyframes float3D {
+    0%, 100% { transform: translateY(0px) rotateX(0deg) rotateY(0deg); }
+    25% { transform: translateY(-10px) rotateX(5deg) rotateY(10deg); }
+    50% { transform: translateY(-20px) rotateX(0deg) rotateY(20deg); }
+    75% { transform: translateY(-10px) rotateX(-5deg) rotateY(10deg); }
+  }
+  
+  @keyframes bounce3D {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-20px) scale(1.1) rotateX(10deg); }
+  }
+  
+  @keyframes spin3D {
+    0% { transform: rotateY(0deg) scale(1); }
+    50% { transform: rotateY(180deg) scale(1.2); }
+    100% { transform: rotateY(360deg) scale(1); }
+  }
+  
+  @keyframes tilt3D {
+    0%, 100% { transform: rotateX(0deg) rotateY(0deg); }
+    25% { transform: rotateX(10deg) rotateY(15deg); }
+    75% { transform: rotateX(-10deg) rotateY(-15deg); }
+  }
+  
+  @keyframes wobble3D {
+    0%, 100% { transform: rotateZ(0deg) rotateX(0deg); }
+    15% { transform: rotateZ(5deg) rotateX(5deg); }
+    30% { transform: rotateZ(-5deg) rotateX(-5deg); }
+    45% { transform: rotateZ(4deg) rotateX(4deg); }
+    60% { transform: rotateZ(-4deg) rotateX(-4deg); }
+    75% { transform: rotateZ(2deg) rotateX(2deg); }
+  }
+  
+  @keyframes glowPulse {
+    0%, 100% { filter: drop-shadow(var(--emoji-shadow)) brightness(1); }
+    50% { filter: drop-shadow(0 0 30px rgba(59, 130, 246, 0.5)) brightness(1.2); }
+  }
+  
+  @keyframes pop3D {
+    0% { transform: scale(0) rotateX(90deg); opacity: 0; }
+    60% { transform: scale(1.3) rotateX(-10deg); opacity: 1; }
+    100% { transform: scale(1) rotateX(0deg); }
+  }
+  
+  .emoji-pop {
+    animation: pop3D 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
   }
 
   /* ============ COMPONENTS ============ */
@@ -165,13 +269,18 @@
   .subject-card.maths { border-top: 4px solid var(--maths-color); }
   .subject-card h3 { font-size: 1.5rem; margin-bottom: 5px; }
   .subject-card p { color: var(--text-secondary); font-size: 0.95rem; }
-  .subject-icon { 
-    position: absolute; right: 20px; bottom: 20px; font-size: 4rem; opacity: 0.1;
+  
+  .subject-emoji {
+    position: absolute; right: 20px; bottom: 20px;
+    font-size: 4rem;
+    opacity: 0.15;
     transition: all 0.5s ease;
+    filter: drop-shadow(var(--emoji-shadow));
+    transform-style: preserve-3d;
   }
-  .subject-card:hover .subject-icon {
-    transform: scale(1.3) rotate(10deg);
-    opacity: 0.2;
+  .subject-card:hover .subject-emoji {
+    transform: scale(1.4) rotate(10deg) translateZ(30px);
+    opacity: 0.3;
   }
 
   .grade-card { 
@@ -193,11 +302,16 @@
     color: var(--text-secondary);
     animation: fadeIn 1s ease;
   }
-  .grade-card .emoji {
-    font-size: 2rem;
+  .grade-card .grade-emoji {
+    font-size: 3rem;
     display: block;
     margin-bottom: 10px;
-    animation: float 3s ease-in-out infinite;
+    filter: drop-shadow(var(--emoji-shadow));
+    transform-style: preserve-3d;
+    transition: all 0.3s ease;
+  }
+  .grade-card:hover .grade-emoji {
+    transform: rotateY(180deg) scale(1.2);
   }
 
   .lesson-card { 
@@ -211,14 +325,16 @@
   }
   .lesson-icon {
     width: 60px; height: 60px; border-radius: 12px;
-    background: var(--border-color); color: var(--primary-color);
-    display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;
+    background: var(--border-color); 
+    display: flex; align-items: center; justify-content: center; 
+    font-size: 2rem; flex-shrink: 0;
     transition: all 0.4s ease;
+    filter: drop-shadow(var(--emoji-shadow));
+    transform-style: preserve-3d;
   }
   .lesson-card:hover .lesson-icon {
-    transform: rotate(360deg) scale(1.1);
+    transform: rotateY(360deg) scale(1.1);
     background: var(--primary-color);
-    color: white;
   }
   .lesson-info h4 { font-size: 1.2rem; margin-bottom: 5px; }
   .lesson-info p { color: var(--text-secondary); font-size: 0.9rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -303,6 +419,13 @@
     font-size: 1.4rem; font-weight: 600; margin-bottom: 30px; line-height: 1.5;
     animation: fadeInRight 0.6s ease;
   }
+  .question-emoji {
+    font-size: 2rem;
+    margin-right: 10px;
+    display: inline-block;
+    filter: drop-shadow(var(--emoji-shadow));
+    animation: float3D 3s ease-in-out infinite;
+  }
   
   .options-grid { display: flex; flex-direction: column; gap: 15px; margin-bottom: 30px; }
   .option-btn {
@@ -322,6 +445,15 @@
   .option-btn:hover:not(:disabled) { 
     border-color: var(--primary-color); background: var(--bg-card-hover); 
     transform: translateX(10px) scale(1.02);
+  }
+  
+  .option-btn .opt-emoji {
+    font-size: 1.5rem;
+    filter: drop-shadow(var(--emoji-shadow));
+    transition: all 0.3s ease;
+  }
+  .option-btn:hover .opt-emoji {
+    transform: scale(1.3) rotate(10deg);
   }
   
   /* Selected / Result states */
@@ -380,8 +512,14 @@
   }
   
   .modal-icon { 
-    font-size: 4rem; margin-bottom: 15px;
+    font-size: 4.5rem; margin-bottom: 15px;
+    filter: drop-shadow(var(--emoji-shadow));
     animation: bounceIn 0.8s ease;
+    display: inline-block;
+    transform-style: preserve-3d;
+  }
+  .modal-icon:hover {
+    animation: spin3D 0.8s ease-in-out;
   }
   .modal-icon.success { color: var(--correct-color); }
   .modal-icon.fail { color: var(--wrong-color); }
@@ -412,6 +550,12 @@
     border-radius: 50%;
     border: 2px solid var(--primary-color);
     animation: ringPulse 2s ease-in-out infinite;
+  }
+  .result-circle .result-emoji {
+    font-size: 3rem;
+    margin-bottom: 5px;
+    filter: drop-shadow(var(--emoji-shadow));
+    animation: float3D 2s ease-in-out infinite;
   }
   .result-circle h1 { 
     font-size: 3.5rem; color: var(--primary-color); line-height: 1;
@@ -451,7 +595,12 @@
   .dev-credit:hover {
     transform: scale(1.1);
   }
-  .dev-credit i { color: var(--wrong-color); animation: heartBeat 1.5s infinite; }
+  .dev-credit .footer-emoji {
+    display: inline-block;
+    filter: drop-shadow(var(--emoji-shadow));
+    animation: heartBeat 1.5s infinite;
+    font-size: 1.2rem;
+  }
 
   /* Loaders */
   .loader { 
@@ -515,11 +664,6 @@
     0%, 100% { transform: translateX(0); }
     10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
     20%, 40%, 60%, 80% { transform: translateX(10px); }
-  }
-  
-  @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
   }
   
   @keyframes shimmer {
@@ -592,6 +736,9 @@
     .page-title { font-size: 1.8rem; }
     .grid-2 { grid-template-columns: 1fr; }
     .grid-auto { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+    .emoji-3d { font-size: 2.5rem; }
+    .emoji-3d.large { font-size: 3.5rem; }
+    .emoji-3d.xlarge { font-size: 4rem; }
   }
 </style>
 </head>
@@ -667,7 +814,7 @@
      ===================================================================== */
 
   const SUBJECTS = {
-    science: { key:'science', name:'Science', sinhala:'විද්‍යාව', icon:'fa-flask', desc:'Explore the world of Science.' }
+    science: { key:'science', name:'Science', sinhala:'විද්‍යාව', icon:'fa-flask', desc:'Explore the world of Science.', emoji:'🔬' }
   };
   
   const GRADES = ['8', '9']; 
@@ -767,7 +914,8 @@
       <header>
         <div class="header-inner">
           <div class="logo" onclick="navigate('#/')" style="cursor:pointer;">
-            <i class="fas fa-brain"></i> Quiz Hub
+            <span class="logo-emoji">🧠</span>
+            Quiz Hub
           </div>
           <div class="controls">
             <button class="theme-toggle" onclick="playClickSound(); toggleTheme();" title="Toggle Theme">
@@ -779,7 +927,9 @@
       <main class="animate-pop">${bodyHtml}</main>
       <footer>
         <p>Learning Quiz Hub</p>
-        <p class="dev-credit">🦊 Developed by Lakshan Dulip</p>
+        <p class="dev-credit">
+          <span class="footer-emoji">🦊</span> Developed by Lakshan Dulip
+        </p>
       </footer>
     `;
   }
@@ -787,7 +937,10 @@
   function renderHome(){
     return `
       <div style="text-align:center; margin-bottom:40px;">
-        <h2 class="page-title">විද්‍යාව ප්‍රශ්නාවලිය</h2>
+        <h2 class="page-title">
+          <span class="emoji-3d large glow float">🔬</span> 
+          විද්‍යාව ප්‍රශ්නාවලිය
+        </h2>
         <p class="page-sub">ඔබේ දැනුම පරීක්ෂා කරගන්න පාඩමක් තෝරන්න.</p>
       </div>
       <div class="grid-2">
@@ -795,7 +948,7 @@
           <div class="card subject-card ${s.key}" onclick="navigate('#/subject/${s.key}')">
             <h3>${escapeHtml(s.sinhala)}</h3>
             <p>${escapeHtml(s.desc)}</p>
-            <i class="fas ${s.icon} subject-icon"></i>
+            <span class="subject-emoji">${s.emoji}</span>
           </div>
         `).join('')}
       </div>
@@ -806,15 +959,23 @@
     const meta = subjectMeta(subject);
     const sortedGrades = [...GRADES].sort((a,b) => parseInt(a) - parseInt(b));
     const gradeEmojis = { '8': '📚', '9': '🎓' };
+    const gradeFlavors = { '8': '🌟', '9': '⭐' };
     
     return `
-      <div class="breadcrumb"><a href="#/" onclick="playClickSound()">Home</a> <span>/</span> ${escapeHtml(meta.sinhala)}</div>
-      <h2 class="page-title">ශ්‍රේණිය තෝරන්න</h2>
+      <div class="breadcrumb">
+        <a href="#/" onclick="playClickSound()">Home</a> <span>/</span> 
+        <span class="emoji-3d small" style="font-size:1.2rem;">${meta.emoji}</span> 
+        ${escapeHtml(meta.sinhala)}
+      </div>
+      <h2 class="page-title">
+        <span class="emoji-3d large float">📖</span> 
+        ශ්‍රේණිය තෝරන්න
+      </h2>
       <p class="page-sub">ප්‍රශ්නාවලිය ආරම්භ කිරීමට ඔබගේ ශ්‍රේණිය තෝරන්න.</p>
       <div class="grid-auto" style="margin-top:30px;">
         ${sortedGrades.map(g => `
           <div class="card grade-card" onclick="navigate('#/subject/${meta.key}/grade/${g}')">
-            <span class="emoji">${gradeEmojis[g] || '📖'}</span>
+            <span class="grade-emoji">${gradeFlavors[g] || '📖'}</span>
             <h2>${g}</h2>
             <span>ශ්‍රේණිය</span>
             <div class="lesson-count">
@@ -830,20 +991,28 @@
   function renderLessons(subject, grade){
     const meta = subjectMeta(subject);
     const lessons = getLessons(subject, grade);
+    const lessonEmojis = ['📘', '📗', '📙', '📕', '📓', '📔', '📒', '📚', '🔬', '🧪'];
+    
     return `
       <div class="breadcrumb">
         <a href="#/" onclick="playClickSound()">Home</a> <span>/</span> 
-        <a href="#/subject/${meta.key}" onclick="playClickSound()">${escapeHtml(meta.sinhala)}</a> <span>/</span> 
+        <a href="#/subject/${meta.key}" onclick="playClickSound()">
+          <span class="emoji-3d small" style="font-size:1.2rem;">${meta.emoji}</span> 
+          ${escapeHtml(meta.sinhala)}
+        </a> <span>/</span> 
         ${grade} ශ්‍රේණිය
       </div>
-      <h2 class="page-title">${grade} ශ්‍රේණිය - පාඩම් ලැයිස්තුව</h2>
+      <h2 class="page-title">
+        <span class="emoji-3d large wobble">📚</span> 
+        ${grade} ශ්‍රේණිය - පාඩම් ලැයිස්තුව
+      </h2>
       <p class="page-sub">ප්‍රශ්නාවලිය ආරම්භ කිරීමට පාඩමක් තෝරන්න.</p>
       
       <div style="display:flex; flex-direction:column; gap:15px;">
         ${lessons.length === 0 ? `<div class="card" style="text-align:center;">මෙම ශ්‍රේණිය සඳහා පාඩම් ඇතුළත් කර නොමැත.</div>` : 
           lessons.map((l, i) => `
           <div class="card lesson-card" onclick="navigate('#/subject/${meta.key}/grade/${grade}/quiz/${l.id}')">
-            <div class="lesson-icon"><i class="fas fa-book"></i></div>
+            <div class="lesson-icon">${lessonEmojis[i % lessonEmojis.length]}</div>
             <div class="lesson-info">
               <h4>${escapeHtml(l.title)}</h4>
               <span class="q-badge"><i class="fas fa-question-circle"></i> ප්‍රශ්න ${l.questions.length} යි</span>
@@ -888,6 +1057,7 @@
     
     if(!lesson) {
       return `<div class="card" style="text-align:center; max-width:500px; margin:50px auto;">
+        <span class="emoji-3d large" style="font-size:4rem;">😕</span>
         <h3>පාඩම සොයාගත නොහැක</h3>
         <button class="btn btn-primary" onclick="navigate('#/subject/${meta.key}/grade/${grade}')">පාඩම් වෙත ආපසු</button>
       </div>`;
@@ -911,6 +1081,7 @@
     if(qz.showResult){
       const pct = Math.round((qz.score/total)*100);
       let remark = pct > 75 ? "විශිෂ්ටයි!" : (pct > 50 ? "හොඳයි!" : "තව උත්සාහ කරන්න!");
+      let resultEmoji = pct > 75 ? "🏆" : (pct > 50 ? "👍" : "💪");
       let icon = pct > 75 ? "fa-trophy" : (pct > 50 ? "fa-thumbs-up" : "fa-book-reader");
       
       // Trigger confetti if score is good
@@ -921,10 +1092,14 @@
       return `
         <div class="quiz-container" style="text-align:center;">
           <div class="result-circle">
+            <span class="result-emoji">${resultEmoji}</span>
             <h1>${pct}%</h1>
             <span>ප්‍රතිඵලය</span>
           </div>
-          <h2 style="margin-bottom:10px;"><i class="fas ${icon}" style="color:var(--accent);"></i> ${remark}</h2>
+          <h2 style="margin-bottom:10px;">
+            <span class="emoji-3d" style="font-size:2.5rem;">${resultEmoji}</span>
+            ${remark}
+          </h2>
           <p class="page-sub">ඔබ ප්‍රශ්න ${total} න් ${qz.score} කට නිවැරදිව පිළිතුරු ලබා දී ඇත.</p>
           
           <div style="display:flex; justify-content:center; gap:15px; margin-top:30px; flex-wrap:wrap;">
@@ -940,6 +1115,7 @@
     const question = lesson.questions[qIndex];
     const letters = ['A','B','C','D'];
     const progressPct = ((qz.idx) / total) * 100;
+    const questionEmojis = ['🤔', '💡', '🧠', '🔍', '📝', '✏️', '📖', '🎯'];
 
     return `
       <div class="quiz-container">
@@ -949,7 +1125,10 @@
         </div>
         <div class="progress-bg"><div class="progress-fill" style="width:${progressPct}%"></div></div>
         
-        <div class="question-text">${escapeHtml(question.q)}</div>
+        <div class="question-text">
+          <span class="question-emoji">${questionEmojis[qz.idx % questionEmojis.length]}</span>
+          ${escapeHtml(question.q)}
+        </div>
         
         <div class="options-grid">
           ${question.options.map((opt, i) => `
@@ -976,12 +1155,12 @@
       selectedBtn.classList.add('correct');
       appState.quiz.score++;
       playSuccessSound();
-      showModal(true, "නිවැරදියි!", explanation);
+      showModal(true, "✅ නිවැරදියි!", explanation);
     } else {
       selectedBtn.classList.add('wrong');
       correctBtn.classList.add('correct');
       playFailSound();
-      showModal(false, "වැරදියි!", explanation);
+      showModal(false, "❌ වැරදියි!", explanation);
     }
   };
 
@@ -992,9 +1171,10 @@
     
     document.getElementById('modalTitle').textContent = title;
     document.getElementById('modalTitle').style.color = isCorrect ? 'var(--correct-color)' : 'var(--wrong-color)';
-    document.getElementById('modalText').innerHTML = text ? `<strong>විවරණය:</strong><br>${text}` : "විවරණයක් ඇතුළත් කර නොමැත.";
+    document.getElementById('modalText').innerHTML = text ? `<strong>📖 විවරණය:</strong><br>${text}` : "විවරණයක් ඇතුළත් කර නොමැත.";
     
-    icon.className = `modal-icon ${isCorrect ? 'success fas fa-check-circle' : 'fail fas fa-times-circle'}`;
+    icon.textContent = isCorrect ? '🎉' : '😅';
+    icon.className = `modal-icon ${isCorrect ? 'success' : 'fail'}`;
     
     setTimeout(() => { modal.classList.add('active'); }, 600);
   }
