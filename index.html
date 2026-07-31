@@ -1,4 +1,4 @@
-
+<!DOCTYPE html>
 <html lang="si">
 <head>
 <meta charset="UTF-8">
@@ -7,22 +7,22 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,900&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
-  /* ============ TOKENS ============ */
+  /* ============ TOKENS (DARK THEME) ============ */
   :root{
-    --paper:#f1efe7;
-    --paper-2:#e8e4d8;
-    --card:#fbfaf6;
-    --ink:#242220;
-    --ink-soft:#635e54;
-    --maths:#2b4c7e;
-    --maths-light:#e3ebf6;
-    --science:#2f6b4f;
-    --science-light:#e4f1ea;
-    --stamp:#b8402a;
-    --stamp-light:#f7e6e1;
-    --line: rgba(36,34,32,0.13);
-    --shadow: 0 8px 28px rgba(36,34,32,0.11);
-    --shadow-sm: 0 3px 10px rgba(36,34,32,0.08);
+    --paper: #121212;           /* Main background */
+    --paper-2: #242424;         /* Secondary background */
+    --card: #1e1e1e;            /* Card background */
+    --ink: #e0e0e0;             /* Primary text */
+    --ink-soft: #9e9e9e;        /* Secondary text */
+    --maths: #64b5f6;           /* Maths color (Light Blue) */
+    --maths-light: rgba(100, 181, 246, 0.15);
+    --science: #4db6ac;         /* Science color (Teal) */
+    --science-light: rgba(77, 182, 172, 0.15);
+    --stamp: #e57373;           /* Accent color (Light Red) */
+    --stamp-light: rgba(229, 115, 115, 0.15);
+    --line: rgba(255, 255, 255, 0.12); /* Borders */
+    --shadow: 0 8px 28px rgba(0, 0, 0, 0.6);
+    --shadow-sm: 0 3px 10px rgba(0, 0, 0, 0.4);
     --radius: 14px;
     --radius-lg: 22px;
     --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
@@ -46,11 +46,11 @@
 
   /* ============ HEADER ============ */
   .site-header{
-    background:var(--ink);
-    color:var(--paper);
+    background: #000000;
+    color: var(--ink);
     padding:22px 20px 26px;
     position:relative;
-    background-image: repeating-linear-gradient(to bottom, transparent 0 26px, rgba(241,239,231,0.045) 26px 27px);
+    background-image: repeating-linear-gradient(to bottom, transparent 0 26px, rgba(255,255,255,0.05) 26px 27px);
   }
   .site-header .inner{max-width:1000px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;}
   .brand{display:flex; align-items:center; gap:14px; cursor:pointer;}
@@ -59,16 +59,16 @@
     display:flex;align-items:center;justify-content:center;
     transform:rotate(-8deg); flex:none;
     color:var(--stamp); font-family:var(--font-mono); font-weight:600; font-size:11px;
-    background:rgba(184,64,42,0.06);
+    background:var(--stamp-light);
   }
   .brand-text h1{font-family:var(--font-display); font-weight:700; font-size:22px; margin:0; letter-spacing:0.2px;}
-  .brand-text p{margin:2px 0 0; font-size:12.5px; color:rgba(241,239,231,0.6); font-family:var(--font-mono);}
+  .brand-text p{margin:2px 0 0; font-size:12.5px; color:rgba(255,255,255,0.5); font-family:var(--font-mono);}
   .header-links{display:flex; gap:10px; align-items:center; font-size:13px;}
   .header-links a{
-    color:rgba(241,239,231,0.72); background:none; border:none; cursor:pointer; font-size:13px;
-    text-decoration:none; padding:6px 4px;
+    color:rgba(255,255,255,0.6); background:none; border:none; cursor:pointer; font-size:13px;
+    text-decoration:none; padding:6px 4px; transition: color 0.2s ease;
   }
-  .header-links a:hover{color:var(--paper);}
+  .header-links a:hover{color:#fff;}
 
   main{flex:1; max-width:1000px; margin:0 auto; padding:34px 20px 60px; width:100%;}
 
@@ -76,7 +76,7 @@
     font-family:var(--font-mono); font-size:12px; text-transform:uppercase; letter-spacing:1.5px;
     color:var(--ink-soft); margin:0 0 8px;
   }
-  h2.page-title{font-family:var(--font-display); font-size:clamp(24px,4vw,34px); margin:0 0 6px; font-weight:700;}
+  h2.page-title{font-family:var(--font-display); font-size:clamp(24px,4vw,34px); margin:0 0 6px; font-weight:700; color:#fff;}
   .page-sub{color:var(--ink-soft); margin:0 0 28px; font-size:15px;}
 
   .breadcrumb{font-size:13px; color:var(--ink-soft); margin-bottom:20px; font-family:var(--font-mono);}
@@ -93,20 +93,20 @@
     border:1px solid var(--line); overflow:hidden;
     transition: transform .15s ease, box-shadow .15s ease;
   }
-  .subject-tile:hover{transform:translateY(-3px) rotate(-0.4deg); box-shadow:0 14px 30px rgba(36,34,32,0.16);}
+  .subject-tile:hover{transform:translateY(-3px) rotate(-0.4deg); box-shadow:0 14px 30px rgba(0,0,0,0.8);}
   .subject-tile::before{
     content:''; position:absolute; left:0; top:0; bottom:0; width:14px;
-    background-image: radial-gradient(circle, rgba(36,34,32,0.16) 2.5px, transparent 2.6px);
+    background-image: radial-gradient(circle, rgba(255,255,255,0.08) 2.5px, transparent 2.6px);
     background-size:14px 20px; background-position:center;
   }
   .subject-tile.maths{border-top:5px solid var(--maths);}
   .subject-tile.science{border-top:5px solid var(--science);}
-  .subject-tile h3{font-family:var(--font-display); font-size:26px; margin:0 0 4px;}
+  .subject-tile h3{font-family:var(--font-display); font-size:26px; margin:0 0 4px; color:#fff;}
   .subject-tile .sinhala{font-size:14px; color:var(--ink-soft); margin:0 0 14px;}
   .subject-tile .desc{font-size:13.5px; color:var(--ink-soft); margin:0;}
   .subject-tile .tag{
     display:inline-block; margin-top:16px; font-family:var(--font-mono); font-size:11.5px;
-    padding:4px 10px; border-radius:20px;
+    padding:4px 10px; border-radius:20px; font-weight:600;
   }
   .subject-tile.maths .tag{background:var(--maths-light); color:var(--maths);}
   .subject-tile.science .tag{background:var(--science-light); color:var(--science);}
@@ -134,10 +134,10 @@
   .lesson-card img{width:64px; height:64px; object-fit:cover; border-radius:10px; flex:none; border:1px solid var(--line);}
   .lesson-card .icon-fallback{
     width:64px;height:64px;border-radius:10px;flex:none;display:flex;align-items:center;justify-content:center;
-    font-family:var(--font-display); font-size:22px; font-weight:700; color:#fff;
+    font-family:var(--font-display); font-size:22px; font-weight:700; color:#121212;
   }
   .lesson-card .body{flex:1; min-width:0;}
-  .lesson-card h4{margin:0 0 4px; font-family:var(--font-display); font-size:18px;}
+  .lesson-card h4{margin:0 0 4px; font-family:var(--font-display); font-size:18px; color:#fff;}
   .lesson-card p{margin:0; font-size:13.5px; color:var(--ink-soft); overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;}
   .qcount{font-family:var(--font-mono); font-size:11.5px; color:var(--ink-soft); margin-top:8px; display:inline-block;}
 
@@ -150,18 +150,18 @@
   .btn{
     display:inline-flex; align-items:center; gap:8px; font-family:var(--font-body); font-weight:600; font-size:14px;
     padding:11px 20px; border-radius:30px; border:none; cursor:pointer; text-decoration:none;
-    transition: transform .1s ease, box-shadow .1s ease; background:var(--ink); color:var(--paper);
+    transition: transform .1s ease, box-shadow .1s ease; background:var(--ink); color:#121212;
   }
-  .btn:hover{transform:translateY(-1px); box-shadow:0 6px 14px rgba(36,34,32,0.22);}
+  .btn:hover{transform:translateY(-1px); box-shadow:0 6px 14px rgba(0,0,0,0.8);}
   .btn:disabled{opacity:0.4; cursor:not-allowed; transform:none; box-shadow:none;}
-  .btn.stamp-btn{background:var(--stamp); color:#fff;}
+  .btn.stamp-btn{background:var(--stamp); color:#121212;}
   .btn.outline{background:transparent; color:var(--ink); border:1.5px solid var(--line);}
 
   /* ============ LESSON DETAIL ============ */
   .lesson-detail{background:var(--card); border-radius:var(--radius-lg); border:1px solid var(--line); box-shadow:var(--shadow); overflow:hidden;}
   .lesson-detail img{width:100%; max-height:280px; object-fit:cover; display:block;}
   .lesson-detail .content{padding:28px 30px;}
-  .lesson-detail h2{font-family:var(--font-display); margin:0 0 10px; font-size:28px;}
+  .lesson-detail h2{font-family:var(--font-display); margin:0 0 10px; font-size:28px; color:#fff;}
   .lesson-detail .desc{color:var(--ink-soft); white-space:pre-wrap; margin-bottom:20px;}
   .lesson-detail .actions{display:flex; gap:12px; flex-wrap:wrap; align-items:center;}
   .ext-link{font-size:13.5px; color:var(--maths); text-decoration:none; font-family:var(--font-mono);}
@@ -174,14 +174,14 @@
   .progress-bar{height:6px; background:var(--paper-2); border-radius:6px; overflow:hidden; margin-bottom:26px;}
   .progress-bar .fill{height:100%; background:var(--stamp); border-radius:6px; transition:width .25s ease;}
   .quiz-question img{width:100%; max-height:220px; object-fit:cover; border-radius:12px; margin-bottom:16px;}
-  .quiz-question h3{font-family:var(--font-display); font-size:22px; margin:0 0 22px; line-height:1.35;}
+  .quiz-question h3{font-family:var(--font-display); font-size:22px; margin:0 0 22px; line-height:1.35; color:#fff;}
   .options{display:flex; flex-direction:column; gap:10px; margin-bottom:26px;}
   .option-btn{
     text-align:left; padding:14px 16px; border-radius:12px; border:1.5px solid var(--line); background:var(--paper);
     cursor:pointer; font-size:14.5px; font-family:var(--font-body); display:flex; align-items:center; gap:12px;
-    transition: border-color .12s ease, background .12s ease;
+    transition: border-color .12s ease, background .12s ease; color:var(--ink);
   }
-  .option-btn:hover{border-color:var(--ink-soft);}
+  .option-btn:hover{border-color:var(--ink-soft); background:var(--card);}
   .option-btn.selected{border-color:var(--stamp); background:var(--stamp-light); font-weight:600;}
   .option-btn .letter{
     width:26px; height:26px; border-radius:50%; border:1.5px solid var(--line); flex:none;
@@ -203,7 +203,7 @@
   .review-item{border:1px solid var(--line); border-radius:12px; padding:16px 18px; background:var(--paper);}
   .review-item.correct{border-left:4px solid var(--science);}
   .review-item.incorrect{border-left:4px solid var(--stamp);}
-  .review-item .q{font-weight:600; margin-bottom:8px; font-size:14.5px;}
+  .review-item .q{font-weight:600; margin-bottom:8px; font-size:14.5px; color:#fff;}
   .review-item .a-line{font-size:13.5px; margin:3px 0; color:var(--ink-soft);}
   .review-item .a-line.wrong-answer{color:var(--stamp);}
   .review-item .a-line.right-answer{color:var(--science);}
@@ -212,7 +212,7 @@
 
   .loading-screen{display:flex; align-items:center; justify-content:center; min-height:70vh; color:var(--ink-soft); font-family:var(--font-mono); font-size:13px;}
   .site-footer{text-align:center; padding:26px 20px; font-size:12px; color:var(--ink-soft); font-family:var(--font-mono);}
-  .error-message { text-align: center; padding: 50px 20px; color: var(--stamp); font-weight: bold;}
+  .error-message { text-align: center; padding: 50px 20px; color: var(--stamp); font-weight: bold; background:var(--card); border:1px solid var(--line); border-radius:var(--radius-lg); max-width:600px; margin:40px auto;}
 </style>
 </head>
 <body>
@@ -221,7 +221,7 @@
 <script>
   /* =====================================================================
      LEARNING QUIZ HUB
-     Single-file site pulling data from data.json
+     Single-file site pulling data from data.json (Dark Theme Adapted)
      ===================================================================== */
 
   const SUBJECTS = {
