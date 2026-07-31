@@ -176,7 +176,7 @@
     min-height: 100vh;
   }
 
-  /* ============ AMBIENT GRID BACKGROUND (replaces stock photography) ============ */
+  /* ============ AMBIENT GRID BACKGROUND ============ */
   body::before {
     content: '';
     position: fixed;
@@ -195,6 +195,40 @@
   button:focus-visible, a:focus-visible, .option-btn:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 3px; }
 
   main { flex: 1; max-width: 1100px; margin: 0 auto; padding: 40px 20px; width: 100%; }
+
+  /* ============ FULLSCREEN STYLES ============ */
+  .fullscreen-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--border-color);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    transition: all 0.2s ease;
+  }
+  .fullscreen-btn:hover {
+    background: var(--primary-color);
+    color: #fff;
+    transform: scale(1.05);
+  }
+  .fullscreen-btn.is-fullscreen {
+    background: var(--primary-color);
+    color: #1a1a1a;
+  }
+
+  /* Fullscreen mode adjustments */
+  :-webkit-full-screen {
+    background-color: var(--bg-main);
+  }
+  :-moz-full-screen {
+    background-color: var(--bg-main);
+  }
+  :fullscreen {
+    background-color: var(--bg-main);
+  }
 
   /* ============ HEADER ============ */
   header {
@@ -337,7 +371,6 @@
   .quiz-progress-mini { display: flex; align-items: center; gap: 8px; }
   .quiz-progress-mini .frac { font-weight: 700; font-size: 0.85rem; color: var(--text-secondary); font-family: 'Space Grotesk', sans-serif; }
 
-  /* Signature element: a lab flask that fills as the quiz progresses */
   .flask-mini { width: 38px; height: 52px; position: relative; flex-shrink: 0; }
   .flask-mini .flask-mask {
     position: absolute; inset: 0; overflow: hidden;
@@ -580,6 +613,60 @@
     }
     setTimeout(() => container.remove(), 5200);
   }
+
+  // ============ FULLSCREEN FUNCTIONS ============
+  function toggleFullscreen() {
+    const btn = document.getElementById('fullscreenBtn');
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+      // Enter fullscreen
+      const elem = document.documentElement;
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+      } else if (elem.webkitRequestFullscreen) {
+        elem.webkitRequestFullscreen();
+      }
+      btn.classList.add('is-fullscreen');
+      btn.querySelector('i').className = 'fas fa-compress';
+      playClickSound();
+    } else {
+      // Exit fullscreen
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      }
+      btn.classList.remove('is-fullscreen');
+      btn.querySelector('i').className = 'fas fa-expand';
+      playClickSound();
+    }
+  }
+
+  // Update fullscreen button state when fullscreen changes
+  document.addEventListener('fullscreenchange', updateFullscreenButton);
+  document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
+
+  function updateFullscreenButton() {
+    const btn = document.getElementById('fullscreenBtn');
+    if (!btn) return;
+    const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    if (isFullscreen) {
+      btn.classList.add('is-fullscreen');
+      btn.querySelector('i').className = 'fas fa-compress';
+    } else {
+      btn.classList.remove('is-fullscreen');
+      btn.querySelector('i').className = 'fas fa-expand';
+    }
+  }
+
+  // Keyboard shortcut: F for fullscreen
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'f' || e.key === 'F') {
+      // Don't trigger if typing in an input
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      e.preventDefault();
+      toggleFullscreen();
+    }
+  });
 </script>
 
 <div id="app"></div>
@@ -688,6 +775,9 @@
     // post-render side effects for animated signature elements
     if (r.name === 'quiz' && appState.quiz && !appState.quiz.showResult) animateFlask();
     if (r.name === 'quiz' && appState.quiz && appState.quiz.showResult) animateRing();
+
+    // Update fullscreen button state
+    updateFullscreenButton();
   }
 
   function animateFlask() {
@@ -711,6 +801,7 @@
     const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
     const muteIcon = isMuted ? 'fa-volume-mute' : 'fa-volume-up';
     const muteClass = isMuted ? 'muted' : '';
+    const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement);
 
     return `
       <header>
@@ -734,12 +825,17 @@
               <div class="stat-item"><i class="fas fa-fire"></i><span class="value">${appState.streak}</span></div>
             </div>
 
-            <button id="muteBtn" class="icon-btn ${muteClass}" onclick="toggleMute()" title="${isMuted ? 'Unmute' : 'Mute'}">
+            <!-- Fullscreen Button -->
+            <button id="fullscreenBtn" class="fullscreen-btn ${isFullscreen ? 'is-fullscreen' : ''}" onclick="toggleFullscreen()" title="Fullscreen (F)">
+              <i class="fas ${isFullscreen ? 'fa-compress' : 'fa-expand'}"></i>
+            </button>
+
+            <button id="muteBtn" class="icon-btn ${muteClass}" onclick="toggleMute()" title="${isMuted ? 'Unmute' : 'Mute'} (M)">
               <i class="fas ${muteIcon}"></i>
             </button>
 
             <div class="theme-wrap">
-              <button class="icon-btn" onclick="toggleThemePopover(event)" title="තේමාව මාරු කරන්න">🎨</button>
+              <button class="icon-btn" onclick="toggleThemePopover(event)" title="තේමාව මාරු කරන්න (T)">🎨</button>
               <div class="theme-popover" id="themePopover">
                 <div class="theme-popover-title">තේමාව</div>
                 ${THEMES.map(theme => `
@@ -1052,8 +1148,9 @@
 
   /* ---------------- GLOBAL KEYBOARD SHORTCUTS ---------------- */
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'm' || e.key === 'M') { toggleMute(); return; }
-    if (e.key === 't' || e.key === 'T') { toggleTheme(); return; }
+    // Fullscreen is handled separately with 'f' key
+    if (e.key === 'm' || e.key === 'M') { e.preventDefault(); toggleMute(); return; }
+    if (e.key === 't' || e.key === 'T') { e.preventDefault(); toggleTheme(); return; }
 
     const r = appState.route;
     if (r.name !== 'quiz' || !appState.quiz || appState.quiz.showResult) return;
