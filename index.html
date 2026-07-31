@@ -8,11 +8,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Noto+Sans+Sinhala:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-  /* ============ DEFAULT THEMES ============ */
+  /* ============ CSS VARIABLES (THEMES) ============ */
   :root[data-theme="dark"] {
     --bg-main: #0f172a;
-    --bg-card: #1e293b;
-    --bg-card-hover: #2dd4bf0d;
+    --bg-card: rgba(30, 41, 59, 0.92);
+    --bg-card-hover: rgba(45, 212, 191, 0.08);
     --text-primary: #f1f5f9;
     --text-secondary: #94a3b8;
     --border-color: #334155;
@@ -29,13 +29,15 @@
     --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
     --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.4);
     --shadow-lg: 0 15px 25px -5px rgba(0,0,0,0.5);
-    --modal-overlay: rgba(15, 23, 42, 0.9);
+    --modal-overlay: rgba(15, 23, 42, 0.92);
     --card-border: #334155;
+    --bg-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1920&q=80');
+    --bg-overlay: rgba(15, 23, 42, 0.85);
   }
 
   :root[data-theme="light"] {
     --bg-main: #f0f4f8;
-    --bg-card: #ffffff;
+    --bg-card: rgba(255, 255, 255, 0.92);
     --bg-card-hover: #f8fafc;
     --text-primary: #1a2332;
     --text-secondary: #64748b;
@@ -53,14 +55,15 @@
     --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
     --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
     --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
-    --modal-overlay: rgba(255, 255, 255, 0.85);
+    --modal-overlay: rgba(255, 255, 255, 0.92);
     --card-border: #e2e8f0;
+    --bg-image: url('https://images.unsplash.com/photo-1504608524849-3cdf7b3a29e6?w=1920&q=80');
+    --bg-overlay: rgba(255, 255, 255, 0.85);
   }
 
-  /* ============ PURPLE THEME ============ */
   :root[data-theme="purple"] {
     --bg-main: #0a0618;
-    --bg-card: #1a1035;
+    --bg-card: rgba(26, 16, 53, 0.92);
     --bg-card-hover: #2a1a45;
     --text-primary: #f0eaff;
     --text-secondary: #b8a5d9;
@@ -80,12 +83,13 @@
     --shadow-lg: 0 15px 25px -5px rgba(0,0,0,0.7);
     --modal-overlay: rgba(10, 6, 24, 0.95);
     --card-border: #3a2a5a;
+    --bg-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1920&q=80');
+    --bg-overlay: rgba(10, 6, 24, 0.88);
   }
 
-  /* ============ OCEAN THEME ============ */
   :root[data-theme="ocean"] {
     --bg-main: #0c1929;
-    --bg-card: #0f2847;
+    --bg-card: rgba(15, 40, 71, 0.92);
     --bg-card-hover: #1a3a5a;
     --text-primary: #e0f2fe;
     --text-secondary: #94b8d9;
@@ -105,12 +109,13 @@
     --shadow-lg: 0 15px 25px -5px rgba(0,0,0,0.7);
     --modal-overlay: rgba(12, 25, 41, 0.95);
     --card-border: #1a4a6a;
+    --bg-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80');
+    --bg-overlay: rgba(12, 25, 41, 0.88);
   }
 
-  /* ============ FOREST THEME ============ */
   :root[data-theme="forest"] {
     --bg-main: #0a1a0a;
-    --bg-card: #0f2a0f;
+    --bg-card: rgba(15, 42, 15, 0.92);
     --bg-card-hover: #1a3a1a;
     --text-primary: #e0f0e0;
     --text-secondary: #8ab88a;
@@ -130,12 +135,13 @@
     --shadow-lg: 0 15px 25px -5px rgba(0,0,0,0.7);
     --modal-overlay: rgba(10, 26, 10, 0.95);
     --card-border: #1a4a1a;
+    --bg-image: url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920&q=80');
+    --bg-overlay: rgba(10, 26, 10, 0.88);
   }
 
-  /* ============ SUNSET THEME ============ */
   :root[data-theme="sunset"] {
     --bg-main: #1a0a0a;
-    --bg-card: #2a1515;
+    --bg-card: rgba(42, 21, 21, 0.92);
     --bg-card-hover: #3a2020;
     --text-primary: #fce4e4;
     --text-secondary: #d9a0a0;
@@ -155,23 +161,53 @@
     --shadow-lg: 0 15px 25px -5px rgba(0,0,0,0.7);
     --modal-overlay: rgba(26, 10, 10, 0.95);
     --card-border: #4a2a2a;
+    --bg-image: url('https://images.unsplash.com/photo-1503803548695-c2a7b4a5b875?w=1920&q=80');
+    --bg-overlay: rgba(26, 10, 10, 0.88);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', 'Noto Sans Sinhala', sans-serif; }
   
   body {
     background-color: var(--bg-main);
+    background-image: var(--bg-image);
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
     color: var(--text-primary);
     line-height: 1.6;
     transition: background-color 0.4s ease, color 0.4s ease;
     overflow-x: hidden;
+    position: relative;
+    min-height: 100vh;
   }
-
+  
+  /* ============ BACKGROUND OVERLAY ============ */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-overlay);
+    z-index: 0;
+    backdrop-filter: blur(2px);
+    transition: all 0.4s ease;
+  }
+  
+  #app {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
   a { text-decoration: none; color: inherit; }
   button { cursor: pointer; border: none; outline: none; background: none; font-family: inherit; transition: all 0.2s; }
   
   /* ============ LAYOUT ============ */
-  #app { min-height: 100vh; display: flex; flex-direction: column; }
   main { flex: 1; max-width: 1100px; margin: 0 auto; padding: 40px 20px; width: 100%; }
 
   /* ============ HEADER ============ */
@@ -181,6 +217,7 @@
     padding: 12px 0;
     position: sticky;
     top: 0;
+    backdrop-filter: blur(10px);
     box-shadow: var(--shadow-sm);
     z-index: 50;
     transition: all 0.4s ease;
@@ -191,13 +228,51 @@
     flex-wrap: wrap;
     gap: 10px;
   }
-  .logo { 
-    display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.3rem; 
+  
+  /* ============ LOGO WITH IMAGE ============ */
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+  .logo:hover {
+    transform: scale(1.02);
+  }
+  .logo img {
+    height: 45px;
+    width: auto;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.2));
+  }
+  .logo:hover img {
+    transform: rotate(-5deg) scale(1.05);
+    filter: drop-shadow(0 4px 15px rgba(99, 102, 241, 0.3));
+  }
+  .logo-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+  }
+  .logo-text .main {
+    font-weight: 900;
+    font-size: 1.4rem;
     background: var(--primary-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
   }
-  .logo i { font-size: 1.6rem; -webkit-text-fill-color: initial; color: var(--primary-color); }
+  .logo-text .sub {
+    font-size: 0.5rem;
+    color: var(--text-secondary);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+    -webkit-text-fill-color: var(--text-secondary);
+  }
   
   .controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
   
@@ -292,6 +367,7 @@
     padding: 6px 16px;
     border-radius: 50px;
     border: 1px solid var(--border-color);
+    backdrop-filter: blur(5px);
   }
   .stat-item {
     display: flex;
@@ -321,10 +397,7 @@
   .breadcrumb a { color: var(--primary-color); font-weight: 500; }
   .breadcrumb a:hover { text-decoration: underline; }
 
-  /* ============ CARDS ============ */
-  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
-  .grid-auto { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
-  
+  /* ============ CARDS (Glassmorphism) ============ */
   .card {
     background: var(--bg-card);
     border: 1px solid var(--card-border);
@@ -334,6 +407,7 @@
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+    backdrop-filter: blur(5px);
   }
   .card:hover { 
     transform: translateY(-3px); 
@@ -426,9 +500,12 @@
   /* ============ QUIZ UI ============ */
   .quiz-container {
     max-width: 750px; margin: 0 auto;
-    background: var(--bg-card); border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg); padding: 35px;
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    padding: 35px;
     border: 1px solid var(--card-border);
+    backdrop-filter: blur(10px);
   }
   .quiz-header { 
     display: flex; justify-content: space-between; align-items: center; 
@@ -459,6 +536,7 @@
     border-radius: 12px; font-size: 1rem; color: var(--text-primary);
     display: flex; align-items: center; gap: 12px;
     transition: all 0.2s ease;
+    backdrop-filter: blur(5px);
   }
   .option-btn:hover:not(:disabled) { 
     border-color: var(--primary-color); background: var(--bg-card-hover); 
@@ -524,19 +602,24 @@
   /* ============ EXPLANATION MODAL ============ */
   .modal-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: var(--modal-overlay); backdrop-filter: blur(4px);
+    background: var(--modal-overlay);
+    backdrop-filter: blur(8px);
     display: flex; align-items: center; justify-content: center;
     z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.25s ease;
   }
   .modal-overlay.active { opacity: 1; visibility: visible; }
   
   .modal-content {
-    background: var(--bg-card); width: 90%; max-width: 450px;
-    border-radius: var(--radius-lg); padding: 30px;
+    background: var(--bg-card);
+    width: 90%; max-width: 450px;
+    border-radius: var(--radius-lg);
+    padding: 30px;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    transform: translateY(20px) scale(0.95); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform: translateY(20px) scale(0.95);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     border: 1px solid var(--card-border);
     text-align: center;
+    backdrop-filter: blur(10px);
   }
   .modal-overlay.active .modal-content { 
     transform: translateY(0) scale(1);
@@ -620,6 +703,7 @@
     text-align: center; padding: 20px; color: var(--text-secondary); 
     font-size: 0.8rem; border-top: 1px solid var(--border-color); 
     background: var(--bg-card);
+    backdrop-filter: blur(10px);
   }
   .dev-credit { 
     margin-top: 5px; font-weight: 600; color: var(--primary-color);
@@ -656,6 +740,9 @@
     .header-inner { flex-direction: column; align-items: stretch; }
     .controls { justify-content: center; }
     .theme-selector { flex-wrap: wrap; justify-content: center; }
+    .logo img { height: 35px; }
+    .logo-text .main { font-size: 1.1rem; }
+    .logo-text .sub { font-size: 0.4rem; }
   }
 </style>
 </head>
@@ -892,9 +979,17 @@
     return `
       <header>
         <div class="header-inner">
-          <div class="logo" onclick="navigate('#/')" style="cursor:pointer;">
-            <i class="fas fa-brain"></i> Quiz Hub
+          <!-- ===== LOGO WITH IMAGE ===== -->
+          <div class="logo" onclick="navigate('#/')">
+            <!-- Replace 'logo.png' with your actual image path -->
+            <img src="logo.png" alt="Quiz Hub Logo" 
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="logo-text">
+              <span class="main">Quiz Hub</span>
+              <span class="sub">LEARN • PLAY • GROW</span>
+            </div>
           </div>
+          
           <div class="controls">
             <div class="game-stats">
               <div class="stat-item">
@@ -944,10 +1039,10 @@
         <p class="page-sub">Test your knowledge, earn stars, and climb the leaderboard!</p>
         ${appState.totalQuestions > 0 ? `
           <div style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap; margin-top:10px;">
-            <span style="background:var(--bg-card); padding:6px 16px; border-radius:50px; border:1px solid var(--border-color);">
+            <span style="background:var(--bg-card); padding:6px 16px; border-radius:50px; border:1px solid var(--border-color); backdrop-filter:blur(5px);">
               <i class="fas fa-star" style="color:var(--accent);"></i> ${appState.totalScore} stars
             </span>
-            <span style="background:var(--bg-card); padding:6px 16px; border-radius:50px; border:1px solid var(--border-color);">
+            <span style="background:var(--bg-card); padding:6px 16px; border-radius:50px; border:1px solid var(--border-color); backdrop-filter:blur(5px);">
               <i class="fas fa-fire" style="color:var(--wrong-color);"></i> Best Streak: ${appState.bestStreak}
             </span>
           </div>
