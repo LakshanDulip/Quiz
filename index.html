@@ -8,10 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Sinhala:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-  /* ============ CSS VARIABLES (THEMES) ============
-     Each theme carries its own small identity rather than a palette swap:
-     Chalkboard (dark), Notebook (light), Galaxy (purple), Tide Pool (ocean),
-     Canopy (forest), Ember (sunset). */
+  /* ============ CSS VARIABLES (THEMES) ============ */
   :root[data-theme="dark"] {
     --bg-main: #0d1815;
     --bg-card: rgba(19, 32, 28, 0.9);
@@ -35,6 +32,7 @@
     --shadow-lg: 0 22px 44px -12px rgba(0,0,0,0.6);
     --modal-overlay: rgba(6, 12, 10, 0.92);
     --card-border: #25392f;
+    --glow-color: rgba(250, 204, 21, 0.6);
   }
 
   :root[data-theme="light"] {
@@ -60,6 +58,7 @@
     --shadow-lg: 0 22px 44px -12px rgba(43,38,32,0.18);
     --modal-overlay: rgba(247, 242, 231, 0.95);
     --card-border: #e4d9c0;
+    --glow-color: rgba(37, 99, 235, 0.6);
   }
 
   :root[data-theme="purple"] {
@@ -85,6 +84,7 @@
     --shadow-lg: 0 22px 44px -12px rgba(0,0,0,0.7);
     --modal-overlay: rgba(11, 6, 32, 0.95);
     --card-border: #33235a;
+    --glow-color: rgba(192, 132, 252, 0.6);
   }
 
   :root[data-theme="ocean"] {
@@ -110,6 +110,7 @@
     --shadow-lg: 0 22px 44px -12px rgba(0,0,0,0.7);
     --modal-overlay: rgba(7, 27, 44, 0.95);
     --card-border: #163f5c;
+    --glow-color: rgba(56, 189, 248, 0.6);
   }
 
   :root[data-theme="forest"] {
@@ -135,6 +136,7 @@
     --shadow-lg: 0 22px 44px -12px rgba(0,0,0,0.7);
     --modal-overlay: rgba(10, 25, 18, 0.95);
     --card-border: #1c4230;
+    --glow-color: rgba(74, 222, 128, 0.6);
   }
 
   :root[data-theme="sunset"] {
@@ -160,6 +162,7 @@
     --shadow-lg: 0 22px 44px -12px rgba(0,0,0,0.7);
     --modal-overlay: rgba(28, 15, 20, 0.95);
     --card-border: #4a2733;
+    --glow-color: rgba(251, 113, 133, 0.6);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', 'Noto Sans Sinhala', sans-serif; }
@@ -219,16 +222,9 @@
     color: #1a1a1a;
   }
 
-  /* Fullscreen mode adjustments */
-  :-webkit-full-screen {
-    background-color: var(--bg-main);
-  }
-  :-moz-full-screen {
-    background-color: var(--bg-main);
-  }
-  :fullscreen {
-    background-color: var(--bg-main);
-  }
+  :-webkit-full-screen { background-color: var(--bg-main); }
+  :-moz-full-screen { background-color: var(--bg-main); }
+  :fullscreen { background-color: var(--bg-main); }
 
   /* ============ HEADER ============ */
   header {
@@ -424,7 +420,27 @@
   .kbd-hint { font-size: 0.7rem; color: var(--text-secondary); margin-top: 12px; opacity: 0.7; }
   .kbd-hint kbd { background: var(--border-color); padding: 1px 6px; border-radius: 4px; font-family: inherit; }
 
-  /* ============ RESULTS (SVG progress ring) ============ */
+  /* ============ RESULTS ============ */
+  .result-wrapper {
+    position: relative;
+    transition: all 0.5s ease;
+  }
+  
+  .result-wrapper.perfect {
+    animation: perfectGlow 2s ease-in-out infinite;
+  }
+  
+  @keyframes perfectGlow {
+    0%, 100% {
+      box-shadow: 0 0 30px var(--glow-color), 0 0 60px var(--glow-color), 0 0 90px var(--glow-color);
+      transform: scale(1);
+    }
+    50% {
+      box-shadow: 0 0 50px var(--glow-color), 0 0 100px var(--glow-color), 0 0 150px var(--glow-color);
+      transform: scale(1.02);
+    }
+  }
+
   .ring-wrap { position: relative; width: 170px; height: 170px; margin: 0 auto 16px; }
   .ring-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
   .ring-bg { fill: none; stroke: var(--border-color); stroke-width: 10; }
@@ -441,10 +457,48 @@
   .result-comment { font-size: 1.1rem; font-weight: 600; color: var(--text-primary); margin-top: 5px; }
   .result-comment .emoji { font-size: 1.5rem; margin-right: 8px; }
 
+  /* ============ PERFECT SCORE SPECIAL EFFECTS ============ */
+  .perfect-badge {
+    display: inline-block;
+    background: var(--primary-gradient);
+    color: #1a1a1a;
+    padding: 6px 20px;
+    border-radius: 50px;
+    font-weight: 800;
+    font-size: 1.1rem;
+    animation: perfectBadgePulse 1.5s ease-in-out infinite;
+    margin-top: 5px;
+  }
+  
+  @keyframes perfectBadgePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  /* Screen Glow Effect for 100% */
+  .screen-glow {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    background: radial-gradient(ellipse at center, var(--glow-color) 0%, transparent 70%);
+  }
+  .screen-glow.active {
+    opacity: 1;
+    animation: screenGlowPulse 2s ease-in-out infinite;
+  }
+  
+  @keyframes screenGlowPulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+
   /* ============ CONFETTI ============ */
   .confetti-layer { position: fixed; inset: 0; pointer-events: none; z-index: 2000; overflow: hidden; }
   .confetti-piece { position: absolute; top: -40px; animation-name: confettiFall; animation-timing-function: ease-in; animation-fill-mode: forwards; }
-  @keyframes confettiFall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(110vh) rotate(360deg); opacity: 0.15; } }
+  @keyframes confettiFall { 0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; } 100% { transform: translateY(110vh) rotate(720deg) scale(0.5); opacity: 0; } }
 
   /* ============ LOADER ============ */
   .loader-wrap { text-align: center; padding: 90px 20px; }
@@ -479,10 +533,14 @@
     .theme-popover { right: 50%; transform: translateX(50%); }
     .logo-text .main { font-size: 1.15rem; }
     .hero h2 { font-size: 1.5rem; }
+    .screen-glow { display: none; }
   }
 </style>
 </head>
 <body>
+
+<!-- Screen Glow Overlay -->
+<div class="screen-glow" id="screenGlow"></div>
 
 <!-- Audio synthesis -->
 <script>
@@ -493,10 +551,15 @@
 
   const correctEmojis = ['🎉', '🌟', '✨', '🎊', '💫', '🏆', '🥳', '👏', '🎯', '⭐', '🌈', '🔥', '💪', '🤩', '😍', '🥰'];
   const wrongEmojis = ['😅', '😊', '💪', '🤔', '📖', '😌', '🤗', '💡', '🌱', '🔄', '😄', '🙂', '🧠', '📚', '💭', '🤓'];
+  const perfectEmojis = ['🏆', '👑', '🌟', '✨', '💎', '🎊', '🥇', '⭐', '🌈', '🔥', '💯', '🎉'];
 
   function getRandomEmoji(isCorrect) {
     const emojis = isCorrect ? correctEmojis : wrongEmojis;
     return emojis[Math.floor(Math.random() * emojis.length)];
+  }
+
+  function getPerfectEmoji() {
+    return perfectEmojis[Math.floor(Math.random() * perfectEmojis.length)];
   }
 
   function playClickSound() {
@@ -540,6 +603,36 @@
     gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3);
     osc.connect(gainNode); gainNode.connect(audioCtx.destination);
     osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+  }
+
+  function playPerfectSound() {
+    if (isMuted) return;
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    // Epic ascending melody for perfect score
+    const notes = [523, 587, 659, 784, 880, 988, 1047];
+    notes.forEach((freq, i) => {
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      osc.type = 'triangle';
+      const t = audioCtx.currentTime + i * 0.08;
+      osc.frequency.setValueAtTime(freq, t);
+      gainNode.gain.setValueAtTime(0.2, t);
+      gainNode.gain.linearRampToValueAtTime(0, t + 0.15);
+      osc.connect(gainNode); gainNode.connect(audioCtx.destination);
+      osc.start(t); osc.stop(t + 0.15);
+    });
+    // Add a final chord
+    [523, 659, 784].forEach((freq, i) => {
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      osc.type = 'sine';
+      const t = audioCtx.currentTime + 0.6 + i * 0.05;
+      osc.frequency.setValueAtTime(freq, t);
+      gainNode.gain.setValueAtTime(0.25, t);
+      gainNode.gain.linearRampToValueAtTime(0, t + 0.3);
+      osc.connect(gainNode); gainNode.connect(audioCtx.destination);
+      osc.start(t); osc.stop(t + 0.3);
+    });
   }
 
   function playCelebrationSound() {
@@ -595,30 +688,30 @@
     return icons[theme] || '🎨';
   }
 
-  function spawnConfetti() {
+  function spawnPerfectConfetti() {
     if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const emojis = ['🧪', '⚗️', '🔬', '✨', '🌟', '🧬', '⚛️', '🎉'];
+    const emojis = ['🏆', '👑', '🌟', '✨', '💎', '🎊', '🥇', '⭐', '🌈', '🔥', '💯', '🎉', '🧪', '⚗️', '🔬', '🧬', '⚛️'];
+    const colors = ['#facc15', '#fb923c', '#f472b6', '#34d399', '#60a5fa', '#a78bfa', '#f87171', '#fbbf24'];
     const container = document.createElement('div');
     container.className = 'confetti-layer';
     document.body.appendChild(container);
-    for (let i = 0; i < 26; i++) {
+    for (let i = 0; i < 50; i++) {
       const piece = document.createElement('span');
       piece.className = 'confetti-piece';
       piece.textContent = emojis[Math.floor(Math.random() * emojis.length)];
       piece.style.left = Math.random() * 100 + 'vw';
-      piece.style.animationDuration = (2.4 + Math.random() * 1.8) + 's';
-      piece.style.animationDelay = (Math.random() * 0.6) + 's';
-      piece.style.fontSize = (14 + Math.random() * 14) + 'px';
+      piece.style.animationDuration = (2.8 + Math.random() * 2.2) + 's';
+      piece.style.animationDelay = (Math.random() * 0.8) + 's';
+      piece.style.fontSize = (18 + Math.random() * 22) + 'px';
       container.appendChild(piece);
     }
-    setTimeout(() => container.remove(), 5200);
+    setTimeout(() => container.remove(), 6000);
   }
 
   // ============ FULLSCREEN FUNCTIONS ============
   function toggleFullscreen() {
     const btn = document.getElementById('fullscreenBtn');
     if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-      // Enter fullscreen
       const elem = document.documentElement;
       if (elem.requestFullscreen) {
         elem.requestFullscreen();
@@ -629,7 +722,6 @@
       btn.querySelector('i').className = 'fas fa-compress';
       playClickSound();
     } else {
-      // Exit fullscreen
       if (document.exitFullscreen) {
         document.exitFullscreen();
       } else if (document.webkitExitFullscreen) {
@@ -641,7 +733,6 @@
     }
   }
 
-  // Update fullscreen button state when fullscreen changes
   document.addEventListener('fullscreenchange', updateFullscreenButton);
   document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
 
@@ -658,10 +749,19 @@
     }
   }
 
-  // Keyboard shortcut: F for fullscreen
+  // ============ SCREEN GLOW ============
+  function triggerScreenGlow() {
+    const glow = document.getElementById('screenGlow');
+    if (glow) {
+      glow.classList.add('active');
+      setTimeout(() => {
+        glow.classList.remove('active');
+      }, 5000);
+    }
+  }
+
   document.addEventListener('keydown', (e) => {
     if (e.key === 'f' || e.key === 'F') {
-      // Don't trigger if typing in an input
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
       e.preventDefault();
       toggleFullscreen();
@@ -772,11 +872,23 @@
     app.innerHTML = renderShell(body);
     window.scrollTo(0, 0);
 
-    // post-render side effects for animated signature elements
     if (r.name === 'quiz' && appState.quiz && !appState.quiz.showResult) animateFlask();
-    if (r.name === 'quiz' && appState.quiz && appState.quiz.showResult) animateRing();
+    if (r.name === 'quiz' && appState.quiz && appState.quiz.showResult) {
+      animateRing();
+      // Check for perfect score
+      const qz = appState.quiz;
+      const total = qz.order.length;
+      const pct = Math.round((qz.score / total) * 100);
+      if (pct === 100 && !qz.perfectTriggered) {
+        qz.perfectTriggered = true;
+        setTimeout(() => {
+          triggerScreenGlow();
+          spawnPerfectConfetti();
+          playPerfectSound();
+        }, 600);
+      }
+    }
 
-    // Update fullscreen button state
     updateFullscreenButton();
   }
 
@@ -825,7 +937,6 @@
               <div class="stat-item"><i class="fas fa-fire"></i><span class="value">${appState.streak}</span></div>
             </div>
 
-            <!-- Fullscreen Button -->
             <button id="fullscreenBtn" class="fullscreen-btn ${isFullscreen ? 'is-fullscreen' : ''}" onclick="toggleFullscreen()" title="Fullscreen (F)">
               <i class="fas ${isFullscreen ? 'fa-compress' : 'fa-expand'}"></i>
             </button>
@@ -933,7 +1044,7 @@
   }
 
   function getResultComment(pct) {
-    if (pct === 100) return { emoji: '🏆', text: 'පරිපූර්ණයි! ඔබ සැබෑ විද්‍යාඥයෙක්! 🌟' };
+    if (pct === 100) return { emoji: '🏆', text: '💯 පරිපූර්ණයි! ඔබ සැබෑ විද්‍යා අභිබවා ගියා! 🌟✨' };
     if (pct >= 80) return { emoji: '🌟', text: 'විශිෂ්ටයි! ඔබ ඉතා දක්ෂයි! 🎯' };
     if (pct >= 70) return { emoji: '💪', text: 'හොඳයි! තව ටිකක් උත්සාහ කරන්න! 📚' };
     if (pct >= 50) return { emoji: '😊', text: 'හොඳ ආරම්භයක්! දිගටම පුහුණු වන්න! 🔥' };
@@ -944,13 +1055,20 @@
   function renderRing(pct) {
     const r = 54, c = 2 * Math.PI * r;
     const offset = c - (pct / 100) * c;
+    const isPerfect = pct === 100;
     return `
-      <div class="ring-wrap">
-        <svg class="ring-svg" viewBox="0 0 120 120">
-          <circle class="ring-bg" cx="60" cy="60" r="${r}"></circle>
-          <circle class="ring-fg" id="ringFg" cx="60" cy="60" r="${r}" stroke-dasharray="${c}" stroke-dashoffset="${c}" data-target="${offset}"></circle>
-        </svg>
-        <div class="ring-center"><h1>${pct}%</h1><span>ලකුණු</span></div>
+      <div class="result-wrapper ${isPerfect ? 'perfect' : ''}">
+        <div class="ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 120 120">
+            <circle class="ring-bg" cx="60" cy="60" r="${r}"></circle>
+            <circle class="ring-fg" id="ringFg" cx="60" cy="60" r="${r}" stroke-dasharray="${c}" stroke-dashoffset="${c}" data-target="${offset}"></circle>
+          </svg>
+          <div class="ring-center">
+            <h1>${pct}%</h1>
+            <span>ලකුණු</span>
+          </div>
+        </div>
+        ${isPerfect ? '<div class="perfect-badge">🏆 PERFECT! 💯</div>' : ''}
       </div>
     `;
   }
@@ -975,6 +1093,7 @@
         showResult: false,
         answeredCurrent: false,
         confettiShown: false,
+        perfectTriggered: false,
         powerups: { fiftyFifty: 1, skip: 1 }
       };
     }
@@ -988,7 +1107,15 @@
 
       if (!qz.confettiShown && pct >= 80) {
         qz.confettiShown = true;
-        setTimeout(() => { spawnConfetti(); playCelebrationSound(); }, 400);
+        if (pct === 100) {
+          setTimeout(() => {
+            triggerScreenGlow();
+            spawnPerfectConfetti();
+            playPerfectSound();
+          }, 600);
+        } else {
+          setTimeout(() => { spawnConfetti(); playCelebrationSound(); }, 400);
+        }
       }
 
       return `
@@ -1148,7 +1275,11 @@
 
   /* ---------------- GLOBAL KEYBOARD SHORTCUTS ---------------- */
   document.addEventListener('keydown', (e) => {
-    // Fullscreen is handled separately with 'f' key
+    if (e.key === 'f' || e.key === 'F') {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      e.preventDefault();
+      toggleFullscreen();
+    }
     if (e.key === 'm' || e.key === 'M') { e.preventDefault(); toggleMute(); return; }
     if (e.key === 't' || e.key === 'T') { e.preventDefault(); toggleTheme(); return; }
 
@@ -1168,7 +1299,6 @@
     }
   });
 
-  /* close theme popover on outside click */
   document.addEventListener('click', (e) => {
     const p = document.getElementById('themePopover');
     if (p && p.classList.contains('open') && !e.target.closest('.theme-wrap')) p.classList.remove('open');
