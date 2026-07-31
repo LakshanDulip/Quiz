@@ -959,7 +959,7 @@
     const meta = subjectMeta(subject);
     const sortedGrades = [...GRADES].sort((a,b) => parseInt(a) - parseInt(b));
     const gradeEmojis = { '8': '📚', '9': '🎓' };
-    const gradeFlavors = { '8': '🌟', '9': '⭐' };
+    const gradeFlavors = { '8': '⭐', '9': '⭐' };
     
     return `
       <div class="breadcrumb">
@@ -1173,7 +1173,7 @@
     document.getElementById('modalTitle').style.color = isCorrect ? 'var(--correct-color)' : 'var(--wrong-color)';
     document.getElementById('modalText').innerHTML = text ? `<strong>📖 විවරණය:</strong><br>${text}` : "විවරණයක් ඇතුළත් කර නොමැත.";
     
-    icon.textContent = isCorrect ? '🎉' : '😅';
+    icon.textContent = isCorrect ? '🤩' : '😓';
     icon.className = `modal-icon ${isCorrect ? 'success' : 'fail'}`;
     
     setTimeout(() => { modal.classList.add('active'); }, 600);
