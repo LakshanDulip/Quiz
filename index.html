@@ -108,6 +108,23 @@
     color: white;
   }
 
+  /* ============ MUTE BUTTON ============ */
+  .mute-btn {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: var(--border-color); color: var(--text-primary);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    transition: all 0.2s ease;
+  }
+  .mute-btn:hover { 
+    background: var(--primary-color);
+    color: white;
+  }
+  .mute-btn.muted { 
+    background: var(--wrong-color);
+    color: white;
+  }
+
   /* ============ SCORE & STREAK BADGE ============ */
   .game-stats {
     display: flex;
@@ -258,20 +275,6 @@
     display: flex; justify-content: space-between; align-items: center; 
     margin-bottom: 15px; 
   }
-  .quiz-timer {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 700;
-    color: var(--text-secondary);
-    font-size: 0.95rem;
-  }
-  .quiz-timer i { color: var(--accent); }
-  .quiz-timer .time {
-    color: var(--text-primary);
-    font-size: 1.1rem;
-  }
-  .quiz-timer.warning .time { color: var(--wrong-color); animation: pulse 1s ease-in-out infinite; }
   
   .progress-bg { 
     height: 6px; background: var(--border-color); border-radius: 10px; overflow: hidden; margin-bottom: 25px;
@@ -440,6 +443,17 @@
     letter-spacing: 0.5px;
   }
 
+  .result-comment {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-top: 5px;
+  }
+  .result-comment .emoji {
+    font-size: 1.5rem;
+    margin-right: 8px;
+  }
+
   /* ============ STREAK INDICATOR ============ */
   .streak-indicator {
     display: inline-flex;
@@ -503,8 +517,12 @@
 <script>
   const AudioContext = window.AudioContext || window.webkitAudioContext;
   const audioCtx = new AudioContext();
+  
+  // Mute state
+  let isMuted = localStorage.getItem('quizMuted') === 'true' || false;
 
   function playClickSound() {
+    if(isMuted) return;
     if(audioCtx.state === 'suspended') audioCtx.resume();
     const osc = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
@@ -520,6 +538,7 @@
   }
 
   function playSuccessSound() {
+    if(isMuted) return;
     if(audioCtx.state === 'suspended') audioCtx.resume();
     const osc = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
@@ -534,19 +553,41 @@
     osc.stop(audioCtx.currentTime + 0.2);
   }
   
+  // New Wrong Sound - More gentle and friendly
   function playFailSound() {
+    if(isMuted) return;
     if(audioCtx.state === 'suspended') audioCtx.resume();
     const osc = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(250, audioCtx.currentTime);
-    osc.frequency.linearRampToValueAtTime(150, audioCtx.currentTime + 0.2);
-    gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
-    gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.2);
+    
+    // Two-tone gentle wrong sound (like a soft "buzz")
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+    osc.frequency.linearRampToValueAtTime(250, audioCtx.currentTime + 0.15);
+    osc.frequency.linearRampToValueAtTime(300, audioCtx.currentTime + 0.25);
+    
+    gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3);
+    
     osc.connect(gainNode);
     gainNode.connect(audioCtx.destination);
     osc.start();
-    osc.stop(audioCtx.currentTime + 0.2);
+    osc.stop(audioCtx.currentTime + 0.3);
+  }
+
+  function toggleMute() {
+    isMuted = !isMuted;
+    localStorage.setItem('quizMuted', isMuted);
+    // Update button icon
+    const muteBtn = document.querySelector('.mute-btn i');
+    if(muteBtn) {
+      muteBtn.className = isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up';
+    }
+    const muteBtnParent = document.querySelector('.mute-btn');
+    if(muteBtnParent) {
+      muteBtnParent.classList.toggle('muted', isMuted);
+    }
+    playClickSound();
   }
 </script>
 
@@ -664,6 +705,9 @@
 
   function renderShell(bodyHtml){
     const themeIcon = document.documentElement.getAttribute('data-theme') === 'light' ? 'fa-moon' : 'fa-sun';
+    const muteIcon = isMuted ? 'fa-volume-mute' : 'fa-volume-up';
+    const muteClass = isMuted ? 'muted' : '';
+    
     return `
       <header>
         <div class="header-inner">
@@ -681,6 +725,9 @@
                 <span class="value">${appState.streak}</span>
               </div>
             </div>
+            <button class="mute-btn ${muteClass}" onclick="toggleMute()" title="${isMuted ? 'Unmute' : 'Mute'}">
+              <i class="fas ${muteIcon}"></i>
+            </button>
             <button class="theme-toggle" onclick="playClickSound(); toggleTheme();" title="Toggle Theme">
               <i class="fas ${themeIcon}"></i>
             </button>
@@ -774,6 +821,23 @@
     `;
   }
 
+  /* ============ RESULT COMMENTS (SINHALA) ============ */
+  function getResultComment(pct, score, total) {
+    if (pct === 100) {
+      return { emoji: '🏆', text: 'පරිපූර්ණයි! ඔබ සැබෑ විද්‍යාඥයෙක්! 🌟' };
+    } else if (pct >= 80) {
+      return { emoji: '🌟', text: 'විශිෂ්ටයි! ඔබ ඉතා දක්ෂයි! 🎯' };
+    } else if (pct >= 70) {
+      return { emoji: '💪', text: 'හොඳයි! තව ටිකක් උත්සාහ කරන්න! 📚' };
+    } else if (pct >= 50) {
+      return { emoji: '😊', text: 'හොඳ ආරම්භයක්! දිගටම පුහුණු වන්න! 🔥' };
+    } else if (pct >= 30) {
+      return { emoji: '💪', text: 'අසාර්ථක වීමෙන් ඉගෙන ගන්න! නැවත උත්සාහ කරන්න! 🚀' };
+    } else {
+      return { emoji: '📖', text: 'පාඩම් කරලා නැවත උත්සාහ කරන්න! ඔබට පුළුවන්! 💪' };
+    }
+  }
+
   /* ============ QUIZ SYSTEM ============ */
   function renderQuizScreen(subject, grade, lessonId){
     const meta = subjectMeta(subject);
@@ -806,37 +870,39 @@
     // Results Screen
     if(qz.showResult){
       const pct = Math.round((qz.score/total)*100);
-      let resultEmoji = pct >= 80 ? "🏆" : (pct >= 50 ? "🌟" : "💪");
-      let remark = pct >= 80 ? "Excellent!" : (pct >= 50 ? "Good Job!" : "Keep Practicing!");
+      const comment = getResultComment(pct, qz.score, total);
       
       return `
         <div class="quiz-container" style="text-align:center;">
           <div class="result-circle">
             <h1>${pct}%</h1>
-            <span>Score</span>
+            <span>ලකුණු</span>
           </div>
           
-          <h2 style="margin-bottom:5px;">${resultEmoji} ${remark}</h2>
-          <p class="page-sub">You answered ${qz.score} out of ${total} questions correctly.</p>
+          <div class="result-comment">
+            <span class="emoji">${comment.emoji}</span>
+            ${comment.text}
+          </div>
+          <p class="page-sub" style="margin-top:5px;">ඔබ ප්‍රශ්න ${total} න් ${qz.score} කට නිවැරදිව පිළිතුරු ලබා දී ඇත.</p>
           
           <div class="result-stats">
             <div class="result-stat">
               <div class="num">${qz.score}</div>
-              <div class="label">Correct</div>
+              <div class="label">නිවැරදි</div>
             </div>
             <div class="result-stat">
               <div class="num">${total - qz.score}</div>
-              <div class="label">Wrong</div>
+              <div class="label">වැරදි</div>
             </div>
             <div class="result-stat">
               <div class="num">${Math.round((qz.score/total)*100)}%</div>
-              <div class="label">Accuracy</div>
+              <div class="label">නිරවද්‍යතාව</div>
             </div>
           </div>
           
           <div style="display:flex; justify-content:center; gap:12px; margin-top:20px; flex-wrap:wrap;">
-            <button class="btn btn-outline" onclick="navigate('#/subject/${meta.key}/grade/${grade}')"><i class="fas fa-list"></i> Lessons</button>
-            <button class="btn btn-primary" onclick="appState.quiz=null; render(); playClickSound();"><i class="fas fa-redo"></i> Retry</button>
+            <button class="btn btn-outline" onclick="navigate('#/subject/${meta.key}/grade/${grade}')"><i class="fas fa-list"></i> පාඩම්</button>
+            <button class="btn btn-primary" onclick="appState.quiz=null; render(); playClickSound();"><i class="fas fa-redo"></i> නැවත කරන්න</button>
           </div>
         </div>
       `;
@@ -859,7 +925,7 @@
         
         <div class="progress-bg"><div class="progress-fill" style="width:${progressPct}%"></div></div>
         
-        <div class="question-number">Question ${qz.idx + 1}</div>
+        <div class="question-number">ප්‍රශ්නය ${qz.idx + 1}</div>
         <div class="question-text">${escapeHtml(question.q)}</div>
         
         <div class="options-grid">
@@ -876,7 +942,7 @@
             <i class="fas fa-cut"></i> 50/50 (${qz.powerups.fiftyFifty})
           </button>
           <button class="powerup-btn" id="skipBtn" onclick="useSkip()" ${qz.answeredCurrent || qz.powerups.skip <= 0 ? 'disabled' : ''}>
-            <i class="fas fa-forward"></i> Skip (${qz.powerups.skip})
+            <i class="fas fa-forward"></i> මඟ හරින්න (${qz.powerups.skip})
           </button>
         </div>
       </div>
@@ -926,10 +992,10 @@
     const question = findLesson(qz.subject, qz.grade, qz.lessonId).questions[qIndex];
     
     document.getElementById('skipBtn').disabled = true;
-    document.getElementById('skipBtn').textContent = `Skip (${qz.powerups.skip})`;
+    document.getElementById('skipBtn').textContent = `මඟ හරින්න (${qz.powerups.skip})`;
     
     playFailSound();
-    showModal(false, "⏭️ Skipped!", "You skipped this question. Don't worry, keep going!");
+    showModal(false, "⏭️ මඟ හැරියා!", "ඔබ මෙම ප්‍රශ්නය මඟ හැරියා. කමක් නැහැ, දිගටම යන්න! 💪");
   };
 
   window.checkAnswer = function(selectedIndex, correctIndex, explanation) {
@@ -946,13 +1012,13 @@
       appState.streak++;
       if(appState.streak > appState.bestStreak) appState.bestStreak = appState.streak;
       playSuccessSound();
-      showModal(true, "✅ Correct!", explanation);
+      showModal(true, "✅ නිවැරදියි!", explanation);
     } else {
       selectedBtn.classList.add('wrong');
       correctBtn.classList.add('correct');
       appState.streak = 0;
       playFailSound();
-      showModal(false, "❌ Wrong!", explanation);
+      showModal(false, "❌ වැරදියි!", explanation);
     }
   };
 
@@ -962,7 +1028,7 @@
     
     document.getElementById('modalTitle').textContent = title;
     document.getElementById('modalTitle').style.color = isCorrect ? 'var(--correct-color)' : 'var(--wrong-color)';
-    document.getElementById('modalText').innerHTML = text ? `<strong>💡 Explanation:</strong><br>${text}` : "No explanation available.";
+    document.getElementById('modalText').innerHTML = text ? `<strong>💡 පැහැදිලි කිරීම:</strong><br>${text}` : "පැහැදිලි කිරීමක් නැත.";
     
     icon.textContent = isCorrect ? '🎉' : '😅';
     icon.className = `modal-icon ${isCorrect ? 'correct' : 'wrong'}`;
