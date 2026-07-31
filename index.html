@@ -5,19 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Learning Quiz Hub — Maths & Science</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Noto+Sans+Sinhala:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Noto+Sans+Sinhala:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
   /* ============ CSS VARIABLES (THEMES) ============ */
   :root[data-theme="light"] {
-    --bg-main: #f4f6f8;
+    --bg-main: #f0f4f8;
     --bg-card: #ffffff;
     --bg-card-hover: #f8fafc;
-    --text-primary: #1e293b;
+    --text-primary: #1a2332;
     --text-secondary: #64748b;
     --border-color: #e2e8f0;
-    --primary-color: #3b82f6;
-    --primary-hover: #2563eb;
+    --primary-color: #6366f1;
+    --primary-hover: #4f46e5;
+    --primary-gradient: linear-gradient(135deg, #6366f1, #8b5cf6);
     --maths-color: #0ea5e9;
     --science-color: #10b981;
     --correct-color: #10b981;
@@ -28,19 +29,19 @@
     --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
     --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
     --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
-    --modal-overlay: rgba(255, 255, 255, 0.8);
-    --emoji-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    --modal-overlay: rgba(255, 255, 255, 0.85);
   }
 
   :root[data-theme="dark"] {
     --bg-main: #0f172a;
     --bg-card: #1e293b;
     --bg-card-hover: #2dd4bf0d;
-    --text-primary: #f8fafc;
+    --text-primary: #f1f5f9;
     --text-secondary: #94a3b8;
     --border-color: #334155;
-    --primary-color: #3b82f6;
-    --primary-hover: #60a5fa;
+    --primary-color: #818cf8;
+    --primary-hover: #6366f1;
+    --primary-gradient: linear-gradient(135deg, #818cf8, #a78bfa);
     --maths-color: #38bdf8;
     --science-color: #34d399;
     --correct-color: #34d399;
@@ -51,8 +52,7 @@
     --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
     --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.4);
     --shadow-lg: 0 15px 25px -5px rgba(0,0,0,0.5);
-    --modal-overlay: rgba(15, 23, 42, 0.85);
-    --emoji-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    --modal-overlay: rgba(15, 23, 42, 0.9);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', 'Noto Sans Sinhala', sans-serif; }
@@ -76,675 +76,430 @@
   header {
     background: var(--bg-card);
     border-bottom: 1px solid var(--border-color);
-    padding: 15px 0;
+    padding: 12px 0;
     position: sticky;
     top: 0;
     box-shadow: var(--shadow-sm);
     z-index: 50;
-    animation: slideDown 0.5s ease;
   }
   .header-inner {
     max-width: 1100px; margin: 0 auto; padding: 0 20px;
     display: flex; justify-content: space-between; align-items: center;
   }
   .logo { 
-    display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 1.4rem; color: var(--primary-color);
-    animation: pulse 2s infinite;
+    display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.3rem; 
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
-  .logo-emoji {
-    font-size: 2.2rem;
-    display: inline-block;
-    animation: float3D 3s ease-in-out infinite;
-    filter: drop-shadow(var(--emoji-shadow));
-    transform-style: preserve-3d;
-    perspective: 500px;
-  }
-  .logo-emoji:hover {
-    animation: spin3D 1s ease-in-out;
-  }
-  .logo i { font-size: 1.8rem; }
+  .logo i { font-size: 1.6rem; -webkit-text-fill-color: initial; color: var(--primary-color); }
   
-  .controls { display: flex; gap: 15px; align-items: center; }
+  .controls { display: flex; gap: 12px; align-items: center; }
   .theme-toggle {
-    width: 40px; height: 40px; border-radius: 50%;
+    width: 38px; height: 38px; border-radius: 50%;
     background: var(--border-color); color: var(--text-primary);
     display: flex; align-items: center; justify-content: center;
-    font-size: 1.2rem;
-    transition: all 0.3s ease;
+    font-size: 1.1rem;
+    transition: all 0.2s ease;
   }
   .theme-toggle:hover { 
-    transform: scale(1.1) rotate(180deg); 
+    transform: rotate(180deg); 
     background: var(--primary-color);
     color: white;
   }
 
-  /* ============ 3D EMOJI STYLES ============ */
-  .emoji-3d {
-    font-size: 3rem;
-    display: inline-block;
-    filter: drop-shadow(var(--emoji-shadow));
-    transform-style: preserve-3d;
-    perspective: 500px;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    cursor: default;
+  /* ============ SCORE & STREAK BADGE ============ */
+  .game-stats {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    background: var(--bg-main);
+    padding: 6px 16px;
+    border-radius: 50px;
+    border: 1px solid var(--border-color);
   }
-  .emoji-3d:hover {
-    transform: rotateY(180deg) scale(1.2);
-    filter: drop-shadow(0 12px 30px rgba(0,0,0,0.3));
+  .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
   }
-  .emoji-3d.small { font-size: 2rem; }
-  .emoji-3d.large { font-size: 4.5rem; }
-  .emoji-3d.xlarge { font-size: 6rem; }
-  
-  .emoji-3d.glow {
-    animation: glowPulse 2s ease-in-out infinite;
-  }
-  
-  .emoji-3d.float {
-    animation: float3D 3s ease-in-out infinite;
-  }
-  
-  .emoji-3d.bounce {
-    animation: bounce3D 2s ease-in-out infinite;
-  }
-  
-  .emoji-3d.spin {
-    animation: spin3D 4s linear infinite;
-  }
-  
-  .emoji-3d.tilt {
-    animation: tilt3D 3s ease-in-out infinite;
-  }
-  
-  .emoji-3d.wobble {
-    animation: wobble3D 2.5s ease-in-out infinite;
-  }
-
-  /* ============ 3D EMOJI ANIMATIONS ============ */
-  @keyframes float3D {
-    0%, 100% { transform: translateY(0px) rotateX(0deg) rotateY(0deg); }
-    25% { transform: translateY(-10px) rotateX(5deg) rotateY(10deg); }
-    50% { transform: translateY(-20px) rotateX(0deg) rotateY(20deg); }
-    75% { transform: translateY(-10px) rotateX(-5deg) rotateY(10deg); }
-  }
-  
-  @keyframes bounce3D {
-    0%, 100% { transform: translateY(0) scale(1); }
-    50% { transform: translateY(-20px) scale(1.1) rotateX(10deg); }
-  }
-  
-  @keyframes spin3D {
-    0% { transform: rotateY(0deg) scale(1); }
-    50% { transform: rotateY(180deg) scale(1.2); }
-    100% { transform: rotateY(360deg) scale(1); }
-  }
-  
-  @keyframes tilt3D {
-    0%, 100% { transform: rotateX(0deg) rotateY(0deg); }
-    25% { transform: rotateX(10deg) rotateY(15deg); }
-    75% { transform: rotateX(-10deg) rotateY(-15deg); }
-  }
-  
-  @keyframes wobble3D {
-    0%, 100% { transform: rotateZ(0deg) rotateX(0deg); }
-    15% { transform: rotateZ(5deg) rotateX(5deg); }
-    30% { transform: rotateZ(-5deg) rotateX(-5deg); }
-    45% { transform: rotateZ(4deg) rotateX(4deg); }
-    60% { transform: rotateZ(-4deg) rotateX(-4deg); }
-    75% { transform: rotateZ(2deg) rotateX(2deg); }
-  }
-  
-  @keyframes glowPulse {
-    0%, 100% { filter: drop-shadow(var(--emoji-shadow)) brightness(1); }
-    50% { filter: drop-shadow(0 0 30px rgba(59, 130, 246, 0.5)) brightness(1.2); }
-  }
-  
-  @keyframes pop3D {
-    0% { transform: scale(0) rotateX(90deg); opacity: 0; }
-    60% { transform: scale(1.3) rotateX(-10deg); opacity: 1; }
-    100% { transform: scale(1) rotateX(0deg); }
-  }
-  
-  .emoji-pop {
-    animation: pop3D 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-  }
+  .stat-item i { color: var(--accent); }
+  .stat-item .value { color: var(--text-primary); font-weight: 700; }
 
   /* ============ COMPONENTS ============ */
   .page-title { 
-    font-size: 2.2rem; font-weight: 700; margin-bottom: 10px; color: var(--text-primary);
-    animation: fadeInUp 0.6s ease;
+    font-size: 2rem; font-weight: 800; margin-bottom: 8px; 
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
   .page-sub { 
-    color: var(--text-secondary); margin-bottom: 30px; font-size: 1.1rem;
-    animation: fadeInUp 0.8s ease;
+    color: var(--text-secondary); margin-bottom: 30px; font-size: 1rem; 
   }
   .breadcrumb { 
-    color: var(--text-secondary); margin-bottom: 20px; font-size: 0.9rem;
-    animation: fadeInLeft 0.5s ease;
+    color: var(--text-secondary); margin-bottom: 20px; font-size: 0.85rem; 
   }
-  .breadcrumb span { margin: 0 8px; }
-  .breadcrumb a { color: var(--primary-color); font-weight: 500; transition: all 0.3s; }
-  .breadcrumb a:hover { 
-    text-decoration: underline;
-    transform: translateX(5px);
-    display: inline-block;
-  }
+  .breadcrumb span { margin: 0 6px; }
+  .breadcrumb a { color: var(--primary-color); font-weight: 500; }
+  .breadcrumb a:hover { text-decoration: underline; }
 
   /* ============ CARDS ============ */
-  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-  .grid-auto { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+  .grid-auto { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
   
   .card {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: var(--radius);
-    padding: 30px;
-    box-shadow: var(--shadow-md);
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    padding: 25px;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.25s ease;
     position: relative;
     overflow: hidden;
-    animation: fadeInUp 0.6s ease;
   }
   .card:hover { 
-    transform: translateY(-5px) scale(1.02); 
-    box-shadow: var(--shadow-lg); 
+    transform: translateY(-3px); 
+    box-shadow: var(--shadow-md); 
     border-color: var(--primary-color);
   }
   
-  .card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-    transition: left 0.6s ease;
-  }
-  .card:hover::before {
-    left: 100%;
-  }
-  
-  .subject-card.science { border-top: 4px solid var(--science-color); }
-  .subject-card.maths { border-top: 4px solid var(--maths-color); }
-  .subject-card h3 { font-size: 1.5rem; margin-bottom: 5px; }
-  .subject-card p { color: var(--text-secondary); font-size: 0.95rem; }
-  
-  .subject-emoji {
-    position: absolute; right: 20px; bottom: 20px;
-    font-size: 4rem;
-    opacity: 0.15;
-    transition: all 0.5s ease;
-    filter: drop-shadow(var(--emoji-shadow));
-    transform-style: preserve-3d;
-  }
-  .subject-card:hover .subject-emoji {
-    transform: scale(1.4) rotate(10deg) translateZ(30px);
-    opacity: 0.3;
+  .subject-card.science { border-left: 4px solid var(--science-color); }
+  .subject-card.maths { border-left: 4px solid var(--maths-color); }
+  .subject-card h3 { font-size: 1.3rem; margin-bottom: 3px; }
+  .subject-card p { color: var(--text-secondary); font-size: 0.9rem; }
+  .subject-icon { 
+    position: absolute; right: 15px; bottom: 15px; font-size: 3rem; opacity: 0.08;
   }
 
   .grade-card { 
-    text-align: center; padding: 40px 20px; cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    text-align: center; padding: 30px 15px; cursor: pointer;
+    transition: all 0.25s ease;
   }
   .grade-card:hover {
-    transform: translateY(-10px) scale(1.05);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: var(--shadow-lg);
   }
   .grade-card h2 { 
-    font-size: 3rem; color: var(--primary-color); margin-bottom: 5px;
-    animation: bounceIn 0.8s ease;
+    font-size: 2.8rem; color: var(--primary-color); margin-bottom: 3px;
   }
-  .grade-card span { color: var(--text-secondary); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
+  .grade-card span { color: var(--text-secondary); font-weight: 500; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
   .grade-card .lesson-count {
-    margin-top: 10px;
-    font-size: 0.8rem;
+    margin-top: 8px;
+    font-size: 0.75rem;
     color: var(--text-secondary);
-    animation: fadeIn 1s ease;
-  }
-  .grade-card .grade-emoji {
-    font-size: 3rem;
-    display: block;
-    margin-bottom: 10px;
-    filter: drop-shadow(var(--emoji-shadow));
-    transform-style: preserve-3d;
-    transition: all 0.3s ease;
-  }
-  .grade-card:hover .grade-emoji {
-    transform: rotateY(180deg) scale(1.2);
   }
 
   .lesson-card { 
-    display: flex; align-items: center; gap: 20px; padding: 20px; cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex; align-items: center; gap: 16px; padding: 18px 20px; cursor: pointer;
+    transition: all 0.25s ease;
   }
   .lesson-card:hover {
-    transform: translateX(10px) scale(1.02);
+    transform: translateX(5px);
     border-color: var(--primary-color);
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--shadow-md);
   }
   .lesson-icon {
-    width: 60px; height: 60px; border-radius: 12px;
-    background: var(--border-color); 
+    width: 50px; height: 50px; border-radius: 12px;
+    background: var(--primary-gradient); 
     display: flex; align-items: center; justify-content: center; 
-    font-size: 2rem; flex-shrink: 0;
-    transition: all 0.4s ease;
-    filter: drop-shadow(var(--emoji-shadow));
-    transform-style: preserve-3d;
+    font-size: 1.3rem; flex-shrink: 0;
+    color: white;
   }
-  .lesson-card:hover .lesson-icon {
-    transform: rotateY(360deg) scale(1.1);
-    background: var(--primary-color);
-  }
-  .lesson-info h4 { font-size: 1.2rem; margin-bottom: 5px; }
-  .lesson-info p { color: var(--text-secondary); font-size: 0.9rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .lesson-info h4 { font-size: 1.1rem; margin-bottom: 3px; }
+  .lesson-info p { color: var(--text-secondary); font-size: 0.85rem; }
   .q-badge {
-    display: inline-block; padding: 4px 10px; background: var(--border-color);
-    border-radius: 20px; font-size: 0.8rem; font-weight: 600; margin-top: 10px;
-    transition: all 0.3s ease;
+    display: inline-block; padding: 3px 10px; background: var(--border-color);
+    border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin-top: 5px;
   }
   .lesson-card:hover .q-badge {
     background: var(--primary-color);
     color: white;
-    transform: scale(1.05);
   }
 
   /* ============ BUTTONS ============ */
   .btn {
-    padding: 12px 24px; border-radius: 50px; font-weight: 600; font-size: 1rem;
+    padding: 10px 22px; border-radius: 50px; font-weight: 600; font-size: 0.95rem;
     display: inline-flex; align-items: center; gap: 8px;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    position: relative;
-    overflow: hidden;
+    transition: all 0.2s ease;
   }
   .btn-primary { 
-    background: var(--primary-color); color: #fff; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    background: var(--primary-gradient); color: #fff; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
   }
   .btn-primary:hover { 
-    background: var(--primary-hover); transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
-  }
-  .btn-primary::after {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
-    transform: rotate(45deg) translateX(-100%);
-    transition: transform 0.6s ease;
-  }
-  .btn-primary:hover::after {
-    transform: rotate(45deg) translateX(100%);
+    transform: translateY(-2px); box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
   }
   .btn-outline { 
     border: 2px solid var(--border-color); color: var(--text-primary);
   }
   .btn-outline:hover { 
     border-color: var(--primary-color); color: var(--primary-color);
-    transform: translateY(-3px) scale(1.05);
+  }
+  .btn-success {
+    background: var(--correct-color);
+    color: white;
+  }
+  .btn-danger {
+    background: var(--wrong-color);
+    color: white;
   }
   .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
 
   /* ============ QUIZ UI ============ */
   .quiz-container {
-    max-width: 800px; margin: 0 auto;
+    max-width: 750px; margin: 0 auto;
     background: var(--bg-card); border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg); padding: 40px;
+    box-shadow: var(--shadow-lg); padding: 35px;
     border: 1px solid var(--border-color);
-    animation: fadeInUp 0.6s ease;
   }
-  .quiz-header { display: flex; justify-content: space-between; margin-bottom: 20px; color: var(--text-secondary); font-weight: 500; }
+  .quiz-header { 
+    display: flex; justify-content: space-between; align-items: center; 
+    margin-bottom: 15px; 
+  }
+  .quiz-timer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+  }
+  .quiz-timer i { color: var(--accent); }
+  .quiz-timer .time {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+  }
+  .quiz-timer.warning .time { color: var(--wrong-color); animation: pulse 1s ease-in-out infinite; }
   
   .progress-bg { 
-    height: 8px; background: var(--border-color); border-radius: 10px; overflow: hidden; margin-bottom: 30px;
+    height: 6px; background: var(--border-color); border-radius: 10px; overflow: hidden; margin-bottom: 25px;
   }
   .progress-fill { 
-    height: 100%; background: var(--primary-color); transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-  }
-  .progress-fill::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-    animation: shimmer 2s infinite;
+    height: 100%; background: var(--primary-gradient); transition: width 0.5s ease;
   }
   
+  .question-number {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    margin-bottom: 5px;
+  }
   .question-text { 
-    font-size: 1.4rem; font-weight: 600; margin-bottom: 30px; line-height: 1.5;
-    animation: fadeInRight 0.6s ease;
-  }
-  .question-emoji {
-    font-size: 2rem;
-    margin-right: 10px;
-    display: inline-block;
-    filter: drop-shadow(var(--emoji-shadow));
-    animation: float3D 3s ease-in-out infinite;
+    font-size: 1.25rem; font-weight: 600; margin-bottom: 25px; line-height: 1.6;
   }
   
-  .options-grid { display: flex; flex-direction: column; gap: 15px; margin-bottom: 30px; }
+  .options-grid { display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px; }
   .option-btn {
-    width: 100%; text-align: left; padding: 18px 20px;
+    width: 100%; text-align: left; padding: 14px 18px;
     background: var(--bg-main); border: 2px solid var(--border-color);
-    border-radius: 15px; font-size: 1.1rem; color: var(--text-primary);
-    display: flex; align-items: center; gap: 15px;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    animation: slideInLeft 0.5s ease;
-    animation-fill-mode: both;
+    border-radius: 12px; font-size: 1rem; color: var(--text-primary);
+    display: flex; align-items: center; gap: 12px;
+    transition: all 0.2s ease;
   }
-  .option-btn:nth-child(1) { animation-delay: 0.1s; }
-  .option-btn:nth-child(2) { animation-delay: 0.2s; }
-  .option-btn:nth-child(3) { animation-delay: 0.3s; }
-  .option-btn:nth-child(4) { animation-delay: 0.4s; }
-  
   .option-btn:hover:not(:disabled) { 
     border-color: var(--primary-color); background: var(--bg-card-hover); 
-    transform: translateX(10px) scale(1.02);
+    transform: translateX(4px);
   }
   
-  .option-btn .opt-emoji {
-    font-size: 1.5rem;
-    filter: drop-shadow(var(--emoji-shadow));
-    transition: all 0.3s ease;
-  }
-  .option-btn:hover .opt-emoji {
-    transform: scale(1.3) rotate(10deg);
-  }
-  
-  /* Selected / Result states */
   .option-btn.selected { 
     border-color: var(--accent); background: rgba(245, 158, 11, 0.1);
-    animation: pulse 1s ease;
   }
   .option-btn.correct { 
     border-color: var(--correct-color); background: rgba(16, 185, 129, 0.1); 
     color: var(--correct-color); font-weight: 600;
-    animation: correctAnswer 0.6s ease;
   }
   .option-btn.wrong { 
     border-color: var(--wrong-color); background: rgba(239, 68, 68, 0.1); 
-    color: var(--wrong-color); opacity: 0.7;
-    animation: wrongAnswer 0.6s ease;
+    color: var(--wrong-color);
   }
   
   .opt-letter {
-    width: 32px; height: 32px; border-radius: 50%;
+    width: 28px; height: 28px; border-radius: 50%;
     background: var(--border-color); display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: 0.9rem; transition: all 0.3s ease;
+    font-weight: 700; font-size: 0.8rem; transition: all 0.2s ease;
+    flex-shrink: 0;
   }
-  .option-btn:hover .opt-letter {
-    transform: scale(1.1);
+  .option-btn.correct .opt-letter { background: var(--correct-color); color: #fff; }
+  .option-btn.wrong .opt-letter { background: var(--wrong-color); color: #fff; }
+
+  /* ============ POWER-UPS ============ */
+  .powerups {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 10px;
+    flex-wrap: wrap;
   }
-  .option-btn.selected .opt-letter { background: var(--accent); color: #fff; }
-  .option-btn.correct .opt-letter { 
-    background: var(--correct-color); color: #fff;
-    animation: bounceIn 0.6s ease;
+  .powerup-btn {
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: var(--border-color);
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid transparent;
   }
-  .option-btn.wrong .opt-letter { 
-    background: var(--wrong-color); color: #fff;
-    animation: shake 0.6s ease;
+  .powerup-btn:hover:not(:disabled) {
+    transform: scale(1.05);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+  }
+  .powerup-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .powerup-btn.active {
+    background: var(--primary-gradient);
+    color: white;
   }
 
   /* ============ EXPLANATION MODAL ============ */
   .modal-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: var(--modal-overlay); backdrop-filter: blur(5px);
+    background: var(--modal-overlay); backdrop-filter: blur(4px);
     display: flex; align-items: center; justify-content: center;
-    z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.3s ease;
+    z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.25s ease;
   }
   .modal-overlay.active { opacity: 1; visibility: visible; }
   
   .modal-content {
-    background: var(--bg-card); width: 90%; max-width: 500px;
+    background: var(--bg-card); width: 90%; max-width: 450px;
     border-radius: var(--radius-lg); padding: 30px;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-    transform: translateY(30px) scale(0.95); transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform: translateY(20px) scale(0.95); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     border: 1px solid var(--border-color); text-align: center;
   }
   .modal-overlay.active .modal-content { 
     transform: translateY(0) scale(1);
-    animation: modalPop 0.6s ease;
   }
   
   .modal-icon { 
-    font-size: 4.5rem; margin-bottom: 15px;
-    filter: drop-shadow(var(--emoji-shadow));
-    animation: bounceIn 0.8s ease;
-    display: inline-block;
-    transform-style: preserve-3d;
+    font-size: 3.5rem; margin-bottom: 12px;
+    display: block;
   }
-  .modal-icon:hover {
-    animation: spin3D 0.8s ease-in-out;
-  }
-  .modal-icon.success { color: var(--correct-color); }
-  .modal-icon.fail { color: var(--wrong-color); }
+  .modal-icon.correct { color: var(--correct-color); }
+  .modal-icon.wrong { color: var(--wrong-color); }
   
   .modal-title { 
-    font-size: 1.5rem; margin-bottom: 15px; font-weight: 700;
-    animation: fadeInUp 0.6s ease;
+    font-size: 1.3rem; margin-bottom: 12px; font-weight: 700;
   }
   .modal-text { 
-    color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 25px; 
-    line-height: 1.6; padding: 15px; background: var(--bg-main); border-radius: 10px;
-    animation: fadeInUp 0.8s ease;
+    color: var(--text-secondary); font-size: 1rem; margin-bottom: 20px; 
+    line-height: 1.6; padding: 12px; background: var(--bg-main); border-radius: 8px;
   }
   
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+  .modal-actions .btn { flex: 1; justify-content: center; }
+
   /* ============ RESULTS ============ */
   .result-circle {
-    width: 200px; height: 200px; border-radius: 50%;
-    border: 10px solid var(--primary-color);
+    width: 160px; height: 160px; border-radius: 50%;
+    background: var(--primary-gradient);
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    margin: 0 auto 30px; box-shadow: 0 0 30px rgba(59, 130, 246, 0.2);
-    animation: resultPop 1s ease;
+    margin: 0 auto 20px;
+    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.3);
     position: relative;
   }
-  .result-circle::before {
-    content: '';
-    position: absolute;
-    inset: -10px;
-    border-radius: 50%;
-    border: 2px solid var(--primary-color);
-    animation: ringPulse 2s ease-in-out infinite;
-  }
-  .result-circle .result-emoji {
-    font-size: 3rem;
-    margin-bottom: 5px;
-    filter: drop-shadow(var(--emoji-shadow));
-    animation: float3D 2s ease-in-out infinite;
-  }
   .result-circle h1 { 
-    font-size: 3.5rem; color: var(--primary-color); line-height: 1;
-    animation: countUp 1s ease;
+    font-size: 3rem; color: white; line-height: 1;
   }
-  .result-circle span { font-size: 1rem; color: var(--text-secondary); font-weight: 600; letter-spacing: 2px; }
+  .result-circle span { 
+    font-size: 0.8rem; color: rgba(255,255,255,0.8); font-weight: 500; letter-spacing: 1px;
+  }
+  .result-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin: 20px 0;
+  }
+  .result-stat {
+    text-align: center;
+    padding: 10px;
+    background: var(--bg-main);
+    border-radius: 10px;
+  }
+  .result-stat .num {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+  }
+  .result-stat .label {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
 
-  /* ============ CONFETTI ============ */
-  .confetti-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 999;
-    overflow: hidden;
+  /* ============ STREAK INDICATOR ============ */
+  .streak-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 12px;
+    border-radius: 50px;
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 0.85rem;
   }
-  .confetti {
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    animation: confettiFall linear infinite;
+  .streak-indicator i { 
+    animation: pulse 1s ease-in-out infinite;
   }
 
   /* Footer */
   footer { 
-    text-align: center; padding: 30px; color: var(--text-secondary); 
-    font-size: 0.9rem; border-top: 1px solid var(--border-color); 
+    text-align: center; padding: 20px; color: var(--text-secondary); 
+    font-size: 0.8rem; border-top: 1px solid var(--border-color); 
     background: var(--bg-card);
-    animation: fadeInUp 1s ease;
   }
   .dev-credit { 
-    margin-top: 10px; font-weight: 600; color: var(--primary-color); letter-spacing: 1px;
-    transition: all 0.3s ease;
-  }
-  .dev-credit:hover {
-    transform: scale(1.1);
-  }
-  .dev-credit .footer-emoji {
-    display: inline-block;
-    filter: drop-shadow(var(--emoji-shadow));
-    animation: heartBeat 1.5s infinite;
-    font-size: 1.2rem;
+    margin-top: 5px; font-weight: 600; color: var(--primary-color);
   }
 
-  /* Loaders */
-  .loader { 
-    border: 4px solid var(--border-color); border-top: 4px solid var(--primary-color); 
-    border-radius: 50%; width: 40px; height: 40px; 
-    animation: spin 1s linear infinite; margin: 50px auto; 
-  }
-  
-  /* ============ ANIMATIONS ============ */
-  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-  
-  @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  
-  @keyframes fadeInDown {
-    from { opacity: 0; transform: translateY(-30px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  
-  @keyframes fadeInLeft {
-    from { opacity: 0; transform: translateX(-30px); }
-    to { opacity: 1; transform: translateX(0); }
-  }
-  
-  @keyframes fadeInRight {
-    from { opacity: 0; transform: translateX(30px); }
-    to { opacity: 1; transform: translateX(0); }
-  }
-  
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  
-  @keyframes slideInLeft {
-    from { opacity: 0; transform: translateX(-50px); }
-    to { opacity: 1; transform: translateX(0); }
-  }
-  
-  @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-100px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  
-  @keyframes bounceIn {
-    0% { opacity: 0; transform: scale(0.3); }
-    50% { opacity: 1; transform: scale(1.05); }
-    70% { transform: scale(0.9); }
-    100% { transform: scale(1); }
-  }
-  
+  /* ============ ANIMATIONS (Minimal) ============ */
   @keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
   }
   
   @keyframes shake {
     0%, 100% { transform: translateX(0); }
-    10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
-    20%, 40%, 60%, 80% { transform: translateX(10px); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
   }
   
-  @keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
-  }
+  .shake { animation: shake 0.4s ease; }
   
-  @keyframes resultPop {
-    0% { opacity: 0; transform: scale(0.5) rotate(-10deg); }
-    60% { opacity: 1; transform: scale(1.1) rotate(5deg); }
-    100% { transform: scale(1) rotate(0deg); }
-  }
-  
-  @keyframes ringPulse {
-    0%, 100% { transform: scale(1); opacity: 0.5; }
-    50% { transform: scale(1.1); opacity: 0; }
-  }
-  
-  @keyframes countUp {
-    from { opacity: 0; transform: scale(0.5); }
-    to { opacity: 1; transform: scale(1); }
-  }
-  
-  @keyframes correctAnswer {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); background: rgba(16, 185, 129, 0.3); }
-    100% { transform: scale(1); }
-  }
-  
-  @keyframes wrongAnswer {
-    0% { transform: translateX(0); }
-    25% { transform: translateX(-15px); }
-    50% { transform: translateX(15px); }
-    75% { transform: translateX(-15px); }
-    100% { transform: translateX(0); }
-  }
-  
-  @keyframes modalPop {
-    0% { opacity: 0; transform: scale(0.8) rotate(-5deg); }
-    60% { opacity: 1; transform: scale(1.05) rotate(2deg); }
-    100% { transform: scale(1) rotate(0deg); }
-  }
-  
-  @keyframes heartBeat {
-    0%, 100% { transform: scale(1); }
-    14% { transform: scale(1.3); }
-    28% { transform: scale(1); }
-    42% { transform: scale(1.3); }
-    70% { transform: scale(1); }
-  }
-  
-  @keyframes confettiFall {
-    0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
-    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
-  }
-  
-  @keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-20px); }
-  }
-  
-  .animate-pop { animation: popIn 0.3s ease forwards; }
-  @keyframes popIn { 0% { opacity: 0; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
+  .animate-pop { animation: popIn 0.25s ease forwards; }
+  @keyframes popIn { 0% { opacity: 0; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
 
-  /* Responsive */
+  /* ============ RESPONSIVE ============ */
   @media (max-width: 768px) {
     .quiz-container { padding: 20px; }
-    .question-text { font-size: 1.1rem; }
-    .option-btn { font-size: 0.95rem; padding: 14px 16px; }
-    .page-title { font-size: 1.8rem; }
+    .question-text { font-size: 1.05rem; }
+    .option-btn { font-size: 0.9rem; padding: 12px 14px; }
+    .page-title { font-size: 1.6rem; }
     .grid-2 { grid-template-columns: 1fr; }
-    .grid-auto { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
-    .emoji-3d { font-size: 2.5rem; }
-    .emoji-3d.large { font-size: 3.5rem; }
-    .emoji-3d.xlarge { font-size: 4rem; }
+    .grid-auto { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+    .game-stats { padding: 4px 12px; gap: 10px; }
+    .stat-item { font-size: 0.75rem; }
+    .result-stats { grid-template-columns: repeat(2, 1fr); }
   }
 </style>
 </head>
 <body>
 
-<!-- Audio synthesis for sounds without external files -->
+<!-- Audio synthesis -->
 <script>
   const AudioContext = window.AudioContext || window.webkitAudioContext;
   const audioCtx = new AudioContext();
@@ -755,13 +510,13 @@
     const gainNode = audioCtx.createGain();
     osc.type = 'sine';
     osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.1);
-    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+    osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.08);
+    gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
     osc.connect(gainNode);
     gainNode.connect(audioCtx.destination);
     osc.start();
-    osc.stop(audioCtx.currentTime + 0.1);
+    osc.stop(audioCtx.currentTime + 0.08);
   }
 
   function playSuccessSound() {
@@ -769,15 +524,14 @@
     const osc = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
     osc.type = 'triangle';
-    osc.frequency.setValueAtTime(400, audioCtx.currentTime);
-    osc.frequency.setValueAtTime(600, audioCtx.currentTime + 0.1);
-    osc.frequency.setValueAtTime(800, audioCtx.currentTime + 0.2);
-    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-    gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.4);
+    osc.frequency.setValueAtTime(500, audioCtx.currentTime);
+    osc.frequency.setValueAtTime(700, audioCtx.currentTime + 0.08);
+    gainNode.gain.setValueAtTime(0.25, audioCtx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.2);
     osc.connect(gainNode);
     gainNode.connect(audioCtx.destination);
     osc.start();
-    osc.stop(audioCtx.currentTime + 0.4);
+    osc.stop(audioCtx.currentTime + 0.2);
   }
   
   function playFailSound() {
@@ -785,14 +539,14 @@
     const osc = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
     osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(300, audioCtx.currentTime);
-    osc.frequency.linearRampToValueAtTime(150, audioCtx.currentTime + 0.3);
-    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
-    gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3);
+    osc.frequency.setValueAtTime(250, audioCtx.currentTime);
+    osc.frequency.linearRampToValueAtTime(150, audioCtx.currentTime + 0.2);
+    gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.2);
     osc.connect(gainNode);
     gainNode.connect(audioCtx.destination);
     osc.start();
-    osc.stop(audioCtx.currentTime + 0.3);
+    osc.stop(audioCtx.currentTime + 0.2);
   }
 </script>
 
@@ -801,10 +555,12 @@
 <!-- Explanation Modal -->
 <div class="modal-overlay" id="explainModal">
   <div class="modal-content">
-    <div id="modalIcon" class="modal-icon"></div>
+    <span id="modalIcon" class="modal-icon"></span>
     <h2 id="modalTitle" class="modal-title"></h2>
     <div id="modalText" class="modal-text"></div>
-    <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="closeModalAndNext()">ඊළඟ ප්‍රශ්නයට යන්න <i class="fas fa-arrow-right"></i></button>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="closeModalAndNext()">ඊළඟට <i class="fas fa-arrow-right"></i></button>
+    </div>
   </div>
 </div>
 
@@ -814,7 +570,7 @@
      ===================================================================== */
 
   const SUBJECTS = {
-    science: { key:'science', name:'Science', sinhala:'විද්‍යාව', icon:'fa-flask', desc:'Explore the world of Science.', emoji:'🔬' }
+    science: { key:'science', name:'Science', sinhala:'විද්‍යාව', icon:'fa-flask', desc:'Explore Science', emoji:'🔬' }
   };
   
   const GRADES = ['8', '9']; 
@@ -824,7 +580,11 @@
     loading: true,
     error: null,
     route: {name:'home'},
-    quiz: null
+    quiz: null,
+    totalScore: 0,
+    totalQuestions: 0,
+    streak: 0,
+    bestStreak: 0
   };
 
   // Theme Toggler
@@ -837,11 +597,9 @@
     render();
   }
   
-  // Set initial theme
   const savedTheme = localStorage.getItem('theme') || 'dark';
   document.documentElement.setAttribute('data-theme', savedTheme);
 
-  // Helper functions
   function escapeHtml(str){ return (str==null?'':String(str)).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
   function shuffleIdx(n){
     const arr = Array.from({length:n}, (_,i)=>i);
@@ -860,7 +618,6 @@
   }
   function findLesson(subject, grade, lessonId){ return getLessons(subject, grade).find(l => l.id === lessonId) || null; }
 
-  // Load JSON Data
   async function loadData() {
       try {
           const response = await fetch('data.json?t=' + new Date().getTime());
@@ -869,18 +626,16 @@
           appState.loading = false;
           render();
       } catch (error) {
-          appState.error = "දත්ත ලබාගැනීමේ දෝෂයකි. කරුණාකර data.json ගොනුව පරීක්ෂා කරන්න.";
+          appState.error = "දත්ත ලබාගැනීමේ දෝෂයකි. data.json පරීක්ෂා කරන්න.";
           appState.loading = false;
           render();
       }
   }
 
-  // Routing
   function parseHash(){
     const h = location.hash.replace(/^#\/?/, '');
     const parts = h.split('/').filter(Boolean);
     if(parts[0] === 'subject' && parts[1] && parts[2] === 'grade' && parts[3]){
-      if(parts[4] === 'lesson' && parts[5]) return { name:'lessonDetail', subject:parts[1], grade:parts[3], lessonId:parts[5] };
       if(parts[4] === 'quiz' && parts[5]) return { name:'quiz', subject:parts[1], grade:parts[3], lessonId:parts[5] };
       return { name:'lessons', subject:parts[1], grade:parts[3] };
     }
@@ -890,11 +645,10 @@
   function navigate(hash){ playClickSound(); location.hash = hash; }
   window.addEventListener('hashchange', () => { appState.route = parseHash(); render(); });
 
-  // Main Render
   function render(){
     const app = document.getElementById('app');
-    if(appState.loading){ app.innerHTML = renderShell(`<div class="loader"></div><p style="text-align:center;">පොඩ්ඩක් ඉන්න...</p>`); return; }
-    if(appState.error) { app.innerHTML = renderShell(`<div class="card" style="text-align:center; color:var(--wrong-color); max-width:500px; margin:50px auto;"><i class="fas fa-exclamation-triangle fa-3x"></i><h3 style="margin-top:20px;">${appState.error}</h3></div>`); return; }
+    if(appState.loading){ app.innerHTML = renderShell(`<div class="loader"></div><p style="text-align:center;color:var(--text-secondary);">Loading...</p>`); return; }
+    if(appState.error) { app.innerHTML = renderShell(`<div class="card" style="text-align:center; color:var(--wrong-color); max-width:500px; margin:50px auto;"><i class="fas fa-exclamation-triangle fa-2x"></i><h3 style="margin-top:15px;">${appState.error}</h3></div>`); return; }
 
     const r = appState.route;
     let body = '';
@@ -914,10 +668,19 @@
       <header>
         <div class="header-inner">
           <div class="logo" onclick="navigate('#/')" style="cursor:pointer;">
-            <span class="logo-emoji">🧠</span>
-            Quiz Hub
+            <i class="fas fa-brain"></i> Quiz Hub
           </div>
           <div class="controls">
+            <div class="game-stats">
+              <div class="stat-item">
+                <i class="fas fa-star"></i>
+                <span class="value">${appState.totalScore}</span>
+              </div>
+              <div class="stat-item">
+                <i class="fas fa-fire"></i>
+                <span class="value">${appState.streak}</span>
+              </div>
+            </div>
             <button class="theme-toggle" onclick="playClickSound(); toggleTheme();" title="Toggle Theme">
               <i class="fas ${themeIcon}"></i>
             </button>
@@ -927,28 +690,33 @@
       <main class="animate-pop">${bodyHtml}</main>
       <footer>
         <p>Learning Quiz Hub</p>
-        <p class="dev-credit">
-          <span class="footer-emoji">🦊</span> Developed by Lakshan Dulip
-        </p>
+        <p class="dev-credit">🦊 Developed by Lakshan Dulip</p>
       </footer>
     `;
   }
 
   function renderHome(){
     return `
-      <div style="text-align:center; margin-bottom:40px;">
-        <h2 class="page-title">
-          <span class="emoji-3d large glow float">🔬</span> 
-          විද්‍යාව ප්‍රශ්නාවලිය
-        </h2>
-        <p class="page-sub">ඔබේ දැනුම පරීක්ෂා කරගන්න පාඩමක් තෝරන්න.</p>
+      <div style="text-align:center; margin-bottom:30px;">
+        <h2 class="page-title">🎯 Science Quiz Challenge</h2>
+        <p class="page-sub">Test your knowledge, earn stars, and climb the leaderboard!</p>
+        ${appState.totalQuestions > 0 ? `
+          <div style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap; margin-top:10px;">
+            <span style="background:var(--bg-card); padding:6px 16px; border-radius:50px; border:1px solid var(--border-color);">
+              <i class="fas fa-star" style="color:var(--accent);"></i> ${appState.totalScore} stars
+            </span>
+            <span style="background:var(--bg-card); padding:6px 16px; border-radius:50px; border:1px solid var(--border-color);">
+              <i class="fas fa-fire" style="color:var(--wrong-color);"></i> Best Streak: ${appState.bestStreak}
+            </span>
+          </div>
+        ` : ''}
       </div>
       <div class="grid-2">
         ${Object.values(SUBJECTS).map(s => `
           <div class="card subject-card ${s.key}" onclick="navigate('#/subject/${s.key}')">
             <h3>${escapeHtml(s.sinhala)}</h3>
             <p>${escapeHtml(s.desc)}</p>
-            <span class="subject-emoji">${s.emoji}</span>
+            <i class="fas ${s.icon} subject-icon"></i>
           </div>
         `).join('')}
       </div>
@@ -958,29 +726,18 @@
   function renderGrades(subject){
     const meta = subjectMeta(subject);
     const sortedGrades = [...GRADES].sort((a,b) => parseInt(a) - parseInt(b));
-    const gradeEmojis = { '8': '📚', '9': '🎓' };
-    const gradeFlavors = { '8': '⭐', '9': '⭐' };
     
     return `
-      <div class="breadcrumb">
-        <a href="#/" onclick="playClickSound()">Home</a> <span>/</span> 
-        <span class="emoji-3d small" style="font-size:1.2rem;">${meta.emoji}</span> 
-        ${escapeHtml(meta.sinhala)}
-      </div>
-      <h2 class="page-title">
-        <span class="emoji-3d large float">📖</span> 
-        ශ්‍රේණිය තෝරන්න
-      </h2>
-      <p class="page-sub">ප්‍රශ්නාවලිය ආරම්භ කිරීමට ඔබගේ ශ්‍රේණිය තෝරන්න.</p>
-      <div class="grid-auto" style="margin-top:30px;">
+      <div class="breadcrumb"><a href="#/" onclick="playClickSound()">Home</a> <span>/</span> ${escapeHtml(meta.sinhala)}</div>
+      <h2 class="page-title">📚 Select Your Grade</h2>
+      <p class="page-sub">Choose your grade to start the quiz challenge.</p>
+      <div class="grid-auto" style="margin-top:25px;">
         ${sortedGrades.map(g => `
           <div class="card grade-card" onclick="navigate('#/subject/${meta.key}/grade/${g}')">
-            <span class="grade-emoji">${gradeFlavors[g] || '📖'}</span>
             <h2>${g}</h2>
-            <span>ශ්‍රේණිය</span>
+            <span>Grade</span>
             <div class="lesson-count">
-              <i class="fas fa-book"></i> 
-              ${getLessons(subject, g).length} පාඩම්
+              <i class="fas fa-book"></i> ${getLessons(subject, g).length} lessons
             </div>
           </div>
         `).join('')}
@@ -991,63 +748,30 @@
   function renderLessons(subject, grade){
     const meta = subjectMeta(subject);
     const lessons = getLessons(subject, grade);
-    const lessonEmojis = ['📘', '📗', '📙', '📕', '📓', '📔', '📒', '📚', '🔬', '🧪'];
     
     return `
       <div class="breadcrumb">
         <a href="#/" onclick="playClickSound()">Home</a> <span>/</span> 
-        <a href="#/subject/${meta.key}" onclick="playClickSound()">
-          <span class="emoji-3d small" style="font-size:1.2rem;">${meta.emoji}</span> 
-          ${escapeHtml(meta.sinhala)}
-        </a> <span>/</span> 
-        ${grade} ශ්‍රේණිය
+        <a href="#/subject/${meta.key}" onclick="playClickSound()">${escapeHtml(meta.sinhala)}</a> <span>/</span> 
+        Grade ${grade}
       </div>
-      <h2 class="page-title">
-        <span class="emoji-3d large wobble">📚</span> 
-        ${grade} ශ්‍රේණිය - පාඩම් ලැයිස්තුව
-      </h2>
-      <p class="page-sub">ප්‍රශ්නාවලිය ආරම්භ කිරීමට පාඩමක් තෝරන්න.</p>
+      <h2 class="page-title">📖 ${grade} Lessons</h2>
+      <p class="page-sub">Select a lesson to start the quiz challenge.</p>
       
-      <div style="display:flex; flex-direction:column; gap:15px;">
-        ${lessons.length === 0 ? `<div class="card" style="text-align:center;">මෙම ශ්‍රේණිය සඳහා පාඩම් ඇතුළත් කර නොමැත.</div>` : 
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        ${lessons.length === 0 ? `<div class="card" style="text-align:center;">No lessons available for this grade.</div>` : 
           lessons.map((l, i) => `
           <div class="card lesson-card" onclick="navigate('#/subject/${meta.key}/grade/${grade}/quiz/${l.id}')">
-            <div class="lesson-icon">${lessonEmojis[i % lessonEmojis.length]}</div>
+            <div class="lesson-icon">${i + 1}</div>
             <div class="lesson-info">
               <h4>${escapeHtml(l.title)}</h4>
-              <span class="q-badge"><i class="fas fa-question-circle"></i> ප්‍රශ්න ${l.questions.length} යි</span>
+              <span class="q-badge"><i class="fas fa-question-circle"></i> ${l.questions.length} questions</span>
             </div>
             <div style="margin-left:auto; color:var(--primary-color);"><i class="fas fa-chevron-right"></i></div>
           </div>
         `).join('')}
       </div>
     `;
-  }
-
-  // Confetti Animation
-  function createConfetti() {
-    const container = document.createElement('div');
-    container.className = 'confetti-container';
-    document.body.appendChild(container);
-    
-    const colors = ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff', '#5f27cd', '#01a3a4', '#f368e0'];
-    
-    for (let i = 0; i < 100; i++) {
-      const confetti = document.createElement('div');
-      confetti.className = 'confetti';
-      confetti.style.left = Math.random() * 100 + '%';
-      confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
-      confetti.style.width = Math.random() * 10 + 5 + 'px';
-      confetti.style.height = Math.random() * 10 + 5 + 'px';
-      confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
-      confetti.style.animationDuration = Math.random() * 2 + 2 + 's';
-      confetti.style.animationDelay = Math.random() * 2 + 's';
-      container.appendChild(confetti);
-    }
-    
-    setTimeout(() => {
-      container.remove();
-    }, 5000);
   }
 
   /* ============ QUIZ SYSTEM ============ */
@@ -1057,9 +781,8 @@
     
     if(!lesson) {
       return `<div class="card" style="text-align:center; max-width:500px; margin:50px auto;">
-        <span class="emoji-3d large" style="font-size:4rem;">😕</span>
-        <h3>පාඩම සොයාගත නොහැක</h3>
-        <button class="btn btn-primary" onclick="navigate('#/subject/${meta.key}/grade/${grade}')">පාඩම් වෙත ආපසු</button>
+        <h3>Lesson not found</h3>
+        <button class="btn btn-primary" onclick="navigate('#/subject/${meta.key}/grade/${grade}')">Back to Lessons</button>
       </div>`;
     }
 
@@ -1070,7 +793,10 @@
         idx: 0,
         score: 0,
         showResult: false,
-        answeredCurrent: false
+        answeredCurrent: false,
+        startTime: Date.now(),
+        timePerQuestion: [],
+        powerups: { fiftyFifty: 1, skip: 1 }
       };
     }
     
@@ -1080,55 +806,61 @@
     // Results Screen
     if(qz.showResult){
       const pct = Math.round((qz.score/total)*100);
-      let remark = pct > 75 ? "විශිෂ්ටයි!" : (pct > 50 ? "හොඳයි!" : "තව උත්සාහ කරන්න!");
-      let resultEmoji = pct > 75 ? "🏆" : (pct > 50 ? "👍" : "💪");
-      let icon = pct > 75 ? "fa-trophy" : (pct > 50 ? "fa-thumbs-up" : "fa-book-reader");
-      
-      // Trigger confetti if score is good
-      if (pct > 75) {
-        setTimeout(createConfetti, 500);
-      }
+      let resultEmoji = pct >= 80 ? "🏆" : (pct >= 50 ? "🌟" : "💪");
+      let remark = pct >= 80 ? "Excellent!" : (pct >= 50 ? "Good Job!" : "Keep Practicing!");
       
       return `
         <div class="quiz-container" style="text-align:center;">
           <div class="result-circle">
-            <span class="result-emoji">${resultEmoji}</span>
             <h1>${pct}%</h1>
-            <span>ප්‍රතිඵලය</span>
+            <span>Score</span>
           </div>
-          <h2 style="margin-bottom:10px;">
-            <span class="emoji-3d" style="font-size:2.5rem;">${resultEmoji}</span>
-            ${remark}
-          </h2>
-          <p class="page-sub">ඔබ ප්‍රශ්න ${total} න් ${qz.score} කට නිවැරදිව පිළිතුරු ලබා දී ඇත.</p>
           
-          <div style="display:flex; justify-content:center; gap:15px; margin-top:30px; flex-wrap:wrap;">
-            <button class="btn btn-outline" onclick="navigate('#/subject/${meta.key}/grade/${grade}')"><i class="fas fa-list"></i> පාඩම් ලැයිස්තුව</button>
-            <button class="btn btn-primary" onclick="appState.quiz=null; render(); playClickSound();"><i class="fas fa-redo"></i> නැවත කරන්න</button>
+          <h2 style="margin-bottom:5px;">${resultEmoji} ${remark}</h2>
+          <p class="page-sub">You answered ${qz.score} out of ${total} questions correctly.</p>
+          
+          <div class="result-stats">
+            <div class="result-stat">
+              <div class="num">${qz.score}</div>
+              <div class="label">Correct</div>
+            </div>
+            <div class="result-stat">
+              <div class="num">${total - qz.score}</div>
+              <div class="label">Wrong</div>
+            </div>
+            <div class="result-stat">
+              <div class="num">${Math.round((qz.score/total)*100)}%</div>
+              <div class="label">Accuracy</div>
+            </div>
+          </div>
+          
+          <div style="display:flex; justify-content:center; gap:12px; margin-top:20px; flex-wrap:wrap;">
+            <button class="btn btn-outline" onclick="navigate('#/subject/${meta.key}/grade/${grade}')"><i class="fas fa-list"></i> Lessons</button>
+            <button class="btn btn-primary" onclick="appState.quiz=null; render(); playClickSound();"><i class="fas fa-redo"></i> Retry</button>
           </div>
         </div>
       `;
     }
 
-    // Active Question Screen
+    // Active Question
     const qIndex = qz.order[qz.idx];
     const question = lesson.questions[qIndex];
     const letters = ['A','B','C','D'];
     const progressPct = ((qz.idx) / total) * 100;
-    const questionEmojis = ['🤔', '💡', '🧠', '🔍', '📝', '✏️', '📖', '🎯'];
 
     return `
       <div class="quiz-container">
         <div class="quiz-header">
-          <span>${escapeHtml(lesson.title)}</span>
-          <span><i class="fas fa-flag-checkered"></i> ${qz.idx + 1} / ${total}</span>
+          <span style="font-weight:600;font-size:0.9rem;">${escapeHtml(lesson.title)}</span>
+          <span style="font-weight:600;font-size:0.9rem;color:var(--text-secondary);">
+            <i class="fas fa-flag-checkered"></i> ${qz.idx + 1}/${total}
+          </span>
         </div>
+        
         <div class="progress-bg"><div class="progress-fill" style="width:${progressPct}%"></div></div>
         
-        <div class="question-text">
-          <span class="question-emoji">${questionEmojis[qz.idx % questionEmojis.length]}</span>
-          ${escapeHtml(question.q)}
-        </div>
+        <div class="question-number">Question ${qz.idx + 1}</div>
+        <div class="question-text">${escapeHtml(question.q)}</div>
         
         <div class="options-grid">
           ${question.options.map((opt, i) => `
@@ -1138,11 +870,68 @@
             </button>
           `).join('')}
         </div>
+        
+        <div class="powerups">
+          <button class="powerup-btn" id="fiftyBtn" onclick="useFiftyFifty()" ${qz.answeredCurrent || qz.powerups.fiftyFifty <= 0 ? 'disabled' : ''}>
+            <i class="fas fa-cut"></i> 50/50 (${qz.powerups.fiftyFifty})
+          </button>
+          <button class="powerup-btn" id="skipBtn" onclick="useSkip()" ${qz.answeredCurrent || qz.powerups.skip <= 0 ? 'disabled' : ''}>
+            <i class="fas fa-forward"></i> Skip (${qz.powerups.skip})
+          </button>
+        </div>
       </div>
     `;
   }
 
-  // Answer Checking Logic
+  // Power-ups
+  let fiftyActive = false;
+  
+  window.useFiftyFifty = function() {
+    const qz = appState.quiz;
+    if(qz.answeredCurrent || qz.powerups.fiftyFifty <= 0) return;
+    
+    qz.powerups.fiftyFifty--;
+    const qIndex = qz.order[qz.idx];
+    const question = findLesson(qz.subject, qz.grade, qz.lessonId).questions[qIndex];
+    const correct = question.correct;
+    
+    // Get wrong options
+    const wrongOptions = question.options.map((_, i) => i).filter(i => i !== correct);
+    // Shuffle and pick 2 wrong to remove
+    const shuffled = shuffleIdx(wrongOptions.length);
+    const toRemove = shuffled.slice(0, 2).map(i => wrongOptions[i]);
+    
+    // Hide 2 wrong options
+    toRemove.forEach(i => {
+      const btn = document.getElementById(`opt-${i}`);
+      if(btn) {
+        btn.style.display = 'none';
+        btn.disabled = true;
+      }
+    });
+    
+    document.getElementById('fiftyBtn').disabled = true;
+    document.getElementById('fiftyBtn').textContent = '50/50 (0)';
+    playClickSound();
+  };
+  
+  window.useSkip = function() {
+    const qz = appState.quiz;
+    if(qz.answeredCurrent || qz.powerups.skip <= 0) return;
+    
+    qz.powerups.skip--;
+    // Skip current question (mark as wrong without answer)
+    qz.answeredCurrent = true;
+    const qIndex = qz.order[qz.idx];
+    const question = findLesson(qz.subject, qz.grade, qz.lessonId).questions[qIndex];
+    
+    document.getElementById('skipBtn').disabled = true;
+    document.getElementById('skipBtn').textContent = `Skip (${qz.powerups.skip})`;
+    
+    playFailSound();
+    showModal(false, "⏭️ Skipped!", "You skipped this question. Don't worry, keep going!");
+  };
+
   window.checkAnswer = function(selectedIndex, correctIndex, explanation) {
     if(appState.quiz.answeredCurrent) return;
     appState.quiz.answeredCurrent = true;
@@ -1150,33 +939,35 @@
     const selectedBtn = document.getElementById(`opt-${selectedIndex}`);
     const correctBtn = document.getElementById(`opt-${correctIndex}`);
     
-    // UI Updates
     if(selectedIndex === correctIndex) {
       selectedBtn.classList.add('correct');
       appState.quiz.score++;
+      appState.totalScore++;
+      appState.streak++;
+      if(appState.streak > appState.bestStreak) appState.bestStreak = appState.streak;
       playSuccessSound();
-      showModal(true, "✅ නිවැරදියි!", explanation);
+      showModal(true, "✅ Correct!", explanation);
     } else {
       selectedBtn.classList.add('wrong');
       correctBtn.classList.add('correct');
+      appState.streak = 0;
       playFailSound();
-      showModal(false, "❌ වැරදියි!", explanation);
+      showModal(false, "❌ Wrong!", explanation);
     }
   };
 
-  // Modal Logic
   function showModal(isCorrect, title, text) {
     const modal = document.getElementById('explainModal');
     const icon = document.getElementById('modalIcon');
     
     document.getElementById('modalTitle').textContent = title;
     document.getElementById('modalTitle').style.color = isCorrect ? 'var(--correct-color)' : 'var(--wrong-color)';
-    document.getElementById('modalText').innerHTML = text ? `<strong>📖 විවරණය:</strong><br>${text}` : "විවරණයක් ඇතුළත් කර නොමැත.";
+    document.getElementById('modalText').innerHTML = text ? `<strong>💡 Explanation:</strong><br>${text}` : "No explanation available.";
     
-    icon.textContent = isCorrect ? '🤩' : '😓';
-    icon.className = `modal-icon ${isCorrect ? 'success' : 'fail'}`;
+    icon.textContent = isCorrect ? '🎉' : '😅';
+    icon.className = `modal-icon ${isCorrect ? 'correct' : 'wrong'}`;
     
-    setTimeout(() => { modal.classList.add('active'); }, 600);
+    setTimeout(() => { modal.classList.add('active'); }, 300);
   }
 
   window.closeModalAndNext = function() {
@@ -1188,11 +979,16 @@
         qz.answeredCurrent = false;
         if(qz.idx < qz.order.length - 1) {
             qz.idx++;
+            // Reset any hidden options
+            document.querySelectorAll('.option-btn').forEach(btn => {
+              btn.style.display = '';
+              btn.disabled = false;
+            });
         } else {
             qz.showResult = true;
         }
         render();
-    }, 300);
+    }, 200);
   };
 
   /* ---------------- INIT ---------------- */
