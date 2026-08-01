@@ -194,6 +194,36 @@
     --bronze: #d97706;
   }
 
+  :root[data-theme="pink"] {
+    --bg-main: #1f0b17;
+    --bg-card: rgba(45, 18, 35, 0.92);
+    --bg-card-hover: #3d162f;
+    --text-primary: #fdf2f8;
+    --text-secondary: #f472b6;
+    --border-color: #501e3e;
+    --primary-color: #ec4899;
+    --primary-hover: #db2777;
+    --primary-gradient: linear-gradient(135deg, #f472b6, #ec4899);
+    --science-color: #34d399;
+    --correct-color: #34d399;
+    --wrong-color: #fb7185;
+    --accent: #facc15;
+    --grid-dot: rgba(236, 72, 153, 0.11);
+    --radius: 16px;
+    --radius-lg: 24px;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.5);
+    --shadow-md: 0 10px 22px -8px rgba(0,0,0,0.6);
+    --shadow-lg: 0 22px 44px -12px rgba(0,0,0,0.7);
+    --modal-overlay: rgba(31, 11, 23, 0.95);
+    --card-border: #501e3e;
+    --glow-color: rgba(236, 72, 153, 0.6);
+    --heart-color: #fb7185;
+    --timer-color: #facc15;
+    --gold: #facc15;
+    --silver: #94a3b8;
+    --bronze: #d97706;
+  }
+
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', 'Noto Sans Sinhala', sans-serif; }
 
   body {
@@ -342,6 +372,7 @@
   .theme-dot-ocean { background: #0f2847; }
   .theme-dot-forest { background: #0f2a0f; }
   .theme-dot-sunset { background: #2a1515; }
+  .theme-dot-pink { background: #3d162f; }
 
   .page-title { font-family: 'Space Grotesk', 'Noto Sans Sinhala', sans-serif; font-size: 2rem; font-weight: 700; margin-bottom: 8px; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
   .page-sub { color: var(--text-secondary); margin-bottom: 30px; font-size: 1rem; }
@@ -893,7 +924,7 @@
 <script>
   // ============ CONFIG ============
   const MODES = { STUDY: 'study', GAME: 'game', FLASHCARD: 'flashcard' };
-  const THEMES = ['dark', 'light', 'purple', 'ocean', 'forest', 'sunset'];
+  const THEMES = ['dark', 'light', 'purple', 'ocean', 'forest', 'sunset', 'pink'];
   const MAX_TIMER = 20;
   const MAX_LIVES = 3;
 
@@ -1112,7 +1143,7 @@
   }
 
   function getThemeIcon(theme) {
-    const icons = { dark: '🌙', light: '☀️', purple: '💜', ocean: '🌊', forest: '🌿', sunset: '🌅' };
+    const icons = { dark: '🌙', light: '☀️', purple: '💜', ocean: '🌊', forest: '🌿', sunset: '🌅', pink: '🌸' };
     return icons[theme] || '🎨';
   }
 
@@ -1391,7 +1422,7 @@
           </div>
           <div class="status ${isUnlocked ? 'unlocked' : 'locked'}">
             ${isUnlocked ? '✅ අගුළු හැරියා' : '🔒 අගුළු ලා ඇත'}
-          </div>
+            </div>
         </div>
       `;
     }).join('');
@@ -2024,7 +2055,7 @@
           </div>
         </div>
       `;
-    }
+  }
 
     const qIndex = qz.order[qz.idx];
     const question = lesson.questions[qIndex];
