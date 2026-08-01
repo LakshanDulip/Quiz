@@ -224,6 +224,68 @@
     --bronze: #d97706;
   }
 
+  /* NEW: Pink White / Sakura Theme */
+  :root[data-theme="sakura"] {
+    --bg-main: #fdf2f8; 
+    --bg-card: rgba(255, 255, 255, 0.95);
+    --bg-card-hover: #fff;
+    --text-primary: #4a044e;
+    --text-secondary: #9d174d;
+    --border-color: #fbcfe8;
+    --primary-color: #ec4899;
+    --primary-hover: #db2777;
+    --primary-gradient: linear-gradient(135deg, #f472b6, #fb7185);
+    --science-color: #10b981;
+    --correct-color: #10b981;
+    --wrong-color: #ef4444;
+    --accent: #f59e0b;
+    --grid-dot: rgba(236, 72, 153, 0.1);
+    --radius: 16px;
+    --radius-lg: 24px;
+    --shadow-sm: 0 1px 3px rgba(236,72,153,0.1);
+    --shadow-md: 0 10px 22px -8px rgba(236,72,153,0.15);
+    --shadow-lg: 0 22px 44px -12px rgba(236,72,153,0.2);
+    --modal-overlay: rgba(253, 242, 248, 0.95);
+    --card-border: #fbcfe8;
+    --glow-color: rgba(244, 114, 182, 0.4);
+    --heart-color: #ef4444;
+    --timer-color: #db2777;
+    --gold: #f59e0b;
+    --silver: #94a3b8;
+    --bronze: #b45309;
+  }
+
+  /* NEW: Pure White Theme */
+  :root[data-theme="pure-white"] {
+    --bg-main: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f9f9f9;
+    --text-primary: #111111;
+    --text-secondary: #666666;
+    --border-color: #eaeaea;
+    --primary-color: #000000;
+    --primary-hover: #333333;
+    --primary-gradient: linear-gradient(135deg, #222222, #555555);
+    --science-color: #10b981;
+    --correct-color: #10b981;
+    --wrong-color: #ef4444;
+    --accent: #f59e0b;
+    --grid-dot: rgba(0, 0, 0, 0.05);
+    --radius: 16px;
+    --radius-lg: 24px;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+    --shadow-md: 0 10px 22px -8px rgba(0,0,0,0.1);
+    --shadow-lg: 0 22px 44px -12px rgba(0,0,0,0.15);
+    --modal-overlay: rgba(255, 255, 255, 0.95);
+    --card-border: #eaeaea;
+    --glow-color: rgba(0, 0, 0, 0.1);
+    --heart-color: #ef4444;
+    --timer-color: #000000;
+    --gold: #f59e0b;
+    --silver: #94a3b8;
+    --bronze: #b45309;
+  }
+
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', 'Noto Sans Sinhala', sans-serif; }
 
   body {
@@ -292,7 +354,7 @@
   .stat-item .value { color: var(--text-primary); font-weight: 700; }
 
   .icon-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--border-color); color: var(--text-primary); display: flex; align-items: center; justify-content: center; font-size: 1rem; }
-  .icon-btn:hover { background: var(--primary-color); color: #1a1a1a; }
+  .icon-btn:hover { background: var(--primary-color); color: #fff; }
   .icon-btn.muted { background: var(--wrong-color); color: #fff; }
 
   /* ============ MODE SELECTOR ============ */
@@ -316,8 +378,11 @@
   .mode-btn:hover { color: var(--text-primary); }
   .mode-btn.active {
     background: var(--primary-gradient);
-    color: #1a1a1a;
+    color: #fff;
     box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  }
+  :root[data-theme="light"] .mode-btn.active, :root[data-theme="pure-white"] .mode-btn.active, :root[data-theme="sakura"] .mode-btn.active {
+    color: #fff;
   }
 
   .lives-display { display: flex; gap: 3px; font-size: 1.1rem; }
@@ -351,21 +416,23 @@
     width: 190px;
   }
   .theme-popover.open { display: grid; }
-  .theme-popover-title { grid-column: 1 / -1; font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+  .theme-popover-title { grid-column: 1 / -1; font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 4px; }
   .theme-dot {
     width: 100%; aspect-ratio: 1; border-radius: 10px; border: 2px solid transparent;
-    display: flex; align-items: center; justify-content: center; font-size: 1rem;
+    display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
     position: relative; transition: all 0.2s ease;
   }
   .theme-dot:hover { transform: scale(1.08); }
   .theme-dot.active { border-color: var(--primary-color); }
   .theme-dot .check {
-    position: absolute; bottom: -2px; right: -2px; width: 14px; height: 14px;
+    position: absolute; bottom: -4px; right: -4px; width: 16px; height: 16px;
     background: var(--correct-color); color: #fff; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center; font-size: 0.4rem;
+    display: flex; align-items: center; justify-content: center; font-size: 0.5rem;
     opacity: 0; transform: scale(0.5); transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   }
   .theme-dot.active .check { opacity: 1; transform: scale(1); }
+  
   .theme-dot-dark { background: #0f172a; }
   .theme-dot-light { background: #f0f4f8; border-color: #ddd; }
   .theme-dot-purple { background: #1a1035; }
@@ -373,6 +440,8 @@
   .theme-dot-forest { background: #0f2a0f; }
   .theme-dot-sunset { background: #2a1515; }
   .theme-dot-pink { background: #3d162f; }
+  .theme-dot-pure-white { background: #ffffff; border-color: #ccc; }
+  .theme-dot-sakura { background: #fdf2f8; border-color: #fbcfe8; }
 
   .page-title { font-family: 'Space Grotesk', 'Noto Sans Sinhala', sans-serif; font-size: 2rem; font-weight: 700; margin-bottom: 8px; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
   .page-sub { color: var(--text-secondary); margin-bottom: 30px; font-size: 1rem; }
@@ -401,13 +470,13 @@
 
   .lesson-card { display: flex; align-items: center; gap: 16px; padding: 18px 20px; cursor: pointer; }
   .lesson-card:hover { transform: translateX(5px); border-color: var(--primary-color); box-shadow: var(--shadow-md); }
-  .lesson-icon { width: 50px; height: 50px; border-radius: 12px; background: var(--primary-gradient); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 700; flex-shrink: 0; color: #1a1a1a; font-family: 'Space Grotesk', sans-serif; }
+  .lesson-icon { width: 50px; height: 50px; border-radius: 12px; background: var(--primary-gradient); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 700; flex-shrink: 0; color: #fff; font-family: 'Space Grotesk', sans-serif; }
   .lesson-info h4 { font-size: 1.1rem; margin-bottom: 3px; }
   .q-badge { display: inline-block; padding: 3px 10px; background: var(--border-color); border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin-top: 5px; }
 
   .btn { padding: 10px 22px; border-radius: 50px; font-weight: 600; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s ease; }
   .btn:active { transform: scale(0.96); }
-  .btn-primary { background: var(--primary-gradient); color: #1a1a1a; box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
+  .btn-primary { background: var(--primary-gradient); color: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
   .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
   .btn-outline { border: 2px solid var(--border-color); color: var(--text-primary); }
   .btn-outline:hover { border-color: var(--primary-color); color: var(--primary-color); }
@@ -436,7 +505,7 @@
 
   .opt-letter { width: 28px; height: 28px; border-radius: 50%; background: var(--border-color); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; flex-shrink: 0; font-family: 'Space Grotesk', sans-serif; }
   .option-btn.correct .opt-letter { background: var(--correct-color); color: #08210f; }
-  .option-btn.wrong .opt-letter { background: var(--wrong-color); color: #2a0a0e; }
+  .option-btn.wrong .opt-letter { background: var(--wrong-color); color: #fff; }
   .option-btn.reveal-answer .opt-letter { background: var(--science-color); color: #08210f; }
 
   .study-answer-reveal {
@@ -485,7 +554,7 @@
   .flashcard-back {
     transform: rotateY(180deg);
     border-color: var(--science-color);
-    background: rgba(19, 32, 28, 0.98);
+    background: var(--bg-main);
   }
 
   .powerups { display: flex; gap: 10px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
@@ -734,7 +803,7 @@
     font-size: 0.75rem;
     font-weight: 600;
     background: var(--primary-gradient);
-    color: #1a1a1a;
+    color: #fff;
     display: none;
     align-items: center;
     gap: 6px;
@@ -889,7 +958,7 @@
         <i class="fas fa-trophy"></i> එකතු කරන්න
       </button>
       <button class="btn btn-outline" onclick="skipSaveScore()" style="width: 100%; justify-content: center;">
-        මඟ හරින්න
+        <මඟ හරින්න
       </button>
     </div>
   </div>
@@ -924,7 +993,7 @@
 <script>
   // ============ CONFIG ============
   const MODES = { STUDY: 'study', GAME: 'game', FLASHCARD: 'flashcard' };
-  const THEMES = ['dark', 'light', 'purple', 'ocean', 'forest', 'sunset', 'pink'];
+  const THEMES = ['dark', 'light', 'purple', 'ocean', 'forest', 'sunset', 'pink', 'pure-white', 'sakura'];
   const MAX_TIMER = 20;
   const MAX_LIVES = 3;
 
@@ -1143,7 +1212,7 @@
   }
 
   function getThemeIcon(theme) {
-    const icons = { dark: '🌙', light: '☀️', purple: '💜', ocean: '🌊', forest: '🌿', sunset: '🌅', pink: '🌸' };
+    const icons = { dark: '🌙', light: '☀️', purple: '💜', ocean: '🌊', forest: '🌿', sunset: '🌅', pink: '🌺', 'pure-white': '⚪', sakura: '🌸' };
     return icons[theme] || '🎨';
   }
 
@@ -1422,7 +1491,7 @@
           </div>
           <div class="status ${isUnlocked ? 'unlocked' : 'locked'}">
             ${isUnlocked ? '✅ අගුළු හැරියා' : '🔒 අගුළු ලා ඇත'}
-            </div>
+          </div>
         </div>
       `;
     }).join('');
@@ -2055,7 +2124,7 @@
           </div>
         </div>
       `;
-  }
+    }
 
     const qIndex = qz.order[qz.idx];
     const question = lesson.questions[qIndex];
