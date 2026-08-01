@@ -473,7 +473,7 @@
   .leaderboard-entry .rank.gold { color: var(--gold); }
   .leaderboard-entry .rank.silver { color: var(--silver); }
   .leaderboard-entry .rank.bronze { color: var(--bronze); }
-  .leaderboard-entry .info { flex: 1; }
+  .leaderboard-entry .info { flex: 1; text-align: left; }
   .leaderboard-entry .info .name { font-weight: 600; }
   .leaderboard-entry .info .detail { font-size: 0.75rem; color: var(--text-secondary); }
   .leaderboard-entry .score { font-weight: 700; font-size: 1.1rem; color: var(--primary-color); font-family: 'Space Grotesk', sans-serif; }
@@ -489,6 +489,8 @@
     border: 1px solid var(--border-color);
     transition: all 0.3s ease;
     opacity: 0.6;
+    margin-bottom: 8px;
+    text-align: left;
   }
   .achievement-card.unlocked {
     opacity: 1;
@@ -619,6 +621,9 @@
 </head>
 <body>
 
+<!-- Main App Container -->
+<div id="app"></div>
+
 <!-- Screen Glow -->
 <div class="screen-glow" id="screenGlow"></div>
 
@@ -642,20 +647,21 @@
 
 <!-- Explanation Modal -->
 <div class="modal-overlay" id="explainModal">
-  <div class="modal-content" style="position:relative;">
+  <div class="modal-content">
     <button class="modal-close-btn" onclick="closeModalAndNext()">✕</button>
     <span id="modalIcon" class="modal-icon"></span>
     <h2 id="modalTitle" class="modal-title"></h2>
     <div id="modalText" class="modal-text"></div>
     <div class="modal-actions">
-      <button class="btn btn-primary" id="modalNextBtn" onclick="closeModalAndNext()">ඊළඟට <i class="fas fa-arrow-right"></i></button>
+      <button class="btn btn-primary" id="modalNextBtn" onclick="closeModalAndNext(); if(currentMode === MODES.STUDY) nextStudyQuestion();">ඊළඟට <i class="fas fa-arrow-right"></i></button>
     </div>
+    <div class="kbd-hint" style="font-size:0.7rem;color:var(--text-secondary);margin-top:12px;opacity:0.7;">ඉක්මන් කිරීමට <kbd style="background:var(--border-color);padding:1px 6px;border-radius:4px;font-family:inherit;">Enter</kbd> ඔබන්න</div>
   </div>
 </div>
 
 <!-- Leaderboard Modal -->
 <div class="modal-overlay" id="leaderboardModal">
-  <div class="modal-content" style="position:relative;max-width:500px;">
+  <div class="modal-content" style="max-width:500px;">
     <button class="modal-close-btn" onclick="closeLeaderboard()">✕</button>
     <h2 class="modal-title" style="margin-bottom:15px;">🏆 ශ්‍රේණිගත කිරීම</h2>
     <div id="leaderboardList"></div>
@@ -667,7 +673,7 @@
 
 <!-- Achievements Modal -->
 <div class="modal-overlay" id="achievementsModal">
-  <div class="modal-content" style="position:relative;max-width:500px;">
+  <div class="modal-content" style="max-width:500px;">
     <button class="modal-close-btn" onclick="closeAchievements()">✕</button>
     <h2 class="modal-title" style="margin-bottom:15px;">🏅 ජයග්‍රහණ</h2>
     <div id="achievementsList"></div>
@@ -679,7 +685,7 @@
 
 <!-- Progress Modal -->
 <div class="modal-overlay" id="progressModal">
-  <div class="modal-content" style="position:relative;max-width:500px;">
+  <div class="modal-content" style="max-width:500px;">
     <button class="modal-close-btn" onclick="closeProgress()">✕</button>
     <h2 class="modal-title" style="margin-bottom:15px;">📈 ප්‍රගතිය</h2>
     <div id="progressContent"></div>
@@ -960,6 +966,7 @@
   function renderLeaderboard() {
     const lb = getLeaderboard();
     const container = document.getElementById('leaderboardList');
+    if (!container) return;
     if (lb.length === 0) {
       container.innerHTML = '<p style="color:var(--text-secondary);text-align:center;padding:20px;">තවම ලකුණු නොමැත. පළමු ප්‍රශ්නාවලිය අරඹන්න! 🚀</p>';
       return;
@@ -1015,7 +1022,6 @@
     if (!ach[id]) {
       ach[id] = { unlocked: true, date: new Date().toISOString() };
       localStorage.setItem('quizAchievements', JSON.stringify(ach));
-      // Show notification
       const a = ACHIEVEMENTS[id];
       if (a) {
         setTimeout(() => {
@@ -1037,6 +1043,7 @@
   function renderAchievements() {
     const unlocked = getAchievements();
     const container = document.getElementById('achievementsList');
+    if (!container) return;
     container.innerHTML = Object.values(ACHIEVEMENTS).map(ach => {
       const isUnlocked = !!unlocked[ach.id];
       return `
@@ -1097,6 +1104,7 @@
   function renderProgress() {
     const p = getProgress();
     const container = document.getElementById('progressContent');
+    if (!container) return;
     const total = p.totalQuestions || 0;
     const correct = p.correctAnswers || 0;
     const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
@@ -1128,29 +1136,29 @@
           <div style="font-size:0.7rem;color:var(--text-secondary);">හොඳම දිගිය</div>
         </div>
         <div class="card" style="padding:15px;text-align:center;">
-          <div style="font-size:1.8rem;">📅</div>
-          <div style="font-weight:700;font-size:1.2rem;">${p.dailyStreak || 0}</div>
-          <div style="font-size:0.7rem;color:var(--text-secondary);">දින දිගිය</div>
+          <div style="font-size:1.8rem;">🎮</div>
+          <div style="font-weight:700;font-size:1.2rem;">${p.gameWins || 0}</div>
+          <div style="font-size:0.7rem;color:var(--text-secondary);">Game Wins</div>
         </div>
       </div>
 
       <div style="margin-bottom:10px;">
         <div style="font-weight:600;margin-bottom:8px;">📊 විෂය අනුව</div>
         ${Object.keys(p.subjectStats).length === 0 ? '<p style="color:var(--text-secondary);font-size:0.9rem;">තවම විෂය දත්ත නොමැත.</p>' :
-          Object.entries(p.subjectStats).map(([subject, stats]) => {
-            const pct2 = stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0;
-            return `
-              <div style="margin-bottom:8px;">
-                <div class="progress-stat">
-                  <span>${subject}</span>
-                  <span>${pct2}%</span>
-                </div>
-                <div class="progress-bar-container">
-                  <div class="progress-bar-fill" style="width:${pct2}%;height:6px;"></div>
-                </div>
+        Object.entries(p.subjectStats).map(([subject, stats]) => {
+          const pct2 = stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0;
+          return `
+            <div style="margin-bottom:8px;">
+              <div class="progress-stat">
+                <span>${subject}</span>
+                <span>${pct2}%</span>
               </div>
-            `;
-          }).join('')
+              <div class="progress-bar-container">
+                <div class="progress-bar-fill" style="width:${pct2}%;height:6px;"></div>
+              </div>
+            </div>
+          `;
+        }).join('')
         }
       </div>
     `;
@@ -1269,6 +1277,20 @@
     window.scrollTo(0, 0);
     updateFullscreenBtn();
     updateInstallButton();
+
+    // Trigger ring animation if on results screen
+    setTimeout(() => {
+      const ring = document.getElementById('ringFg');
+      if (ring) {
+        ring.style.strokeDashoffset = ring.getAttribute('data-target');
+      }
+    }, 100);
+
+    // Timer cleanup on unmount
+    if (r.name !== 'quiz' && timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
   }
 
   function renderShell(body) {
@@ -1914,6 +1936,7 @@
         e.preventDefault();
         if (currentMode === MODES.STUDY) {
           closeModalAndNext();
+          nextStudyQuestion();
         }
       }
       return;
