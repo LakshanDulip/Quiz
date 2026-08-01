@@ -2,24 +2,13 @@
 <html lang="si" data-theme="dark">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Quiz Hub — Study, Flashcards & Game Mode</title>
-
-<!-- PWA Meta Tags -->
-<meta name="description" content="Quiz Hub - Learn Science with interactive quizzes, flashcards, and game mode. Study smarter!">
-<meta name="theme-color" content="#0d1815">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Quiz Hub">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="application-name" content="Quiz Hub">
-
-<!-- PWA Manifest -->
-<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Quiz%20Hub%20-%20Study%20%26%20Play%22%2C%22short_name%22%3A%22Quiz%20Hub%22%2C%22description%22%3A%22Interactive%20science%20quiz%20app%20with%20flashcards%20and%20game%20mode%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230d1815%22%2C%22theme_color%22%3A%22%230d1815%22%2C%22orientation%22%3A%22any%22%2C%22categories%22%3A%5B%22education%22%2C%22quiz%22%2C%22learning%22%5D%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%2040%2040'%3E%253Ccircle%20cx%3D'20'%20cy%3D'20'%20r%3D'3.4'%20fill%3D'%23fb923c'%2F%3E%253Cellipse%20cx%3D'20'%20cy%3D'20'%20rx%3D'17'%20ry%3D'7'%20fill%3D'none'%20stroke%3D'%23facc15'%20stroke-width%3D'2.2'%2F%3E%253Cellipse%20cx%3D'20'%20cy%3D'20'%20rx%3D'17'%20ry%3D'7'%20fill%3D'none'%20stroke%3D'%23facc15'%20stroke-width%3D'2.2'%20transform%3D'rotate(60%2020%2020)'%2F%3E%253Cellipse%20cx%3D'20'%20cy%3D'20'%20rx%3D'17'%20ry%3D'7'%20fill%3D'none'%20stroke%3D'%23facc15'%20stroke-width%3D'2.2'%20transform%3D'rotate(120%2020%2020)'%2F%3E%253C%2Fsvg%3E%22%2C%22sizes%22%3A%2240x40%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%7D%2C%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20192%20192'%3E%253Crect%20width%3D'192'%20height%3D'192'%20rx%3D'32'%20fill%3D'%230d1815'%2F%3E%253Ccircle%20cx%3D'96'%20cy%3D'96'%20r%3D'16'%20fill%3D'%23fb923c'%2F%3E%253Cellipse%20cx%3D'96'%20cy%3D'96'%20rx%3D'80'%20ry%3D'32'%20fill%3D'none'%20stroke%3D'%23facc15'%20stroke-width%3D'8'%2F%3E%253Cellipse%20cx%3D'96'%20cy%3D'96'%20rx%3D'80'%20ry%3D'32'%20fill%3D'none'%20stroke%3D'%23facc15'%20stroke-width%3D'8'%20transform%3D'rotate(60%2096%2096)'%2F%3E%253Cellipse%20cx%3D'96'%20cy%3D'96'%20rx%3D'80'%20ry%3D'32'%20fill%3D'none'%20stroke%3D'%23facc15'%20stroke-width%3D'8'%20transform%3D'rotate(120%2096%2096)'%2F%3E%253Ctext%20x%3D'96'%20y%3D'170'%20text-anchor%3D'middle'%20fill%3D'%23facc15'%20font-size%3D'16'%20font-weight%3D'bold'%20font-family%3D'sans-serif'%3EQUIZ%3C%2Ftext%3E%253C%2Fsvg%3E%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%2C%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20viewBox%3D'0%200%20512%20512'%3E%253Crect%20width%3D'512'%20height%3D'512'%20rx%3D'64'%20fill%3D'%230d1815'%2F%3E%253Ccircle%20cx%3D'256'%20cy%3D'256'%20r%3D'40'%20fill%3D'%23fb923c'%2F%3E%253Cellipse%20cx%3D'256'%20cy%3D'256'%20rx%3D'200'%20ry%3D'80'%20fill%3D'none'%20stroke%3D'%23facc15'%20stroke-width%3D'16'%2F%3E%253Cellipse%20cx%3D'256'%20cy%3D'256'%20rx%3D'200'%20ry%3D'80'%20fill%3D'none'%20stroke%3D'%23facc15'%20stroke-width%3D'16'%20transform%3D'rotate(60%20256%20256)'%2F%3E%253Cellipse%20cx%3D'256'%20cy%3D'256'%20rx%3D'200'%20ry%3D'80'%20fill%3D'none'%20stroke%3D'%23facc15'%20stroke-width%3D'16'%20transform%3D'rotate(120%20256%20256)'%2F%3E%253Ctext%20x%3D'256'%20y%3D'430'%20text-anchor%3D'middle'%20fill%3D'%23facc15'%20font-size%3D'48'%20font-weight%3D'bold'%20font-family%3D'sans-serif'%3EQUIZ%20HUB%3C%2Ftext%3E%253C%2Fsvg%3E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
-
-<!-- Apple Touch Icons -->
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%230d1815'/%3E%3Ccircle cx='96' cy='96' r='16' fill='%23fb923c'/%3E%3Cellipse cx='96' cy='96' rx='80' ry='32' fill='none' stroke='%23facc15' stroke-width='8'/%3E%3Cellipse cx='96' cy='96' rx='80' ry='32' fill='none' stroke='%23facc15' stroke-width='8' transform='rotate(60 96 96)'/%3E%3Cellipse cx='96' cy='96' rx='80' ry='32' fill='none' stroke='%23facc15' stroke-width='8' transform='rotate(120 96 96)'/%3E%3Ctext x='96' y='170' text-anchor='middle' fill='%23facc15' font-size='16' font-weight='bold' font-family='sans-serif'%3EQUIZ%3C/text%3E%3C/svg%3E">
-
+<meta name="theme-color" content="#0d1815">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Sinhala:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -53,7 +42,6 @@
     --gold: #facc15;
     --silver: #94a3b8;
     --bronze: #d97706;
-    --offline-badge-bg: #fb923c;
   }
 
   :root[data-theme="light"] {
@@ -84,7 +72,6 @@
     --gold: #facc15;
     --silver: #94a3b8;
     --bronze: #d97706;
-    --offline-badge-bg: #d97706;
   }
 
   :root[data-theme="purple"] {
@@ -115,7 +102,6 @@
     --gold: #facc15;
     --silver: #94a3b8;
     --bronze: #d97706;
-    --offline-badge-bg: #c084fc;
   }
 
   :root[data-theme="ocean"] {
@@ -146,7 +132,6 @@
     --gold: #facc15;
     --silver: #94a3b8;
     --bronze: #d97706;
-    --offline-badge-bg: #38bdf8;
   }
 
   :root[data-theme="forest"] {
@@ -177,7 +162,6 @@
     --gold: #facc15;
     --silver: #94a3b8;
     --bronze: #d97706;
-    --offline-badge-bg: #4ade80;
   }
 
   :root[data-theme="sunset"] {
@@ -208,7 +192,6 @@
     --gold: #facc15;
     --silver: #94a3b8;
     --bronze: #d97706;
-    --offline-badge-bg: #fb7185;
   }
 
   :root[data-theme="pink"] {
@@ -239,9 +222,9 @@
     --gold: #facc15;
     --silver: #94a3b8;
     --bronze: #d97706;
-    --offline-badge-bg: #ec4899;
   }
 
+  /* NEW: Pink White / Sakura Theme */
   :root[data-theme="sakura"] {
     --bg-main: #fdf2f8; 
     --bg-card: rgba(255, 255, 255, 0.95);
@@ -270,9 +253,9 @@
     --gold: #f59e0b;
     --silver: #94a3b8;
     --bronze: #b45309;
-    --offline-badge-bg: #f472b6;
   }
 
+  /* NEW: Pure White Theme */
   :root[data-theme="pure-white"] {
     --bg-main: #ffffff;
     --bg-card: #ffffff;
@@ -301,7 +284,6 @@
     --gold: #f59e0b;
     --silver: #94a3b8;
     --bronze: #b45309;
-    --offline-badge-bg: #000000;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', 'Noto Sans Sinhala', sans-serif; }
@@ -328,11 +310,6 @@
     transition: background-color 0.4s ease, color 0.4s ease;
     min-height: 100vh;
     position: relative;
-    /* Safe area insets for mobile */
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -360,86 +337,6 @@
   button { cursor: pointer; border: none; outline: none; background: none; font-family: inherit; transition: all 0.2s; }
 
   main { flex: 1; max-width: 1100px; margin: 0 auto; padding: 40px 20px; width: 100%; }
-
-  /* ============ OFFLINE INDICATOR ============ */
-  .offline-indicator {
-    display: none;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 16px;
-    background: var(--offline-badge-bg);
-    color: #fff;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-align: center;
-    justify-content: center;
-    position: sticky;
-    top: 0;
-    z-index: 999;
-    animation: slideDown 0.3s ease;
-  }
-  .offline-indicator.show { display: flex; }
-  .offline-indicator.online { background: var(--correct-color); }
-  @keyframes slideDown {
-    from { transform: translateY(-100%); }
-    to { transform: translateY(0); }
-  }
-
-  /* ============ INSTALL PROMPT ============ */
-  .install-prompt {
-    display: none;
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 3000;
-    background: var(--bg-card);
-    border: 2px solid var(--primary-color);
-    border-radius: var(--radius-lg);
-    padding: 20px 24px;
-    box-shadow: var(--shadow-lg);
-    backdrop-filter: blur(12px);
-    max-width: 90%;
-    width: 400px;
-    text-align: center;
-    animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
-  .install-prompt.show { display: block; }
-  @keyframes slideUp {
-    from { transform: translateX(-50%) translateY(100px); opacity: 0; }
-    to { transform: translateX(-50%) translateY(0); opacity: 1; }
-  }
-  .install-prompt .prompt-icon {
-    font-size: 3rem;
-    display: block;
-    margin-bottom: 10px;
-  }
-  .install-prompt .prompt-title {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 1.2rem;
-    font-weight: 700;
-    margin-bottom: 8px;
-    color: var(--primary-color);
-  }
-  .install-prompt .prompt-text {
-    color: var(--text-secondary);
-    font-size: 0.85rem;
-    margin-bottom: 16px;
-    line-height: 1.5;
-  }
-  .install-prompt .prompt-actions {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
-  /* ============ SAFE AREA ADJUSTMENTS ============ */
-  @supports (padding: max(0px)) {
-    .install-prompt {
-      bottom: max(20px, env(safe-area-inset-bottom, 20px));
-    }
-  }
 
   /* ============ HEADER ============ */
   header {
@@ -512,6 +409,9 @@
     color: #fff;
     box-shadow: 0 2px 10px rgba(0,0,0,0.15);
   }
+  :root[data-theme="light"] .mode-btn.active, :root[data-theme="pure-white"] .mode-btn.active, :root[data-theme="sakura"] .mode-btn.active {
+    color: #fff;
+  }
 
   .lives-display { display: flex; gap: 3px; font-size: 1.1rem; }
   .lives-display .heart { color: var(--heart-color); transition: all 0.3s ease; }
@@ -534,7 +434,6 @@
     border: 1px solid var(--science-color);
   }
 
-  /* ============ THEME POPOVER ============ */
   .theme-wrap { position: relative; }
   .theme-popover {
     position: absolute; top: 44px; right: 0; z-index: 100;
@@ -572,7 +471,6 @@
   .theme-dot-pure-white { background: #ffffff; border-color: #ccc; }
   .theme-dot-sakura { background: #fdf2f8; border-color: #fbcfe8; }
 
-  /* ============ PAGE TITLES ============ */
   .page-title { font-family: 'Space Grotesk', 'Noto Sans Sinhala', sans-serif; font-size: clamp(1.5rem, 4vw, 2.15rem); font-weight: 700; letter-spacing: -0.01em; margin-bottom: 8px; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
   .page-sub { color: var(--text-secondary); margin-bottom: 30px; font-size: 1rem; }
   .breadcrumb { color: var(--text-secondary); margin-bottom: 20px; font-size: 0.85rem; display: flex; align-items: center; flex-wrap: wrap; }
@@ -580,7 +478,6 @@
   .breadcrumb a { color: var(--primary-color); font-weight: 600; transition: opacity 0.2s ease; }
   .breadcrumb a:hover { opacity: 0.7; }
 
-  /* ============ GRIDS & CARDS ============ */
   .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 380px)); gap: 20px; justify-content: center; }
   .grid-auto { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 210px)); gap: 20px; justify-content: center; }
   .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
@@ -621,7 +518,6 @@
   .lesson-info h4 { font-size: 1.1rem; margin-bottom: 3px; }
   .q-badge { display: inline-block; padding: 3px 10px; background: var(--border-color); border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin-top: 5px; }
 
-  /* ============ BUTTONS ============ */
   .btn { padding: 10px 22px; border-radius: 50px; font-weight: 600; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s ease; }
   .btn:active { transform: scale(0.96); }
   .btn-primary { background: var(--primary-gradient); color: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
@@ -881,7 +777,7 @@
     animation: iconBounceIn 0.5s cubic-bezier(.3,1.6,.4,1);
   }
 
-  /* ============ CELEBRATION ============ */
+  /* 100% Celebration Styles */
   .celebration-glow {
     position: fixed; inset: 0; z-index: 9998;
     background: radial-gradient(circle at center, rgba(250, 204, 21, 0.4) 0%, transparent 70%);
@@ -974,7 +870,7 @@
   footer { text-align: center; padding: 20px; color: var(--text-secondary); font-size: 0.8rem; border-top: 1px solid var(--border-color); background: var(--bg-card); backdrop-filter: blur(10px); }
   .dev-credit { margin-top: 5px; font-weight: 600; color: var(--primary-color); }
 
-  /* ============ INSTALL BUTTON ============ */
+  /* PWA Install Button */
   .install-btn {
     padding: 6px 16px;
     border-radius: 50px;
@@ -989,97 +885,6 @@
   }
   .install-btn:hover { transform: scale(1.05); }
   .install-btn.show { display: inline-flex; }
-
-  /* ============ DAILY CHALLENGE ============ */
-  .daily-challenge-card {
-    background: linear-gradient(135deg, var(--bg-card), rgba(250, 204, 21, 0.05));
-    border: 2px solid var(--primary-color);
-    border-radius: var(--radius-lg);
-    padding: 24px;
-    margin-bottom: 24px;
-    position: relative;
-    overflow: hidden;
-  }
-  .daily-challenge-card::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(250, 204, 21, 0.08) 0%, transparent 70%);
-    animation: dailyGlow 3s ease-in-out infinite;
-  }
-  @keyframes dailyGlow {
-    0%, 100% { transform: translate(0, 0); }
-    50% { transform: translate(10%, 5%); }
-  }
-  .daily-challenge-card .streak-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--primary-gradient);
-    color: #fff;
-    padding: 4px 12px;
-    border-radius: 50px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    margin-bottom: 8px;
-  }
-
-  /* ============ QUESTION DIFFICULTY INDICATOR ============ */
-  .difficulty-indicator {
-    display: inline-flex;
-    gap: 2px;
-    margin-left: 8px;
-  }
-  .difficulty-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--border-color);
-    transition: background 0.3s ease;
-  }
-  .difficulty-dot.active { background: var(--accent); }
-
-  /* ============ NOTIFICATION TOAST ============ */
-  .toast-container {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 10000;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    pointer-events: none;
-  }
-  .toast {
-    background: var(--bg-card);
-    border: 1px solid var(--card-border);
-    border-radius: 12px;
-    padding: 12px 18px;
-    box-shadow: var(--shadow-lg);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    animation: toastIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards,
-               toastOut 0.3s ease 2.5s forwards;
-    pointer-events: auto;
-    max-width: 350px;
-  }
-  .toast.success { border-left: 3px solid var(--correct-color); }
-  .toast.error { border-left: 3px solid var(--wrong-color); }
-  .toast.info { border-left: 3px solid var(--primary-color); }
-  @keyframes toastIn {
-    from { transform: translateX(120%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-  }
-  @keyframes toastOut {
-    from { transform: translateX(0); opacity: 1; }
-    to { transform: translateX(120%); opacity: 0; }
-  }
 
   @media (max-width: 768px) {
     .quiz-container { padding: 20px; }
@@ -1099,12 +904,6 @@
 </style>
 </head>
 <body>
-
-<!-- Offline Indicator -->
-<div class="offline-indicator" id="offlineIndicator">
-  <i class="fas fa-wifi-slash"></i>
-  <span id="offlineText">ඔබ නොබැඳිව සිටී (Offline) - කරුණාකර අන්තර්ජාල සම්බන්ධතාව පරීක්ෂා කරන්න</span>
-</div>
 
 <!-- Login / Guest Modal -->
 <div class="modal-overlay" id="loginModal" style="background: var(--bg-main); z-index: 9999;">
@@ -1148,26 +947,6 @@
 
 <!-- Screen Glow -->
 <div class="screen-glow" id="screenGlow"></div>
-
-<!-- Toast Container -->
-<div class="toast-container" id="toastContainer"></div>
-
-<!-- Enhanced Install Prompt -->
-<div class="install-prompt" id="installPrompt">
-  <span class="prompt-icon">📱</span>
-  <div class="prompt-title">Install Quiz Hub</div>
-  <div class="prompt-text">
-    Add Quiz Hub to your home screen for quick access and offline use! 🚀
-  </div>
-  <div class="prompt-actions">
-    <button class="btn btn-primary" onclick="triggerInstall()">
-      <i class="fas fa-download"></i> Install Now
-    </button>
-    <button class="btn btn-outline" onclick="dismissInstallPrompt()">
-      Maybe Later
-    </button>
-  </div>
-</div>
 
 <!-- Game Over Modal -->
 <div class="game-over-overlay" id="gameOverModal">
@@ -1237,7 +1016,7 @@
   </div>
 </div>
 
-<!-- Save Score Modal -->
+<!-- Save Score Modal (guest leaderboard name capture) -->
 <div class="modal-overlay" id="saveScoreModal">
   <div class="modal-content" style="max-width:400px;">
     <button class="modal-close-btn" onclick="skipSaveScore()" aria-label="වසන්න">✕</button>
@@ -1276,125 +1055,27 @@
   </div>
 </div>
 
+<!-- PWA Install Banner -->
+<div id="installBanner" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:3000;background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:16px 24px;box-shadow:var(--shadow-lg);backdrop-filter:blur(10px);max-width:90%;">
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;">
+    <span style="font-size:1.5rem;">📱</span>
+    <span style="font-weight:600;">Quiz Hub app එක install කරන්න</span>
+    <button class="btn btn-primary" onclick="installApp()" style="font-size:0.85rem;padding:6px 18px;">Install</button>
+    <button onclick="dismissInstallBanner()" style="color:var(--text-secondary);font-size:1.2rem;">✕</button>
+  </div>
+</div>
+
 <script>
   // ============ CONFIG ============
   const MODES = { STUDY: 'study', GAME: 'game', FLASHCARD: 'flashcard' };
   const THEMES = ['dark', 'light', 'purple', 'ocean', 'forest', 'sunset', 'pink', 'pure-white', 'sakura'];
   const MAX_TIMER = 20;
   const MAX_LIVES = 3;
-  const CACHE_VERSION = 'quizhub-v2';
 
   let currentMode = localStorage.getItem('quizMode') || MODES.STUDY;
   let isMuted = localStorage.getItem('quizMuted') === 'true' || false;
   let timerInterval = null;
   let deferredPrompt = null;
-
-  // ============ OFFLINE / ONLINE DETECTION ============
-  function updateOnlineStatus() {
-    const indicator = document.getElementById('offlineIndicator');
-    const text = document.getElementById('offlineText');
-    
-    if (navigator.onLine) {
-      indicator.classList.remove('show');
-      indicator.classList.add('online');
-      setTimeout(() => {
-        indicator.classList.remove('show', 'online');
-      }, 2000);
-    } else {
-      indicator.classList.add('show');
-      indicator.classList.remove('online');
-      text.textContent = 'ඔබ නොබැඳිව සිටී (Offline) - කරුණාකර අන්තර්ජාල සම්බන්ධතාව පරීක්ෂා කරන්න';
-    }
-  }
-
-  window.addEventListener('online', () => {
-    updateOnlineStatus();
-    showToast('ඔබ නැවත අන්තර්ජාලයට සම්බන්ධ වී ඇත! 🌐', 'success');
-  });
-
-  window.addEventListener('offline', () => {
-    updateOnlineStatus();
-    showToast('ඔබ නොබැඳිව සිටී. App එක තවමත් වැඩ කරයි! 📱', 'error');
-  });
-
-  // ============ ENHANCED INSTALL PROMPT ============
-  let installPromptDismissed = false;
-
-  function showInstallPrompt() {
-    if (installPromptDismissed) return;
-    
-    // Check if already installed
-    if (window.matchMedia('(display-mode: standalone)').matches) return;
-    
-    // Show after 5 seconds of app usage
-    setTimeout(() => {
-      const prompt = document.getElementById('installPrompt');
-      if (prompt && deferredPrompt) {
-        prompt.classList.add('show');
-      }
-    }, 5000);
-  }
-
-  function triggerInstall() {
-    const prompt = document.getElementById('installPrompt');
-    prompt.classList.remove('show');
-    
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then((choiceResult) => {
-        if (choiceResult.outcome === 'accepted') {
-          showToast('App installing... 🎉', 'success');
-        } else {
-          showToast('Maybe next time! 😊', 'info');
-        }
-        deferredPrompt = null;
-      });
-    } else {
-      // Fallback: show instructions
-      showToast('Open browser menu and tap "Add to Home Screen" 📱', 'info');
-    }
-  }
-
-  function dismissInstallPrompt() {
-    const prompt = document.getElementById('installPrompt');
-    prompt.classList.remove('show');
-    installPromptDismissed = true;
-    // Store dismissal for 7 days
-    localStorage.setItem('installPromptDismissed', Date.now() + 7 * 24 * 60 * 60 * 1000);
-  }
-
-  // Check if we should show install prompt
-  function shouldShowInstallPrompt() {
-    const dismissed = localStorage.getItem('installPromptDismissed');
-    if (dismissed && Date.now() < parseInt(dismissed)) return false;
-    return true;
-  }
-
-  // ============ PWA ============
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    
-    if (shouldShowInstallPrompt()) {
-      showInstallPrompt();
-    }
-    
-    // Also update the header install button
-    const headerBtn = document.getElementById('installBtn');
-    if (headerBtn) headerBtn.classList.add('show');
-  });
-
-  window.addEventListener('appinstalled', () => {
-    document.getElementById('installPrompt').classList.remove('show');
-    const headerBtn = document.getElementById('installBtn');
-    if (headerBtn) headerBtn.classList.remove('show');
-    deferredPrompt = null;
-    showToast('App installed successfully! 🎉', 'success');
-  });
-
-  function installApp() {
-    triggerInstall();
-  }
 
   // ============ AUTHENTICATION SYSTEM ============
   let currentUser = localStorage.getItem('quizUsername') || sessionStorage.getItem('quizGuestName');
@@ -1412,7 +1093,7 @@
   function handleLogin() {
     const nameInput = document.getElementById('usernameInput').value.trim();
     if (nameInput.length < 2) {
-      showToast('කරුණාකර වලංගු නමක් ඇතුළත් කරන්න.', 'error');
+      alert("කරුණාකර වලංගු නමක් ඇතුළත් කරන්න.");
       return;
     }
     
@@ -1427,7 +1108,6 @@
     document.getElementById('loginModal').classList.remove('active');
     syncAppState();
     render();
-    showToast(`සාදරයෙන් පිළිගනිමු, ${currentUser}! 🎉`, 'success');
   }
 
   function handleGuest() {
@@ -1441,7 +1121,6 @@
     document.getElementById('loginModal').classList.remove('active');
     syncAppState();
     render();
-    showToast('අමුත්තෙක් ලෙස ක්‍රීඩා කරමින්... 👋', 'info');
   }
 
   function handleLogout() {
@@ -1460,7 +1139,6 @@
       appState.route = { name: 'home' };
       checkAuth();
       render();
-      showToast('ඔබ ඉවත් විය. නැවත පිවිසෙන්න! 👋', 'info');
     }
   }
 
@@ -1473,27 +1151,29 @@
     appState.streak = 0; 
   }
 
-  // ============ TOAST NOTIFICATIONS ============
-  function showToast(message, type = 'info') {
-    const container = document.getElementById('toastContainer');
-    if (!container) return;
-    
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    
-    const icons = { success: '✅', error: '❌', info: 'ℹ️' };
-    toast.innerHTML = `
-      <span style="font-size:1.2rem;">${icons[type] || '📢'}</span>
-      <span>${message}</span>
-    `;
-    
-    container.appendChild(toast);
-    
-    setTimeout(() => {
-      if (toast.parentNode) {
-        toast.remove();
-      }
-    }, 3000);
+  // ============ PWA ============
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    document.getElementById('installBanner').style.display = 'block';
+  });
+
+  window.addEventListener('appinstalled', () => {
+    document.getElementById('installBanner').style.display = 'none';
+  });
+
+  function installApp() {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(() => {
+        deferredPrompt = null;
+        document.getElementById('installBanner').style.display = 'none';
+      });
+    }
+  }
+
+  function dismissInstallBanner() {
+    document.getElementById('installBanner').style.display = 'none';
   }
 
   // ============ AUDIO ============
@@ -1597,7 +1277,6 @@
     render();
     const p = document.getElementById('themePopover');
     if (p) p.classList.remove('open');
-    showToast(`තේමාව: ${theme.charAt(0).toUpperCase() + theme.slice(1)} ${getThemeIcon(theme)}`, 'info');
   }
 
   function toggleThemePopover(e) {
@@ -1619,8 +1298,6 @@
     appState.quiz = null;
     render();
     playClick();
-    const modeNames = { study: 'Study Mode 📖', game: 'Game Mode 🎮', flashcard: 'Flashcard Mode 🃏' };
-    showToast(modeNames[mode] || `Mode: ${mode}`, 'info');
   }
 
   // ============ FULLSCREEN ============
@@ -1658,126 +1335,6 @@
       btn.classList.toggle('muted', isMuted);
     }
     playClick();
-    showToast(isMuted ? 'ශබ්දය නිහඬ කර ඇත 🔇' : 'ශබ්දය සක්‍රියයි 🔊', 'info');
-  }
-
-  // ============ DAILY CHALLENGE ============
-  function getDailyChallenge() {
-    const today = new Date().toDateString();
-    const stored = localStorage.getItem('dailyChallenge');
-    
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      if (parsed.date === today) {
-        return parsed;
-      }
-    }
-
-    const challenge = {
-      date: today,
-      completed: false,
-      score: 0,
-      questionsAnswered: 0,
-      targetScore: 5,
-      reward: Math.floor(Math.random() * 50) + 50
-    };
-
-    localStorage.setItem('dailyChallenge', JSON.stringify(challenge));
-    return challenge;
-  }
-
-  function completeDailyChallenge() {
-    const challenge = getDailyChallenge();
-    if (!challenge.completed && challenge.score >= challenge.targetScore) {
-      challenge.completed = true;
-      localStorage.setItem('dailyChallenge', JSON.stringify(challenge));
-      
-      const p = getProgress();
-      const today = new Date().toDateString();
-      if (p.lastPlayed) {
-        const last = new Date(p.lastPlayed);
-        const diff = (new Date(today) - last) / (1000 * 60 * 60 * 24);
-        if (diff <= 1.5) {
-          p.dailyStreak = (p.dailyStreak || 0) + 1;
-        } else {
-          p.dailyStreak = 1;
-        }
-      } else {
-        p.dailyStreak = 1;
-      }
-      p.lastPlayed = today;
-      const storage = isGuest ? sessionStorage : localStorage;
-      const storageKey = isGuest ? 'guest_quizProgress' : `user_${currentUser}_quizProgress`;
-      storage.setItem(storageKey, JSON.stringify(p));
-      
-      appState.totalScore += challenge.reward;
-      showToast(`🎉 Daily Challenge Complete! +${challenge.reward} points!`, 'success');
-      triggerScreenGlow();
-      
-      checkAchievements(p);
-    }
-  }
-
-  function renderDailyChallenge() {
-    const challenge = getDailyChallenge();
-    const progress = challenge.targetScore > 0 ? Math.min((challenge.score / challenge.targetScore) * 100, 100) : 0;
-    
-    return `
-      <div class="daily-challenge-card">
-        <div style="position:relative;z-index:1;">
-          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
-            <span class="streak-badge">
-              <i class="fas fa-calendar-check"></i> Daily Challenge
-            </span>
-            ${challenge.completed ? '<span style="color:var(--correct-color);font-weight:700;">✅ Completed!</span>' : ''}
-            ${getProgress().dailyStreak >= 7 ? '<span style="color:var(--accent);">🔥 ' + getProgress().dailyStreak + ' day streak!</span>' : ''}
-          </div>
-          <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:8px;">
-            🎯 Answer <strong>${challenge.targetScore} questions correctly</strong> to earn <strong>+${challenge.reward} bonus points!</strong>
-          </p>
-          <div class="progress-bar-container" style="height:10px;margin-bottom:6px;">
-            <div class="progress-bar-fill" style="width:${progress}%;height:10px;"></div>
-          </div>
-          <div class="progress-stat">
-            <span>${challenge.score} / ${challenge.targetScore} correct</span>
-            <span>${Math.round(progress)}%</span>
-          </div>
-          ${challenge.completed ? `
-            <div style="margin-top:10px;color:var(--correct-color);font-weight:600;">
-              🏆 Reward earned! Come back tomorrow for a new challenge.
-            </div>
-          ` : ''}
-        </div>
-      </div>
-    `;
-  }
-
-  // ============ QUESTION DIFFICULTY ============
-  function getQuestionDifficulty(question) {
-    const qLen = question.q.length;
-    const options = question.options;
-    const avgOptLen = options.reduce((sum, o) => sum + o.length, 0) / options.length;
-    
-    let difficulty = 1;
-    
-    if (qLen > 80 || avgOptLen > 25) difficulty = 2;
-    if (qLen > 120 || avgOptLen > 40) difficulty = 3;
-    
-    return difficulty;
-  }
-
-  function renderDifficultyIndicator(difficulty) {
-    let color = 'var(--correct-color)';
-    if (difficulty === 2) color = 'var(--accent)';
-    if (difficulty === 3) color = 'var(--wrong-color)';
-    
-    return `
-      <span class="difficulty-indicator" title="${difficulty === 1 ? 'Easy' : difficulty === 2 ? 'Medium' : 'Hard'}">
-        ${[1,2,3].map(i => `
-          <span class="difficulty-dot ${i <= difficulty ? 'active' : ''}" style="${i <= difficulty ? 'background:' + color : ''}"></span>
-        `).join('')}
-      </span>
-    `;
   }
 
   // ============ CONFETTI & CELEBRATION ============
@@ -1814,6 +1371,7 @@
     confettiContainer.innerHTML = '';
     const colors = ['#facc15', '#fb923c', '#4ade80', '#38bdf8', '#c084fc', '#fb7185', '#fff'];
 
+    // 100+ confetti pieces
     for(let i=0; i<100; i++) {
       const piece = document.createElement('div');
       piece.className = 'adv-confetti';
@@ -1836,6 +1394,7 @@
       confettiContainer.appendChild(piece);
     }
 
+    // 40+ floating particles (emojis)
     const particlesContainer = document.getElementById('celebrationParticles');
     particlesContainer.innerHTML = '';
     const pEmojis = ['⭐', '🌟', '✨', '🏆', '💎', '🎉', '🎊', '🥇', '💯', '🔥', '🌈', '🧬', '🔬', '⚛️'];
@@ -1936,7 +1495,6 @@
     document.getElementById('saveScoreModal').classList.remove('active');
     pendingSaveScore = null;
     playClick();
-    showToast('Score saved to leaderboard! 🏆', 'success');
   }
 
   function skipSaveScore() {
@@ -1964,9 +1522,6 @@
     game_winner: { id: 'game_winner', name: 'ක්‍රීඩා ශූරයා', icon: '🎮', desc: 'ගේම් මෝඩ් එකෙන් ජයග්‍රහණය කරන්න', check: (s) => s.gameWins >= 1 },
     study_enthusiast: { id: 'study_enthusiast', name: 'ඉගෙනුම් ලෝලී', icon: '📚', desc: 'ස්ටඩි මෝඩ් එකෙන් ප්‍රශ්න 20ක් කරන්න', check: (s) => s.studyQuestions >= 20 },
     daily_player: { id: 'daily_player', name: 'දිනපතා විද්‍යාඥයා', icon: '📅', desc: 'දින 7ක් පිළිවෙලින් ක්‍රීඩා කරන්න', check: (s) => s.dailyStreak >= 7 },
-    century: { id: 'century', name: 'ශතකය', icon: '💯', desc: 'ප්‍රශ්න 100කට නිවැරදිව පිළිතුරු දෙන්න', check: (s) => s.correctAnswers >= 100 },
-    flashcard_master: { id: 'flashcard_master', name: 'ෆ්ලෑෂ්කාඩ් මාස්ටර්', icon: '🃏', desc: 'ෆ්ලෑෂ්කාඩ් 50ක් පෙරළන්න', check: (s) => s.flashcardFlips >= 50 },
-    offline_user: { id: 'offline_user', name: 'Offline වීරයා', icon: '📶', desc: 'Offline mode භාවිතා කරමින් quiz එකක් සම්පූර්ණ කරන්න', check: (s) => s.offlineQuizzes >= 1 },
   };
 
   function getAchievements() {
@@ -1981,8 +1536,7 @@
       const a = ACHIEVEMENTS[id];
       if (a) {
         setTimeout(() => {
-          showToast(`🏅 ${a.icon} ${a.name}\n${a.desc}\n\n🎉 Achievement unlocked!`, 'success');
-          triggerScreenGlow();
+          alert(`🏅 ${a.icon} ${a.name}\n${a.desc}\n\n🎉 ජයග්‍රහණය අගුළු හැරියා!`);
         }, 500);
       }
     }
@@ -2041,9 +1595,7 @@
       studyQuestions: 0,
       dailyStreak: 0,
       lastPlayed: null,
-      subjectStats: {},
-      flashcardFlips: 0,
-      offlineQuizzes: 0
+      subjectStats: {}
     };
   }
 
@@ -2073,12 +1625,6 @@
         p[key] = (p[key] || 0) + (stats[key] || 0);
       }
     });
-    
-    // Track offline quizzes
-    if (!navigator.onLine && stats.totalQuestions > 0) {
-      p.offlineQuizzes = (p.offlineQuizzes || 0) + 1;
-    }
-    
     storage.setItem(storageKey, JSON.stringify(p));
   }
 
@@ -2235,31 +1781,9 @@
       appState.loading = false;
       render();
     } catch (error) {
-      // Try to load from cache if offline
-      if (!navigator.onLine) {
-        const cachedData = sessionStorage.getItem('cachedQuizData');
-        if (cachedData) {
-          appState.content = JSON.parse(cachedData);
-          appState.loading = false;
-          render();
-          showToast('Offline mode: Using cached questions 📦', 'info');
-          return;
-        }
-      }
       appState.error = 'දත්ත ලබාගැනීමේ දෝෂයකි. data.json පරීක්ෂා කරන්න.';
       appState.loading = false;
       render();
-    }
-  }
-
-  // Cache data for offline use when online
-  async function cacheDataForOffline() {
-    try {
-      const response = await fetch('data.json');
-      const data = await response.json();
-      sessionStorage.setItem('cachedQuizData', JSON.stringify(data));
-    } catch (e) {
-      // Silently fail
     }
   }
 
@@ -2301,7 +1825,6 @@
           <i class="fas fa-flask-vial" style="font-size:2.4rem;display:block;margin-bottom:14px;color:var(--wrong-color);"></i>
           <h3 style="margin-bottom:8px;">දත්ත පූරණය අසාර්ථකයි</h3>
           <p style="color:var(--text-secondary);font-size:0.9rem;">${escapeHtml(appState.error)}</p>
-          ${!navigator.onLine ? '<p style="color:var(--primary-color);margin-top:12px;">📱 App එක offline mode එකේ වැඩ කරයි!</p>' : ''}
         </div>
       `);
       return;
@@ -2320,6 +1843,7 @@
     updateFullscreenBtn();
     updateInstallButton();
 
+    // Trigger ring animation if on results screen
     setTimeout(() => {
       const ring = document.getElementById('ringFg');
       if (ring) {
@@ -2327,6 +1851,7 @@
       }
     }, 100);
 
+    // Timer cleanup on unmount
     if (r.name !== 'quiz' && timerInterval) {
       clearInterval(timerInterval);
       timerInterval = null;
@@ -2423,7 +1948,6 @@
       <footer>
         <p>Learning Quiz Hub</p>
         <p class="dev-credit">🦊 Developed by Lakshan Dulip</p>
-        <p style="font-size:0.7rem;margin-top:4px;opacity:0.6;">📱 Works offline • Install for quick access</p>
       </footer>
     `;
   }
@@ -2438,8 +1962,6 @@
   // ============ PAGES ============
   function renderHome() {
     const progress = getProgress();
-    const dailyChallenge = renderDailyChallenge();
-    
     return `
       <div style="text-align:center;margin-bottom:30px;padding:30px 20px 10px;position:relative;border-radius:var(--radius-lg);overflow:hidden;">
         <div style="position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:340px;height:220px;background:var(--primary-gradient);filter:blur(70px);opacity:0.28;z-index:-1;"></div>
@@ -2468,9 +1990,6 @@
           </span>
         </div>
       </div>
-      
-      ${dailyChallenge}
-      
       <div class="grid-2">
         ${Object.values(SUBJECTS).map(s => `
           <div class="card subject-card" onclick="navigate('#/subject/${s.key}')">
@@ -2535,36 +2054,653 @@
     `;
   }
 
-  // ============ QUIZ & FLASHCARDS (Same as previous implementation) ============
-  // [Quiz rendering and interaction logic remains the same as before]
+  // ============ QUIZ & FLASHCARDS ============
+  function renderQuiz(subject, grade, lessonId) {
+    const meta = subjectMeta(subject);
+    const lesson = findLesson(subject, grade, lessonId);
+
+    if (!lesson) {
+      return `<div class="card" style="max-width:500px;margin:50px auto;text-align:center;"><h3>Lesson not found</h3><button class="btn btn-primary" style="margin-top:14px;" onclick="navigate('#/subject/${meta.key}/grade/${grade}')">Back</button></div>`;
+    }
+
+    if (!appState.quiz || appState.quiz.lessonId !== lessonId) {
+      appState.quiz = {
+        subject, grade, lessonId,
+        order: shuffleIdx(lesson.questions.length),
+        idx: 0,
+        score: 0,
+        wrong: 0,
+        showResult: false,
+        answeredCurrent: false,
+        confettiShown: false,
+        celebrationTriggered: false,
+        perfectTriggered: false,
+        gameOver: false,
+        lives: MAX_LIVES,
+        timer: MAX_TIMER,
+        powerups: { fiftyFifty: 1, skip: 1 },
+        studyAnswers: {},
+        isFlipped: false,
+        hiddenOptions: [],
+        startTime: Date.now()
+      };
+      if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+    }
+
+    const qz = appState.quiz;
+    const total = qz.order.length;
+
+    // FLASHCARD MODE
+    if (currentMode === MODES.FLASHCARD) {
+      const qIndex = qz.order[qz.idx];
+      const question = lesson.questions[qIndex];
+
+      return `
+        <div class="quiz-container">
+          <div class="quiz-header">
+            <span class="lesson-name">${escapeHtml(lesson.title)}</span>
+            <span class="study-badge"><i class="fas fa-clone"></i> Flashcard ${qz.idx + 1}/${total}</span>
+          </div>
+
+          <div class="flashcard-container" onclick="toggleFlashcardFlip()">
+            <div class="flashcard ${qz.isFlipped ? 'flipped' : ''}" id="flashCardElement">
+              <div class="flashcard-front">
+                <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:8px;">❓ ප්‍රශ්නය (ක්ලික් කර මාරු කරන්න)</div>
+                <div style="font-size:1.25rem; font-weight:600;">${escapeHtml(question.q)}</div>
+                <div style="margin-top:20px; font-size:0.8rem; color:var(--primary-color);"><i class="fas fa-sync-alt"></i> පිළිතුර බලන්න Flip කරන්න</div>
+              </div>
+              <div class="flashcard-back">
+                <div style="font-size:0.82rem; color:var(--correct-color); font-weight:700; margin-bottom:6px;">✅ නිවැරදි පිළිතුර</div>
+                <div style="font-size:1.2rem; font-weight:700; margin-bottom:12px;">${escapeHtml(question.options[question.correct])}</div>
+                <div style="font-size:0.9rem; color:var(--text-secondary);">💡 ${escapeHtml(question.explanation || '')}</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; gap:10px; margin-top:20px;">
+            <button class="btn btn-outline" onclick="prevFlashcard()" ${qz.idx === 0 ? 'disabled' : ''}>
+              <i class="fas fa-arrow-left"></i> පසුපසට
+            </button>
+            <button class="btn btn-outline" onclick="toggleFlashcardFlip()">
+              <i class="fas fa-sync-alt"></i> Flip
+            </button>
+            <button class="btn btn-primary" onclick="nextFlashcard()">
+              ඊළඟට <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    // GAME / STUDY MODE
+    const isGame = currentMode === MODES.GAME;
+
+    if (isGame && !qz.gameOver && !qz.showResult && !qz.answeredCurrent && !timerInterval) {
+      startTimer();
+    }
+
+    if (qz.gameOver) {
+      showGameOver(qz.score, qz.wrong);
+      return `<div style="text-align:center;padding:40px;">Game Over...</div>`;
+    }
+
+    if (qz.showResult) {
+      if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+      const pct = Math.round((qz.score / total) * 100);
+      const comment = getResultComment(pct);
+
+      if (pct === 100 && !qz.celebrationTriggered) {
+        qz.celebrationTriggered = true;
+        setTimeout(triggerCelebration, 500);
+      } else if (pct >= 80 && pct < 100 && !qz.confettiShown) {
+        qz.confettiShown = true;
+        setTimeout(spawnConfetti, 400);
+      }
+
+      if (!qz.resultsProcessed) {
+        qz.resultsProcessed = true;
+
+        if (pct >= 80) {
+          if (isGuest) {
+            openSaveScoreModal(qz.score, total, currentMode);
+          } else {
+            saveToLeaderboard(currentUser, qz.score, total, currentMode);
+          }
+        }
+
+        const progressUpdate = {
+          totalQuestions: total,
+          correctAnswers: qz.score,
+          subjectStats: { [subject]: { correct: qz.score, total: total } }
+        };
+        if (pct === 100) progressUpdate.perfectCount = 1;
+        if (currentMode === MODES.GAME && qz.score > 0) progressUpdate.gameWins = 1;
+        if (currentMode === MODES.STUDY) progressUpdate.studyQuestions = total;
+        updateProgress(progressUpdate);
+
+        appState.totalQuestions += total;
+        if (qz.score > 0) appState.totalScore += qz.score;
+        if (appState.streak > appState.bestStreak) appState.bestStreak = appState.streak;
+        if (pct === 100) appState.perfectCount++;
+        updateBestStreak(appState.bestStreak);
+
+        const stats = getProgress();
+        stats.perfectCount = appState.perfectCount;
+        stats.bestStreak = appState.bestStreak;
+        stats.totalQuestions = appState.totalQuestions;
+        checkAchievements(stats);
+      }
+
+      const r = 54, c = 2 * Math.PI * r;
+      const offset = c - (pct / 100) * c;
+
+      return `
+        <div class="quiz-container" style="text-align:center;">
+          <div class="result-wrapper ${pct === 100 ? 'perfect' : ''}">
+            <div class="ring-wrap">
+              <svg class="ring-svg" viewBox="0 0 120 120">
+                <circle class="ring-bg" cx="60" cy="60" r="${r}"></circle>
+                <circle class="ring-fg" id="ringFg" cx="60" cy="60" r="${r}" stroke-dasharray="${c}" stroke-dashoffset="${c}" data-target="${offset}"></circle>
+              </svg>
+              <div class="ring-center"><h1>${pct}%</h1><span>ලකුණු</span></div>
+            </div>
+            ${pct === 100 ? '<div class="perfect-badge">🏆 PERFECT! 💯</div>' : ''}
+          </div>
+          <div class="result-comment"><span class="emoji">${comment.emoji}</span>${comment.text}</div>
+          <p class="page-sub" style="margin-top:5px;">ඔබ ප්‍රශ්න ${total} න් ${qz.score} කට නිවැරදිව පිළිතුරු ලබා දී ඇත.</p>
+          <div class="result-stats">
+            <div class="result-stat"><div class="num">${qz.score}</div><div class="label">නිවැරදි</div></div>
+            <div class="result-stat"><div class="num">${qz.wrong}</div><div class="label">වැරදි</div></div>
+            <div class="result-stat"><div class="num">${pct}%</div><div class="label">නිරවද්‍යතාව</div></div>
+          </div>
+          <div style="display:flex;justify-content:center;gap:12px;margin-top:20px;flex-wrap:wrap;">
+            <button class="btn btn-outline" onclick="navigate('#/subject/${meta.key}/grade/${grade}')"><i class="fas fa-list"></i> පාඩම්</button>
+            <button class="btn btn-primary" onclick="appState.quiz=null;render();playClick();"><i class="fas fa-redo"></i> නැවත</button>
+          </div>
+        </div>
+      `;
+    }
+
+    const qIndex = qz.order[qz.idx];
+    const question = lesson.questions[qIndex];
+    const letters = ['A', 'B', 'C', 'D'];
+    const showStudyAnswer = isGame ? false : qz.answeredCurrent;
+
+    return `
+      <div class="quiz-container">
+        <div class="quiz-header">
+          <span class="lesson-name">${escapeHtml(lesson.title)}</span>
+          <div class="quiz-stats-right">
+            ${isGame ? `
+              <div class="lives-display">
+                ${Array(MAX_LIVES).fill(0).map((_, i) => `
+                  <span class="heart ${i < qz.lives ? '' : 'lost'}">❤️</span>
+                `).join('')}
+              </div>
+              <div class="timer-display ${qz.timer <= 5 ? 'warning' : ''}" id="timerDisplay">
+                <i class="fas fa-clock"></i>
+                <span id="timerValue">${qz.timer}s</span>
+              </div>
+            ` : `
+              <span class="study-badge"><i class="fas fa-book"></i> Study Mode</span>
+            `}
+            <span style="font-weight:600;font-size:0.85rem;color:var(--text-secondary);">
+              <i class="fas fa-flag-checkered"></i> ${qz.idx + 1}/${total}
+            </span>
+          </div>
+        </div>
+
+        <div class="quiz-progress-track" role="progressbar" aria-valuenow="${qz.idx + 1}" aria-valuemin="1" aria-valuemax="${total}" aria-label="ප්‍රශ්න ප්‍රගතිය">
+          <div class="quiz-progress-fill" style="width:${((qz.idx) / total) * 100}%"></div>
+        </div>
+
+        <div class="question-number">${isGame ? '🎯' : '📖'} ප්‍රශ්නය ${qz.idx + 1}</div>
+        <div class="question-text">${escapeHtml(question.q)}</div>
+
+        <div class="options-grid">
+          ${question.options.map((opt, i) => {
+            if (qz.hiddenOptions && qz.hiddenOptions.includes(i)) {
+              return ''; // Hidden via Hint or 50/50
+            }
+
+            let btnClass = 'option-btn';
+            let disabled = false;
+            let extra = '';
+            
+            if (qz.answeredCurrent) {
+              disabled = true;
+              if (i === question.correct) {
+                btnClass += ' correct';
+              } else if (showStudyAnswer && i !== question.correct) {
+                if (qz.studyAnswers[qz.idx] === i) {
+                  btnClass += ' wrong';
+                }
+              }
+              if (showStudyAnswer && i === question.correct) {
+                btnClass += ' reveal-answer';
+              }
+            }
+            
+            if (showStudyAnswer && i === question.correct) {
+              extra = '<i class="fas fa-check-circle" style="margin-left:auto;color:var(--correct-color);"></i>';
+            }
+            if (showStudyAnswer && qz.studyAnswers[qz.idx] === i && i !== question.correct) {
+              extra = '<i class="fas fa-times-circle" style="margin-left:auto;color:var(--wrong-color);"></i>';
+            }
+            
+            return `
+              <button class="${btnClass}" id="opt-${i}" onclick="handleOptionClick(${i})" ${disabled ? 'disabled' : ''}>
+                <div class="opt-letter">${letters[i]}</div>
+                <div>${escapeHtml(opt)}</div>
+                ${extra}
+              </button>
+            `;
+          }).join('')}
+        </div>
+
+        ${showStudyAnswer ? `
+          <div class="study-answer-reveal">
+            <div class="correct-answer">✅ නිවැරදි පිළිතුර: ${escapeHtml(question.options[question.correct])}</div>
+            <div class="explanation">💡 ${escapeHtml(question.explanation) || 'පැහැදිලි කිරීමක් නැත.'}</div>
+            <div style="margin-top:12px;">
+              <button class="btn btn-primary" onclick="nextStudyQuestion()"><i class="fas fa-arrow-right"></i> ඊළඟ ප්‍රශ්නය</button>
+            </div>
+          </div>
+        ` : ''}
+
+        ${!isGame && !qz.answeredCurrent ? `
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; flex-wrap:wrap; gap:10px;">
+            <div style="color:var(--text-secondary);font-size:0.8rem;">
+              <i class="fas fa-lightbulb"></i> පිළිතුරක් තෝරන්න
+            </div>
+            <button class="btn btn-outline" style="padding:4px 14px; font-size:0.8rem;" onclick="useStudyHint()">
+              💡 ඉඟියක් (Hint)
+            </button>
+          </div>
+        ` : ''}
+
+        ${isGame ? `
+          <div class="powerups">
+            <button class="powerup-btn" id="fiftyBtn" onclick="useFiftyFifty()" ${qz.answeredCurrent || qz.powerups.fiftyFifty <= 0 ? 'disabled' : ''}>
+              <i class="fas fa-cut"></i> 50/50 (${qz.powerups.fiftyFifty})
+            </button>
+            <button class="powerup-btn" id="skipBtn" onclick="useSkip()" ${qz.answeredCurrent || qz.powerups.skip <= 0 ? 'disabled' : ''}>
+              <i class="fas fa-forward"></i> මඟ හරින්න (${qz.powerups.skip})
+            </button>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }
+
+  // ============ FLASHCARD CONTROLS ============
+  function toggleFlashcardFlip() {
+    const qz = appState.quiz;
+    if (!qz) return;
+    qz.isFlipped = !qz.isFlipped;
+    const card = document.getElementById('flashCardElement');
+    if (card) card.classList.toggle('flipped', qz.isFlipped);
+    playClick();
+  }
+
+  function nextFlashcard() {
+    const qz = appState.quiz;
+    if (!qz) return;
+    qz.isFlipped = false;
+    const lesson = findLesson(qz.subject, qz.grade, qz.lessonId);
+    if (qz.idx < qz.order.length - 1) {
+      qz.idx++;
+    } else {
+      qz.idx = 0; // loop back to first
+    }
+    render();
+    playClick();
+  }
+
+  function prevFlashcard() {
+    const qz = appState.quiz;
+    if (!qz) return;
+    qz.isFlipped = false;
+    if (qz.idx > 0) {
+      qz.idx--;
+      render();
+      playClick();
+    }
+  }
+
+  // ============ STUDY HINT ============
+  function useStudyHint() {
+    const qz = appState.quiz;
+    if (!qz || qz.answeredCurrent) return;
+
+    const lesson = findLesson(qz.subject, qz.grade, qz.lessonId);
+    const qIndex = qz.order[qz.idx];
+    const question = lesson.questions[qIndex];
+    const correct = question.correct;
+
+    // Find wrong options not hidden yet
+    const wrongIdxs = question.options.map((_, i) => i).filter(i => i !== correct && (!qz.hiddenOptions || !qz.hiddenOptions.includes(i)));
+    if (wrongIdxs.length > 0) {
+      const removeIdx = wrongIdxs[Math.floor(Math.random() * wrongIdxs.length)];
+      if (!qz.hiddenOptions) qz.hiddenOptions = [];
+      qz.hiddenOptions.push(removeIdx);
+      render();
+      playClick();
+    }
+  }
+
+  // ============ TIMER ============
+  function startTimer() {
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+    const qz = appState.quiz;
+    if (!qz || qz.showResult || qz.gameOver) return;
+
+    timerInterval = setInterval(() => {
+      if (!appState.quiz || appState.quiz.showResult || appState.quiz.gameOver) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        return;
+      }
+      qz.timer--;
+      const timerEl = document.getElementById('timerValue');
+      if (timerEl) timerEl.textContent = qz.timer + 's';
+      const timerDisplay = document.getElementById('timerDisplay');
+      if (timerDisplay && qz.timer <= 5) {
+        timerDisplay.classList.add('warning');
+        if (qz.timer <= 3) playTimerWarning();
+      }
+      if (qz.timer <= 0) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        if (!qz.answeredCurrent) {
+          qz.answeredCurrent = true;
+          qz.wrong++;
+          qz.lives--;
+          playLoseLife();
+          if (qz.lives <= 0) {
+            qz.gameOver = true;
+            render();
+            return;
+          }
+          const qIndex = qz.order[qz.idx];
+          const question = findLesson(qz.subject, qz.grade, qz.lessonId).questions[qIndex];
+          const correctBtn = document.getElementById(`opt-${question.correct}`);
+          if (correctBtn) correctBtn.classList.add('correct');
+          showModal(false, "⏰ කාලය අවසානයි!", "කාලය අවසන් විය. නිවැරදි පිළිතුර පෙන්වා ඇත. 💪");
+        }
+      }
+    }, 1000);
+  }
+
+  // ============ HANDLE OPTION CLICK ============
+  window.handleOptionClick = function(selectedIndex) {
+    const qz = appState.quiz;
+    if (!qz || qz.answeredCurrent) return;
+
+    const lesson = findLesson(qz.subject, qz.grade, qz.lessonId);
+    const qIndexLookup = qz.order[qz.idx];
+    const question = lesson ? lesson.questions[qIndexLookup] : null;
+    if (!question) return;
+    const correctIndex = question.correct;
+    const explanation = question.explanation || '';
+
+    qz.answeredCurrent = true;
+
+    const isGame = currentMode === MODES.GAME;
+    const selectedBtn = document.getElementById(`opt-${selectedIndex}`);
+    const correctBtn = document.getElementById(`opt-${correctIndex}`);
+
+    if (selectedIndex === correctIndex) {
+      if (selectedBtn) selectedBtn.classList.add('correct');
+      qz.score++;
+      appState.totalScore++;
+      appState.streak++;
+      if (appState.streak > appState.bestStreak) appState.bestStreak = appState.streak;
+      if (isGame) playCorrect();
+      if (!isGame) {
+        qz.studyAnswers[qz.idx] = selectedIndex;
+        showModal(true, "✅ නිවැරදියි!", explanation);
+      }
+    } else {
+      if (selectedBtn) selectedBtn.classList.add('wrong');
+      if (correctBtn) correctBtn.classList.add('correct');
+      qz.wrong++;
+      appState.streak = 0;
+      
+      if (isGame) {
+        qz.lives--;
+        playLoseLife();
+        if (qz.lives <= 0) {
+          qz.gameOver = true;
+          render();
+          return;
+        }
+        showModal(false, "❌ වැරදියි!", explanation);
+      } else {
+        qz.studyAnswers[qz.idx] = selectedIndex;
+        playWrong();
+        showModal(false, "❌ වැරදියි!", explanation);
+      }
+    }
+
+    if (isGame) {
+      setTimeout(() => {
+        const modal = document.getElementById('explainModal');
+        if (modal) modal.classList.remove('active');
+
+        if (qz.showResult) return;
+        if (qz.idx < qz.order.length - 1) {
+          qz.idx++;
+          qz.answeredCurrent = false;
+          qz.hiddenOptions = [];
+          qz.timer = MAX_TIMER;
+          render();
+        } else {
+          qz.showResult = true;
+          render();
+        }
+      }, 1500);
+    }
+  };
+
+  // ============ STUDY MODE NEXT ============
+  window.nextStudyQuestion = function() {
+    const qz = appState.quiz;
+    if (!qz) return;
+    qz.hiddenOptions = [];
+    if (qz.idx < qz.order.length - 1) {
+      qz.idx++;
+      qz.answeredCurrent = false;
+      render();
+    } else {
+      qz.showResult = true;
+      render();
+    }
+    playClick();
+  };
+
+  // ============ MODAL ============
+  function showModal(isCorrect, title, text) {
+    const modal = document.getElementById('explainModal');
+    const icon = document.getElementById('modalIcon');
+    const actions = document.querySelector('.modal-actions');
+    const closeBtn = document.querySelector('.modal-close-btn');
+
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalTitle').style.color = isCorrect ? 'var(--correct-color)' : 'var(--wrong-color)';
+    document.getElementById('modalText').innerHTML = text ? `<strong>💡 පැහැදිලි කිරීම:</strong><br>${escapeHtml(text)}` : "පැහැදිලි කිරීමක් නැත.";
+    icon.textContent = getRandomEmoji(isCorrect);
+    icon.className = `modal-icon ${isCorrect ? 'correct' : 'wrong'}`;
+
+    if (currentMode === MODES.GAME) {
+      actions.style.display = 'none';
+      closeBtn.style.display = 'none';
+    } else {
+      actions.style.display = 'flex';
+      closeBtn.style.display = 'block';
+    }
+
+    setTimeout(() => { modal.classList.add('active'); }, 300);
+  }
+
+  window.closeModalAndNext = function() {
+    playClick();
+    document.getElementById('explainModal').classList.remove('active');
+    if (currentMode === MODES.STUDY) {
+      return;
+    }
+  };
+
+  // ============ POWER-UPS ============
+  window.useFiftyFifty = function() {
+    const qz = appState.quiz;
+    if (qz.answeredCurrent || qz.powerups.fiftyFifty <= 0 || currentMode !== MODES.GAME) return;
+    qz.powerups.fiftyFifty--;
+    const qIndex = qz.order[qz.idx];
+    const question = findLesson(qz.subject, qz.grade, qz.lessonId).questions[qIndex];
+    const correct = question.correct;
+    const wrongOptions = question.options.map((_, i) => i).filter(i => i !== correct);
+    const shuffled = shuffleIdx(wrongOptions.length);
+    const toRemove = shuffled.slice(0, 2).map(i => wrongOptions[i]);
+    toRemove.forEach(i => {
+      const btn = document.getElementById(`opt-${i}`);
+      if (btn) { btn.style.display = 'none'; btn.disabled = true; }
+    });
+    document.getElementById('fiftyBtn').disabled = true;
+    document.getElementById('fiftyBtn').textContent = '50/50 (0)';
+    playClick();
+  };
+
+  window.useSkip = function() {
+    const qz = appState.quiz;
+    if (qz.answeredCurrent || qz.powerups.skip <= 0 || currentMode !== MODES.GAME) return;
+    qz.powerups.skip--;
+    qz.answeredCurrent = true;
+    qz.wrong++;
+    qz.lives--;
+    document.getElementById('skipBtn').disabled = true;
+    document.getElementById('skipBtn').textContent = `මඟ හරින්න (${qz.powerups.skip})`;
+    playLoseLife();
+    if (qz.lives <= 0) {
+      qz.gameOver = true;
+      render();
+      return;
+    }
+    const qIndex = qz.order[qz.idx];
+    const question = findLesson(qz.subject, qz.grade, qz.lessonId).questions[qIndex];
+    const correctBtn = document.getElementById(`opt-${question.correct}`);
+    if (correctBtn) correctBtn.classList.add('correct');
+    showModal(false, "⏭️ මඟ හැරියා!", "ඔබ මෙම ප්‍රශ්නය මඟ හැරියා. ජීවිතයක් අහිමි විය! 💔");
+  };
+
+  // ============ GAME OVER ============
+  function showGameOver(correct, wrong) {
+    const total = correct + wrong;
+    const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
+    document.getElementById('goCorrect').textContent = correct;
+    document.getElementById('goWrong').textContent = wrong;
+    document.getElementById('goPct').textContent = pct + '%';
+    document.getElementById('gameOverModal').classList.add('active');
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+  }
+
+  function closeGameOver() {
+    document.getElementById('gameOverModal').classList.remove('active');
+    if (appState.quiz) {
+      const qz = appState.quiz;
+      qz.idx = 0;
+      qz.score = 0;
+      qz.wrong = 0;
+      qz.showResult = false;
+      qz.answeredCurrent = false;
+      qz.lives = MAX_LIVES;
+      qz.timer = MAX_TIMER;
+      qz.confettiShown = false;
+      qz.celebrationTriggered = false;
+      qz.gameOver = false;
+      render();
+    }
+  }
+
+  function closeGameOverAndHome() {
+    document.getElementById('gameOverModal').classList.remove('active');
+    appState.quiz = null;
+    navigate('#/');
+  }
+
+  // ============ KEYBOARD SHORTCUTS ============
+  document.addEventListener('keydown', (e) => {
+    const typingInField = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA';
+
+    if (e.key === 'Escape') {
+      const openOverlays = ['explainModal', 'leaderboardModal', 'achievementsModal', 'progressModal', 'saveScoreModal', 'summaryModal', 'celebrationOverlay'];
+      for (const id of openOverlays) {
+        const el = document.getElementById(id);
+        if (el && el.classList.contains('active')) {
+          if (id === 'explainModal') { closeModalAndNext(); if (currentMode === MODES.STUDY) return; }
+          else if (id === 'celebrationOverlay') { closeCelebration(); }
+          else el.classList.remove('active');
+          return;
+        }
+      }
+      const popover = document.getElementById('themePopover');
+      if (popover && popover.classList.contains('open')) { popover.classList.remove('open'); return; }
+      return;
+    }
+
+    if (typingInField) return;
+
+    if (e.key === 'f' || e.key === 'F') {
+      e.preventDefault();
+      toggleFullscreen();
+      return;
+    }
+    if (e.key === 'm' || e.key === 'M') { e.preventDefault(); toggleMute(); return; }
+    if (e.key === 't' || e.key === 'T') { e.preventDefault(); setTheme(THEMES[(THEMES.indexOf(document.documentElement.getAttribute('data-theme')) + 1) % THEMES.length]); return; }
+
+    const r = appState.route;
+    if (r.name !== 'quiz' || !appState.quiz || appState.quiz.showResult) return;
+
+    const modal = document.getElementById('explainModal');
+    if (modal && modal.classList.contains('active')) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        if (currentMode === MODES.STUDY) {
+          closeModalAndNext();
+          nextStudyQuestion();
+        }
+      }
+      return;
+    }
+
+    if (!appState.quiz.answeredCurrent && ['1', '2', '3', '4'].includes(e.key)) {
+      const idx = parseInt(e.key, 10) - 1;
+      const btn = document.getElementById('opt-' + idx);
+      if (btn && !btn.disabled && btn.style.display !== 'none') btn.click();
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    const p = document.getElementById('themePopover');
+    if (p && p.classList.contains('open') && !e.target.closest('.theme-wrap')) p.classList.remove('open');
+  });
 
   // ============ INIT ============
   window.addEventListener('DOMContentLoaded', () => {
     checkAuth();
-    updateOnlineStatus();
     loadData();
     appState.route = parseHash();
-    
-    // Cache data for offline use when online
-    if (navigator.onLine) {
-      cacheDataForOffline();
-    }
-    
-    // Show install prompt if appropriate
-    if (shouldShowInstallPrompt()) {
-      showInstallPrompt();
-    }
   });
 
-  // ============ SERVICE WORKER REGISTRATION ============
+  // Service Worker for PWA
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js').then(registration => {
-        console.log('ServiceWorker registered:', registration.scope);
-      }).catch(err => {
-        console.log('ServiceWorker registration failed:', err);
-      });
-    });
+    navigator.serviceWorker.register('sw.js').catch(() => {});
   }
 </script>
 
