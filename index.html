@@ -224,7 +224,7 @@
     --bronze: #d97706;
   }
 
-  /* NEW: Pink White / Sakura Theme */
+  /* Pink White / Sakura Theme */
   :root[data-theme="sakura"] {
     --bg-main: #fdf2f8; 
     --bg-card: rgba(255, 255, 255, 0.95);
@@ -255,7 +255,7 @@
     --bronze: #b45309;
   }
 
-  /* NEW: Pure White Theme */
+  /* Pure White Theme */
   :root[data-theme="pure-white"] {
     --bg-main: #ffffff;
     --bg-card: #ffffff;
@@ -434,6 +434,7 @@
     border: 1px solid var(--science-color);
   }
 
+  /* ============ THEME POPOVER ============ */
   .theme-wrap { position: relative; }
   .theme-popover {
     position: absolute; top: 44px; right: 0; z-index: 100;
@@ -471,6 +472,7 @@
   .theme-dot-pure-white { background: #ffffff; border-color: #ccc; }
   .theme-dot-sakura { background: #fdf2f8; border-color: #fbcfe8; }
 
+  /* ============ PAGE TITLES ============ */
   .page-title { font-family: 'Space Grotesk', 'Noto Sans Sinhala', sans-serif; font-size: clamp(1.5rem, 4vw, 2.15rem); font-weight: 700; letter-spacing: -0.01em; margin-bottom: 8px; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
   .page-sub { color: var(--text-secondary); margin-bottom: 30px; font-size: 1rem; }
   .breadcrumb { color: var(--text-secondary); margin-bottom: 20px; font-size: 0.85rem; display: flex; align-items: center; flex-wrap: wrap; }
@@ -478,6 +480,7 @@
   .breadcrumb a { color: var(--primary-color); font-weight: 600; transition: opacity 0.2s ease; }
   .breadcrumb a:hover { opacity: 0.7; }
 
+  /* ============ GRIDS & CARDS ============ */
   .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 380px)); gap: 20px; justify-content: center; }
   .grid-auto { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 210px)); gap: 20px; justify-content: center; }
   .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
@@ -518,6 +521,7 @@
   .lesson-info h4 { font-size: 1.1rem; margin-bottom: 3px; }
   .q-badge { display: inline-block; padding: 3px 10px; background: var(--border-color); border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin-top: 5px; }
 
+  /* ============ BUTTONS ============ */
   .btn { padding: 10px 22px; border-radius: 50px; font-weight: 600; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s ease; }
   .btn:active { transform: scale(0.96); }
   .btn-primary { background: var(--primary-gradient); color: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
@@ -777,7 +781,7 @@
     animation: iconBounceIn 0.5s cubic-bezier(.3,1.6,.4,1);
   }
 
-  /* 100% Celebration Styles */
+  /* ============ CELEBRATION ============ */
   .celebration-glow {
     position: fixed; inset: 0; z-index: 9998;
     background: radial-gradient(circle at center, rgba(250, 204, 21, 0.4) 0%, transparent 70%);
@@ -870,7 +874,7 @@
   footer { text-align: center; padding: 20px; color: var(--text-secondary); font-size: 0.8rem; border-top: 1px solid var(--border-color); background: var(--bg-card); backdrop-filter: blur(10px); }
   .dev-credit { margin-top: 5px; font-weight: 600; color: var(--primary-color); }
 
-  /* PWA Install Button */
+  /* ============ INSTALL BUTTON ============ */
   .install-btn {
     padding: 6px 16px;
     border-radius: 50px;
@@ -885,6 +889,137 @@
   }
   .install-btn:hover { transform: scale(1.05); }
   .install-btn.show { display: inline-flex; }
+
+  /* ============ DAILY CHALLENGE ============ */
+  .daily-challenge-card {
+    background: linear-gradient(135deg, var(--bg-card), rgba(250, 204, 21, 0.05));
+    border: 2px solid var(--primary-color);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .daily-challenge-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(250, 204, 21, 0.08) 0%, transparent 70%);
+    animation: dailyGlow 3s ease-in-out infinite;
+  }
+  @keyframes dailyGlow {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(10%, 5%); }
+  }
+  .daily-challenge-card .streak-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--primary-gradient);
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  /* ============ QUESTION DIFFICULTY INDICATOR ============ */
+  .difficulty-indicator {
+    display: inline-flex;
+    gap: 2px;
+    margin-left: 8px;
+  }
+  .difficulty-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border-color);
+    transition: background 0.3s ease;
+  }
+  .difficulty-dot.active { background: var(--accent); }
+
+  /* ============ VOICE / TTS BUTTON ============ */
+  .tts-btn {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    background: var(--border-color);
+    color: var(--text-secondary);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    border: 1px solid transparent;
+  }
+  .tts-btn:hover { border-color: var(--primary-color); color: var(--primary-color); }
+  .tts-btn.speaking { background: var(--primary-color); color: #fff; animation: ttsPulse 1s infinite; }
+  @keyframes ttsPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+  /* ============ DARK MODE TOGGLE SWITCH ============ */
+  .theme-switch {
+    width: 52px;
+    height: 28px;
+    background: var(--border-color);
+    border-radius: 50px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  .theme-switch::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 22px;
+    height: 22px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+  }
+  .theme-switch.dark::after { transform: translateX(24px); }
+
+  /* ============ NOTIFICATION TOAST ============ */
+  .toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+  }
+  .toast {
+    background: var(--bg-card);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 12px 18px;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    animation: toastIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards,
+               toastOut 0.3s ease 2.5s forwards;
+    pointer-events: auto;
+    max-width: 350px;
+  }
+  .toast.success { border-left: 3px solid var(--correct-color); }
+  .toast.error { border-left: 3px solid var(--wrong-color); }
+  .toast.info { border-left: 3px solid var(--primary-color); }
+  @keyframes toastIn {
+    from { transform: translateX(120%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  @keyframes toastOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(120%); opacity: 0; }
+  }
 
   @media (max-width: 768px) {
     .quiz-container { padding: 20px; }
@@ -947,6 +1082,9 @@
 
 <!-- Screen Glow -->
 <div class="screen-glow" id="screenGlow"></div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
 
 <!-- Game Over Modal -->
 <div class="game-over-overlay" id="gameOverModal">
@@ -1016,7 +1154,7 @@
   </div>
 </div>
 
-<!-- Save Score Modal (guest leaderboard name capture) -->
+<!-- Save Score Modal -->
 <div class="modal-overlay" id="saveScoreModal">
   <div class="modal-content" style="max-width:400px;">
     <button class="modal-close-btn" onclick="skipSaveScore()" aria-label="වසන්න">✕</button>
@@ -1093,7 +1231,7 @@
   function handleLogin() {
     const nameInput = document.getElementById('usernameInput').value.trim();
     if (nameInput.length < 2) {
-      alert("කරුණාකර වලංගු නමක් ඇතුළත් කරන්න.");
+      showToast('කරුණාකර වලංගු නමක් ඇතුළත් කරන්න.', 'error');
       return;
     }
     
@@ -1108,6 +1246,7 @@
     document.getElementById('loginModal').classList.remove('active');
     syncAppState();
     render();
+    showToast(`සාදරයෙන් පිළිගනිමු, ${currentUser}! 🎉`, 'success');
   }
 
   function handleGuest() {
@@ -1121,6 +1260,7 @@
     document.getElementById('loginModal').classList.remove('active');
     syncAppState();
     render();
+    showToast('අමුත්තෙක් ලෙස ක්‍රීඩා කරමින්... 👋', 'info');
   }
 
   function handleLogout() {
@@ -1139,6 +1279,7 @@
       appState.route = { name: 'home' };
       checkAuth();
       render();
+      showToast('ඔබ ඉවත් විය. නැවත පිවිසෙන්න! 👋', 'info');
     }
   }
 
@@ -1151,6 +1292,29 @@
     appState.streak = 0; 
   }
 
+  // ============ TOAST NOTIFICATIONS ============
+  function showToast(message, type = 'info') {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+    
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+    toast.innerHTML = `
+      <span style="font-size:1.2rem;">${icons[type] || '📢'}</span>
+      <span>${message}</span>
+    `;
+    
+    container.appendChild(toast);
+    
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.remove();
+      }
+    }, 3000);
+  }
+
   // ============ PWA ============
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
@@ -1160,6 +1324,7 @@
 
   window.addEventListener('appinstalled', () => {
     document.getElementById('installBanner').style.display = 'none';
+    showToast('App installed successfully! 🎉', 'success');
   });
 
   function installApp() {
@@ -1244,6 +1409,12 @@
       }, 500);
       osc.disconnect();
       return;
+    } else if (type === 'toast') {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1000, now);
+      osc.frequency.setValueAtTime(1200, now + 0.05);
+      gain.gain.setValueAtTime(0.15, now);
+      gain.gain.linearRampToValueAtTime(0, now + 0.15);
     }
     osc.connect(gain);
     gain.connect(audioCtx.destination);
@@ -1277,6 +1448,7 @@
     render();
     const p = document.getElementById('themePopover');
     if (p) p.classList.remove('open');
+    showToast(`තේමාව: ${theme.charAt(0).toUpperCase() + theme.slice(1)} ${getThemeIcon(theme)}`, 'info');
   }
 
   function toggleThemePopover(e) {
@@ -1298,6 +1470,8 @@
     appState.quiz = null;
     render();
     playClick();
+    const modeNames = { study: 'Study Mode 📖', game: 'Game Mode 🎮', flashcard: 'Flashcard Mode 🃏' };
+    showToast(modeNames[mode] || `Mode: ${mode}`, 'info');
   }
 
   // ============ FULLSCREEN ============
@@ -1335,6 +1509,188 @@
       btn.classList.toggle('muted', isMuted);
     }
     playClick();
+    showToast(isMuted ? 'ශබ්දය නිහඬ කර ඇත 🔇' : 'ශබ්දය සක්‍රියයි 🔊', 'info');
+  }
+
+  // ============ TEXT TO SPEECH ============
+  let speechSynthesis = window.speechSynthesis;
+  let isSpeaking = false;
+  let currentUtterance = null;
+
+  function speakText(text) {
+    if (!speechSynthesis) return;
+    
+    // Cancel any ongoing speech
+    if (isSpeaking && currentUtterance) {
+      speechSynthesis.cancel();
+      isSpeaking = false;
+      updateTTSButtons(false);
+      return;
+    }
+
+    if (isMuted) {
+      showToast('TTS requires sound to be enabled 🔊', 'error');
+      return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'si-LK';
+    utterance.rate = 0.9;
+    utterance.pitch = 1;
+    
+    // Try Sinhala voice, fallback to default
+    const voices = speechSynthesis.getVoices();
+    const sinhalaVoice = voices.find(v => v.lang.includes('si'));
+    if (sinhalaVoice) utterance.voice = sinhalaVoice;
+
+    currentUtterance = utterance;
+    isSpeaking = true;
+    updateTTSButtons(true);
+
+    utterance.onend = () => {
+      isSpeaking = false;
+      currentUtterance = null;
+      updateTTSButtons(false);
+    };
+
+    utterance.onerror = () => {
+      isSpeaking = false;
+      currentUtterance = null;
+      updateTTSButtons(false);
+    };
+
+    speechSynthesis.speak(utterance);
+  }
+
+  function updateTTSButtons(speaking) {
+    document.querySelectorAll('.tts-btn').forEach(btn => {
+      btn.classList.toggle('speaking', speaking);
+      btn.querySelector('i').className = speaking ? 'fas fa-stop' : 'fas fa-volume-up';
+      btn.querySelector('.tts-label').textContent = speaking ? 'නවතන්න' : 'අහන්න';
+    });
+  }
+
+  // ============ DAILY CHALLENGE ============
+  function getDailyChallenge() {
+    const today = new Date().toDateString();
+    const stored = localStorage.getItem('dailyChallenge');
+    
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (parsed.date === today) {
+        return parsed;
+      }
+    }
+
+    // Generate new daily challenge
+    const challenge = {
+      date: today,
+      completed: false,
+      score: 0,
+      questionsAnswered: 0,
+      targetScore: 5, // Need 5 correct answers
+      reward: Math.floor(Math.random() * 50) + 50 // Random reward 50-100 points
+    };
+
+    localStorage.setItem('dailyChallenge', JSON.stringify(challenge));
+    return challenge;
+  }
+
+  function completeDailyChallenge() {
+    const challenge = getDailyChallenge();
+    if (!challenge.completed && challenge.score >= challenge.targetScore) {
+      challenge.completed = true;
+      localStorage.setItem('dailyChallenge', JSON.stringify(challenge));
+      
+      // Update daily streak
+      const p = getProgress();
+      const today = new Date().toDateString();
+      if (p.lastPlayed) {
+        const last = new Date(p.lastPlayed);
+        const diff = (new Date(today) - last) / (1000 * 60 * 60 * 24);
+        if (diff <= 1.5) {
+          p.dailyStreak = (p.dailyStreak || 0) + 1;
+        } else {
+          p.dailyStreak = 1;
+        }
+      } else {
+        p.dailyStreak = 1;
+      }
+      p.lastPlayed = today;
+      const storage = isGuest ? sessionStorage : localStorage;
+      const storageKey = isGuest ? 'guest_quizProgress' : `user_${currentUser}_quizProgress`;
+      storage.setItem(storageKey, JSON.stringify(p));
+      
+      appState.totalScore += challenge.reward;
+      showToast(`🎉 Daily Challenge Complete! +${challenge.reward} points!`, 'success');
+      triggerScreenGlow();
+      
+      // Check achievements after daily streak update
+      checkAchievements(p);
+    }
+  }
+
+  function renderDailyChallenge() {
+    const challenge = getDailyChallenge();
+    const progress = challenge.targetScore > 0 ? Math.min((challenge.score / challenge.targetScore) * 100, 100) : 0;
+    
+    return `
+      <div class="daily-challenge-card">
+        <div style="position:relative;z-index:1;">
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px;">
+            <span class="streak-badge">
+              <i class="fas fa-calendar-check"></i> Daily Challenge
+            </span>
+            ${challenge.completed ? '<span style="color:var(--correct-color);font-weight:700;">✅ Completed!</span>' : ''}
+            ${getProgress().dailyStreak >= 7 ? '<span style="color:var(--accent);">🔥 ' + getProgress().dailyStreak + ' day streak!</span>' : ''}
+          </div>
+          <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:8px;">
+            🎯 Answer <strong>${challenge.targetScore} questions correctly</strong> to earn <strong>+${challenge.reward} bonus points!</strong>
+          </p>
+          <div class="progress-bar-container" style="height:10px;margin-bottom:6px;">
+            <div class="progress-bar-fill" style="width:${progress}%;height:10px;"></div>
+          </div>
+          <div class="progress-stat">
+            <span>${challenge.score} / ${challenge.targetScore} correct</span>
+            <span>${Math.round(progress)}%</span>
+          </div>
+          ${challenge.completed ? `
+            <div style="margin-top:10px;color:var(--correct-color);font-weight:600;">
+              🏆 Reward earned! Come back tomorrow for a new challenge.
+            </div>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  }
+
+  // ============ QUESTION DIFFICULTY ============
+  function getQuestionDifficulty(question) {
+    // Simple heuristic based on question length and option similarity
+    const qLen = question.q.length;
+    const options = question.options;
+    const avgOptLen = options.reduce((sum, o) => sum + o.length, 0) / options.length;
+    
+    let difficulty = 1; // Easy by default
+    
+    if (qLen > 80 || avgOptLen > 25) difficulty = 2; // Medium
+    if (qLen > 120 || avgOptLen > 40) difficulty = 3; // Hard
+    
+    return difficulty;
+  }
+
+  function renderDifficultyIndicator(difficulty) {
+    let color = 'var(--correct-color)';
+    if (difficulty === 2) color = 'var(--accent)';
+    if (difficulty === 3) color = 'var(--wrong-color)';
+    
+    return `
+      <span class="difficulty-indicator" title="${difficulty === 1 ? 'Easy' : difficulty === 2 ? 'Medium' : 'Hard'}">
+        ${[1,2,3].map(i => `
+          <span class="difficulty-dot ${i <= difficulty ? 'active' : ''}" style="${i <= difficulty ? 'background:' + color : ''}"></span>
+        `).join('')}
+      </span>
+    `;
   }
 
   // ============ CONFETTI & CELEBRATION ============
@@ -1371,7 +1727,6 @@
     confettiContainer.innerHTML = '';
     const colors = ['#facc15', '#fb923c', '#4ade80', '#38bdf8', '#c084fc', '#fb7185', '#fff'];
 
-    // 100+ confetti pieces
     for(let i=0; i<100; i++) {
       const piece = document.createElement('div');
       piece.className = 'adv-confetti';
@@ -1394,7 +1749,6 @@
       confettiContainer.appendChild(piece);
     }
 
-    // 40+ floating particles (emojis)
     const particlesContainer = document.getElementById('celebrationParticles');
     particlesContainer.innerHTML = '';
     const pEmojis = ['⭐', '🌟', '✨', '🏆', '💎', '🎉', '🎊', '🥇', '💯', '🔥', '🌈', '🧬', '🔬', '⚛️'];
@@ -1495,6 +1849,7 @@
     document.getElementById('saveScoreModal').classList.remove('active');
     pendingSaveScore = null;
     playClick();
+    showToast('Score saved to leaderboard! 🏆', 'success');
   }
 
   function skipSaveScore() {
@@ -1522,6 +1877,8 @@
     game_winner: { id: 'game_winner', name: 'ක්‍රීඩා ශූරයා', icon: '🎮', desc: 'ගේම් මෝඩ් එකෙන් ජයග්‍රහණය කරන්න', check: (s) => s.gameWins >= 1 },
     study_enthusiast: { id: 'study_enthusiast', name: 'ඉගෙනුම් ලෝලී', icon: '📚', desc: 'ස්ටඩි මෝඩ් එකෙන් ප්‍රශ්න 20ක් කරන්න', check: (s) => s.studyQuestions >= 20 },
     daily_player: { id: 'daily_player', name: 'දිනපතා විද්‍යාඥයා', icon: '📅', desc: 'දින 7ක් පිළිවෙලින් ක්‍රීඩා කරන්න', check: (s) => s.dailyStreak >= 7 },
+    century: { id: 'century', name: 'ශතකය', icon: '💯', desc: 'ප්‍රශ්න 100කට නිවැරදිව පිළිතුරු දෙන්න', check: (s) => s.correctAnswers >= 100 },
+    flashcard_master: { id: 'flashcard_master', name: 'ෆ්ලෑෂ්කාඩ් මාස්ටර්', icon: '🃏', desc: 'ෆ්ලෑෂ්කාඩ් 50ක් පෙරළන්න', check: (s) => s.flashcardFlips >= 50 },
   };
 
   function getAchievements() {
@@ -1536,7 +1893,8 @@
       const a = ACHIEVEMENTS[id];
       if (a) {
         setTimeout(() => {
-          alert(`🏅 ${a.icon} ${a.name}\n${a.desc}\n\n🎉 ජයග්‍රහණය අගුළු හැරියා!`);
+          showToast(`🏅 ${a.icon} ${a.name}\n${a.desc}\n\n🎉 Achievement unlocked!`, 'success');
+          triggerScreenGlow();
         }, 500);
       }
     }
@@ -1595,7 +1953,8 @@
       studyQuestions: 0,
       dailyStreak: 0,
       lastPlayed: null,
-      subjectStats: {}
+      subjectStats: {},
+      flashcardFlips: 0
     };
   }
 
@@ -1843,7 +2202,6 @@
     updateFullscreenBtn();
     updateInstallButton();
 
-    // Trigger ring animation if on results screen
     setTimeout(() => {
       const ring = document.getElementById('ringFg');
       if (ring) {
@@ -1851,10 +2209,16 @@
       }
     }, 100);
 
-    // Timer cleanup on unmount
     if (r.name !== 'quiz' && timerInterval) {
       clearInterval(timerInterval);
       timerInterval = null;
+    }
+
+    // Cancel TTS when navigating away
+    if (speechSynthesis && isSpeaking) {
+      speechSynthesis.cancel();
+      isSpeaking = false;
+      updateTTSButtons(false);
     }
   }
 
@@ -1962,6 +2326,8 @@
   // ============ PAGES ============
   function renderHome() {
     const progress = getProgress();
+    const dailyChallenge = renderDailyChallenge();
+    
     return `
       <div style="text-align:center;margin-bottom:30px;padding:30px 20px 10px;position:relative;border-radius:var(--radius-lg);overflow:hidden;">
         <div style="position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:340px;height:220px;background:var(--primary-gradient);filter:blur(70px);opacity:0.28;z-index:-1;"></div>
@@ -1990,6 +2356,9 @@
           </span>
         </div>
       </div>
+      
+      ${dailyChallenge}
+      
       <div class="grid-2">
         ${Object.values(SUBJECTS).map(s => `
           <div class="card subject-card" onclick="navigate('#/subject/${s.key}')">
@@ -2094,6 +2463,15 @@
     if (currentMode === MODES.FLASHCARD) {
       const qIndex = qz.order[qz.idx];
       const question = lesson.questions[qIndex];
+      const difficulty = getQuestionDifficulty(question);
+
+      // Track flashcard flips
+      const p = getProgress();
+      const storage = isGuest ? sessionStorage : localStorage;
+      const storageKey = isGuest ? 'guest_quizProgress' : `user_${currentUser}_quizProgress`;
+      p.flashcardFlips = (p.flashcardFlips || 0) + 1;
+      storage.setItem(storageKey, JSON.stringify(p));
+      checkAchievements(p);
 
       return `
         <div class="quiz-container">
@@ -2105,14 +2483,25 @@
           <div class="flashcard-container" onclick="toggleFlashcardFlip()">
             <div class="flashcard ${qz.isFlipped ? 'flipped' : ''}" id="flashCardElement">
               <div class="flashcard-front">
-                <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:8px;">❓ ප්‍රශ්නය (ක්ලික් කර මාරු කරන්න)</div>
+                <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:8px;">
+                  ❓ ප්‍රශ්නය (ක්ලික් කර මාරු කරන්න)
+                  ${renderDifficultyIndicator(difficulty)}
+                </div>
                 <div style="font-size:1.25rem; font-weight:600;">${escapeHtml(question.q)}</div>
-                <div style="margin-top:20px; font-size:0.8rem; color:var(--primary-color);"><i class="fas fa-sync-alt"></i> පිළිතුර බලන්න Flip කරන්න</div>
+                <div style="margin-top:20px; font-size:0.8rem; color:var(--primary-color);">
+                  <i class="fas fa-sync-alt"></i> පිළිතුර බලන්න Flip කරන්න
+                </div>
+                <button class="tts-btn" style="margin-top:10px;" onclick="event.stopPropagation(); speakText('${escapeHtml(question.q).replace(/'/g, "\\'")}')">
+                  <i class="fas fa-volume-up"></i> <span class="tts-label">අහන්න</span>
+                </button>
               </div>
               <div class="flashcard-back">
                 <div style="font-size:0.82rem; color:var(--correct-color); font-weight:700; margin-bottom:6px;">✅ නිවැරදි පිළිතුර</div>
                 <div style="font-size:1.2rem; font-weight:700; margin-bottom:12px;">${escapeHtml(question.options[question.correct])}</div>
                 <div style="font-size:0.9rem; color:var(--text-secondary);">💡 ${escapeHtml(question.explanation || '')}</div>
+                <button class="tts-btn" style="margin-top:10px;" onclick="event.stopPropagation(); speakText('${escapeHtml(question.options[question.correct]).replace(/'/g, "\\'")}')">
+                  <i class="fas fa-volume-up"></i> <span class="tts-label">අහන්න</span>
+                </button>
               </div>
             </div>
           </div>
@@ -2178,6 +2567,15 @@
         if (currentMode === MODES.STUDY) progressUpdate.studyQuestions = total;
         updateProgress(progressUpdate);
 
+        // Update daily challenge
+        const challenge = getDailyChallenge();
+        if (!challenge.completed) {
+          challenge.score = Math.min(challenge.score + qz.score, challenge.targetScore);
+          challenge.questionsAnswered += total;
+          localStorage.setItem('dailyChallenge', JSON.stringify(challenge));
+          completeDailyChallenge();
+        }
+
         appState.totalQuestions += total;
         if (qz.score > 0) appState.totalScore += qz.score;
         if (appState.streak > appState.bestStreak) appState.bestStreak = appState.streak;
@@ -2225,11 +2623,12 @@
     const question = lesson.questions[qIndex];
     const letters = ['A', 'B', 'C', 'D'];
     const showStudyAnswer = isGame ? false : qz.answeredCurrent;
+    const difficulty = getQuestionDifficulty(question);
 
     return `
       <div class="quiz-container">
         <div class="quiz-header">
-          <span class="lesson-name">${escapeHtml(lesson.title)}</span>
+          <span class="lesson-name">${escapeHtml(lesson.title)} ${renderDifficultyIndicator(difficulty)}</span>
           <div class="quiz-stats-right">
             ${isGame ? `
               <div class="lives-display">
@@ -2255,12 +2654,16 @@
         </div>
 
         <div class="question-number">${isGame ? '🎯' : '📖'} ප්‍රශ්නය ${qz.idx + 1}</div>
-        <div class="question-text">${escapeHtml(question.q)}</div>
+        <div class="question-text">${escapeHtml(question.q)}
+          <button class="tts-btn" style="margin-left:10px;" onclick="speakText('${escapeHtml(question.q).replace(/'/g, "\\'")}')">
+            <i class="fas fa-volume-up"></i> <span class="tts-label">අහන්න</span>
+          </button>
+        </div>
 
         <div class="options-grid">
           ${question.options.map((opt, i) => {
             if (qz.hiddenOptions && qz.hiddenOptions.includes(i)) {
-              return ''; // Hidden via Hint or 50/50
+              return '';
             }
 
             let btnClass = 'option-btn';
@@ -2351,7 +2754,7 @@
     if (qz.idx < qz.order.length - 1) {
       qz.idx++;
     } else {
-      qz.idx = 0; // loop back to first
+      qz.idx = 0;
     }
     render();
     playClick();
@@ -2378,7 +2781,6 @@
     const question = lesson.questions[qIndex];
     const correct = question.correct;
 
-    // Find wrong options not hidden yet
     const wrongIdxs = question.options.map((_, i) => i).filter(i => i !== correct && (!qz.hiddenOptions || !qz.hiddenOptions.includes(i)));
     if (wrongIdxs.length > 0) {
       const removeIdx = wrongIdxs[Math.floor(Math.random() * wrongIdxs.length)];
@@ -2463,6 +2865,7 @@
       if (!isGame) {
         qz.studyAnswers[qz.idx] = selectedIndex;
         showModal(true, "✅ නිවැරදියි!", explanation);
+        showToast('නියමයි! නිවැරදියි! 🎉', 'success');
       }
     } else {
       if (selectedBtn) selectedBtn.classList.add('wrong');
@@ -2572,6 +2975,7 @@
     document.getElementById('fiftyBtn').disabled = true;
     document.getElementById('fiftyBtn').textContent = '50/50 (0)';
     playClick();
+    showToast('50/50 power-up used! ✂️', 'info');
   };
 
   window.useSkip = function() {
@@ -2684,6 +3088,13 @@
       const btn = document.getElementById('opt-' + idx);
       if (btn && !btn.disabled && btn.style.display !== 'none') btn.click();
     }
+
+    // Flashcard controls
+    if (currentMode === MODES.FLASHCARD && appState.quiz) {
+      if (e.key === 'ArrowLeft') { e.preventDefault(); prevFlashcard(); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); nextFlashcard(); }
+      if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggleFlashcardFlip(); }
+    }
   });
 
   document.addEventListener('click', (e) => {
@@ -2701,6 +3112,14 @@
   // Service Worker for PWA
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+
+  // Load voices for TTS
+  if (speechSynthesis) {
+    speechSynthesis.getVoices();
+    speechSynthesis.onvoiceschanged = () => {
+      speechSynthesis.getVoices();
+    };
   }
 </script>
 
