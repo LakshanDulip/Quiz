@@ -605,17 +605,104 @@
   .install-btn:hover { transform: scale(1.05); }
   .install-btn.show { display: inline-flex; }
 
+  /* ============ ACCESSIBILITY ============ */
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible {
+    outline: 2.5px solid var(--primary-color);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  .option-btn:focus-visible,
+  .card:focus-visible,
+  .btn:focus-visible,
+  .icon-btn:focus-visible,
+  .theme-dot:focus-visible,
+  .mode-btn:focus-visible {
+    outline: 2.5px solid var(--primary-color);
+    outline-offset: 3px;
+  }
+  input#usernameInput:focus-visible { outline-offset: 0; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* ============ CUSTOM SCROLLBAR ============ */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 20px; border: 2px solid transparent; background-clip: padding-box; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--primary-color); background-clip: padding-box; }
+  * { scrollbar-width: thin; scrollbar-color: var(--border-color) transparent; }
+
+  /* ============ TOAST NOTIFICATIONS ============ */
+  .toast-layer {
+    position: fixed; top: 18px; right: 18px; z-index: 4000;
+    display: flex; flex-direction: column; gap: 10px;
+    max-width: 340px; width: calc(100% - 36px);
+    pointer-events: none;
+  }
+  .toast {
+    pointer-events: auto;
+    display: flex; align-items: center; gap: 12px;
+    background: var(--bg-card); border: 1px solid var(--primary-color);
+    border-radius: 14px; padding: 12px 16px;
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(12px);
+    transform: translateX(120%); opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275), opacity 0.3s ease;
+  }
+  .toast.show { transform: translateX(0); opacity: 1; }
+  .toast.leaving { transform: translateX(120%); opacity: 0; }
+  .toast .toast-icon { font-size: 1.8rem; flex-shrink: 0; }
+  .toast .toast-body { flex: 1; text-align: left; }
+  .toast .toast-title { font-weight: 700; font-size: 0.9rem; }
+  .toast .toast-desc { font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px; }
+  .toast .toast-close { color: var(--text-secondary); font-size: 1rem; flex-shrink: 0; padding: 4px; }
+  .toast .toast-close:hover { color: var(--text-primary); }
+
+  @media (max-width: 480px) {
+    .toast-layer { top: auto; bottom: 18px; right: 12px; left: 12px; max-width: none; width: auto; }
+    .toast { transform: translateY(120%); }
+    .toast.show { transform: translateY(0); }
+    .toast.leaving { transform: translateY(120%); }
+  }
+
+  /* ============ QUIZ PROGRESS BAR ============ */
+  .quiz-progress-track {
+    height: 6px; border-radius: 20px; background: var(--border-color);
+    overflow: hidden; margin-bottom: 22px;
+  }
+  .quiz-progress-fill {
+    height: 100%; border-radius: 20px; background: var(--primary-gradient);
+    transition: width 0.4s cubic-bezier(.34,1.3,.5,1);
+  }
+
+  /* ============ MENU TOGGLE (MOBILE) ============ */
+  .menu-toggle-btn { display: none; }
+
   @media (max-width: 768px) {
     .quiz-container { padding: 20px; }
     .question-text { font-size: 1.05rem; }
     .option-btn { font-size: 0.9rem; padding: 12px 14px; }
     .page-title { font-size: 1.6rem; }
     .header-inner { flex-direction: column; align-items: stretch; }
-    .controls { justify-content: center; flex-wrap: wrap; }
+    .controls { justify-content: center; flex-wrap: wrap; row-gap: 10px; }
     .theme-popover { right: 50%; transform: translateX(50%); }
     .logo-text .main { font-size: 1rem; }
     .mode-btn { font-size: 0.6rem; padding: 3px 8px; }
     .grid-3 { grid-template-columns: 1fr; }
+    main { padding: 24px 14px; }
+  }
+
+  @media (max-width: 420px) {
+    .game-stats { padding: 4px 10px; gap: 8px; }
+    .icon-btn { width: 32px; height: 32px; font-size: 0.9rem; }
   }
 </style>
 </head>
@@ -630,8 +717,9 @@
       ඔබේ ප්‍රගතිය සුරැකීමට නම ඇතුළත් කරන්න, නැතහොත් අමුත්තෙක් ලෙස ක්‍රීඩා කරන්න.
     </p>
     
-    <input type="text" id="usernameInput" placeholder="ඔබේ නම ඇතුළත් කරන්න..." 
-           style="width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary); font-family: inherit; font-size: 1rem; outline: none;">
+    <input type="text" id="usernameInput" placeholder="ඔබේ නම ඇතුළත් කරන්න..." maxlength="24" autocomplete="off"
+           onkeydown="if(event.key==='Enter'){event.preventDefault();handleLogin();}"
+           style="width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary); font-family: inherit; font-size: 1rem;">
     
     <div style="display: flex; flex-direction: column; gap: 10px;">
       <button class="btn btn-primary" onclick="handleLogin()" style="width: 100%; justify-content: center;">
@@ -649,6 +737,32 @@
 
 <!-- Screen Glow -->
 <div class="screen-glow" id="screenGlow"></div>
+
+<!-- Toast Notification Layer -->
+<div class="toast-layer" id="toastLayer" aria-live="polite"></div>
+
+<!-- Save Score Modal (guest leaderboard name capture) -->
+<div class="modal-overlay" id="saveScoreModal">
+  <div class="modal-content" style="max-width:400px;">
+    <button class="modal-close-btn" onclick="skipSaveScore()" aria-label="වසන්න">✕</button>
+    <span style="font-size: 3rem; display: block; margin-bottom: 10px;">🎉</span>
+    <h2 class="modal-title">විශිෂ්ටයි!</h2>
+    <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.9rem;">
+      ශ්‍රේණිගත කිරීම් ලැයිස්තුවට එකතු වීමට ඔබේ නම ඇතුළත් කරන්න.
+    </p>
+    <input type="text" id="saveScoreNameInput" placeholder="ඔබේ නම..." maxlength="24" autocomplete="off"
+           onkeydown="if(event.key==='Enter'){event.preventDefault();confirmSaveScore();}"
+           style="width: 100%; padding: 12px; margin-bottom: 16px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary); font-family: inherit; font-size: 1rem;">
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <button class="btn btn-primary" onclick="confirmSaveScore()" style="width: 100%; justify-content: center;">
+        <i class="fas fa-trophy"></i> එකතු කරන්න
+      </button>
+      <button class="btn btn-outline" onclick="skipSaveScore()" style="width: 100%; justify-content: center;">
+        මඟ හරින්න
+      </button>
+    </div>
+  </div>
+</div>
 
 <!-- Game Over Modal -->
 <div class="game-over-overlay" id="gameOverModal">
@@ -671,7 +785,7 @@
 <!-- Explanation Modal -->
 <div class="modal-overlay" id="explainModal">
   <div class="modal-content">
-    <button class="modal-close-btn" onclick="closeModalAndNext()">✕</button>
+    <button class="modal-close-btn" onclick="closeModalAndNext()" aria-label="වසන්න">✕</button>
     <span id="modalIcon" class="modal-icon"></span>
     <h2 id="modalTitle" class="modal-title"></h2>
     <div id="modalText" class="modal-text"></div>
@@ -685,7 +799,7 @@
 <!-- Leaderboard Modal -->
 <div class="modal-overlay" id="leaderboardModal">
   <div class="modal-content" style="max-width:500px;">
-    <button class="modal-close-btn" onclick="closeLeaderboard()">✕</button>
+    <button class="modal-close-btn" onclick="closeLeaderboard()" aria-label="වසන්න">✕</button>
     <h2 class="modal-title" style="margin-bottom:15px;">🏆 ශ්‍රේණිගත කිරීම</h2>
     <div id="leaderboardList"></div>
     <div style="margin-top:15px;">
@@ -697,7 +811,7 @@
 <!-- Achievements Modal -->
 <div class="modal-overlay" id="achievementsModal">
   <div class="modal-content" style="max-width:500px;">
-    <button class="modal-close-btn" onclick="closeAchievements()">✕</button>
+    <button class="modal-close-btn" onclick="closeAchievements()" aria-label="වසන්න">✕</button>
     <h2 class="modal-title" style="margin-bottom:15px;">🏅 ජයග්‍රහණ</h2>
     <div id="achievementsList"></div>
     <div style="margin-top:15px;">
@@ -709,7 +823,7 @@
 <!-- Progress Modal -->
 <div class="modal-overlay" id="progressModal">
   <div class="modal-content" style="max-width:500px;">
-    <button class="modal-close-btn" onclick="closeProgress()">✕</button>
+    <button class="modal-close-btn" onclick="closeProgress()" aria-label="වසන්න">✕</button>
     <h2 class="modal-title" style="margin-bottom:15px;">📈 ප්‍රගතිය</h2>
     <div id="progressContent"></div>
     <div style="margin-top:15px;">
@@ -724,7 +838,7 @@
     <span style="font-size:1.5rem;">📱</span>
     <span style="font-weight:600;">Quiz Hub app එක install කරන්න</span>
     <button class="btn btn-primary" onclick="installApp()" style="font-size:0.85rem;padding:6px 18px;">Install</button>
-    <button onclick="dismissInstallBanner()" style="color:var(--text-secondary);font-size:1.2rem;">✕</button>
+    <button onclick="dismissInstallBanner()" style="color:var(--text-secondary);font-size:1.2rem;" aria-label="වසන්න">✕</button>
   </div>
 </div>
 
@@ -1038,6 +1152,34 @@
     setTimeout(() => container.remove(), 6000);
   }
 
+  // ============ TOASTS ============
+  function showToast(icon, title, desc, duration = 4500) {
+    const layer = document.getElementById('toastLayer');
+    if (!layer) return;
+    const el = document.createElement('div');
+    el.className = 'toast';
+    el.setAttribute('role', 'status');
+    el.innerHTML = `
+      <div class="toast-icon">${icon}</div>
+      <div class="toast-body">
+        <div class="toast-title">${escapeHtml(title)}</div>
+        ${desc ? `<div class="toast-desc">${escapeHtml(desc)}</div>` : ''}
+      </div>
+      <button class="toast-close" aria-label="වසන්න">✕</button>
+    `;
+    layer.appendChild(el);
+    requestAnimationFrame(() => el.classList.add('show'));
+
+    const remove = () => {
+      el.classList.add('leaving');
+      el.classList.remove('show');
+      setTimeout(() => el.remove(), 400);
+    };
+    el.querySelector('.toast-close').addEventListener('click', remove);
+    const timer = setTimeout(remove, duration);
+    el.addEventListener('mouseenter', () => clearTimeout(timer));
+  }
+
   function triggerScreenGlow() {
     const glow = document.getElementById('screenGlow');
     if (glow) {
@@ -1089,6 +1231,34 @@
     }).join('');
   }
 
+  let pendingSaveScore = null;
+
+  function openSaveScoreModal(score, total, mode) {
+    pendingSaveScore = { score, total, mode };
+    const modal = document.getElementById('saveScoreModal');
+    const input = document.getElementById('saveScoreNameInput');
+    input.value = '';
+    modal.classList.add('active');
+    setTimeout(() => input.focus(), 300);
+  }
+
+  function confirmSaveScore() {
+    if (!pendingSaveScore) return;
+    const input = document.getElementById('saveScoreNameInput');
+    const name = input.value.trim() || 'Guest';
+    saveToLeaderboard(name, pendingSaveScore.score, pendingSaveScore.total, pendingSaveScore.mode);
+    document.getElementById('saveScoreModal').classList.remove('active');
+    pendingSaveScore = null;
+    playClick();
+    showToast('🏆', 'ශ්‍රේණිගත කිරීම් ලැයිස්තුවට එකතු කළා!', name, 3500);
+  }
+
+  function skipSaveScore() {
+    document.getElementById('saveScoreModal').classList.remove('active');
+    pendingSaveScore = null;
+    playClick();
+  }
+
   function showLeaderboard() {
     renderLeaderboard();
     document.getElementById('leaderboardModal').classList.add('active');
@@ -1122,7 +1292,8 @@
       const a = ACHIEVEMENTS[id];
       if (a) {
         setTimeout(() => {
-          alert(`🏅 ${a.icon} ${a.name}\n${a.desc}\n\n🎉 ජයග්‍රහණය අගුළු හැරියා!`);
+          showToast(a.icon, `ජයග්‍රහණය අගුළු හැරියා! ${a.name}`, a.desc, 6000);
+          playClick();
         }, 500);
       }
     }
@@ -1183,6 +1354,16 @@
       lastPlayed: null,
       subjectStats: {}
     };
+  }
+
+  function updateBestStreak(streak) {
+    const p = getProgress();
+    const storage = isGuest ? sessionStorage : localStorage;
+    const storageKey = isGuest ? 'guest_quizProgress' : `user_${currentUser}_quizProgress`;
+    if (streak > (p.bestStreak || 0)) {
+      p.bestStreak = streak;
+      storage.setItem(storageKey, JSON.stringify(p));
+    }
   }
 
   function updateProgress(stats) {
@@ -1634,42 +1815,47 @@
         }
       }
 
-      // Save results
-      if (pct >= 80) {
-        if (isGuest) {
-          const name = prompt('🎉 විශිෂ්ටයි! ඔබේ නම ඇතුළත් කරන්න (Leaderboard සඳහා):', 'Guest');
-          if (name) {
-            saveToLeaderboard(name, qz.score, total, currentMode);
+      // Everything below (leaderboard save, progress totals, achievement checks) must
+      // run exactly ONCE per completed quiz — not on every re-render of the results
+      // screen (e.g. switching themes while viewing results used to re-save the score
+      // and inflate progress totals each time). Guard with qz.resultsProcessed.
+      if (!qz.resultsProcessed) {
+        qz.resultsProcessed = true;
+
+        // Save to leaderboard
+        if (pct >= 80) {
+          if (isGuest) {
+            openSaveScoreModal(qz.score, total, currentMode);
+          } else {
+            saveToLeaderboard(currentUser, qz.score, total, currentMode);
           }
-        } else {
-          saveToLeaderboard(currentUser, qz.score, total, currentMode);
         }
+
+        // Update progress
+        const progressUpdate = {
+          totalQuestions: total,
+          correctAnswers: qz.score,
+          subjectStats: { [subject]: { correct: qz.score, total: total } }
+        };
+        if (pct === 100) progressUpdate.perfectCount = 1;
+        if (currentMode === MODES.GAME && qz.score > 0) progressUpdate.gameWins = 1;
+        if (currentMode === MODES.STUDY) progressUpdate.studyQuestions = total;
+        updateProgress(progressUpdate);
+
+        // Update app state
+        appState.totalQuestions += total;
+        if (qz.score > 0) appState.totalScore += qz.score;
+        if (appState.streak > appState.bestStreak) appState.bestStreak = appState.streak;
+        if (pct === 100) appState.perfectCount++;
+        updateBestStreak(appState.bestStreak);
+
+        // Check achievements
+        const stats = getProgress();
+        stats.perfectCount = appState.perfectCount;
+        stats.bestStreak = appState.bestStreak;
+        stats.totalQuestions = appState.totalQuestions;
+        checkAchievements(stats);
       }
-
-      // Update progress
-      const progressUpdate = {
-        totalQuestions: total,
-        correctAnswers: qz.score,
-        subjectStats: { [subject]: { correct: qz.score, total: total } }
-      };
-      if (pct === 100) progressUpdate.perfectCount = 1;
-      if (qz.bestStreak) progressUpdate.bestStreak = qz.bestStreak;
-      if (currentMode === MODES.GAME && qz.score > 0) progressUpdate.gameWins = 1;
-      if (currentMode === MODES.STUDY) progressUpdate.studyQuestions = total;
-      updateProgress(progressUpdate);
-
-      // Update app state
-      appState.totalQuestions += total;
-      if (qz.score > 0) appState.totalScore += qz.score;
-      if (appState.streak > appState.bestStreak) appState.bestStreak = appState.streak;
-      if (pct === 100) appState.perfectCount++;
-
-      // Check achievements
-      const stats = getProgress();
-      stats.perfectCount = appState.perfectCount;
-      stats.bestStreak = appState.bestStreak;
-      stats.totalQuestions = appState.totalQuestions;
-      checkAchievements(stats);
 
       const r = 54, c = 2 * Math.PI * r;
       const offset = c - (pct / 100) * c;
@@ -1730,6 +1916,10 @@
           </div>
         </div>
 
+        <div class="quiz-progress-track" role="progressbar" aria-valuenow="${qz.idx + 1}" aria-valuemin="1" aria-valuemax="${total}" aria-label="ප්‍රශ්න ප්‍රගතිය">
+          <div class="quiz-progress-fill" style="width:${((qz.idx) / total) * 100}%"></div>
+        </div>
+
         <div class="question-number">${isGame ? '🎯' : '📖'} ප්‍රශ්නය ${qz.idx + 1}</div>
         <div class="question-text">${escapeHtml(question.q)}</div>
 
@@ -1761,7 +1951,7 @@
             }
             
             return `
-              <button class="${btnClass}" id="opt-${i}" onclick="handleOptionClick(${i}, ${question.correct}, '${escapeHtml(question.explanation).replace(/'/g, "\\'")}')" ${disabled ? 'disabled' : ''}>
+              <button class="${btnClass}" id="opt-${i}" onclick="handleOptionClick(${i})" ${disabled ? 'disabled' : ''}>
                 <div class="opt-letter">${letters[i]}</div>
                 <div>${escapeHtml(opt)}</div>
                 ${extra}
@@ -1847,9 +2037,17 @@
   }
 
   // ============ HANDLE OPTION CLICK ============
-  window.handleOptionClick = function(selectedIndex, correctIndex, explanation) {
+  window.handleOptionClick = function(selectedIndex) {
     const qz = appState.quiz;
-    if (qz.answeredCurrent) return;
+    if (!qz || qz.answeredCurrent) return;
+
+    const lesson = findLesson(qz.subject, qz.grade, qz.lessonId);
+    const qIndexLookup = qz.order[qz.idx];
+    const question = lesson ? lesson.questions[qIndexLookup] : null;
+    if (!question) return;
+    const correctIndex = question.correct;
+    const explanation = question.explanation || '';
+
     qz.answeredCurrent = true;
 
     const isGame = currentMode === MODES.GAME;
@@ -1931,7 +2129,7 @@
 
     document.getElementById('modalTitle').textContent = title;
     document.getElementById('modalTitle').style.color = isCorrect ? 'var(--correct-color)' : 'var(--wrong-color)';
-    document.getElementById('modalText').innerHTML = text ? `<strong>💡 පැහැදිලි කිරීම:</strong><br>${text}` : "පැහැදිලි කිරීමක් නැත.";
+    document.getElementById('modalText').innerHTML = text ? `<strong>💡 පැහැදිලි කිරීම:</strong><br>${escapeHtml(text)}` : "පැහැදිලි කිරීමක් නැත.";
     icon.textContent = getRandomEmoji(isCorrect);
     icon.className = `modal-icon ${isCorrect ? 'correct' : 'wrong'}`;
 
@@ -2035,10 +2233,29 @@
 
   // ============ KEYBOARD SHORTCUTS ============
   document.addEventListener('keydown', (e) => {
+    const typingInField = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA';
+
+    if (e.key === 'Escape') {
+      const openOverlays = ['explainModal', 'leaderboardModal', 'achievementsModal', 'progressModal', 'saveScoreModal'];
+      for (const id of openOverlays) {
+        const el = document.getElementById(id);
+        if (el && el.classList.contains('active')) {
+          if (id === 'explainModal') { closeModalAndNext(); if (currentMode === MODES.STUDY) return; }
+          else el.classList.remove('active');
+          return;
+        }
+      }
+      const popover = document.getElementById('themePopover');
+      if (popover && popover.classList.contains('open')) { popover.classList.remove('open'); return; }
+      return;
+    }
+
+    if (typingInField) return;
+
     if (e.key === 'f' || e.key === 'F') {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
       e.preventDefault();
       toggleFullscreen();
+      return;
     }
     if (e.key === 'm' || e.key === 'M') { e.preventDefault(); toggleMute(); return; }
     if (e.key === 't' || e.key === 'T') { e.preventDefault(); setTheme(THEMES[(THEMES.indexOf(document.documentElement.getAttribute('data-theme')) + 1) % THEMES.length]); return; }
@@ -2076,13 +2293,6 @@
     loadData();
     appState.route = parseHash();
   });
-
-  const style = document.createElement('style');
-  style.textContent = `
-    .screen-glow.active { opacity: 1 !important; animation: glowPulse 2s ease-in-out infinite; }
-    @keyframes glowPulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
-  `;
-  document.head.appendChild(style);
 
   // Service Worker for PWA
   if ('serviceWorker' in navigator) {
