@@ -545,14 +545,9 @@
   .game-over-stats .label { font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; }
   .game-over-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 15px; }
 
-  /* ============ RESULTS ============ */
+  /* ============ RESULTS & 100% CELEBRATION ============ */
   .result-wrapper { transition: all 0.5s ease; }
-  .result-wrapper.perfect { animation: perfectGlow 2s ease-in-out infinite; }
-  @keyframes perfectGlow {
-    0%, 100% { box-shadow: 0 0 30px var(--glow-color), 0 0 60px var(--glow-color); }
-    50% { box-shadow: 0 0 50px var(--glow-color), 0 0 100px var(--glow-color); transform: scale(1.02); }
-  }
-
+  
   .ring-wrap { position: relative; width: 160px; height: 160px; margin: 0 auto 16px; }
   .ring-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
   .ring-bg { fill: none; stroke: var(--border-color); stroke-width: 10; }
@@ -568,20 +563,93 @@
 
   .result-comment { font-size: 1.1rem; font-weight: 600; color: var(--text-primary); margin-top: 5px; }
   .result-comment .emoji { font-size: 1.5rem; margin-right: 8px; }
-  .perfect-badge { display: inline-block; background: var(--primary-gradient); color: #1a1a1a; padding: 4px 18px; border-radius: 50px; font-weight: 800; font-size: 1rem; animation: badgePulse 1.5s ease-in-out infinite; margin-top: 5px; }
-  @keyframes badgePulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+
+  /* 100% Celebration Styles */
+  .celebration-glow {
+    position: fixed; inset: 0; z-index: 9998;
+    background: radial-gradient(circle at center, rgba(250, 204, 21, 0.4) 0%, transparent 70%);
+    opacity: 0; pointer-events: none; transition: opacity 0.5s ease;
+  }
+  .celebration-glow.active { opacity: 1; animation: celebrateGlowPulse 2s infinite alternate; }
+  @keyframes celebrateGlowPulse { 0% { opacity: 0.8; } 100% { opacity: 1; } }
+
+  .celebration-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; visibility: hidden; transition: all 0.3s ease;
+  }
+  .celebration-overlay.active { opacity: 1; visibility: visible; }
+
+  .celebration-content {
+    text-align: center;
+    transform: scale(0.5) rotate(-5deg);
+    opacity: 0;
+  }
+  .celebration-overlay.active .celebration-content {
+    animation: celebrationPopIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  }
+
+  @keyframes celebrationPopIn {
+    0% { transform: scale(0.5) rotate(-5deg); opacity: 0; }
+    60% { transform: scale(1.1) rotate(2deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+
+  .celebration-badge {
+    background: linear-gradient(135deg, #facc15, #fb923c);
+    color: #1a1a1a;
+    padding: 20px 40px;
+    border-radius: 20px;
+    font-size: 2.5rem;
+    font-weight: 800;
+    font-family: 'Space Grotesk', sans-serif;
+    box-shadow: 0 10px 30px rgba(250, 204, 21, 0.5), inset 0 0 20px rgba(255,255,255,0.5);
+    display: flex; flex-direction: column; gap: 10px; align-items: center;
+    border: 4px solid #fff;
+    margin-bottom: 30px;
+  }
+  .celebration-sub {
+    font-size: 1.2rem; font-weight: 600; font-family: 'Inter', 'Noto Sans Sinhala', sans-serif;
+    opacity: 0.9;
+  }
+
+  .celebration-close-btn {
+    background: #fff; color: #1a1a1a; padding: 12px 30px; border-radius: 50px;
+    font-size: 1.1rem; font-weight: 700; cursor: pointer; border: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: all 0.2s;
+  }
+  .celebration-close-btn:hover { transform: scale(1.05); background: #f0f0f0; }
+
+  .confetti-container, .celebration-particles {
+    position: fixed; inset: 0; z-index: 9997; pointer-events: none; overflow: hidden;
+  }
+
+  .adv-confetti {
+    position: absolute; top: -20px;
+    animation: advConfettiFall linear forwards;
+  }
+  @keyframes advConfettiFall {
+    to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  .adv-particle {
+    position: absolute; bottom: -50px;
+    animation: advParticleFloat linear forwards;
+  }
+  @keyframes advParticleFloat {
+    0% { transform: translateY(0) scale(0.5); opacity: 0; }
+    20% { opacity: 1; transform: translateY(-20vh) scale(1); }
+    100% { transform: translateY(-110vh) scale(1.5) rotate(360deg); opacity: 0; }
+  }
 
   .screen-glow {
-    position: fixed; inset: 0; pointer-events: none; z-index: 999;
+    position: fixed; inset: 0; pointer-events: none; z-index: 900;
     opacity: 0; transition: opacity 0.5s ease;
     background: radial-gradient(ellipse at center, var(--glow-color) 0%, transparent 70%);
   }
   .screen-glow.active { opacity: 1 !important; animation: glowPulse 2s ease-in-out infinite; }
   @keyframes glowPulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
-
-  .confetti-layer { position: fixed; inset: 0; pointer-events: none; z-index: 2000; overflow: hidden; }
-  .confetti-piece { position: absolute; top: -40px; animation-name: confettiFall; animation-timing-function: ease-in; animation-fill-mode: forwards; }
-  @keyframes confettiFall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
 
   .animate-pop { animation: popIn 0.25s ease forwards; }
   @keyframes popIn { 0% { opacity: 0; transform: scale(0.97); } 100% { opacity: 1; transform: scale(1); } }
@@ -605,104 +673,19 @@
   .install-btn:hover { transform: scale(1.05); }
   .install-btn.show { display: inline-flex; }
 
-  /* ============ ACCESSIBILITY ============ */
-  button:focus-visible,
-  a:focus-visible,
-  input:focus-visible {
-    outline: 2.5px solid var(--primary-color);
-    outline-offset: 2px;
-    border-radius: 4px;
-  }
-  .option-btn:focus-visible,
-  .card:focus-visible,
-  .btn:focus-visible,
-  .icon-btn:focus-visible,
-  .theme-dot:focus-visible,
-  .mode-btn:focus-visible {
-    outline: 2.5px solid var(--primary-color);
-    outline-offset: 3px;
-  }
-  input#usernameInput:focus-visible { outline-offset: 0; }
-
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-      animation-duration: 0.001ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.001ms !important;
-      scroll-behavior: auto !important;
-    }
-  }
-
-  /* ============ CUSTOM SCROLLBAR ============ */
-  ::-webkit-scrollbar { width: 10px; height: 10px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 20px; border: 2px solid transparent; background-clip: padding-box; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--primary-color); background-clip: padding-box; }
-  * { scrollbar-width: thin; scrollbar-color: var(--border-color) transparent; }
-
-  /* ============ TOAST NOTIFICATIONS ============ */
-  .toast-layer {
-    position: fixed; top: 18px; right: 18px; z-index: 4000;
-    display: flex; flex-direction: column; gap: 10px;
-    max-width: 340px; width: calc(100% - 36px);
-    pointer-events: none;
-  }
-  .toast {
-    pointer-events: auto;
-    display: flex; align-items: center; gap: 12px;
-    background: var(--bg-card); border: 1px solid var(--primary-color);
-    border-radius: 14px; padding: 12px 16px;
-    box-shadow: var(--shadow-lg);
-    backdrop-filter: blur(12px);
-    transform: translateX(120%); opacity: 0;
-    transition: transform 0.4s cubic-bezier(0.175,0.885,0.32,1.275), opacity 0.3s ease;
-  }
-  .toast.show { transform: translateX(0); opacity: 1; }
-  .toast.leaving { transform: translateX(120%); opacity: 0; }
-  .toast .toast-icon { font-size: 1.8rem; flex-shrink: 0; }
-  .toast .toast-body { flex: 1; text-align: left; }
-  .toast .toast-title { font-weight: 700; font-size: 0.9rem; }
-  .toast .toast-desc { font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px; }
-  .toast .toast-close { color: var(--text-secondary); font-size: 1rem; flex-shrink: 0; padding: 4px; }
-  .toast .toast-close:hover { color: var(--text-primary); }
-
-  @media (max-width: 480px) {
-    .toast-layer { top: auto; bottom: 18px; right: 12px; left: 12px; max-width: none; width: auto; }
-    .toast { transform: translateY(120%); }
-    .toast.show { transform: translateY(0); }
-    .toast.leaving { transform: translateY(120%); }
-  }
-
-  /* ============ QUIZ PROGRESS BAR ============ */
-  .quiz-progress-track {
-    height: 6px; border-radius: 20px; background: var(--border-color);
-    overflow: hidden; margin-bottom: 22px;
-  }
-  .quiz-progress-fill {
-    height: 100%; border-radius: 20px; background: var(--primary-gradient);
-    transition: width 0.4s cubic-bezier(.34,1.3,.5,1);
-  }
-
-  /* ============ MENU TOGGLE (MOBILE) ============ */
-  .menu-toggle-btn { display: none; }
-
   @media (max-width: 768px) {
     .quiz-container { padding: 20px; }
     .question-text { font-size: 1.05rem; }
     .option-btn { font-size: 0.9rem; padding: 12px 14px; }
     .page-title { font-size: 1.6rem; }
     .header-inner { flex-direction: column; align-items: stretch; }
-    .controls { justify-content: center; flex-wrap: wrap; row-gap: 10px; }
+    .controls { justify-content: center; flex-wrap: wrap; }
     .theme-popover { right: 50%; transform: translateX(50%); }
     .logo-text .main { font-size: 1rem; }
     .mode-btn { font-size: 0.6rem; padding: 3px 8px; }
     .grid-3 { grid-template-columns: 1fr; }
-    main { padding: 24px 14px; }
-  }
-
-  @media (max-width: 420px) {
-    .game-stats { padding: 4px 10px; gap: 8px; }
-    .icon-btn { width: 32px; height: 32px; font-size: 0.9rem; }
+    .celebration-badge { font-size: 1.8rem; padding: 15px 25px; }
+    .celebration-sub { font-size: 1rem; }
   }
 </style>
 </head>
@@ -738,8 +721,73 @@
 <!-- Screen Glow -->
 <div class="screen-glow" id="screenGlow"></div>
 
-<!-- Toast Notification Layer -->
-<div class="toast-layer" id="toastLayer" aria-live="polite"></div>
+<!-- Game Over Modal -->
+<div class="game-over-overlay" id="gameOverModal">
+  <div class="game-over-content">
+    <span class="big-icon">💔</span>
+    <h2>Game Over!</h2>
+    <p style="color:var(--text-secondary);margin-bottom:15px;">ඔබගේ සියලු ජීවිත අහිමි විය. නැවත උත්සාහ කරන්න!</p>
+    <div class="game-over-stats">
+      <div class="stat"><div class="num" id="goCorrect">0</div><div class="label">නිවැරදි</div></div>
+      <div class="stat"><div class="num" id="goWrong">0</div><div class="label">වැරදි</div></div>
+      <div class="stat"><div class="num" id="goPct">0%</div><div class="label">ලකුණු</div></div>
+    </div>
+    <div class="game-over-actions">
+      <button class="btn btn-primary" onclick="closeGameOver()"><i class="fas fa-redo"></i> නැවත</button>
+      <button class="btn btn-outline" onclick="closeGameOverAndHome()"><i class="fas fa-home"></i> මුල් පිටුව</button>
+    </div>
+  </div>
+</div>
+
+<!-- Explanation Modal -->
+<div class="modal-overlay" id="explainModal">
+  <div class="modal-content">
+    <button class="modal-close-btn" onclick="closeModalAndNext()">✕</button>
+    <span id="modalIcon" class="modal-icon"></span>
+    <h2 id="modalTitle" class="modal-title"></h2>
+    <div id="modalText" class="modal-text"></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="modalNextBtn" onclick="closeModalAndNext(); if(currentMode === MODES.STUDY) nextStudyQuestion();">ඊළඟට <i class="fas fa-arrow-right"></i></button>
+    </div>
+    <div class="kbd-hint" style="font-size:0.7rem;color:var(--text-secondary);margin-top:12px;opacity:0.7;">ඉක්මන් කිරීමට <kbd style="background:var(--border-color);padding:1px 6px;border-radius:4px;font-family:inherit;">Enter</kbd> ඔබන්න</div>
+  </div>
+</div>
+
+<!-- Leaderboard Modal -->
+<div class="modal-overlay" id="leaderboardModal">
+  <div class="modal-content" style="max-width:500px;">
+    <button class="modal-close-btn" onclick="closeLeaderboard()">✕</button>
+    <h2 class="modal-title" style="margin-bottom:15px;">🏆 ශ්‍රේණිගත කිරීම</h2>
+    <div id="leaderboardList"></div>
+    <div style="margin-top:15px;">
+      <button class="btn btn-outline" onclick="closeLeaderboard()" style="width:100%;justify-content:center;">වසන්න</button>
+    </div>
+  </div>
+</div>
+
+<!-- Achievements Modal -->
+<div class="modal-overlay" id="achievementsModal">
+  <div class="modal-content" style="max-width:500px;">
+    <button class="modal-close-btn" onclick="closeAchievements()">✕</button>
+    <h2 class="modal-title" style="margin-bottom:15px;">🏅 ජයග්‍රහණ</h2>
+    <div id="achievementsList"></div>
+    <div style="margin-top:15px;">
+      <button class="btn btn-outline" onclick="closeAchievements()" style="width:100%;justify-content:center;">වසන්න</button>
+    </div>
+  </div>
+</div>
+
+<!-- Progress Modal -->
+<div class="modal-overlay" id="progressModal">
+  <div class="modal-content" style="max-width:500px;">
+    <button class="modal-close-btn" onclick="closeProgress()">✕</button>
+    <h2 class="modal-title" style="margin-bottom:15px;">📈 ප්‍රගතිය</h2>
+    <div id="progressContent"></div>
+    <div style="margin-top:15px;">
+      <button class="btn btn-outline" onclick="closeProgress()" style="width:100%;justify-content:center;">වසන්න</button>
+    </div>
+  </div>
+</div>
 
 <!-- Save Score Modal (guest leaderboard name capture) -->
 <div class="modal-overlay" id="saveScoreModal">
@@ -764,71 +812,19 @@
   </div>
 </div>
 
-<!-- Game Over Modal -->
-<div class="game-over-overlay" id="gameOverModal">
-  <div class="game-over-content">
-    <span class="big-icon">💔</span>
-    <h2>Game Over!</h2>
-    <p style="color:var(--text-secondary);margin-bottom:15px;">ඔබගේ සියලු ජීවිත අහිමි විය. නැවත උත්සාහ කරන්න!</p>
-    <div class="game-over-stats">
-      <div class="stat"><div class="num" id="goCorrect">0</div><div class="label">නිවැරදි</div></div>
-      <div class="stat"><div class="num" id="goWrong">0</div><div class="label">වැරදි</div></div>
-      <div class="stat"><div class="num" id="goPct">0%</div><div class="label">ලකුණු</div></div>
+<!-- Celebration Elements -->
+<div class="celebration-glow" id="celebrationGlow"></div>
+<div class="celebration-particles" id="celebrationParticles"></div>
+<div class="confetti-container" id="confettiContainer"></div>
+<div class="celebration-overlay" id="celebrationOverlay">
+  <div class="celebration-content">
+    <div class="celebration-badge">
+      🏆 100% PERFECT!
+      <span class="celebration-sub">ඔබ සැබෑ විද්‍යාඥයෙක්! 🌟</span>
     </div>
-    <div class="game-over-actions">
-      <button class="btn btn-primary" onclick="closeGameOver()"><i class="fas fa-redo"></i> නැවත</button>
-      <button class="btn btn-outline" onclick="closeGameOverAndHome()"><i class="fas fa-home"></i> මුල් පිටුව</button>
-    </div>
-  </div>
-</div>
-
-<!-- Explanation Modal -->
-<div class="modal-overlay" id="explainModal">
-  <div class="modal-content">
-    <button class="modal-close-btn" onclick="closeModalAndNext()" aria-label="වසන්න">✕</button>
-    <span id="modalIcon" class="modal-icon"></span>
-    <h2 id="modalTitle" class="modal-title"></h2>
-    <div id="modalText" class="modal-text"></div>
-    <div class="modal-actions">
-      <button class="btn btn-primary" id="modalNextBtn" onclick="closeModalAndNext(); if(currentMode === MODES.STUDY) nextStudyQuestion();">ඊළඟට <i class="fas fa-arrow-right"></i></button>
-    </div>
-    <div class="kbd-hint" style="font-size:0.7rem;color:var(--text-secondary);margin-top:12px;opacity:0.7;">ඉක්මන් කිරීමට <kbd style="background:var(--border-color);padding:1px 6px;border-radius:4px;font-family:inherit;">Enter</kbd> ඔබන්න</div>
-  </div>
-</div>
-
-<!-- Leaderboard Modal -->
-<div class="modal-overlay" id="leaderboardModal">
-  <div class="modal-content" style="max-width:500px;">
-    <button class="modal-close-btn" onclick="closeLeaderboard()" aria-label="වසන්න">✕</button>
-    <h2 class="modal-title" style="margin-bottom:15px;">🏆 ශ්‍රේණිගත කිරීම</h2>
-    <div id="leaderboardList"></div>
-    <div style="margin-top:15px;">
-      <button class="btn btn-outline" onclick="closeLeaderboard()" style="width:100%;justify-content:center;">වසන්න</button>
-    </div>
-  </div>
-</div>
-
-<!-- Achievements Modal -->
-<div class="modal-overlay" id="achievementsModal">
-  <div class="modal-content" style="max-width:500px;">
-    <button class="modal-close-btn" onclick="closeAchievements()" aria-label="වසන්න">✕</button>
-    <h2 class="modal-title" style="margin-bottom:15px;">🏅 ජයග්‍රහණ</h2>
-    <div id="achievementsList"></div>
-    <div style="margin-top:15px;">
-      <button class="btn btn-outline" onclick="closeAchievements()" style="width:100%;justify-content:center;">වසන්න</button>
-    </div>
-  </div>
-</div>
-
-<!-- Progress Modal -->
-<div class="modal-overlay" id="progressModal">
-  <div class="modal-content" style="max-width:500px;">
-    <button class="modal-close-btn" onclick="closeProgress()" aria-label="වසන්න">✕</button>
-    <h2 class="modal-title" style="margin-bottom:15px;">📈 ප්‍රගතිය</h2>
-    <div id="progressContent"></div>
-    <div style="margin-top:15px;">
-      <button class="btn btn-outline" onclick="closeProgress()" style="width:100%;justify-content:center;">වසන්න</button>
-    </div>
+    <button class="celebration-close-btn" onclick="closeCelebration()">
+      <i class="fas fa-check"></i> අපූරුයි! දිගටම යන්න
+    </button>
   </div>
 </div>
 
@@ -838,7 +834,7 @@
     <span style="font-size:1.5rem;">📱</span>
     <span style="font-weight:600;">Quiz Hub app එක install කරන්න</span>
     <button class="btn btn-primary" onclick="installApp()" style="font-size:0.85rem;padding:6px 18px;">Install</button>
-    <button onclick="dismissInstallBanner()" style="color:var(--text-secondary);font-size:1.2rem;" aria-label="වසන්න">✕</button>
+    <button onclick="dismissInstallBanner()" style="color:var(--text-secondary);font-size:1.2rem;">✕</button>
   </div>
 </div>
 
@@ -1114,70 +1110,92 @@
     playClick();
   }
 
-  // ============ CONFETTI ============
-  function spawnConfetti(count = 30) {
+  // ============ CONFETTI & CELEBRATION ============
+  let celebrationTimeout = null;
+
+  function spawnConfetti() {
     if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const emojis = ['🧪', '⚗️', '🔬', '✨', '🌟', '🧬', '⚛️', '🎉'];
-    const container = document.createElement('div');
-    container.className = 'confetti-layer';
-    document.body.appendChild(container);
-    for (let i = 0; i < count; i++) {
+    const container = document.getElementById('confettiContainer');
+    if (!container) return;
+    
+    for (let i = 0; i < 40; i++) {
       const piece = document.createElement('span');
-      piece.className = 'confetti-piece';
+      piece.className = 'adv-confetti';
       piece.textContent = emojis[Math.floor(Math.random() * emojis.length)];
       piece.style.left = Math.random() * 100 + 'vw';
       piece.style.animationDuration = (2.4 + Math.random() * 2) + 's';
       piece.style.animationDelay = (Math.random() * 0.6) + 's';
       piece.style.fontSize = (14 + Math.random() * 18) + 'px';
+      piece.style.position = 'absolute';
+      piece.style.top = '-40px';
       container.appendChild(piece);
     }
-    setTimeout(() => container.remove(), 5000);
   }
 
-  function spawnPerfectConfetti() {
-    const emojis = ['🏆', '👑', '🌟', '✨', '💎', '🎊', '🥇', '⭐', '🌈', '🔥', '💯', '🎉'];
-    const container = document.createElement('div');
-    container.className = 'confetti-layer';
-    document.body.appendChild(container);
-    for (let i = 0; i < 50; i++) {
-      const piece = document.createElement('span');
-      piece.className = 'confetti-piece';
-      piece.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+  function triggerCelebration() {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    
+    document.getElementById('celebrationGlow').classList.add('active');
+    document.getElementById('celebrationOverlay').classList.add('active');
+    playPerfect();
+
+    const confettiContainer = document.getElementById('confettiContainer');
+    confettiContainer.innerHTML = '';
+    const colors = ['#facc15', '#fb923c', '#4ade80', '#38bdf8', '#c084fc', '#fb7185', '#fff'];
+
+    // 80+ confetti pieces
+    for(let i=0; i<100; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'adv-confetti';
       piece.style.left = Math.random() * 100 + 'vw';
-      piece.style.animationDuration = (2.8 + Math.random() * 2.2) + 's';
-      piece.style.animationDelay = (Math.random() * 0.8) + 's';
-      piece.style.fontSize = (18 + Math.random() * 22) + 'px';
-      container.appendChild(piece);
+      piece.style.width = (6 + Math.random() * 10) + 'px';
+      piece.style.height = (6 + Math.random() * 10) + 'px';
+      piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      
+      const shapeType = Math.floor(Math.random() * 3);
+      if (shapeType === 0) piece.style.borderRadius = '50%';
+      else if (shapeType === 2) {
+          piece.style.backgroundColor = 'transparent';
+          piece.style.borderLeft = '5px solid transparent';
+          piece.style.borderRight = '5px solid transparent';
+          piece.style.borderBottom = `10px solid ${colors[Math.floor(Math.random() * colors.length)]}`;
+      }
+
+      piece.style.animationDuration = (2.5 + Math.random() * 2) + 's';
+      piece.style.animationDelay = (Math.random() * 1.5) + 's';
+      confettiContainer.appendChild(piece);
     }
-    setTimeout(() => container.remove(), 6000);
+
+    // 30+ floating particles (emojis)
+    const particlesContainer = document.getElementById('celebrationParticles');
+    particlesContainer.innerHTML = '';
+    const pEmojis = ['⭐', '🌟', '✨', '🏆', '💎', '🎉', '🎊', '🥇', '💯', '🔥', '🌈', '🧬', '🔬', '⚛️'];
+    for(let i=0; i<40; i++) {
+       const p = document.createElement('div');
+       p.className = 'adv-particle';
+       p.textContent = pEmojis[Math.floor(Math.random() * pEmojis.length)];
+       p.style.left = Math.random() * 100 + 'vw';
+       p.style.fontSize = (20 + Math.random() * 30) + 'px';
+       p.style.animationDuration = (4 + Math.random() * 3) + 's';
+       p.style.animationDelay = (Math.random() * 1.5) + 's';
+       particlesContainer.appendChild(p);
+    }
+
+    celebrationTimeout = setTimeout(closeCelebration, 6000);
   }
 
-  // ============ TOASTS ============
-  function showToast(icon, title, desc, duration = 4500) {
-    const layer = document.getElementById('toastLayer');
-    if (!layer) return;
-    const el = document.createElement('div');
-    el.className = 'toast';
-    el.setAttribute('role', 'status');
-    el.innerHTML = `
-      <div class="toast-icon">${icon}</div>
-      <div class="toast-body">
-        <div class="toast-title">${escapeHtml(title)}</div>
-        ${desc ? `<div class="toast-desc">${escapeHtml(desc)}</div>` : ''}
-      </div>
-      <button class="toast-close" aria-label="වසන්න">✕</button>
-    `;
-    layer.appendChild(el);
-    requestAnimationFrame(() => el.classList.add('show'));
-
-    const remove = () => {
-      el.classList.add('leaving');
-      el.classList.remove('show');
-      setTimeout(() => el.remove(), 400);
-    };
-    el.querySelector('.toast-close').addEventListener('click', remove);
-    const timer = setTimeout(remove, duration);
-    el.addEventListener('mouseenter', () => clearTimeout(timer));
+  function closeCelebration() {
+    document.getElementById('celebrationOverlay').classList.remove('active');
+    document.getElementById('celebrationGlow').classList.remove('active');
+    setTimeout(() => {
+        document.getElementById('confettiContainer').innerHTML = '';
+        document.getElementById('celebrationParticles').innerHTML = '';
+    }, 500);
+    if (celebrationTimeout) {
+      clearTimeout(celebrationTimeout);
+      celebrationTimeout = null;
+    }
   }
 
   function triggerScreenGlow() {
@@ -1250,7 +1268,6 @@
     document.getElementById('saveScoreModal').classList.remove('active');
     pendingSaveScore = null;
     playClick();
-    showToast('🏆', 'ශ්‍රේණිගත කිරීම් ලැයිස්තුවට එකතු කළා!', name, 3500);
   }
 
   function skipSaveScore() {
@@ -1292,8 +1309,7 @@
       const a = ACHIEVEMENTS[id];
       if (a) {
         setTimeout(() => {
-          showToast(a.icon, `ජයග්‍රහණය අගුළු හැරියා! ${a.name}`, a.desc, 6000);
-          playClick();
+          alert(`🏅 ${a.icon} ${a.name}\n${a.desc}\n\n🎉 ජයග්‍රහණය අගුළු හැරියා!`);
         }, 500);
       }
     }
@@ -1777,6 +1793,7 @@
         showResult: false,
         answeredCurrent: false,
         confettiShown: false,
+        celebrationTriggered: false,
         perfectTriggered: false,
         gameOver: false,
         lives: MAX_LIVES,
@@ -1806,13 +1823,12 @@
       const pct = Math.round((qz.score / total) * 100);
       const comment = getResultComment(pct);
 
-      if (!qz.confettiShown && pct >= 80) {
+      if (pct === 100 && !qz.celebrationTriggered) {
+        qz.celebrationTriggered = true;
+        setTimeout(triggerCelebration, 500);
+      } else if (pct >= 80 && pct < 100 && !qz.confettiShown) {
         qz.confettiShown = true;
-        if (pct === 100) {
-          setTimeout(() => { triggerScreenGlow(); spawnPerfectConfetti(); playPerfect(); }, 600);
-        } else {
-          setTimeout(spawnConfetti, 400);
-        }
+        setTimeout(spawnConfetti, 400);
       }
 
       // Everything below (leaderboard save, progress totals, achievement checks) must
