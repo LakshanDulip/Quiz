@@ -621,6 +621,29 @@
 </head>
 <body>
 
+<!-- Login / Guest Modal -->
+<div class="modal-overlay" id="loginModal" style="background: var(--bg-main); z-index: 9999;">
+  <div class="modal-content" style="max-width:400px; text-align:center;">
+    <span style="font-size: 3rem; display: block; margin-bottom: 10px;">👋</span>
+    <h2 class="modal-title" style="margin-bottom: 10px;">Quiz Hub වෙත සාදරයෙන් පිළිගනිමු!</h2>
+    <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 0.9rem;">
+      ඔබේ ප්‍රගතිය සුරැකීමට නම ඇතුළත් කරන්න, නැතහොත් අමුත්තෙක් ලෙස ක්‍රීඩා කරන්න.
+    </p>
+    
+    <input type="text" id="usernameInput" placeholder="ඔබේ නම ඇතුළත් කරන්න..." 
+           style="width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary); font-family: inherit; font-size: 1rem; outline: none;">
+    
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <button class="btn btn-primary" onclick="handleLogin()" style="width: 100%; justify-content: center;">
+        <i class="fas fa-sign-in-alt"></i> ඇතුළු වන්න (Login)
+      </button>
+      <button class="btn btn-outline" onclick="handleGuest()" style="width: 100%; justify-content: center;">
+        <i class="fas fa-user-secret"></i> අමුත්තෙක් ලෙස (Play as Guest)
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- Main App Container -->
 <div id="app"></div>
 
@@ -716,6 +739,80 @@
   let isMuted = localStorage.getItem('quizMuted') === 'true' || false;
   let timerInterval = null;
   let deferredPrompt = null;
+
+  // ============ AUTHENTICATION SYSTEM ============
+  let currentUser = localStorage.getItem('quizUsername') || sessionStorage.getItem('quizGuestName');
+  let isGuest = sessionStorage.getItem('isGuest') === 'true';
+
+  function checkAuth() {
+    const loginModal = document.getElementById('loginModal');
+    if (!currentUser) {
+      loginModal.classList.add('active');
+    } else {
+      loginModal.classList.remove('active');
+    }
+  }
+
+  function handleLogin() {
+    const nameInput = document.getElementById('usernameInput').value.trim();
+    if (nameInput.length < 2) {
+      alert("කරුණාකර වලංගු නමක් ඇතුළත් කරන්න.");
+      return;
+    }
+    
+    playClick();
+    currentUser = nameInput;
+    isGuest = false;
+    
+    localStorage.setItem('quizUsername', currentUser);
+    sessionStorage.removeItem('isGuest');
+    sessionStorage.removeItem('quizGuestName');
+    
+    document.getElementById('loginModal').classList.remove('active');
+    syncAppState();
+    render();
+  }
+
+  function handleGuest() {
+    playClick();
+    currentUser = 'Guest';
+    isGuest = true;
+    
+    sessionStorage.setItem('isGuest', 'true');
+    sessionStorage.setItem('quizGuestName', 'Guest');
+    
+    document.getElementById('loginModal').classList.remove('active');
+    syncAppState();
+    render();
+  }
+
+  function handleLogout() {
+    if (confirm("ඔබට නිසැකවම ඉවත් වීමට අවශ්‍යද?")) {
+      playClick();
+      localStorage.removeItem('quizUsername');
+      sessionStorage.removeItem('isGuest');
+      sessionStorage.removeItem('quizGuestName');
+      
+      if (isGuest) {
+        sessionStorage.removeItem('guest_quizProgress');
+      }
+      
+      currentUser = null;
+      isGuest = false;
+      appState.route = { name: 'home' };
+      checkAuth();
+      render();
+    }
+  }
+
+  function syncAppState() {
+    const p = getProgress();
+    appState.totalScore = p.correctAnswers || 0;
+    appState.totalQuestions = p.totalQuestions || 0;
+    appState.bestStreak = p.bestStreak || 0;
+    appState.perfectCount = p.perfectCount || 0;
+    appState.streak = 0; 
+  }
 
   // ============ PWA ============
   window.addEventListener('beforeinstallprompt', (e) => {
@@ -1072,7 +1169,10 @@
 
   // ============ PROGRESS ============
   function getProgress() {
-    return JSON.parse(localStorage.getItem('quizProgress')) || {
+    const storage = isGuest ? sessionStorage : localStorage;
+    const storageKey = isGuest ? 'guest_quizProgress' : `user_${currentUser}_quizProgress`;
+
+    return JSON.parse(storage.getItem(storageKey)) || {
       totalQuestions: 0,
       correctAnswers: 0,
       perfectCount: 0,
@@ -1087,6 +1187,9 @@
 
   function updateProgress(stats) {
     const p = getProgress();
+    const storage = isGuest ? sessionStorage : localStorage;
+    const storageKey = isGuest ? 'guest_quizProgress' : `user_${currentUser}_quizProgress`;
+
     Object.keys(stats).forEach(key => {
       if (key === 'subjectStats') {
         Object.keys(stats.subjectStats).forEach(subj => {
@@ -1098,7 +1201,7 @@
         p[key] = (p[key] || 0) + (stats[key] || 0);
       }
     });
-    localStorage.setItem('quizProgress', JSON.stringify(p));
+    storage.setItem(storageKey, JSON.stringify(p));
   }
 
   function renderProgress() {
@@ -1357,6 +1460,15 @@
               </div>
             </div>
 
+            <div style="display: flex; align-items: center; gap: 8px; margin-left: 10px; padding-left: 10px; border-left: 1px solid var(--border-color);">
+              <span style="font-size: 0.85rem; font-weight: 600; color: var(--primary-color);">
+                <i class="fas fa-user"></i> ${currentUser === 'Guest' ? 'Guest' : escapeHtml(currentUser || '')}
+              </span>
+              <button class="icon-btn" onclick="handleLogout()" title="Logout" style="width: 28px; height: 28px; font-size: 0.8rem;">
+                <i class="fas fa-sign-out-alt"></i>
+              </button>
+            </div>
+
             <button class="install-btn" id="installBtn" onclick="installApp()">
               <i class="fas fa-download"></i> Install
             </button>
@@ -1524,9 +1636,13 @@
 
       // Save results
       if (pct >= 80) {
-        const name = prompt('🎉 විශිෂ්ටයි! ඔබේ නම ඇතුළත් කරන්න (Leaderboard සඳහා):', 'Student');
-        if (name) {
-          saveToLeaderboard(name, qz.score, total, currentMode);
+        if (isGuest) {
+          const name = prompt('🎉 විශිෂ්ටයි! ඔබේ නම ඇතුළත් කරන්න (Leaderboard සඳහා):', 'Guest');
+          if (name) {
+            saveToLeaderboard(name, qz.score, total, currentMode);
+          }
+        } else {
+          saveToLeaderboard(currentUser, qz.score, total, currentMode);
         }
       }
 
@@ -1955,8 +2071,11 @@
   });
 
   // ============ INIT ============
-  loadData();
-  appState.route = parseHash();
+  window.addEventListener('DOMContentLoaded', () => {
+    checkAuth();
+    loadData();
+    appState.route = parseHash();
+  });
 
   const style = document.createElement('style');
   style.textContent = `
