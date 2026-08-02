@@ -24,6 +24,39 @@ const OPTIONAL_ASSETS = [
   '/voice/100score.mp3'
 ];
 
+// ✅ External domains that should NOT be cached
+const EXTERNAL_DOMAINS = [
+  'ibb.co',
+  'i.ibb.co',
+  'imgur.com',
+  'i.imgur.com',
+  'cloudinary.com',
+  'res.cloudinary.com',
+  'images.unsplash.com',
+  'plus.unsplash.com'
+];
+
+// Helper function to check if URL is external
+function isExternalUrl(url) {
+  const hostname = url.hostname;
+  
+  // Check against known external domains
+  for (const domain of EXTERNAL_DOMAINS) {
+    if (hostname.includes(domain)) return true;
+  }
+  
+  // Check if it's not our own domain
+  if (self.location.hostname && !hostname.includes(self.location.hostname)) {
+    // Allow CDN fonts and icons
+    if (hostname.includes('cdnjs.cloudflare.com')) return false;
+    if (hostname.includes('fonts.googleapis.com')) return false;
+    if (hostname.includes('fonts.gstatic.com')) return false;
+    return true;
+  }
+  
+  return false;
+}
+
 // Install event - pre-cache critical assets
 self.addEventListener('install', (event) => {
   console.log('[SW] Installing service worker v' + VERSION);
@@ -93,6 +126,12 @@ self.addEventListener('fetch', (event) => {
   // Skip non-GET requests and browser extensions
   if (request.method !== 'GET') return;
   if (url.origin.includes('chrome-extension')) return;
+  
+  // ✅ Skip external URLs - let browser handle them directly
+  if (isExternalUrl(url)) {
+    console.log('[SW] Skipping external URL:', url.hostname);
+    return; // Don't intercept, let browser fetch directly
+  }
   
   // Handle different request types
   if (url.pathname.endsWith('.json')) {
@@ -251,13 +290,12 @@ async function updateCache(urls) {
   await Promise.all(updatePromises);
 }
 
-// Notification click handler (if notifications are implemented)
+// Notification click handler
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   
   event.waitUntil(
     clients.matchAll({ type: 'window' }).then((clientList) => {
-      // Focus existing window or open new one
       for (const client of clientList) {
         if (client.url.includes(self.location.origin) && 'focus' in client) {
           return client.focus();
@@ -270,7 +308,7 @@ self.addEventListener('notificationclick', (event) => {
   );
 });
 
-// Push notification handler (if push is implemented)
+// Push notification handler
 self.addEventListener('push', (event) => {
   const options = {
     body: event.data?.text() || 'New update available!',
@@ -306,7 +344,6 @@ async function checkForUpdates() {
     const data = await response.json();
     
     if (data.version !== VERSION) {
-      // Notify all clients about update
       const clients = await self.clients.matchAll();
       clients.forEach(client => {
         client.postMessage({
