@@ -526,6 +526,7 @@
   .btn-outline:hover { border-color: var(--primary-color); color: var(--primary-color); background: var(--bg-card-hover); }
   .btn-success { background: var(--correct-color); color: #1a1a1a; }
   .btn-danger { background: var(--wrong-color); color: #fff; }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
 
   /* ============ QUIZ ============ */
   .quiz-container { max-width: 750px; margin: 0 auto; background: var(--bg-card); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); padding: 30px; border: 1px solid var(--card-border); backdrop-filter: blur(10px); position: relative; }
@@ -538,6 +539,38 @@
   .quiz-stats-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   .question-number { font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; margin-bottom: 5px; }
   .question-text { font-size: 1.25rem; font-weight: 600; margin-bottom: 25px; line-height: 1.6; }
+
+  .question-image-wrap {
+    width: 100%;
+    margin-bottom: 20px;
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--bg-main);
+    border: 1px solid var(--border-color);
+    position: relative;
+    min-height: 60px;
+  }
+  .question-image-wrap img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 340px;
+    object-fit: contain;
+    background: var(--bg-main);
+  }
+  .question-image-wrap.img-error .question-image-placeholder { display: flex; }
+  .question-image-wrap.img-error img { display: none; }
+  .question-image-placeholder {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 30px 15px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+  }
+  .question-image-placeholder i { font-size: 1.8rem; opacity: 0.6; }
 
   .quiz-progress-track {
     width: 100%; height: 6px; background: var(--bg-main); border-radius: 50px;
@@ -579,6 +612,9 @@
   .study-answer-reveal .correct-answer { font-weight: 700; color: var(--correct-color); font-size: 1.1rem; }
   .study-answer-reveal .explanation { color: var(--text-secondary); margin-top: 8px; font-size: 0.95rem; }
 
+  .next-question-wrap { margin-top: 20px; }
+  .next-question-btn { width: 100%; justify-content: center; font-size: 1rem; padding: 13px 22px; }
+
   /* ============ FLASHCARDS ============ */
   .flashcard-container {
     perspective: 1000px;
@@ -611,11 +647,19 @@
     border: 2px solid var(--card-border);
     background: var(--bg-card);
     box-shadow: var(--shadow-lg);
+    overflow-y: auto;
   }
   .flashcard-back {
     transform: rotateY(180deg);
     border-color: var(--science-color);
     background: var(--bg-main);
+  }
+  .flashcard-front img, .flashcard-back img {
+    max-width: 100%;
+    max-height: 120px;
+    object-fit: contain;
+    border-radius: 10px;
+    margin-bottom: 10px;
   }
 
   .powerups { display: flex; gap: 10px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
@@ -1907,8 +1951,8 @@
             </div>
 
             <div class="game-stats">
-              <div class="stat-item"><i class="fas fa-star"></i><span class="value">${appState.totalScore}</span></div>
-              <div class="stat-item"><i class="fas fa-fire"></i><span class="value">${appState.streak}</span></div>
+              <div class="stat-item"><i class="fas fa-star"></i><span class="value" id="statScoreValue">${appState.totalScore}</span></div>
+              <div class="stat-item"><i class="fas fa-fire"></i><span class="value" id="statStreakValue">${appState.streak}</span></div>
             </div>
 
             <div class="control-group">
@@ -1956,7 +2000,7 @@
           </div>
         </div>
       </header>
-      <main class="animate-pop">${body}</main>
+      <main class="animate-pop" id="mainContent">${body}</main>
       <footer>
         <p>Learning Quiz Hub</p>
         <p class="dev-credit">🦊 Developed by Lakshan Dulip</p>
@@ -2066,6 +2110,22 @@
     `;
   }
 
+  // ============ IMAGE HELPERS ============
+  function renderQuestionImage(image) {
+    if (!image) return '';
+    const safeSrc = escapeHtml(image);
+    return `
+      <div class="question-image-wrap" id="questionImageWrap">
+        <img src="${safeSrc}" alt="ප්‍රශ්නයට අදාළ රූපය" loading="lazy" decoding="async"
+             onerror="this.closest('.question-image-wrap').classList.add('img-error')">
+        <div class="question-image-placeholder">
+          <i class="fas fa-image"></i>
+          <span>රූපය පූරණය කළ නොහැක</span>
+        </div>
+      </div>
+    `;
+  }
+
   // ============ QUIZ & FLASHCARDS ============
   function renderQuiz(subject, grade, lessonId) {
     const meta = subjectMeta(subject);
@@ -2076,6 +2136,7 @@
     }
 
     if (!appState.quiz || appState.quiz.lessonId !== lessonId) {
+      if (appState.quiz && appState.quiz.autoAdvanceTimer) clearTimeout(appState.quiz.autoAdvanceTimer);
       appState.quiz = {
         subject, grade, lessonId,
         order: shuffleIdx(lesson.questions.length),
@@ -2094,6 +2155,7 @@
         studyAnswers: {},
         isFlipped: false,
         hiddenOptions: [],
+        autoAdvanceTimer: null,
         startTime: Date.now()
       };
       if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
@@ -2118,6 +2180,7 @@
             <div class="flashcard ${qz.isFlipped ? 'flipped' : ''}" id="flashCardElement">
               <div class="flashcard-front">
                 <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:8px;">❓ ප්‍රශ්නය (ක්ලික් කර මාරු කරන්න)</div>
+                ${question.image ? renderQuestionImage(question.image) : ''}
                 <div style="font-size:1.25rem; font-weight:600;">${escapeHtml(question.q)}</div>
                 <div style="margin-top:20px; font-size:0.8rem; color:var(--primary-color);"><i class="fas fa-sync-alt"></i> පිළිතුර බලන්න Flip කරන්න</div>
               </div>
@@ -2158,6 +2221,7 @@
 
     if (qz.showResult) {
       if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+      if (qz.autoAdvanceTimer) { clearTimeout(qz.autoAdvanceTimer); qz.autoAdvanceTimer = null; }
       const pct = Math.round((qz.score / total) * 100);
       const comment = getResultComment(pct);
 
@@ -2236,7 +2300,7 @@
     const qIndex = qz.order[qz.idx];
     const question = lesson.questions[qIndex];
     const letters = ['A', 'B', 'C', 'D'];
-    const showStudyAnswer = isGame ? false : qz.answeredCurrent;
+    const showStudyPanel = !isGame && qz.answeredCurrent;
 
     return `
       <div class="quiz-container">
@@ -2267,6 +2331,7 @@
         </div>
 
         <div class="question-number">${isGame ? '🎯' : '📖'} ප්‍රශ්නය ${qz.idx + 1}</div>
+        ${question.image ? renderQuestionImage(question.image) : ''}
         <div class="question-text">${escapeHtml(question.q)}</div>
 
         <div class="options-grid">
@@ -2283,20 +2348,18 @@
               disabled = true;
               if (i === question.correct) {
                 btnClass += ' correct';
-              } else if (showStudyAnswer && i !== question.correct) {
-                if (qz.studyAnswers[qz.idx] === i) {
-                  btnClass += ' wrong';
-                }
+              } else if (qz.studyAnswers[qz.idx] === i) {
+                btnClass += ' wrong';
               }
-              if (showStudyAnswer && i === question.correct) {
+              if (showStudyPanel && i === question.correct) {
                 btnClass += ' reveal-answer';
               }
             }
             
-            if (showStudyAnswer && i === question.correct) {
+            if (showStudyPanel && i === question.correct) {
               extra = '<i class="fas fa-check-circle" style="margin-left:auto;color:var(--correct-color);"></i>';
             }
-            if (showStudyAnswer && qz.studyAnswers[qz.idx] === i && i !== question.correct) {
+            if (showStudyPanel && qz.studyAnswers[qz.idx] === i && i !== question.correct) {
               extra = '<i class="fas fa-times-circle" style="margin-left:auto;color:var(--wrong-color);"></i>';
             }
             
@@ -2310,13 +2373,10 @@
           }).join('')}
         </div>
 
-        ${showStudyAnswer ? `
+        ${showStudyPanel ? `
           <div class="study-answer-reveal">
             <div class="correct-answer">✅ නිවැරදි පිළිතුර: ${escapeHtml(question.options[question.correct])}</div>
             <div class="explanation">💡 ${escapeHtml(question.explanation) || 'පැහැදිලි කිරීමක් නැත.'}</div>
-            <div style="margin-top:12px;">
-              <button class="btn btn-primary" onclick="nextStudyQuestion()"><i class="fas fa-arrow-right"></i> ඊළඟ ප්‍රශ්නය</button>
-            </div>
           </div>
         ` : ''}
 
@@ -2341,8 +2401,49 @@
             </button>
           </div>
         ` : ''}
+
+        <div class="next-question-wrap">
+          <button class="btn btn-primary next-question-btn" id="nextQuestionBtn" onclick="goToNextQuestion()" ${qz.answeredCurrent ? '' : 'disabled'}>
+            <span>ඊළඟ ප්‍රශ්නය</span> <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
       </div>
     `;
+  }
+
+  // ============ LIGHTWEIGHT RE-RENDER (perf) ============
+  // Re-renders only the <main> content (quiz/lesson/etc) without rebuilding the
+  // header/footer shell. Used for in-quiz interactions so we avoid recreating
+  // the theme popover, mode buttons, and other header DOM on every click.
+  function renderMain() {
+    const mainEl = document.getElementById('mainContent');
+    if (!mainEl) { render(); return; }
+
+    if (appState.loading || appState.error) { render(); return; }
+
+    const r = appState.route;
+    let body = '';
+    if (r.name === 'home') body = renderHome();
+    else if (r.name === 'grades') body = renderGrades(r.subject);
+    else if (r.name === 'lessons') body = renderLessons(r.subject, r.grade);
+    else if (r.name === 'quiz') body = renderQuiz(r.subject, r.grade, r.lessonId);
+    else body = renderHome();
+
+    mainEl.innerHTML = body;
+    updateHeaderStats();
+
+    setTimeout(() => {
+      const ring = document.getElementById('ringFg');
+      if (ring) ring.style.strokeDashoffset = ring.getAttribute('data-target');
+    }, 100);
+  }
+
+  // Updates just the star/streak counters in the header without touching the rest of the DOM.
+  function updateHeaderStats() {
+    const scoreEl = document.getElementById('statScoreValue');
+    const streakEl = document.getElementById('statStreakValue');
+    if (scoreEl) scoreEl.textContent = appState.totalScore;
+    if (streakEl) streakEl.textContent = appState.streak;
   }
 
   // ============ FLASHCARD CONTROLS ============
@@ -2359,13 +2460,12 @@
     const qz = appState.quiz;
     if (!qz) return;
     qz.isFlipped = false;
-    const lesson = findLesson(qz.subject, qz.grade, qz.lessonId);
     if (qz.idx < qz.order.length - 1) {
       qz.idx++;
     } else {
       qz.idx = 0;
     }
-    render();
+    renderMain();
     playClick();
   }
 
@@ -2375,7 +2475,7 @@
     qz.isFlipped = false;
     if (qz.idx > 0) {
       qz.idx--;
-      render();
+      renderMain();
       playClick();
     }
   }
@@ -2395,7 +2495,7 @@
       const removeIdx = wrongIdxs[Math.floor(Math.random() * wrongIdxs.length)];
       if (!qz.hiddenOptions) qz.hiddenOptions = [];
       qz.hiddenOptions.push(removeIdx);
-      render();
+      renderMain();
       playClick();
     }
   }
@@ -2410,7 +2510,7 @@
     if (!qz || qz.showResult || qz.gameOver) return;
 
     timerInterval = setInterval(() => {
-      if (!appState.quiz || appState.quiz.showResult || appState.quiz.gameOver) {
+      if (!appState.quiz || appState.quiz.showResult || appState.quiz.gameOver || appState.quiz.answeredCurrent) {
         clearInterval(timerInterval);
         timerInterval = null;
         return;
@@ -2429,22 +2529,66 @@
         if (!qz.answeredCurrent) {
           qz.answeredCurrent = true;
           qz.wrong++;
+          appState.streak = 0;
           qz.lives--;
           playLoseLife();
           if (qz.lives <= 0) {
             qz.gameOver = true;
-            render();
+            renderMain();
             return;
           }
-          const qIndex = qz.order[qz.idx];
-          const question = findLesson(qz.subject, qz.grade, qz.lessonId).questions[qIndex];
-          const correctBtn = document.getElementById(`opt-${question.correct}`);
-          if (correctBtn) correctBtn.classList.add('correct');
+          renderMain();
           showModal(false, "⏰ කාලය අවසානයි!", "කාලය අවසන් විය. නිවැරදි පිළිතුර පෙන්වා ඇත. 💪");
+          scheduleAutoAdvance(1500);
         }
       }
     }, 1000);
   }
+
+  // ============ AUTO-ADVANCE (fallback-safe) ============
+  // Central place that schedules moving on to the next question in Game Mode.
+  // Storing the timer id on the quiz object (rather than a module-level var)
+  // means it always corresponds to the *current* quiz session and can't leak
+  // across lesson restarts or get silently orphaned.
+  function scheduleAutoAdvance(delay) {
+    const qz = appState.quiz;
+    if (!qz) return;
+    if (qz.autoAdvanceTimer) clearTimeout(qz.autoAdvanceTimer);
+    qz.autoAdvanceTimer = setTimeout(() => {
+      if (appState.quiz) appState.quiz.autoAdvanceTimer = null;
+      goToNextQuestion();
+    }, delay);
+  }
+
+  // Single, unified "move forward" function used by: auto-advance timers,
+  // the on-page Next Question button, the popup's Next button (study mode),
+  // and the timer-expiry / skip power-up paths. Having one function means
+  // there is exactly one place that can get the quiz "stuck".
+  function goToNextQuestion() {
+    const qz = appState.quiz;
+    if (!qz || qz.showResult || qz.gameOver) return;
+    if (!qz.answeredCurrent) return; // safety: can't skip ahead unanswered
+
+    if (qz.autoAdvanceTimer) { clearTimeout(qz.autoAdvanceTimer); qz.autoAdvanceTimer = null; }
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+
+    const modal = document.getElementById('explainModal');
+    if (modal) modal.classList.remove('active');
+    stopVoice('correct');
+    stopVoice('perfect');
+
+    qz.hiddenOptions = [];
+    if (qz.idx < qz.order.length - 1) {
+      qz.idx++;
+      qz.answeredCurrent = false;
+      if (currentMode === MODES.GAME) qz.timer = MAX_TIMER;
+      renderMain();
+    } else {
+      qz.showResult = true;
+      renderMain();
+    }
+  }
+  window.goToNextQuestion = goToNextQuestion;
 
   // ============ HANDLE OPTION CLICK ============
   window.handleOptionClick = function(selectedIndex) {
@@ -2457,80 +2601,65 @@
     if (!question) return;
     const correctIndex = question.correct;
     const explanation = question.explanation || '';
+    const isGame = currentMode === MODES.GAME;
+    const isCorrect = selectedIndex === correctIndex;
+
+    // Stop the countdown immediately so it can never double-fire while the
+    // modal/next-button flow is in progress.
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
 
     qz.answeredCurrent = true;
+    qz.studyAnswers[qz.idx] = selectedIndex;
 
-    const isGame = currentMode === MODES.GAME;
-    const selectedBtn = document.getElementById(`opt-${selectedIndex}`);
-    const correctBtn = document.getElementById(`opt-${correctIndex}`);
-
-    if (selectedIndex === correctIndex) {
-      if (selectedBtn) selectedBtn.classList.add('correct');
+    if (isCorrect) {
       qz.score++;
       appState.totalScore++;
       appState.streak++;
       if (appState.streak > appState.bestStreak) appState.bestStreak = appState.streak;
-      if (isGame) playCorrect();
-      if (!isGame) {
-        qz.studyAnswers[qz.idx] = selectedIndex;
-        showModal(true, "✅ නිවැරදියි!", explanation);
-      }
+      playCorrect();
     } else {
-      if (selectedBtn) selectedBtn.classList.add('wrong');
-      if (correctBtn) correctBtn.classList.add('correct');
       qz.wrong++;
       appState.streak = 0;
-      
       if (isGame) {
         qz.lives--;
         playLoseLife();
-        if (qz.lives <= 0) {
-          qz.gameOver = true;
-          render();
-          return;
-        }
-        showModal(false, "❌ වැරදියි!", explanation);
       } else {
-        qz.studyAnswers[qz.idx] = selectedIndex;
         playWrong();
-        showModal(false, "❌ වැරදියි!", explanation);
       }
     }
 
-    if (isGame) {
-      setTimeout(() => {
-        const modal = document.getElementById('explainModal');
-        if (modal) modal.classList.remove('active');
+    // Game over check (game mode, wrong answer, lives depleted)
+    if (isGame && !isCorrect && qz.lives <= 0) {
+      qz.gameOver = true;
+      renderMain();
+      return;
+    }
 
-        if (qz.showResult) return;
-        if (qz.idx < qz.order.length - 1) {
-          qz.idx++;
-          qz.answeredCurrent = false;
-          qz.hiddenOptions = [];
-          qz.timer = MAX_TIMER;
-          render();
-        } else {
-          qz.showResult = true;
-          render();
-        }
-      }, 1500);
+    // Re-render immediately so the UI (option colors, disabled state, the
+    // study reveal panel, and the Next Question button) always reflects the
+    // answer right away — this is what previously could leave the quiz
+    // looking "stuck" if the modal happened to fail to show.
+    renderMain();
+
+    // Game mode: only interrupt with the popup on wrong answers, matching
+    // the original fast-paced flow (correct answers just play a sound).
+    if (!isGame || !isCorrect) {
+      showModal(isCorrect, isCorrect ? "✅ නිවැරදියි!" : "❌ වැරදියි!", explanation);
+    }
+
+    // Auto-advance only in Game Mode; Study Mode waits for the user
+    // (popup's "ඊළඟට" button or the on-page Next Question button).
+    if (isGame) {
+      scheduleAutoAdvance(1500);
     }
   };
 
   // ============ STUDY MODE NEXT ============
+  // Kept as a named function (referenced from the popup's inline onclick)
+  // but now simply delegates to the single unified advance function.
   window.nextStudyQuestion = function() {
-    const qz = appState.quiz;
-    if (!qz) return;
-    qz.hiddenOptions = [];
-    if (qz.idx < qz.order.length - 1) {
-      qz.idx++;
-      qz.answeredCurrent = false;
-      render();
-    } else {
-      qz.showResult = true;
-      render();
-    }
     playClick();
+    goToNextQuestion();
   };
 
   // ============ MODAL ============
@@ -2568,7 +2697,7 @@
   // ============ POWER-UPS ============
   window.useFiftyFifty = function() {
     const qz = appState.quiz;
-    if (qz.answeredCurrent || qz.powerups.fiftyFifty <= 0 || currentMode !== MODES.GAME) return;
+    if (!qz || qz.answeredCurrent || qz.powerups.fiftyFifty <= 0 || currentMode !== MODES.GAME) return;
     qz.powerups.fiftyFifty--;
     const qIndex = qz.order[qz.idx];
     const question = findLesson(qz.subject, qz.grade, qz.lessonId).questions[qIndex];
@@ -2576,35 +2705,32 @@
     const wrongOptions = question.options.map((_, i) => i).filter(i => i !== correct);
     const shuffled = shuffleIdx(wrongOptions.length);
     const toRemove = shuffled.slice(0, 2).map(i => wrongOptions[i]);
-    toRemove.forEach(i => {
-      const btn = document.getElementById(`opt-${i}`);
-      if (btn) { btn.style.display = 'none'; btn.disabled = true; }
-    });
-    document.getElementById('fiftyBtn').disabled = true;
-    document.getElementById('fiftyBtn').textContent = '50/50 (0)';
+    if (!qz.hiddenOptions) qz.hiddenOptions = [];
+    qz.hiddenOptions.push(...toRemove);
+    renderMain();
     playClick();
   };
 
   window.useSkip = function() {
     const qz = appState.quiz;
-    if (qz.answeredCurrent || qz.powerups.skip <= 0 || currentMode !== MODES.GAME) return;
+    if (!qz || qz.answeredCurrent || qz.powerups.skip <= 0 || currentMode !== MODES.GAME) return;
     qz.powerups.skip--;
     qz.answeredCurrent = true;
     qz.wrong++;
+    appState.streak = 0;
     qz.lives--;
-    document.getElementById('skipBtn').disabled = true;
-    document.getElementById('skipBtn').textContent = `මඟ හරින්න (${qz.powerups.skip})`;
     playLoseLife();
+
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+
     if (qz.lives <= 0) {
       qz.gameOver = true;
-      render();
+      renderMain();
       return;
     }
-    const qIndex = qz.order[qz.idx];
-    const question = findLesson(qz.subject, qz.grade, qz.lessonId).questions[qIndex];
-    const correctBtn = document.getElementById(`opt-${question.correct}`);
-    if (correctBtn) correctBtn.classList.add('correct');
+    renderMain();
     showModal(false, "⏭️ මඟ හැරියා!", "ඔබ මෙම ප්‍රශ්නය මඟ හැරියා. ජීවිතයක් අහිමි විය! 💔");
+    scheduleAutoAdvance(1500);
   };
 
   // ============ GAME OVER ============
@@ -2625,6 +2751,7 @@
     document.getElementById('gameOverModal').classList.remove('active');
     if (appState.quiz) {
       const qz = appState.quiz;
+      if (qz.autoAdvanceTimer) { clearTimeout(qz.autoAdvanceTimer); qz.autoAdvanceTimer = null; }
       qz.idx = 0;
       qz.score = 0;
       qz.wrong = 0;
@@ -2635,12 +2762,15 @@
       qz.confettiShown = false;
       qz.celebrationTriggered = false;
       qz.gameOver = false;
-      render();
+      qz.hiddenOptions = [];
+      qz.studyAnswers = {};
+      renderMain();
     }
   }
 
   function closeGameOverAndHome() {
     document.getElementById('gameOverModal').classList.remove('active');
+    if (appState.quiz && appState.quiz.autoAdvanceTimer) clearTimeout(appState.quiz.autoAdvanceTimer);
     appState.quiz = null;
     navigate('#/');
   }
@@ -2697,6 +2827,13 @@
       const idx = parseInt(e.key, 10) - 1;
       const btn = document.getElementById('opt-' + idx);
       if (btn && !btn.disabled && btn.style.display !== 'none') btn.click();
+      return;
+    }
+
+    // Enter also triggers the on-page Next Question button once answered
+    if (e.key === 'Enter' && appState.quiz.answeredCurrent) {
+      e.preventDefault();
+      goToNextQuestion();
     }
   });
 
@@ -2710,6 +2847,14 @@
     checkAuth();
     loadData();
     appState.route = parseHash();
+  });
+
+  // Release timers/resources when the tab is hidden or closed, to avoid
+  // background ticking and memory growth during long sessions.
+  window.addEventListener('beforeunload', () => {
+    if (timerInterval) clearInterval(timerInterval);
+    if (appState.quiz && appState.quiz.autoAdvanceTimer) clearTimeout(appState.quiz.autoAdvanceTimer);
+    if (celebrationTimeout) clearTimeout(celebrationTimeout);
   });
 
   // Service Worker for PWA
