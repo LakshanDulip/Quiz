@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0d1815">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Sinhala:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Sinhala:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
   /* ============ CSS VARIABLES ============ */
@@ -331,6 +331,34 @@
     pointer-events: none;
   }
 
+  /* ============ AMBIENT FLOATING BLOBS ============ */
+  .bg-blobs { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+  .bg-blob {
+    position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.22;
+    animation: blobFloat 22s ease-in-out infinite;
+  }
+  .bg-blob.b1 { width: 320px; height: 320px; top: -80px; left: -60px; background: var(--primary-color); animation-duration: 26s; }
+  .bg-blob.b2 { width: 260px; height: 260px; top: 30%; right: -80px; background: var(--science-color); animation-duration: 20s; animation-delay: -4s; }
+  .bg-blob.b3 { width: 240px; height: 240px; bottom: -60px; left: 20%; background: var(--accent); animation-duration: 24s; animation-delay: -10s; }
+  .bg-blob.b4 { width: 200px; height: 200px; bottom: 10%; right: 15%; background: var(--wrong-color); opacity: 0.14; animation-duration: 18s; animation-delay: -7s; }
+  @keyframes blobFloat {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    25% { transform: translate(30px, -25px) scale(1.08); }
+    50% { transform: translate(-15px, 20px) scale(0.94); }
+    75% { transform: translate(20px, 30px) scale(1.04); }
+  }
+  @media (prefers-reduced-motion: reduce) { .bg-blob { animation: none !important; } }
+
+  .bg-sparkles { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+  .bg-sparkle {
+    position: absolute; font-size: 1rem; opacity: 0.35;
+    animation: sparkleTwinkle 3.5s ease-in-out infinite;
+  }
+  @keyframes sparkleTwinkle {
+    0%, 100% { opacity: 0.12; transform: scale(0.8) rotate(0deg); }
+    50% { opacity: 0.5; transform: scale(1.15) rotate(15deg); }
+  }
+
   #app { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; }
 
   a { text-decoration: none; color: inherit; }
@@ -361,7 +389,7 @@
   .logo:hover { transform: scale(1.02); }
   .logo-mark { flex-shrink: 0; animation: spin 16s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .logo-text { display: flex; flex-direction: column; line-height: 1.2; font-family: 'Space Grotesk', 'Noto Sans Sinhala', sans-serif; }
+  .logo-text { display: flex; flex-direction: column; line-height: 1.2; font-family: 'Baloo 2', 'Space Grotesk', 'Noto Sans Sinhala', sans-serif; }
   .logo-text .main {
     font-weight: 700; font-size: 1.2rem;
     background: var(--primary-gradient);
@@ -380,9 +408,9 @@
   .stat-item i { color: var(--accent); }
   .stat-item .value { color: var(--text-primary); font-weight: 700; font-variant-numeric: tabular-nums; }
 
-  .icon-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--border-color); color: var(--text-primary); display: flex; align-items: center; justify-content: center; font-size: 1rem; }
-  .icon-btn:hover { background: var(--primary-color); color: #fff; transform: translateY(-2px); box-shadow: 0 6px 14px -4px var(--glow-color); }
-  .icon-btn:active { transform: translateY(0) scale(0.94); }
+  .icon-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--border-color); color: var(--text-primary); display: flex; align-items: center; justify-content: center; font-size: 1rem; position: relative; overflow: hidden; transition: transform 0.25s cubic-bezier(.3,1.7,.4,1), background 0.2s ease, box-shadow 0.2s ease; }
+  .icon-btn:hover { background: var(--primary-color); color: #fff; transform: translateY(-2px) rotate(-8deg) scale(1.08); box-shadow: 0 6px 14px -4px var(--glow-color); }
+  .icon-btn:active { transform: translateY(0) scale(0.88) rotate(0); }
   .icon-btn.muted { background: var(--wrong-color); color: #fff; }
 
   /* ============ MODE SELECTOR ============ */
@@ -401,14 +429,16 @@
     font-weight: 600;
     color: var(--text-secondary);
     transition: all 0.2s ease;
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Baloo 2', 'Space Grotesk', sans-serif;
   }
-  .mode-btn:hover { color: var(--text-primary); }
+  .mode-btn:hover { color: var(--text-primary); transform: scale(1.08); }
   .mode-btn.active {
     background: var(--primary-gradient);
     color: #fff;
     box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    animation: modeActivatePop 0.35s cubic-bezier(.3,1.6,.4,1);
   }
+  @keyframes modeActivatePop { 0% { transform: scale(0.85); } 55% { transform: scale(1.1); } 100% { transform: scale(1); } }
   :root[data-theme="light"] .mode-btn.active, :root[data-theme="pure-white"] .mode-btn.active, :root[data-theme="sakura"] .mode-btn.active {
     color: #fff;
   }
@@ -417,7 +447,7 @@
   .lives-display .heart { color: var(--heart-color); transition: all 0.3s ease; }
   .lives-display .heart.lost { opacity: 0.2; transform: scale(0.7); }
 
-  .timer-display { display: flex; align-items: center; gap: 5px; font-weight: 700; font-size: 0.9rem; font-family: 'Space Grotesk', sans-serif; color: var(--timer-color); }
+  .timer-display { display: flex; align-items: center; gap: 5px; font-weight: 700; font-size: 0.9rem; font-family: 'Baloo 2', 'Space Grotesk', sans-serif; color: var(--timer-color); }
   .timer-display.warning { animation: timerPulse 0.8s ease-in-out infinite; }
   @keyframes timerPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
@@ -471,7 +501,7 @@
   .theme-dot-pure-white { background: #ffffff; border-color: #ccc; }
   .theme-dot-sakura { background: #fdf2f8; border-color: #fbcfe8; }
 
-  .page-title { font-family: 'Space Grotesk', 'Noto Sans Sinhala', sans-serif; font-size: clamp(1.5rem, 4vw, 2.15rem); font-weight: 700; letter-spacing: -0.01em; margin-bottom: 8px; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .page-title { font-family: 'Baloo 2', 'Space Grotesk', 'Noto Sans Sinhala', sans-serif; font-size: clamp(1.5rem, 4vw, 2.15rem); font-weight: 700; letter-spacing: -0.01em; margin-bottom: 8px; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
   .page-sub { color: var(--text-secondary); margin-bottom: 30px; font-size: 1rem; }
   .breadcrumb { color: var(--text-secondary); margin-bottom: 20px; font-size: 0.85rem; display: flex; align-items: center; flex-wrap: wrap; }
   .breadcrumb span { margin: 0 6px; opacity: 0.5; }
@@ -482,8 +512,13 @@
   .grid-auto { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 210px)); gap: 20px; justify-content: center; }
   .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
 
-  .card { background: var(--bg-card); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 25px; box-shadow: var(--shadow-sm); transition: transform 0.3s cubic-bezier(.2,.8,.3,1), box-shadow 0.3s ease, border-color 0.3s ease; position: relative; overflow: hidden; backdrop-filter: blur(6px); }
-  .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--primary-color); }
+  .card { background: var(--bg-card); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 25px; box-shadow: var(--shadow-sm); transition: transform 0.3s cubic-bezier(.2,.8,.3,1), box-shadow 0.3s ease, border-color 0.3s ease; position: relative; overflow: hidden; backdrop-filter: blur(6px); animation: cardEnter 0.5s cubic-bezier(.22,1.1,.4,1) backwards; }
+  .card:hover { transform: translateY(-5px) rotate(-0.6deg); box-shadow: var(--shadow-md); border-color: var(--primary-color); }
+  @keyframes cardEnter { 0% { opacity: 0; transform: translateY(16px) scale(0.96); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+  .grid-2 .card:nth-child(1), .grid-auto .card:nth-child(1) { animation-delay: 0.03s; }
+  .grid-2 .card:nth-child(2), .grid-auto .card:nth-child(2) { animation-delay: 0.09s; }
+  .grid-auto .card:nth-child(3) { animation-delay: 0.15s; }
+  .grid-auto .card:nth-child(4) { animation-delay: 0.21s; }
 
   .subject-card { display: flex; flex-direction: column; gap: 4px; cursor: pointer; border-left: 4px solid var(--science-color); isolation: isolate; }
   .subject-card::before {
@@ -492,7 +527,7 @@
     transition: opacity 0.35s ease, transform 0.35s ease; z-index: -1;
   }
   .subject-card:hover::before { opacity: 0.22; transform: scale(1.15); }
-  .subject-card h3 { font-family: 'Space Grotesk', 'Noto Sans Sinhala', sans-serif; font-size: 1.35rem; }
+  .subject-card h3 { font-family: 'Baloo 2', 'Space Grotesk', 'Noto Sans Sinhala', sans-serif; font-size: 1.35rem; }
   .subject-card p { color: var(--text-secondary); font-size: 0.9rem; }
   .subject-card .enter-cta { margin-top: 14px; align-self: flex-start; }
   .subject-icon { position: absolute; right: 16px; bottom: 12px; font-size: 3.2rem; opacity: 0.08; transition: transform 0.4s cubic-bezier(.2,.8,.3,1), opacity 0.3s ease; }
@@ -507,23 +542,23 @@
     animation: spin 24s linear infinite; z-index: -1;
   }
   .grade-card:hover::after { border-color: var(--primary-color); }
-  .grade-card h2 { font-family: 'Space Grotesk', sans-serif; font-size: 2.8rem; color: var(--primary-color); margin-bottom: 3px; }
+  .grade-card h2 { font-family: 'Baloo 2', 'Space Grotesk', sans-serif; font-size: 2.8rem; color: var(--primary-color); margin-bottom: 3px; }
   .grade-card span { color: var(--text-secondary); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
   .grade-card .lesson-count { margin-top: 8px; font-size: 0.75rem; color: var(--text-secondary); }
 
   .lesson-card { display: flex; align-items: center; gap: 16px; padding: 18px 20px; cursor: pointer; }
   .lesson-card:hover { transform: translateX(5px); border-color: var(--primary-color); box-shadow: var(--shadow-md); }
-  .lesson-icon { width: 50px; height: 50px; border-radius: 12px; background: var(--primary-gradient); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 700; flex-shrink: 0; color: #fff; font-family: 'Space Grotesk', sans-serif; box-shadow: 0 6px 14px -6px var(--glow-color); transition: transform 0.3s cubic-bezier(.2,.8,.3,1); }
+  .lesson-icon { width: 50px; height: 50px; border-radius: 12px; background: var(--primary-gradient); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 700; flex-shrink: 0; color: #fff; font-family: 'Baloo 2', 'Space Grotesk', sans-serif; box-shadow: 0 6px 14px -6px var(--glow-color); transition: transform 0.3s cubic-bezier(.2,.8,.3,1); }
   .lesson-card:hover .lesson-icon { transform: rotate(-6deg) scale(1.06); }
   .lesson-info h4 { font-size: 1.1rem; margin-bottom: 3px; }
   .q-badge { display: inline-block; padding: 3px 10px; background: var(--border-color); border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin-top: 5px; }
 
-  .btn { padding: 10px 22px; border-radius: 50px; font-weight: 600; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s ease; }
-  .btn:active { transform: scale(0.96); }
+  .btn { padding: 10px 22px; border-radius: 50px; font-weight: 700; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px; transition: transform 0.18s cubic-bezier(.3,1.6,.4,1), box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease; position: relative; overflow: hidden; font-family: 'Baloo 2', 'Inter', 'Noto Sans Sinhala', sans-serif; }
+  .btn:active { transform: scale(0.93); }
   .btn-primary { background: var(--primary-gradient); color: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
-  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
+  .btn-primary:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 10px 26px -6px var(--glow-color); }
   .btn-outline { border: 2px solid var(--border-color); color: var(--text-primary); }
-  .btn-outline:hover { border-color: var(--primary-color); color: var(--primary-color); background: var(--bg-card-hover); }
+  .btn-outline:hover { border-color: var(--primary-color); color: var(--primary-color); background: var(--bg-card-hover); transform: translateY(-3px) scale(1.03); }
   .btn-success { background: var(--correct-color); color: #1a1a1a; }
   .btn-danger { background: var(--wrong-color); color: #fff; }
 
@@ -533,7 +568,7 @@
     content: ''; position: absolute; top: 0; left: 24px; right: 24px; height: 3px;
     background: var(--primary-gradient); border-radius: 0 0 4px 4px; opacity: 0.8;
   }
-  .lesson-name { font-weight: 700; font-family: 'Space Grotesk', 'Noto Sans Sinhala', sans-serif; }
+  .lesson-name { font-weight: 700; font-family: 'Baloo 2', 'Space Grotesk', 'Noto Sans Sinhala', sans-serif; }
   .quiz-header { display: flex; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 15px; flex-wrap: wrap; }
   .quiz-stats-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   .question-number { font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; margin-bottom: 5px; }
@@ -553,10 +588,11 @@
     width: 100%; text-align: left; padding: 14px 18px;
     background: var(--bg-main); border: 2px solid var(--border-color);
     border-radius: 12px; font-size: 1rem; color: var(--text-primary);
-    display: flex; align-items: center; gap: 12px;
-    transition: all 0.2s ease;
+    display: flex; align-items: center; gap: 12px; position: relative; overflow: hidden;
+    transition: transform 0.18s cubic-bezier(.3,1.5,.4,1), border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
   }
-  .option-btn:hover:not(:disabled) { border-color: var(--primary-color); background: var(--bg-card-hover); transform: translateX(4px); }
+  .option-btn:hover:not(:disabled) { border-color: var(--primary-color); background: var(--bg-card-hover); transform: translateX(6px) scale(1.015); box-shadow: var(--shadow-sm); }
+  .option-btn:active:not(:disabled) { transform: translateX(6px) scale(0.98); }
   .option-btn:disabled { cursor: default; }
   .option-btn.correct { border-color: var(--correct-color); background: rgba(74, 222, 128, 0.1); color: var(--correct-color); font-weight: 600; animation: optionPop 0.35s cubic-bezier(.3,1.4,.5,1); }
   .option-btn.wrong { border-color: var(--wrong-color); background: rgba(251, 113, 133, 0.1); color: var(--wrong-color); animation: optionShake 0.4s ease; }
@@ -564,7 +600,7 @@
   @keyframes optionPop { 0% { transform: scale(1); } 45% { transform: scale(1.025); } 100% { transform: scale(1); } }
   @keyframes optionShake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-6px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-3px); } 80% { transform: translateX(2px); } }
 
-  .opt-letter { width: 28px; height: 28px; border-radius: 50%; background: var(--border-color); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; flex-shrink: 0; font-family: 'Space Grotesk', sans-serif; }
+  .opt-letter { width: 28px; height: 28px; border-radius: 50%; background: var(--border-color); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; flex-shrink: 0; font-family: 'Baloo 2', 'Space Grotesk', sans-serif; }
   .option-btn.correct .opt-letter { background: var(--correct-color); color: #08210f; }
   .option-btn.wrong .opt-letter { background: var(--wrong-color); color: #fff; }
   .option-btn.reveal-answer .opt-letter { background: var(--science-color); color: #08210f; }
@@ -644,7 +680,7 @@
   .modal-icon.correct { color: var(--correct-color); }
   .modal-icon.wrong { color: var(--wrong-color); }
   @keyframes iconBounceIn { 0% { transform: scale(0.3); opacity: 0; } 60% { transform: scale(1.15); opacity: 1; } 100% { transform: scale(1); } }
-  .modal-title { font-family: 'Space Grotesk', 'Noto Sans Sinhala', sans-serif; font-size: 1.3rem; margin-bottom: 12px; font-weight: 700; }
+  .modal-title { font-family: 'Baloo 2', 'Space Grotesk', 'Noto Sans Sinhala', sans-serif; font-size: 1.3rem; margin-bottom: 12px; font-weight: 700; }
   .modal-text { color: var(--text-secondary); font-size: 1rem; margin-bottom: 20px; line-height: 1.6; padding: 12px; background: var(--bg-main); border-radius: 8px; }
   .modal-actions { display: flex; gap: 10px; justify-content: center; }
   .modal-actions .btn { flex: 1; justify-content: center; }
@@ -669,7 +705,7 @@
     font-size: 1.1rem;
     min-width: 32px;
     text-align: center;
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Baloo 2', 'Space Grotesk', sans-serif;
   }
   .leaderboard-entry .rank.gold { color: var(--gold); }
   .leaderboard-entry .rank.silver { color: var(--silver); }
@@ -677,7 +713,7 @@
   .leaderboard-entry .info { flex: 1; text-align: left; }
   .leaderboard-entry .info .name { font-weight: 600; }
   .leaderboard-entry .info .detail { font-size: 0.75rem; color: var(--text-secondary); }
-  .leaderboard-entry .score { font-weight: 700; font-size: 1.1rem; color: var(--primary-color); font-family: 'Space Grotesk', sans-serif; }
+  .leaderboard-entry .score { font-weight: 700; font-size: 1.1rem; color: var(--primary-color); font-family: 'Baloo 2', 'Space Grotesk', sans-serif; }
 
   /* ============ ACHIEVEMENTS ============ */
   .achievement-card {
@@ -739,10 +775,10 @@
     text-align: center; box-shadow: 0 0 60px rgba(251, 113, 133, 0.2);
   }
   .game-over-content .big-icon { font-size: 4rem; display: block; margin-bottom: 10px; }
-  .game-over-content h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; }
+  .game-over-content h2 { font-family: 'Baloo 2', 'Space Grotesk', sans-serif; font-size: 1.8rem; }
   .game-over-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 15px 0; }
   .game-over-stats .stat { padding: 10px; background: var(--bg-main); border-radius: 10px; }
-  .game-over-stats .num { font-size: 1.5rem; font-weight: 700; color: var(--primary-color); font-family: 'Space Grotesk', sans-serif; }
+  .game-over-stats .num { font-size: 1.5rem; font-weight: 700; color: var(--primary-color); font-family: 'Baloo 2', 'Space Grotesk', sans-serif; }
   .game-over-stats .label { font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; }
   .game-over-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 15px; }
 
@@ -757,12 +793,12 @@
   .ring-bg { fill: none; stroke: var(--border-color); stroke-width: 10; }
   .ring-fg { fill: none; stroke: var(--primary-color); stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset 1.1s cubic-bezier(.3,1.3,.5,1); }
   .ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-  .ring-center h1 { font-family: 'Space Grotesk', sans-serif; font-size: 2.4rem; line-height: 1; }
+  .ring-center h1 { font-family: 'Baloo 2', 'Space Grotesk', sans-serif; font-size: 2.4rem; line-height: 1; }
   .ring-center span { font-size: 0.7rem; color: var(--text-secondary); font-weight: 600; letter-spacing: 1px; }
 
   .result-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 20px 0; }
   .result-stat { text-align: center; padding: 10px; background: var(--bg-main); border-radius: 10px; }
-  .result-stat .num { font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--primary-color); }
+  .result-stat .num { font-family: 'Baloo 2', 'Space Grotesk', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--primary-color); }
   .result-stat .label { font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; }
 
   .result-comment { font-size: 1.1rem; font-weight: 600; color: var(--text-primary); margin-top: 5px; }
@@ -771,7 +807,7 @@
   .perfect-badge {
     display: inline-flex; align-items: center; gap: 6px;
     background: var(--primary-gradient); color: #fff; font-weight: 700;
-    font-family: 'Space Grotesk', sans-serif; font-size: 0.85rem;
+    font-family: 'Baloo 2', 'Space Grotesk', sans-serif; font-size: 0.85rem;
     padding: 6px 16px; border-radius: 50px; margin: -4px auto 10px;
     box-shadow: 0 6px 18px -6px var(--glow-color);
     animation: iconBounceIn 0.5s cubic-bezier(.3,1.6,.4,1);
@@ -816,7 +852,7 @@
     border-radius: 20px;
     font-size: 2.5rem;
     font-weight: 800;
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Baloo 2', 'Space Grotesk', sans-serif;
     box-shadow: 0 10px 30px rgba(250, 204, 21, 0.5), inset 0 0 20px rgba(255,255,255,0.5);
     display: flex; flex-direction: column; gap: 10px; align-items: center;
     border: 4px solid #fff;
@@ -864,8 +900,73 @@
   .screen-glow.active { opacity: 1 !important; animation: glowPulse 2s ease-in-out infinite; }
   @keyframes glowPulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
 
-  .animate-pop { animation: popIn 0.25s ease forwards; }
-  @keyframes popIn { 0% { opacity: 0; transform: scale(0.97); } 100% { opacity: 1; transform: scale(1); } }
+  .animate-pop { animation: pagePopIn 0.4s cubic-bezier(.22,1.15,.4,1) forwards; }
+  @keyframes pagePopIn {
+    0% { opacity: 0; transform: translateY(14px) scale(0.98); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* ============ MASCOT ============ */
+  .mascot-wrap { display: inline-block; animation: mascotBob 2.6s ease-in-out infinite; transform-origin: 50% 90%; }
+  @keyframes mascotBob {
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50% { transform: translateY(-10px) rotate(2deg); }
+  }
+  .mascot-wrap.happy { animation: mascotHappy 0.7s cubic-bezier(.3,1.6,.4,1); }
+  @keyframes mascotHappy {
+    0% { transform: scale(1) rotate(0); }
+    30% { transform: scale(1.25) rotate(-10deg); }
+    55% { transform: scale(0.95) rotate(8deg); }
+    75% { transform: scale(1.12) rotate(-4deg); }
+    100% { transform: scale(1) rotate(0); }
+  }
+  .mascot-wrap.sad { animation: mascotSad 0.6s ease; }
+  @keyframes mascotSad {
+    0%, 100% { transform: translateX(0) rotate(0); }
+    20% { transform: translateX(-8px) rotate(-6deg); }
+    40% { transform: translateX(7px) rotate(5deg); }
+    60% { transform: translateX(-5px) rotate(-3deg); }
+    80% { transform: translateX(3px) rotate(2deg); }
+  }
+  .mascot-wrap.dance { animation: mascotDance 0.9s ease-in-out infinite; }
+  @keyframes mascotDance {
+    0%, 100% { transform: translateY(0) rotate(-8deg) scale(1); }
+    25% { transform: translateY(-14px) rotate(8deg) scale(1.05); }
+    50% { transform: translateY(0) rotate(-6deg) scale(0.98); }
+    75% { transform: translateY(-10px) rotate(10deg) scale(1.05); }
+  }
+  .mascot-bubble {
+    position: relative; display: inline-block; background: var(--bg-card); border: 2px solid var(--card-border);
+    padding: 8px 16px; border-radius: 50px; font-size: 0.85rem; font-weight: 600; color: var(--text-primary);
+    box-shadow: var(--shadow-sm); margin-bottom: 10px; animation: bubblePop 0.4s cubic-bezier(.3,1.5,.4,1);
+  }
+  @keyframes bubblePop { 0% { opacity: 0; transform: scale(0.6) translateY(8px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+
+  /* ============ STREAK FIRE ============ */
+  .stat-item.streak-hot i { animation: fireFlicker 0.5s ease-in-out infinite; }
+  @keyframes fireFlicker {
+    0%, 100% { transform: scale(1) rotate(-3deg); }
+    50% { transform: scale(1.25) rotate(3deg); }
+  }
+  .stat-item.streak-hot .value { color: var(--wrong-color) !important; font-weight: 800; }
+
+  /* ============ MILESTONE TOAST ============ */
+  .milestone-toast {
+    position: fixed; top: 90px; left: 50%; transform: translateX(-50%) translateY(-20px); z-index: 3500;
+    background: var(--primary-gradient); color: #fff; padding: 12px 26px; border-radius: 50px;
+    font-weight: 700; font-family: 'Baloo 2', 'Space Grotesk', sans-serif; font-size: 1rem;
+    box-shadow: 0 10px 30px -6px var(--glow-color); opacity: 0; pointer-events: none;
+    display: flex; align-items: center; gap: 8px; white-space: nowrap;
+    transition: opacity 0.35s ease, transform 0.35s cubic-bezier(.3,1.4,.4,1);
+  }
+  .milestone-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ============ RIPPLE ============ */
+  .ripple-el {
+    position: absolute; border-radius: 50%; background: rgba(255,255,255,0.55);
+    transform: scale(0); animation: rippleAnim 0.6s ease-out forwards; pointer-events: none;
+  }
+  @keyframes rippleAnim { to { transform: scale(2.6); opacity: 0; } }
 
   footer { text-align: center; padding: 20px; color: var(--text-secondary); font-size: 0.8rem; border-top: 1px solid var(--border-color); background: var(--bg-card); backdrop-filter: blur(10px); }
   .dev-credit { margin-top: 5px; font-weight: 600; color: var(--primary-color); }
@@ -945,6 +1046,18 @@
     </div>
   </div>
 </div>
+
+<!-- Ambient Background -->
+<div class="bg-blobs" aria-hidden="true">
+  <div class="bg-blob b1"></div>
+  <div class="bg-blob b2"></div>
+  <div class="bg-blob b3"></div>
+  <div class="bg-blob b4"></div>
+</div>
+<div class="bg-sparkles" id="bgSparkles" aria-hidden="true"></div>
+
+<!-- Milestone Toast -->
+<div class="milestone-toast" id="milestoneToast"></div>
 
 <!-- Main App Container -->
 <div id="app"></div>
@@ -1075,6 +1188,130 @@
   const THEMES = ['dark', 'light', 'purple', 'ocean', 'forest', 'sunset', 'pink', 'pure-white', 'sakura'];
   const MAX_TIMER = 20;
   const MAX_LIVES = 3;
+  const SPARKLE_EMOJIS = ['✨', '⭐', '🔬', '🧪', '⚛️', '🌟'];
+  const MILESTONE_STREAKS = [3, 5, 10, 15, 20];
+
+  // ============ AMBIENT SPARKLES ============
+  function spawnAmbientSparkles() {
+    const container = document.getElementById('bgSparkles');
+    if (!container) return;
+    container.innerHTML = '';
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    for (let i = 0; i < 14; i++) {
+      const s = document.createElement('span');
+      s.className = 'bg-sparkle';
+      s.textContent = SPARKLE_EMOJIS[Math.floor(Math.random() * SPARKLE_EMOJIS.length)];
+      s.style.left = Math.random() * 100 + 'vw';
+      s.style.top = Math.random() * 100 + 'vh';
+      s.style.animationDelay = (Math.random() * 3.5) + 's';
+      s.style.animationDuration = (2.6 + Math.random() * 3) + 's';
+      s.style.fontSize = (10 + Math.random() * 14) + 'px';
+      container.appendChild(s);
+    }
+  }
+
+  // ============ MASCOT: "Bubbles" the friendly science bot ============
+  // mood: 'idle' | 'happy' | 'sad' | 'dance' | 'excited'
+  let mascotIdCounter = 0;
+  function renderMascot(mood, size) {
+    size = size || 70;
+    const gradId = 'mascotGrad' + (mascotIdCounter++);
+    const mouthPaths = {
+      idle: 'M 26 40 Q 35 46 44 40',
+      happy: 'M 24 38 Q 35 52 46 38',
+      sad: 'M 25 44 Q 35 36 45 44',
+      dance: 'M 24 38 Q 35 52 46 38',
+      excited: 'M 24 38 Q 35 52 46 38'
+    };
+    const eyeShape = mood === 'sad'
+      ? `<path d="M22 27 Q26 23 30 27" stroke="#123" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M40 27 Q44 23 48 27" stroke="#123" stroke-width="2.4" fill="none" stroke-linecap="round"/>`
+      : `<circle cx="26" cy="28" r="4.2" fill="#123"/><circle cx="44" cy="28" r="4.2" fill="#123"/><circle cx="27.3" cy="26.5" r="1.2" fill="#fff"/><circle cx="45.3" cy="26.5" r="1.2" fill="#fff"/>`;
+    const blush = mood === 'happy' || mood === 'dance' || mood === 'excited'
+      ? `<ellipse cx="18" cy="35" rx="4" ry="2.4" fill="var(--wrong-color)" opacity="0.45"/><ellipse cx="52" cy="35" rx="4" ry="2.4" fill="var(--wrong-color)" opacity="0.45"/>`
+      : '';
+    return `
+      <svg viewBox="0 0 70 76" width="${size}" height="${size * 76 / 70}" role="img" aria-label="Mascot">
+        <ellipse cx="35" cy="70" rx="16" ry="4" fill="#000" opacity="0.12"/>
+        <rect x="31" y="4" width="8" height="12" rx="4" fill="var(--accent)"/>
+        <circle cx="35" cy="4" r="4.5" fill="var(--wrong-color)"/>
+        <defs>
+          <linearGradient id="${gradId}" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="var(--primary-color)"/>
+            <stop offset="100%" stop-color="var(--accent)"/>
+          </linearGradient>
+        </defs>
+        <rect x="9" y="16" width="52" height="46" rx="20" fill="url(#${gradId})"/>
+        <rect x="16" y="24" width="38" height="26" rx="13" fill="var(--bg-card)"/>
+        ${blush}
+        ${eyeShape}
+        <path d="${mouthPaths[mood] || mouthPaths.idle}" stroke="#123" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+        <circle cx="9" cy="38" r="5" fill="var(--science-color)"/>
+        <circle cx="61" cy="38" r="5" fill="var(--science-color)"/>
+      </svg>
+    `;
+  }
+
+  function showMascotBubble(targetSelector, text) {
+    const el = document.querySelector(targetSelector);
+    if (!el) return;
+    el.textContent = text;
+    el.style.animation = 'none';
+    void el.offsetWidth;
+    el.style.animation = 'bubblePop 0.4s cubic-bezier(.3,1.5,.4,1)';
+  }
+
+  // ============ MILESTONE TOAST ============
+  let milestoneTimeout = null;
+  function showMilestoneToast(text) {
+    const toast = document.getElementById('milestoneToast');
+    if (!toast) return;
+    toast.innerHTML = text;
+    toast.classList.add('show');
+    if (milestoneTimeout) clearTimeout(milestoneTimeout);
+    milestoneTimeout = setTimeout(() => toast.classList.remove('show'), 2200);
+  }
+
+  function miniBurst(x, y) {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const container = document.getElementById('confettiContainer');
+    if (!container) return;
+    const emojis = ['✨', '⭐', '🎉'];
+    for (let i = 0; i < 10; i++) {
+      const p = document.createElement('span');
+      p.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      p.style.position = 'fixed';
+      p.style.left = x + 'px';
+      p.style.top = y + 'px';
+      p.style.fontSize = (12 + Math.random() * 10) + 'px';
+      p.style.pointerEvents = 'none';
+      p.style.zIndex = 9997;
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 40 + Math.random() * 50;
+      p.style.transition = 'transform 0.7s cubic-bezier(.2,.8,.3,1), opacity 0.7s ease';
+      container.appendChild(p);
+      requestAnimationFrame(() => {
+        p.style.transform = `translate(${Math.cos(angle) * dist}px, ${Math.sin(angle) * dist - 20}px) rotate(${Math.random()*180}deg)`;
+        p.style.opacity = '0';
+      });
+      setTimeout(() => p.remove(), 750);
+    }
+  }
+
+  // ============ RIPPLE EFFECT ============
+  document.addEventListener('click', (e) => {
+    const target = e.target.closest('.btn, .icon-btn, .option-btn, .mode-btn');
+    if (!target) return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const rect = target.getBoundingClientRect();
+    const ripple = document.createElement('span');
+    const size = Math.max(rect.width, rect.height);
+    ripple.className = 'ripple-el';
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+    ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+    target.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 620);
+  });
 
   let currentMode = localStorage.getItem('quizMode') || MODES.STUDY;
   let isMuted = localStorage.getItem('quizMuted') === 'true' || false;
@@ -1183,67 +1420,110 @@
   // ============ AUDIO ============
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
+  // Schedules a short sequence of notes (a cheerful chime/arpeggio).
+  // notes: [{freq, start, dur, type, gain}]
+  function playNoteSequence(notes) {
+    const now = audioCtx.currentTime;
+    notes.forEach(n => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = n.type || 'sine';
+      const t0 = now + (n.start || 0);
+      const dur = n.dur || 0.18;
+      const peak = n.gain != null ? n.gain : 0.16;
+      osc.frequency.setValueAtTime(n.freq, t0);
+      gain.gain.setValueAtTime(0, t0);
+      gain.gain.linearRampToValueAtTime(peak, t0 + Math.min(0.02, dur / 4));
+      gain.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(t0);
+      osc.stop(t0 + dur + 0.02);
+    });
+  }
+
   function playSound(type) {
     if (isMuted) return;
     if (audioCtx.state === 'suspended') audioCtx.resume();
-    
-    // 1. Correct answer - play recorded voice
+
+    // Layer in recorded voice lines where available (best-effort, never blocks the synth chime)
     if (type === 'correct') {
       try {
         const audioEl = document.getElementById('audioCorrect');
-        if (audioEl) {
-          audioEl.currentTime = 0;
-          audioEl.play().catch(() => {});
-          return;
-        }
-      } catch(e) { console.warn("Correct audio play failed", e); }
+        if (audioEl) { audioEl.currentTime = 0; audioEl.play().catch(() => {}); }
+      } catch(e) {}
+      // cheerful two-note "ding-ding!" rising major third
+      playNoteSequence([
+        { freq: 784, start: 0, dur: 0.14, type: 'sine', gain: 0.15 },
+        { freq: 988, start: 0.09, dur: 0.22, type: 'sine', gain: 0.17 }
+      ]);
+      return;
     }
-    
-    // 2. Perfect score - play recorded voice
+
     if (type === 'perfect') {
       try {
         const audioEl = document.getElementById('audioPerfect');
-        if (audioEl) {
-          audioEl.currentTime = 0;
-          audioEl.play().catch(() => {});
-        }
-      } catch(e) { console.warn("Perfect audio play failed", e); }
+        if (audioEl) { audioEl.currentTime = 0; audioEl.play().catch(() => {}); }
+      } catch(e) {}
+      // triumphant rising fanfare arpeggio
+      playNoteSequence([
+        { freq: 523, start: 0.00, dur: 0.16, type: 'triangle', gain: 0.16 },
+        { freq: 659, start: 0.12, dur: 0.16, type: 'triangle', gain: 0.16 },
+        { freq: 784, start: 0.24, dur: 0.16, type: 'triangle', gain: 0.17 },
+        { freq: 1047, start: 0.36, dur: 0.42, type: 'triangle', gain: 0.2 }
+      ]);
+      return;
     }
 
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    const now = audioCtx.currentTime;
+    if (type === 'levelup') {
+      playNoteSequence([
+        { freq: 660, start: 0, dur: 0.1, type: 'square', gain: 0.09 },
+        { freq: 880, start: 0.08, dur: 0.1, type: 'square', gain: 0.1 },
+        { freq: 1175, start: 0.16, dur: 0.24, type: 'square', gain: 0.11 }
+      ]);
+      return;
+    }
 
     if (type === 'click') {
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(600, now);
-      osc.frequency.exponentialRampToValueAtTime(300, now + 0.08);
-      gain.gain.setValueAtTime(0.2, now);
-      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
-    } else if (type === 'wrong') {
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(400, now);
-      osc.frequency.linearRampToValueAtTime(250, now + 0.15);
-      gain.gain.setValueAtTime(0.15, now);
-      gain.gain.linearRampToValueAtTime(0, now + 0.3);
-    } else if (type === 'lose') {
+      playNoteSequence([{ freq: 720, start: 0, dur: 0.06, type: 'sine', gain: 0.14 }]);
+      return;
+    }
+
+    if (type === 'wrong') {
+      playNoteSequence([
+        { freq: 330, start: 0, dur: 0.12, type: 'sine', gain: 0.12 },
+        { freq: 247, start: 0.09, dur: 0.2, type: 'sine', gain: 0.11 }
+      ]);
+      return;
+    }
+
+    if (type === 'lose') {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      const now = audioCtx.currentTime;
       osc.type = 'sawtooth';
       osc.frequency.setValueAtTime(200, now);
       osc.frequency.linearRampToValueAtTime(100, now + 0.3);
       gain.gain.setValueAtTime(0.15, now);
       gain.gain.linearRampToValueAtTime(0, now + 0.3);
-    } else if (type === 'timer') {
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(); osc.stop(now + 0.3);
+      return;
+    }
+
+    if (type === 'timer') {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      const now = audioCtx.currentTime;
       osc.type = 'sine';
       osc.frequency.setValueAtTime(800, now);
       osc.frequency.setValueAtTime(600, now + 0.05);
       gain.gain.setValueAtTime(0.1, now);
       gain.gain.linearRampToValueAtTime(0, now + 0.1);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(); osc.stop(now + 0.3);
+      return;
     }
-
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start();
-    osc.stop(now + 0.3);
   }
 
   // Voice stop helper
