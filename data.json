@@ -282,8 +282,7 @@
                     "හිසකෙස්වල"
                   ],
                   "correct": 0,
-                  "explanation": "E.coli බඩවැලේ ස්වභාවිකව ජීවත් වේ.",
-                  "image": "https://i.ibb.co/hJR1jWkM/ecoli-16-9-ratio.jpg"
+                  "explanation": "E.coli බඩවැලේ ස්වභාවිකව ජීවත් වේ."
                 },
                 {
                   "q": "ක්ෂුද්‍ර ජීවීන් අධ්‍යයනය කරන විද්‍යාව කුමක්ද?",
@@ -14421,22 +14420,19 @@
           "lessons": [
             {
               "id": "grade_10_science_l1",
-              "title": "1",
-              "description": "1",
-              "questions": [
-                {
-                  "q": "test",
-                  "options": [
-                    "1",
-                    "2",
-                    "3",
-                    "4"
-                  ],
-                  "correct": 0,
-                  "explanation": "sdgws",
-                  "image": "https://i.ibb.co/ksqNKSMz/Paramecium-bursaria-001.jpg"
-                }
-              ]
+              "title": "🔒📖 මෙම පාඩම තවමත් සූදානම් වෙමින් පවතී... 🚀🔒📖 මෙම පාඩම තවමත් සූදානම් වෙමින් පවතී... 🚀",
+              "description": "Lesson Coming Soon... ✨",
+              "questions": []
+            }
+          ]
+        },
+        "11": {
+          "lessons": [
+            {
+              "id": "grade_11_science_l1",
+              "title": "🔒📖 මෙම පාඩම තවමත් සූදානම් වෙමින් පවතී... 🚀",
+              "description": "",
+              "questions": []
             }
           ]
         }
