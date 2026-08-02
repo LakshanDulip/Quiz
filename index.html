@@ -828,64 +828,119 @@
     animation: iconBounceIn 0.5s cubic-bezier(.3,1.6,.4,1);
   }
 
-  /* 100% Celebration Styles */
+  /* 100% Celebration — Premium Redesign (glassmorphism, no particles/confetti) */
   .celebration-glow {
     position: fixed; inset: 0; z-index: 9998;
-    background: radial-gradient(circle at center, rgba(250, 204, 21, 0.4) 0%, transparent 70%);
-    opacity: 0; pointer-events: none; transition: opacity 0.5s ease;
+    background: radial-gradient(circle at 50% 40%, rgba(250, 204, 21, 0.35) 0%, rgba(251, 146, 60, 0.15) 35%, transparent 70%);
+    opacity: 0; pointer-events: none; transition: opacity 0.6s ease;
   }
-  .celebration-glow.active { opacity: 1; animation: celebrateGlowPulse 2s infinite alternate; }
-  @keyframes celebrateGlowPulse { 0% { opacity: 0.8; } 100% { opacity: 1; } }
+  .celebration-glow.active { opacity: 1; animation: celebrateGlowPulse 2.4s ease-in-out infinite alternate; }
+  @keyframes celebrateGlowPulse { 0% { opacity: 0.7; } 100% { opacity: 1; } }
 
   .celebration-overlay {
     position: fixed; inset: 0; z-index: 9999;
-    background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px);
+    background: radial-gradient(circle at center, rgba(20, 14, 5, 0.55) 0%, rgba(6, 4, 2, 0.88) 100%);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     display: flex; align-items: center; justify-content: center;
-    opacity: 0; visibility: hidden; transition: all 0.3s ease;
+    opacity: 0; visibility: hidden; transition: all 0.35s ease;
   }
   .celebration-overlay.active { opacity: 1; visibility: visible; }
 
   .celebration-content {
     text-align: center;
-    transform: scale(0.5) rotate(-5deg);
+    transform: scale(0.6);
     opacity: 0;
+    padding: 20px;
   }
   .celebration-overlay.active .celebration-content {
-    animation: celebrationPopIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    animation: celebrationPopIn 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
   }
 
   @keyframes celebrationPopIn {
-    0% { transform: scale(0.5) rotate(-5deg); opacity: 0; }
-    60% { transform: scale(1.1) rotate(2deg); opacity: 1; }
-    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    0% { transform: scale(0.6); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
   }
 
   .celebration-badge {
-    background: linear-gradient(135deg, #facc15, #fb923c);
-    color: #1a1a1a;
-    padding: 20px 40px;
-    border-radius: 20px;
-    font-size: 2.5rem;
-    font-weight: 800;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(160deg, rgba(35, 26, 12, 0.85), rgba(20, 14, 6, 0.9));
+    border: 1.5px solid rgba(250, 204, 21, 0.4);
+    padding: 38px 56px;
+    border-radius: 28px;
+    box-shadow:
+      0 0 60px rgba(250, 204, 21, 0.35),
+      0 20px 50px rgba(0,0,0,0.5),
+      inset 0 1px 0 rgba(255,255,255,0.08);
+    display: flex; flex-direction: column; gap: 12px; align-items: center;
+    margin-bottom: 34px;
+    backdrop-filter: blur(6px);
+  }
+  .celebration-badge::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -60%;
+    width: 40%; height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.35), transparent);
+    transform: skewX(-20deg);
+    animation: badgeShine 2.6s ease-in-out infinite;
+  }
+  @keyframes badgeShine {
+    0% { left: -60%; }
+    50% { left: 130%; }
+    100% { left: 130%; }
+  }
+  .celebration-badge .trophy-emoji {
+    font-size: 3.4rem;
+    line-height: 1;
+    filter: drop-shadow(0 0 18px rgba(250, 204, 21, 0.7));
+    animation: trophyFloat 2.2s ease-in-out infinite;
+  }
+  @keyframes trophyFloat {
+    0%, 100% { transform: translateY(0) rotate(-2deg); }
+    50% { transform: translateY(-8px) rotate(2deg); }
+  }
+  .celebration-badge .badge-title {
     font-family: 'Space Grotesk', sans-serif;
-    box-shadow: 0 10px 30px rgba(250, 204, 21, 0.5), inset 0 0 20px rgba(255,255,255,0.5);
-    display: flex; flex-direction: column; gap: 10px; align-items: center;
-    border: 4px solid #fff;
-    margin-bottom: 30px;
+    font-weight: 800;
+    font-size: 2.2rem;
+    letter-spacing: 0.5px;
+    background: linear-gradient(135deg, #fde68a, #facc15 40%, #fb923c 75%, #f97316);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    position: relative;
+    z-index: 1;
   }
   .celebration-sub {
-    font-size: 1.2rem; font-weight: 600; font-family: 'Inter', 'Noto Sans Sinhala', sans-serif;
-    opacity: 0.9;
+    font-size: 1.05rem; font-weight: 600; font-family: 'Inter', 'Noto Sans Sinhala', sans-serif;
+    color: #fde9c8;
+    opacity: 0.92;
+    position: relative;
+    z-index: 1;
   }
 
   .celebration-close-btn {
-    background: #fff; color: #1a1a1a; padding: 12px 30px; border-radius: 50px;
-    font-size: 1.1rem; font-weight: 700; cursor: pointer; border: none;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: all 0.2s;
+    background: linear-gradient(135deg, #facc15, #fb923c);
+    color: #1a1206;
+    padding: 14px 34px;
+    border-radius: 50px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-family: 'Space Grotesk', 'Noto Sans Sinhala', sans-serif;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 8px 24px rgba(250, 204, 21, 0.4), 0 0 0 1px rgba(255,255,255,0.15) inset;
+    transition: transform 0.25s cubic-bezier(.2,.8,.3,1), box-shadow 0.25s ease;
   }
-  .celebration-close-btn:hover { transform: scale(1.05); background: #f0f0f0; }
+  .celebration-close-btn:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 34px rgba(250, 204, 21, 0.55), 0 0 0 1px rgba(255,255,255,0.2) inset;
+  }
+  .celebration-close-btn:active { transform: translateY(-1px); }
 
-  .confetti-container, .celebration-particles {
+  .confetti-container {
     position: fixed; inset: 0; z-index: 9997; pointer-events: none; overflow: hidden;
   }
 
@@ -895,16 +950,6 @@
   }
   @keyframes advConfettiFall {
     to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
-  }
-
-  .adv-particle {
-    position: absolute; bottom: -50px;
-    animation: advParticleFloat linear forwards;
-  }
-  @keyframes advParticleFloat {
-    0% { transform: translateY(0) scale(0.5); opacity: 0; }
-    20% { opacity: 1; transform: translateY(-20vh) scale(1); }
-    100% { transform: translateY(-110vh) scale(1.5) rotate(360deg); opacity: 0; }
   }
 
   .screen-glow {
@@ -936,15 +981,6 @@
   }
   .install-btn:hover { transform: scale(1.05); }
   .install-btn.show { display: inline-flex; }
-
-  /* Lazy image styles */
-  .lazy-image {
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-  .lazy-image.loaded {
-    opacity: 1;
-  }
 
   @media (max-width: 768px) {
     .quiz-container { padding: 20px; }
@@ -1127,49 +1163,6 @@ class PerformanceManager {
         }
       }, 250);
     }, { passive: true });
-
-    this.setupImageOptimization();
-  }
-
-  setupImageOptimization() {
-    if ('IntersectionObserver' in window) {
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const img = entry.target;
-            const src = img.getAttribute('data-src');
-            if (src && window.imageLoader) {
-              window.imageLoader.loadImage(src).then(() => {
-                if (img.isConnected) {
-                  img.src = src;
-                  img.classList.add('loaded');
-                  img.removeAttribute('data-src');
-                }
-              }).catch(() => {
-                if (img.isConnected) {
-                  const wrap = img.closest('.question-image-wrap');
-                  if (wrap) wrap.classList.add('img-error');
-                }
-              });
-              observer.unobserve(img);
-            }
-          }
-        });
-      }, {
-        rootMargin: '50px',
-        threshold: 0.01
-      });
-      this.observers.set('lazyImages', observer);
-    }
-  }
-
-  observeImage(element, src) {
-    const observer = this.observers.get('lazyImages');
-    if (observer && element) {
-      element.setAttribute('data-src', src);
-      element.classList.remove('loaded');
-      observer.observe(element);
-    }
   }
 
   scheduleUpdate(callback, key) {
@@ -1574,16 +1567,16 @@ window.performanceManager = new PerformanceManager();
 
 <!-- Celebration Elements -->
 <div class="celebration-glow" id="celebrationGlow"></div>
-<div class="celebration-particles" id="celebrationParticles"></div>
 <div class="confetti-container" id="confettiContainer"></div>
 <div class="celebration-overlay" id="celebrationOverlay">
   <div class="celebration-content">
     <div class="celebration-badge">
-      🏆 100% PERFECT!
+      <span class="trophy-emoji">🏆</span>
+      <span class="badge-title">100% PERFECT!</span>
       <span class="celebration-sub">ඔබ සැබෑම දක්ශයෙක් 🌟</span>
     </div>
     <button class="celebration-close-btn" onclick="closeCelebration()">
-      <i class="fas fa-check"></i> අපූරුයි! දිගටම යන්න
+      🎉 අපූරුයි! දිගටම යන්න
     </button>
   </div>
 </div>
@@ -1895,7 +1888,7 @@ window.performanceManager = new PerformanceManager();
     playClick();
   }
 
-  // ============ CONFETTI & CELEBRATION ============
+  // ============ CONFETTI (80-99% only) & CELEBRATION (100%) ============
   let celebrationTimeout = null;
 
   function spawnConfetti() {
@@ -1920,68 +1913,18 @@ window.performanceManager = new PerformanceManager();
 
   function triggerCelebration() {
     if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    
+
     document.getElementById('celebrationGlow').classList.add('active');
     document.getElementById('celebrationOverlay').classList.add('active');
     playPerfect();
 
-    const confettiContainer = document.getElementById('confettiContainer');
-    confettiContainer.innerHTML = '';
-    const colors = ['#facc15', '#fb923c', '#4ade80', '#38bdf8', '#c084fc', '#fb7185', '#fff'];
-
-    const fragment = document.createDocumentFragment();
-    for(let i=0; i<100; i++) {
-      const piece = document.createElement('div');
-      piece.className = 'adv-confetti';
-      piece.style.left = Math.random() * 100 + 'vw';
-      piece.style.width = (6 + Math.random() * 10) + 'px';
-      piece.style.height = (6 + Math.random() * 10) + 'px';
-      piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-      
-      const shapeType = Math.floor(Math.random() * 3);
-      if (shapeType === 0) piece.style.borderRadius = '50%';
-      else if (shapeType === 2) {
-          piece.style.backgroundColor = 'transparent';
-          piece.style.borderLeft = '5px solid transparent';
-          piece.style.borderRight = '5px solid transparent';
-          piece.style.borderBottom = `10px solid ${colors[Math.floor(Math.random() * colors.length)]}`;
-      }
-
-      piece.style.animationDuration = (2.5 + Math.random() * 2) + 's';
-      piece.style.animationDelay = (Math.random() * 1.5) + 's';
-      fragment.appendChild(piece);
-    }
-    confettiContainer.appendChild(fragment);
-
-    const particlesContainer = document.getElementById('celebrationParticles');
-    particlesContainer.innerHTML = '';
-    const pEmojis = ['⭐', '🌟', '✨', '🏆', '💎', '🎉', '🎊', '🥇', '💯', '🔥', '🌈', '🧬', '🔬', '⚛️'];
-    const pFragment = document.createDocumentFragment();
-    for(let i=0; i<40; i++) {
-       const p = document.createElement('div');
-       p.className = 'adv-particle';
-       p.textContent = pEmojis[Math.floor(Math.random() * pEmojis.length)];
-       p.style.left = Math.random() * 100 + 'vw';
-       p.style.fontSize = (20 + Math.random() * 30) + 'px';
-       p.style.animationDuration = (4 + Math.random() * 3) + 's';
-       p.style.animationDelay = (Math.random() * 1.5) + 's';
-       pFragment.appendChild(p);
-    }
-    particlesContainer.appendChild(pFragment);
-
-    celebrationTimeout = setTimeout(closeCelebration, 6000);
+    celebrationTimeout = setTimeout(closeCelebration, 8000);
   }
 
   function closeCelebration() {
     document.getElementById('celebrationOverlay').classList.remove('active');
     document.getElementById('celebrationGlow').classList.remove('active');
     stopVoice('perfect');
-    setTimeout(() => {
-        const confetti = document.getElementById('confettiContainer');
-        const particles = document.getElementById('celebrationParticles');
-        if (confetti) confetti.innerHTML = '';
-        if (particles) particles.innerHTML = '';
-    }, 500);
     if (celebrationTimeout) {
       clearTimeout(celebrationTimeout);
       celebrationTimeout = null;
@@ -2307,7 +2250,7 @@ window.performanceManager = new PerformanceManager();
   const SUBJECTS = {
     science: { key: 'science', name: 'Science', sinhala: 'විද්‍යාව', icon: 'fa-flask', desc: 'විද්‍යාව ගවේෂණය කරන්න', emoji: '🔬' }
   };
-const GRADES = ['8', '9', '10'];
+const GRADES = ['8', '9', '10', '11'];
 
   let appState = {
     content: null,
@@ -2460,15 +2403,6 @@ const GRADES = ['8', '9', '10'];
         ring.style.strokeDashoffset = ring.getAttribute('data-target');
       }
     }, 'ringAnimation');
-
-    setTimeout(() => {
-      document.querySelectorAll('.lazy-image').forEach(img => {
-        const src = img.getAttribute('data-src');
-        if (src && window.performanceManager) {
-          window.performanceManager.observeImage(img, src);
-        }
-      });
-    }, 100);
 
     if (r.name !== 'quiz' && timerInterval) {
       cancelAnimationFrame(timerInterval);
@@ -2678,10 +2612,9 @@ const GRADES = ['8', '9', '10'];
     const safeSrc = escapeHtml(image);
     return `
       <div class="question-image-wrap" id="questionImageWrap">
-        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='200'%3E%3Crect fill='%23ddd' width='400' height='200' opacity='0.3'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23999' font-size='14'%3ELoading...%3C/text%3E%3C/svg%3E" 
-             data-src="${safeSrc}" 
-             alt="ප්‍රශ්නයට අදාළ රූපය" 
-             class="lazy-image"
+        <img src="${safeSrc}"
+             alt="ප්‍රශ්නයට අදාළ රූපය"
+             loading="lazy"
              onerror="this.closest('.question-image-wrap').classList.add('img-error')">
         <div class="question-image-placeholder">
           <i class="fas fa-image"></i>
@@ -3015,15 +2948,6 @@ const GRADES = ['8', '9', '10'];
       const ring = document.getElementById('ringFg');
       if (ring) ring.style.strokeDashoffset = ring.getAttribute('data-target');
     }, 'ringAnimation');
-
-    setTimeout(() => {
-      document.querySelectorAll('.lazy-image').forEach(img => {
-        const src = img.getAttribute('data-src');
-        if (src && window.performanceManager) {
-          window.performanceManager.observeImage(img, src);
-        }
-      });
-    }, 100);
   }
 
   function updateHeaderStats() {
