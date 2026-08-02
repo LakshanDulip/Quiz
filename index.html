@@ -1216,162 +1216,216 @@ window.performanceManager = new PerformanceManager();
 </script>
 
 <script>
-// ============ Update Manager ============
-class UpdateManager {
-  constructor() {
-    this.currentVersion = '1.0.0';
-    this.versionUrl = 'version.json';
-    this.checkInterval = 300000;
-    this.isChecking = false;
-    this.updateAvailable = false;
-    this.newVersion = null;
-    this.popupShown = false;
-    this.pendingQuizCheck = false;
-    this.visibilityInterval = null;
-    this.init();
+(function() {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initUM);
+  } else {
+    initUM();
   }
 
-  init() {
-    this.checkForUpdates();
+  function initUM() {
+    class UpdateManager {
+      constructor() {
+        this.currentVersion = '2.0.0';
+        this.versionUrl = 'version.json';
+        this.checkInterval = 300000;
+        this.isChecking = false;
+        this.updateAvailable = false;
+        this.newVersion = null;
+        this.popupShown = false;
+        this.updateDismissed = false;
+        this.lastDismissed = localStorage.getItem('dismissedVersion') || null;
+        this.init();
+      }
 
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        this.checkForUpdates();
-      } else {
-        if (this.visibilityInterval) {
-          clearInterval(this.visibilityInterval);
-          this.visibilityInterval = null;
+      init() {
+        console.log('[Update] Ready v' + this.currentVersion);
+        if (this.lastDismissed) {
+          console.log('[Update] Dismissed:', this.lastDismissed);
+        }
+        setTimeout(() => this.checkForUpdates(), 3000);
+
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible' && !this.updateDismissed) {
+            this.checkForUpdates();
+          }
+        });
+
+        setInterval(() => {
+          if (document.visibilityState === 'visible' && !this.updateDismissed) {
+            this.checkForUpdates();
+          }
+        }, this.checkInterval);
+
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'UPDATE_AVAILABLE' && !this.updateDismissed) {
+              this.updateAvailable = true;
+              this.newVersion = event.data.version;
+              this.showUpdatePrompt();
+            }
+          });
         }
       }
-    });
 
-    this.visibilityInterval = setInterval(() => {
-      if (document.visibilityState === 'visible') {
-        this.checkForUpdates();
-      }
-    }, this.checkInterval);
+      async checkForUpdates() {
+        if (this.isChecking || this.updateAvailable || this.updateDismissed) return;
+        this.isChecking = true;
 
-    // Listen for service worker update messages
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.addEventListener('message', (event) => {
-        if (event.data && event.data.type === 'UPDATE_AVAILABLE') {
-          this.updateAvailable = true;
-          this.newVersion = event.data.version;
-          this.showUpdatePrompt();
+        try {
+          const response = await fetch(this.versionUrl + '?t=' + Date.now(), {
+            cache: 'no-store',
+            headers: { 'Cache-Control': 'no-cache' }
+          });
+
+          if (!response.ok) throw new Error('Failed');
+          const data = await response.json();
+
+          if (data.version === this.lastDismissed) {
+            console.log('[Update] Already dismissed');
+            this.isChecking = false;
+            return;
+          }
+
+          if (data.version !== this.currentVersion) {
+            this.updateAvailable = true;
+            this.newVersion = data.version;
+            this.showUpdatePrompt();
+          }
+        } catch (error) {
+          console.warn('[Update] Check failed');
+        } finally {
+          this.isChecking = false;
         }
-      });
-    }
-  }
-
-  async checkForUpdates() {
-    if (this.isChecking || this.updateAvailable) return;
-    this.isChecking = true;
-
-    try {
-      const response = await fetch(this.versionUrl + '?t=' + Date.now(), {
-        cache: 'no-store',
-        headers: { 'Cache-Control': 'no-cache' }
-      });
-
-      if (!response.ok) throw new Error('Version check failed');
-
-      const data = await response.json();
-      const newVersion = data.version;
-
-      if (newVersion !== this.currentVersion) {
-        this.updateAvailable = true;
-        this.newVersion = newVersion;
-        this.showUpdatePrompt();
       }
-    } catch (error) {
-      console.warn('Update check failed:', error);
-    } finally {
-      this.isChecking = false;
-    }
-  }
 
-  showUpdatePrompt() {
-    if (window.appState && window.appState.quiz && !window.appState.quiz.showResult && !window.appState.quiz.gameOver) {
-      this.pendingQuizCheck = true;
-      const checkInterval = setInterval(() => {
-        if (!window.appState.quiz || window.appState.quiz.showResult || window.appState.quiz.gameOver) {
-          clearInterval(checkInterval);
-          this.createUpdatePopup();
+      showUpdatePrompt() {
+        if (this.popupShown || this.updateDismissed) return;
+
+        if (window.appState && window.appState.quiz && !window.appState.quiz.showResult && !window.appState.quiz.gameOver) {
+          const checkInterval = setInterval(() => {
+            if (!window.appState.quiz || window.appState.quiz.showResult || window.appState.quiz.gameOver) {
+              clearInterval(checkInterval);
+              this.createPopup();
+            }
+          }, 2000);
+        } else {
+          this.createPopup();
         }
-      }, 2000);
-    } else {
-      this.createUpdatePopup();
+      }
+
+      createPopup() {
+        if (this.popupShown) return;
+
+        const existing = document.getElementById('updateOverlay');
+        if (existing) existing.remove();
+
+        this.popupShown = true;
+
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay active';
+        overlay.style.zIndex = '9999';
+        overlay.id = 'updateOverlay';
+        overlay.innerHTML = `
+          <div class="modal-content" style="max-width:400px;text-align:center;">
+            <span style="font-size:3rem;">🚀</span>
+            <h2 class="modal-title">New Update!</h2>
+            <p style="color:var(--text-secondary);margin-bottom:20px;">
+              Version <strong>${this.newVersion}</strong> available
+            </p>
+            <button class="btn btn-primary" id="updateNowBtn" style="width:100%;margin-bottom:10px;">
+              <i class="fas fa-download"></i> Update Now
+            </button>
+            <button class="btn btn-outline" id="updateLaterBtn" style="width:100%;">
+              <i class="fas fa-clock"></i> Later
+            </button>
+          </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        document.getElementById('updateNowBtn').addEventListener('click', () => {
+          this.applyUpdate();
+        });
+
+        document.getElementById('updateLaterBtn').addEventListener('click', () => {
+          this.dismissUpdate();
+        });
+
+        overlay.addEventListener('click', (e) => {
+          if (e.target === overlay) this.dismissUpdate();
+        });
+      }
+
+      applyUpdate() {
+        this.removePopup();
+        this.currentVersion = this.newVersion;
+        this.updateAvailable = false;
+        this.updateDismissed = false;
+        localStorage.removeItem('dismissedVersion');
+
+        if (window.cacheManager) window.cacheManager.clear();
+        if (window.imageLoader) window.imageLoader.clearCache();
+
+        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+          navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_CACHE' });
+          navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
+        }
+
+        if ('caches' in window) {
+          caches.keys().then(names => Promise.all(names.map(n => caches.delete(n))))
+            .then(() => {
+              location.reload();
+            });
+        } else {
+          location.reload();
+        }
+      }
+
+      dismissUpdate() {
+        if (this.newVersion) {
+          localStorage.setItem('dismissedVersion', this.newVersion);
+          this.lastDismissed = this.newVersion;
+        }
+        this.updateDismissed = true;
+        this.updateAvailable = false;
+        this.popupShown = false;
+        this.removePopup();
+
+        setTimeout(() => {
+          this.updateDismissed = false;
+          this.lastDismissed = null;
+          localStorage.removeItem('dismissedVersion');
+        }, 3600000);
+      }
+
+      removePopup() {
+        const overlay = document.getElementById('updateOverlay');
+        if (overlay) {
+          overlay.classList.remove('active');
+          setTimeout(() => {
+            if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+          }, 300);
+        }
+        this.popupShown = false;
+      }
+
+      reset() {
+        this.updateDismissed = false;
+        this.updateAvailable = false;
+        this.popupShown = false;
+        this.newVersion = null;
+        this.lastDismissed = null;
+        localStorage.removeItem('dismissedVersion');
+        this.removePopup();
+        console.log('[Update] Reset complete');
+      }
     }
+
+    window.updateManager = new UpdateManager();
+    console.log('[Update] Commands: window.updateManager.reset(), window.updateManager.checkForUpdates()');
   }
-
-  createUpdatePopup() {
-    if (this.popupShown) return;
-    this.popupShown = true;
-
-    const overlay = document.createElement('div');
-    overlay.className = 'modal-overlay active';
-    overlay.style.zIndex = '9999';
-    overlay.id = 'updateOverlay';
-
-    overlay.innerHTML = `
-      <div class="modal-content" style="max-width:400px;text-align:center;">
-        <span style="font-size:3rem;display:block;margin-bottom:10px;">🚀</span>
-        <h2 class="modal-title">New Update Available</h2>
-        <p style="color:var(--text-secondary);margin-bottom:20px;">
-          Version ${this.newVersion} is now available with improvements and fixes.
-        </p>
-        <div style="display:flex;gap:10px;flex-direction:column;">
-          <button class="btn btn-primary" onclick="window.updateManager.applyUpdate()" style="width:100%;justify-content:center;">
-            <i class="fas fa-download"></i> Update Now
-          </button>
-          <button class="btn btn-outline" onclick="window.updateManager.dismissUpdate()" style="width:100%;justify-content:center;">
-            <i class="fas fa-clock"></i> Later
-          </button>
-        </div>
-      </div>
-    `;
-
-    document.body.appendChild(overlay);
-  }
-
-  applyUpdate() {
-    if (window.cacheManager) window.cacheManager.clear();
-    if (window.imageLoader) window.imageLoader.clearCache();
-    
-    // Clear service worker caches
-    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-      navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_CACHE' });
-    }
-    
-    if ('caches' in window) {
-      caches.keys().then(names => {
-        names.forEach(name => caches.delete(name));
-      }).then(() => {
-        const url = new URL(window.location.href);
-        url.searchParams.set('v', this.newVersion);
-        window.location.href = url.toString();
-        window.location.reload(true);
-      });
-    } else {
-      const url = new URL(window.location.href);
-      url.searchParams.set('v', this.newVersion);
-      window.location.href = url.toString();
-      window.location.reload(true);
-    }
-  }
-
-  dismissUpdate() {
-    const overlay = document.getElementById('updateOverlay');
-    if (overlay) overlay.remove();
-    this.popupShown = false;
-  }
-
-  destroy() {
-    if (this.visibilityInterval) clearInterval(this.visibilityInterval);
-  }
-}
-
-window.updateManager = new UpdateManager();
+})();
 </script>
 
 <!-- Voice Audio Files -->
@@ -1659,6 +1713,12 @@ window.updateManager = new UpdateManager();
     if (audioCtx.state === 'suspended') audioCtx.resume();
     return audioCtx;
   }
+
+  document.addEventListener('click', function resumeAudioOnce() {
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  }, { once: true });
 
   function playSound(type) {
     if (isMuted) return;
@@ -2241,7 +2301,7 @@ window.updateManager = new UpdateManager();
   const SUBJECTS = {
     science: { key: 'science', name: 'Science', sinhala: 'විද්‍යාව', icon: 'fa-flask', desc: 'විද්‍යාව ගවේෂණය කරන්න', emoji: '🔬' }
   };
-const GRADES = ['8', '9', '10'];
+  const GRADES = ['8', '9'];
 
   let appState = {
     content: null,
@@ -3365,7 +3425,7 @@ const GRADES = ['8', '9', '10'];
   // ============ SERVICE WORKER ============
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js')
+      navigator.serviceWorker.register('/sw.js', { scope: '/' })
         .then(registration => {
           console.log('[App] Service Worker registered with scope:', registration.scope);
           
@@ -3421,7 +3481,7 @@ const GRADES = ['8', '9', '10'];
     if (window.cacheManager) {
       window.cacheManager.prune();
     }
-    if (window.updateManager) {
+    if (window.updateManager && typeof window.updateManager.destroy === 'function') {
       window.updateManager.destroy();
     }
     
