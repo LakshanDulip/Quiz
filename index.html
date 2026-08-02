@@ -953,7 +953,7 @@
   <div class="game-over-content">
     <span class="big-icon">💔</span>
     <h2>Game Over!</h2>
-    <p style="color:var(--text-secondary);margin-bottom:15px;">ඔබගේ සියලු ජීවිත අහිමි විය. නැවත උත්සාහ කරන්න!</p>
+    <p style="color:var(--text-secondary);margin-bottom:15px;">ඔබගේ සියලු lives(💔) අහිමි විය. නැවත උත්සාහ කරන්න!</p>
     <div class="game-over-stats">
       <div class="stat"><div class="num" id="goCorrect">0</div><div class="label">නිවැරදි</div></div>
       <div class="stat"><div class="num" id="goWrong">0</div><div class="label">වැරදි</div></div>
@@ -1008,7 +1008,7 @@
 <div class="modal-overlay" id="progressModal">
   <div class="modal-content" style="max-width:500px;">
     <button class="modal-close-btn" onclick="closeProgress()">✕</button>
-    <h2 class="modal-title" style="margin-bottom:15px;">📈 ප්‍රගතිය</h2>
+    <h2 class="modal-title" style="margin-bottom:15px;">📊 ප්‍රගතිය</h2>
     <div id="progressContent"></div>
     <div style="margin-top:15px;">
       <button class="btn btn-outline" onclick="closeProgress()" style="width:100%;justify-content:center;">වසන්න</button>
@@ -1047,7 +1047,7 @@
   <div class="celebration-content">
     <div class="celebration-badge">
       🏆 100% PERFECT!
-      <span class="celebration-sub">ඔබ සැබෑ විද්‍යාඥයෙක්! 🌟</span>
+      <span class="celebration-sub">ඔබ සැබෑම දක්ශයෙක් 🌟</span>
     </div>
     <button class="celebration-close-btn" onclick="closeCelebration()">
       <i class="fas fa-check"></i> අපූරුයි! දිගටම යන්න
@@ -1514,14 +1514,14 @@
 
   // ============ ACHIEVEMENTS ============
   const ACHIEVEMENTS = {
-    first_quiz: { id: 'first_quiz', name: 'පළමු පියවර', icon: '🌱', desc: 'පළමු ප්‍රශ්නාවලිය සම්පූර්ණ කරන්න', check: (s) => s.totalQuestions >= 1 },
-    perfect_score: { id: 'perfect_score', name: 'පරිපූර්ණ දස්කම', icon: '🏆', desc: '100% ලකුණු ලබා ගන්න', check: (s) => s.perfectCount >= 1 },
-    streak_5: { id: 'streak_5', name: 'ගිනි ගැනීම', icon: '🔥', desc: 'පිළිවෙලින් 5ක් නිවැරදි කරන්න', check: (s) => s.bestStreak >= 5 },
-    streak_10: { id: 'streak_10', name: 'නොසැලෙන', icon: '⚡', desc: 'පිළිවෙලින් 10ක් නිවැරදි කරන්න', check: (s) => s.bestStreak >= 10 },
-    quiz_master: { id: 'quiz_master', name: 'ප්‍රශ්නාවලි මාස්ටර්', icon: '👑', desc: 'ප්‍රශ්න 50කට පිළිතුරු දෙන්න', check: (s) => s.totalQuestions >= 50 },
-    game_winner: { id: 'game_winner', name: 'ක්‍රීඩා ශූරයා', icon: '🎮', desc: 'ගේම් මෝඩ් එකෙන් ජයග්‍රහණය කරන්න', check: (s) => s.gameWins >= 1 },
-    study_enthusiast: { id: 'study_enthusiast', name: 'ඉගෙනුම් ලෝලී', icon: '📚', desc: 'ස්ටඩි මෝඩ් එකෙන් ප්‍රශ්න 20ක් කරන්න', check: (s) => s.studyQuestions >= 20 },
-    daily_player: { id: 'daily_player', name: 'දිනපතා විද්‍යාඥයා', icon: '📅', desc: 'දින 7ක් පිළිවෙලින් ක්‍රීඩා කරන්න', check: (s) => s.dailyStreak >= 7 },
+    first_quiz: { id: 'first_quiz', name: 'First Step', icon: '🌱', desc: 'පළමු ප්‍රශ්නාවලිය සම්පූර්ණ කරන්න', check: (s) => s.totalQuestions >= 1 },
+    perfect_score: { id: 'perfect_score', name: 'Perfect Score', icon: '🏆', desc: '100% ලකුණු ලබා ගන්න', check: (s) => s.perfectCount >= 1 },
+    streak_5: { id: 'streak_5', name: 'On Fire', icon: '🔥', desc: 'පිළිවෙලින් 5ක් නිවැරදි කරන්න', check: (s) => s.bestStreak >= 5 },
+    streak_10: { id: 'streak_10', name: 'Unstoppable', icon: '⚡', desc: 'පිළිවෙලින් 10ක් නිවැරදි කරන්න', check: (s) => s.bestStreak >= 10 },
+    quiz_master: { id: 'quiz_master', name: 'Quiz Master', icon: '👑', desc: 'ප්‍රශ්න 50කට පිළිතුරු දෙන්න', check: (s) => s.totalQuestions >= 50 },
+    game_winner: { id: 'game_winner', name: 'Champion', icon: '🎮', desc: 'ගේම් මෝඩ් එකෙන් ජයග්‍රහණය කරන්න', check: (s) => s.gameWins >= 1 },
+    study_enthusiast: { id: 'study_enthusiast', name: 'Enthusiast', icon: '📚', desc: 'ස්ටඩි මෝඩ් එකෙන් ප්‍රශ්න 20ක් කරන්න', check: (s) => s.studyQuestions >= 20 },
+    daily_player: { id: 'daily_player', name: 'Daily Scientist', icon: '📅', desc: 'දින 7ක් පිළිවෙලින් ක්‍රීඩා කරන්න', check: (s) => s.dailyStreak >= 7 },
   };
 
   function getAchievements() {
@@ -1565,7 +1565,7 @@
             <div class="desc">${ach.desc}</div>
           </div>
           <div class="status ${isUnlocked ? 'unlocked' : 'locked'}">
-            ${isUnlocked ? '✅ අගුළු හැරියා' : '🔒 අගුළු ලා ඇත'}
+            ${isUnlocked ? '✅ Unlocked' : '🔒 Locked'}
           </div>
         </div>
       `;
@@ -1764,7 +1764,7 @@
   function findLesson(subject, grade, lessonId) { return getLessons(subject, grade).find(l => l.id === lessonId) || null; }
 
   function getResultComment(pct) {
-    if (pct === 100) return { emoji: '🏆', text: '💯 පරිපූර්ණයි! ඔබ සැබෑ විද්‍යා අභිබවා ගියා! 🌟✨' };
+    if (pct === 100) return { emoji: '🏆', text: '💯 පරිපූර්ණයි! ඔබ සැබෑම දක්ශයෙක්🌟✨' };
     if (pct >= 80) return { emoji: '🌟', text: 'විශිෂ්ටයි! ඔබ ඉතා දක්ෂයි! 🎯' };
     if (pct >= 70) return { emoji: '💪', text: 'හොඳයි! තව ටිකක් උත්සාහ කරන්න! 📚' };
     if (pct >= 50) return { emoji: '😊', text: 'හොඳ ආරම්භයක්! දිගටම පුහුණු වන්න! 🔥' };
@@ -1814,7 +1814,7 @@
             <ellipse cx="20" cy="20" rx="17" ry="7" fill="none" stroke="var(--primary-color)" stroke-width="2.2" stroke-dasharray="18 10" transform="rotate(60 20 20)"/>
             <ellipse cx="20" cy="20" rx="17" ry="7" fill="none" stroke="var(--primary-color)" stroke-width="2.2" stroke-dasharray="18 10" transform="rotate(120 20 20)"/>
           </svg>
-          <p style="color:var(--text-secondary);font-weight:600;letter-spacing:0.3px;">පූරණය වෙමින්...</p>
+          <p style="color:var(--text-secondary);font-weight:600;letter-spacing:0.3px;">Loading...</p>
         </div>
       `);
       return;
@@ -1902,7 +1902,7 @@
             <div class="control-group">
               <button class="icon-btn" onclick="showLeaderboard()" title="Leaderboard">🏆</button>
               <button class="icon-btn" onclick="showAchievements()" title="Achievements">🏅</button>
-              <button class="icon-btn" onclick="showProgress()" title="Progress">📈</button>
+              <button class="icon-btn" onclick="showProgress()" title="Progress">📊</button>
             </div>
 
             <div class="control-group">
@@ -1980,13 +1980,13 @@
         </div>
         <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:12px;">
           <span style="background:var(--bg-card);padding:6px 16px;border-radius:50px;border:1px solid var(--border-color);font-size:0.85rem;backdrop-filter:blur(5px);">
-            <i class="fas fa-star" style="color:var(--accent);"></i> තරු ${appState.totalScore}
+            <i class="fas fa-star" style="color:var(--accent);"></i> Star ${appState.totalScore}
           </span>
           <span style="background:var(--bg-card);padding:6px 16px;border-radius:50px;border:1px solid var(--border-color);font-size:0.85rem;backdrop-filter:blur(5px);">
-            <i class="fas fa-fire" style="color:var(--wrong-color);"></i> හොඳම දිගිය: ${progress.bestStreak || 0}
+            <i class="fas fa-fire" style="color:var(--wrong-color);"></i> Best Streak: ${progress.bestStreak || 0}
           </span>
           <span style="background:var(--bg-card);padding:6px 16px;border-radius:50px;border:1px solid var(--border-color);font-size:0.85rem;backdrop-filter:blur(5px);">
-            <i class="fas fa-trophy" style="color:var(--gold);"></i> පරිපූර්ණ: ${progress.perfectCount || 0}
+            <i class="fas fa-trophy" style="color:var(--gold);"></i> Perfect: ${progress.perfectCount || 0}
           </span>
         </div>
       </div>
@@ -1995,7 +1995,7 @@
           <div class="card subject-card" onclick="navigate('#/subject/${s.key}')">
             <h3>${s.emoji} ${escapeHtml(s.sinhala)}</h3>
             <p>${escapeHtml(s.desc)}</p>
-            <span class="btn btn-primary enter-cta"><i class="fas fa-play"></i> අරඹන්න</span>
+            <span class="btn btn-primary enter-cta"><i class="fas fa-play"></i> Start</span>
             <i class="fas ${s.icon} subject-icon"></i>
           </div>
         `).join('')}
