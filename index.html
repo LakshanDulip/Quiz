@@ -321,6 +321,17 @@
     }
   }
 
+  /* Applied by PerformanceManager on detected low-RAM / low-core devices so
+     backdrop blur and decorative spins don't tax weak GPUs/CPUs. */
+  html.low-end-device .logo-mark,
+  html.low-end-device .grade-card::after { animation: none !important; }
+  html.low-end-device header,
+  html.low-end-device .card,
+  html.low-end-device .quiz-container,
+  html.low-end-device .modal-content,
+  html.low-end-device .theme-popover { backdrop-filter: none !important; }
+  html.low-end-device body::before { background-image: none !important; }
+
   body::before {
     content: '';
     position: fixed;
@@ -558,6 +569,18 @@
     object-fit: contain;
     background: var(--bg-main);
   }
+  /* Shimmer skeleton shown while a question image is still loading */
+  .question-image-wrap:not(.img-loaded):not(.img-error)::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+    background-size: 200% 100%;
+    animation: imgShimmer 1.4s ease-in-out infinite;
+  }
+  @keyframes imgShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+  .question-image-wrap:not(.img-loaded) img { opacity: 0; }
+  .question-image-wrap.img-loaded img { opacity: 1; transition: opacity 0.25s ease; }
+
   .question-image-wrap.img-error .question-image-placeholder { display: flex; }
   .question-image-wrap.img-error img { display: none; }
   .question-image-placeholder {
@@ -990,6 +1013,21 @@
   </div>
 </div>
 
+<!-- Update Available Modal -->
+<div class="modal-overlay" id="updateModal" style="z-index: 9998;">
+  <div class="modal-content" style="max-width:400px;">
+    <span style="font-size: 3rem; display: block; margin-bottom: 10px;">🚀</span>
+    <h2 class="modal-title">New Update Available</h2>
+    <p class="modal-text" style="background:transparent;padding:0;margin-bottom:20px;">
+      Quiz Hub හි නව අනුවාදයක් නිකුත් වී ඇත. නවතම විශේෂාංග සහ දෝෂ නිරාකරණ ලබා ගැනීමට යාවත්කාලීන කරන්න.
+    </p>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="UpdateManager.dismiss()">Later</button>
+      <button class="btn btn-primary" onclick="UpdateManager.applyUpdate()"><i class="fas fa-rotate"></i> Update Now</button>
+    </div>
+  </div>
+</div>
+
 <!-- Main App Container -->
 <div id="app"></div>
 
@@ -1119,6 +1157,12 @@
   const THEMES = ['dark', 'light', 'purple', 'ocean', 'forest', 'sunset', 'pink', 'pure-white', 'sakura'];
   const MAX_TIMER = 20;
   const MAX_LIVES = 3;
+
+  // IMPORTANT (deploy step): bump this value on every release, and update the
+  // "version" field in version.json to match. The Update Manager compares
+  // this baked-in build version against version.json (fetched fresh from the
+  // server) to detect when a newer deployment is live on Vercel.
+  const APP_VERSION = '1.0.0';
 
   let currentMode = localStorage.getItem('quizMode') || MODES.STUDY;
   let isMuted = localStorage.getItem('quizMuted') === 'true' || false;
@@ -1396,12 +1440,16 @@
   let celebrationTimeout = null;
 
   function spawnConfetti() {
-    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (PerformanceManager.reduceEffects()) return;
     const emojis = ['🧪', '⚗️', '🔬', '✨', '🌟', '🧬', '⚛️', '🎉'];
     const container = document.getElementById('confettiContainer');
     if (!container) return;
-    
-    for (let i = 0; i < 40; i++) {
+
+    // Batch all pieces into a DocumentFragment so the browser does one
+    // layout/paint pass instead of 40 incremental ones (DOM optimization).
+    const count = PerformanceManager.isLowEnd ? 18 : 40;
+    const fragment = document.createDocumentFragment();
+    for (let i = 0; i < count; i++) {
       const piece = document.createElement('span');
       piece.className = 'adv-confetti';
       piece.textContent = emojis[Math.floor(Math.random() * emojis.length)];
@@ -1411,13 +1459,14 @@
       piece.style.fontSize = (14 + Math.random() * 18) + 'px';
       piece.style.position = 'absolute';
       piece.style.top = '-40px';
-      container.appendChild(piece);
+      fragment.appendChild(piece);
     }
+    container.appendChild(fragment);
   }
 
   function triggerCelebration() {
     if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    
+
     document.getElementById('celebrationGlow').classList.add('active');
     document.getElementById('celebrationOverlay').classList.add('active');
     playPerfect();
@@ -1426,15 +1475,18 @@
     confettiContainer.innerHTML = '';
     const colors = ['#facc15', '#fb923c', '#4ade80', '#38bdf8', '#c084fc', '#fb7185', '#fff'];
 
-    // 100+ confetti pieces
-    for(let i=0; i<100; i++) {
+    // Fewer pieces on low-end devices; still built as a single fragment so
+    // the browser only reflows once regardless of the count.
+    const confettiCount = PerformanceManager.isLowEnd ? 45 : 100;
+    const confettiFragment = document.createDocumentFragment();
+    for (let i = 0; i < confettiCount; i++) {
       const piece = document.createElement('div');
       piece.className = 'adv-confetti';
       piece.style.left = Math.random() * 100 + 'vw';
       piece.style.width = (6 + Math.random() * 10) + 'px';
       piece.style.height = (6 + Math.random() * 10) + 'px';
       piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-      
+
       const shapeType = Math.floor(Math.random() * 3);
       if (shapeType === 0) piece.style.borderRadius = '50%';
       else if (shapeType === 2) {
@@ -1446,14 +1498,17 @@
 
       piece.style.animationDuration = (2.5 + Math.random() * 2) + 's';
       piece.style.animationDelay = (Math.random() * 1.5) + 's';
-      confettiContainer.appendChild(piece);
+      confettiFragment.appendChild(piece);
     }
+    confettiContainer.appendChild(confettiFragment);
 
-    // 40+ floating particles (emojis)
+    // Floating particles (emojis), also batched and scaled down on low-end devices.
     const particlesContainer = document.getElementById('celebrationParticles');
     particlesContainer.innerHTML = '';
     const pEmojis = ['⭐', '🌟', '✨', '🏆', '💎', '🎉', '🎊', '🥇', '💯', '🔥', '🌈', '🧬', '🔬', '⚛️'];
-    for(let i=0; i<40; i++) {
+    const particleCount = PerformanceManager.isLowEnd ? 18 : 40;
+    const particleFragment = document.createDocumentFragment();
+    for (let i = 0; i < particleCount; i++) {
        const p = document.createElement('div');
        p.className = 'adv-particle';
        p.textContent = pEmojis[Math.floor(Math.random() * pEmojis.length)];
@@ -1461,8 +1516,9 @@
        p.style.fontSize = (20 + Math.random() * 30) + 'px';
        p.style.animationDuration = (4 + Math.random() * 3) + 's';
        p.style.animationDelay = (Math.random() * 1.5) + 's';
-       particlesContainer.appendChild(p);
+       particleFragment.appendChild(p);
     }
+    particlesContainer.appendChild(particleFragment);
 
     celebrationTimeout = setTimeout(closeCelebration, 6000);
   }
@@ -1912,6 +1968,10 @@
       clearInterval(timerInterval);
       timerInterval = null;
     }
+
+    // Safe checkpoint: if an update was detected while a quiz was in
+    // progress, this is where it gets a chance to finally show the prompt.
+    UpdateManager.onSafePoint();
   }
 
   function renderShell(body) {
@@ -2111,12 +2171,17 @@
   }
 
   // ============ IMAGE HELPERS ============
+  // Tracks in-flight prefetches so the same image URL is never requested
+  // twice in a row (Network Optimization: prevent duplicate downloads).
+  const prefetchedImages = new Set();
+
   function renderQuestionImage(image) {
     if (!image) return '';
     const safeSrc = escapeHtml(image);
     return `
       <div class="question-image-wrap" id="questionImageWrap">
         <img src="${safeSrc}" alt="ප්‍රශ්නයට අදාළ රූපය" loading="lazy" decoding="async"
+             onload="this.closest('.question-image-wrap').classList.add('img-loaded')"
              onerror="this.closest('.question-image-wrap').classList.add('img-error')">
         <div class="question-image-placeholder">
           <i class="fas fa-image"></i>
@@ -2124,6 +2189,20 @@
         </div>
       </div>
     `;
+  }
+
+  // Resource Preloading: warm the browser cache for just the *next*
+  // question's image (never the whole lesson/quiz) so advancing feels
+  // instant without ever fetching images the user may never reach.
+  function prefetchNextQuestionImage(lesson, qz) {
+    if (!lesson || !qz) return;
+    const nextIdx = qz.idx + 1;
+    if (nextIdx >= qz.order.length) return;
+    const nextQuestion = lesson.questions[qz.order[nextIdx]];
+    if (!nextQuestion || !nextQuestion.image || prefetchedImages.has(nextQuestion.image)) return;
+    prefetchedImages.add(nextQuestion.image);
+    const img = new Image();
+    img.src = nextQuestion.image;
   }
 
   // ============ QUIZ & FLASHCARDS ============
@@ -2436,6 +2515,8 @@
       const ring = document.getElementById('ringFg');
       if (ring) ring.style.strokeDashoffset = ring.getAttribute('data-target');
     }, 100);
+
+    UpdateManager.onSafePoint();
   }
 
   // Updates just the star/streak counters in the header without touching the rest of the DOM.
@@ -2842,11 +2923,149 @@
     if (p && p.classList.contains('open') && !e.target.closest('.theme-wrap')) p.classList.remove('open');
   });
 
+  // ============ PERFORMANCE MANAGER ============
+  // Central place for device-capability detection, background/foreground
+  // handling, and other cross-cutting performance concerns. Kept as a small
+  // module (IIFE) so it doesn't leak private state into the global scope.
+  const PerformanceManager = (() => {
+    let lowEnd = false;
+    let hiddenSince = null;
+
+    // Heuristic-only: deviceMemory/hardwareConcurrency aren't available on
+    // every browser, so this degrades gracefully to "not low-end" when the
+    // APIs are missing rather than guessing.
+    function detectDeviceClass() {
+      const mem = navigator.deviceMemory;             // GB, Chrome/Android only
+      const cores = navigator.hardwareConcurrency;     // logical cores
+      lowEnd = (typeof mem === 'number' && mem <= 2) || (typeof cores === 'number' && cores <= 2);
+      document.documentElement.classList.toggle('low-end-device', lowEnd);
+    }
+
+    function reduceEffects() {
+      return lowEnd || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    }
+
+    // Pause work that doesn't matter while the tab isn't visible: the game
+    // countdown timer, the WebAudio context, and any pending auto-advance
+    // are all suspended so a backgrounded tab does zero unnecessary work
+    // and the user isn't penalized with a countdown that ran out unseen.
+    function handleVisibilityChange() {
+      if (document.visibilityState === 'hidden') {
+        hiddenSince = Date.now();
+        if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+        if (audioCtx && audioCtx.state === 'running') audioCtx.suspend().catch(() => {});
+      } else {
+        hiddenSince = null;
+        // Resume the game countdown only if a question is still awaiting an answer.
+        const qz = appState.quiz;
+        if (currentMode === MODES.GAME && qz && !qz.showResult && !qz.gameOver && !qz.answeredCurrent) {
+          startTimer();
+        }
+        // Update check + any postponed update prompt (see UpdateManager below).
+        UpdateManager.checkForUpdate();
+        UpdateManager.onSafePoint();
+      }
+    }
+
+    function init() {
+      detectDeviceClass();
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      window.addEventListener('focus', () => UpdateManager.checkForUpdate());
+    }
+
+    return { init, reduceEffects, get isLowEnd() { return lowEnd; } };
+  })();
+
+  // ============ UPDATE MANAGER (Smart Update System) ============
+  // Detects new Vercel deployments by polling a tiny version.json — never on
+  // an interval, only at safe, meaningful moments (first load / tab returns
+  // to foreground) — and never interrupts an in-progress quiz question.
+  const UpdateManager = (() => {
+    const VERSION_URL = 'version.json';
+    const MIN_CHECK_INTERVAL_MS = 60 * 1000; // guard against rapid focus/blur toggling
+    let lastCheck = 0;
+    let checking = false;
+    let pendingVersion = null;
+
+    function isQuizActive() {
+      const qz = appState.quiz;
+      return appState.route && appState.route.name === 'quiz' && qz && !qz.showResult && !qz.gameOver;
+    }
+
+    async function checkForUpdate(force = false) {
+      const now = Date.now();
+      if (checking || (!force && now - lastCheck < MIN_CHECK_INTERVAL_MS)) return;
+      lastCheck = now;
+      checking = true;
+      try {
+        // cache: 'no-store' + a cache-busting query param guarantees this
+        // small request always reaches the network rather than an HTTP cache.
+        const res = await fetch(`${VERSION_URL}?t=${now}`, { cache: 'no-store' });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data && data.version && data.version !== APP_VERSION) {
+          pendingVersion = data.version;
+          maybeShowPrompt();
+        }
+      } catch (e) {
+        // Offline or the file briefly 404s during a deploy — fail silently,
+        // we'll simply try again on the next safe checkpoint.
+      } finally {
+        checking = false;
+      }
+    }
+
+    function maybeShowPrompt() {
+      if (!pendingVersion) return;
+      if (isQuizActive()) return; // postponed until the quiz finishes / user returns home
+      if (sessionStorage.getItem('dismissedUpdateVersion') === pendingVersion) return;
+      const modal = document.getElementById('updateModal');
+      if (modal) modal.classList.add('active');
+    }
+
+    // Called from safe checkpoints (home screen render, quiz result screen,
+    // game-over close) so a prompt postponed during a quiz appears the
+    // moment it's safe to show it, without any polling loop.
+    function onSafePoint() {
+      if (pendingVersion && !isQuizActive()) maybeShowPrompt();
+    }
+
+    function applyUpdate() {
+      const modal = document.getElementById('updateModal');
+      if (modal) modal.classList.remove('active');
+      const url = new URL(location.href);
+      url.searchParams.set('_v', Date.now()); // cache-busting reload, no Ctrl+Shift+R needed
+      const reload = () => { location.href = url.toString(); };
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations()
+          .then(regs => Promise.all(regs.map(r => r.update().catch(() => {}))))
+          .then(reload)
+          .catch(reload);
+      } else {
+        reload();
+      }
+    }
+
+    function dismiss() {
+      const modal = document.getElementById('updateModal');
+      if (modal) modal.classList.remove('active');
+      if (pendingVersion) sessionStorage.setItem('dismissedUpdateVersion', pendingVersion);
+    }
+
+    function init() {
+      checkForUpdate(true); // check once on first load
+    }
+
+    return { init, checkForUpdate, applyUpdate, dismiss, onSafePoint };
+  })();
+
   // ============ INIT ============
   window.addEventListener('DOMContentLoaded', () => {
     checkAuth();
     loadData();
     appState.route = parseHash();
+    PerformanceManager.init();
+    UpdateManager.init();
   });
 
   // Release timers/resources when the tab is hidden or closed, to avoid
