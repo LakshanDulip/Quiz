@@ -224,7 +224,7 @@
     --bronze: #d97706;
   }
 
-  /* NEW: Pink White / Sakura Theme */
+  /* Sakura Theme */
   :root[data-theme="sakura"] {
     --bg-main: #fdf2f8; 
     --bg-card: rgba(255, 255, 255, 0.95);
@@ -255,7 +255,7 @@
     --bronze: #b45309;
   }
 
-  /* NEW: Pure White Theme */
+  /* Pure White Theme */
   :root[data-theme="pure-white"] {
     --bg-main: #ffffff;
     --bg-card: #ffffff;
@@ -905,6 +905,10 @@
 </head>
 <body>
 
+<!-- Voice Audio Files -->
+<audio id="audioCorrect" preload="auto" src="voice/15correct.mp3"></audio>
+<audio id="audioPerfect" preload="auto" src="voice/100score.mp3"></audio>
+
 <!-- Login / Guest Modal -->
 <div class="modal-overlay" id="loginModal" style="background: var(--bg-main); z-index: 9999;">
   <div class="modal-content" style="max-width:400px; text-align:center;">
@@ -1182,6 +1186,30 @@
   function playSound(type) {
     if (isMuted) return;
     if (audioCtx.state === 'suspended') audioCtx.resume();
+    
+    // 1. Correct answer - play recorded voice
+    if (type === 'correct') {
+      try {
+        const audioEl = document.getElementById('audioCorrect');
+        if (audioEl) {
+          audioEl.currentTime = 0;
+          audioEl.play().catch(() => {});
+          return;
+        }
+      } catch(e) { console.warn("Correct audio play failed", e); }
+    }
+    
+    // 2. Perfect score - play recorded voice
+    if (type === 'perfect') {
+      try {
+        const audioEl = document.getElementById('audioPerfect');
+        if (audioEl) {
+          audioEl.currentTime = 0;
+          audioEl.play().catch(() => {});
+        }
+      } catch(e) { console.warn("Perfect audio play failed", e); }
+    }
+
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     const now = audioCtx.currentTime;
@@ -1192,12 +1220,6 @@
       osc.frequency.exponentialRampToValueAtTime(300, now + 0.08);
       gain.gain.setValueAtTime(0.2, now);
       gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
-    } else if (type === 'correct') {
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(500, now);
-      osc.frequency.setValueAtTime(700, now + 0.08);
-      gain.gain.setValueAtTime(0.25, now);
-      gain.gain.linearRampToValueAtTime(0, now + 0.2);
     } else if (type === 'wrong') {
       osc.type = 'sine';
       osc.frequency.setValueAtTime(400, now);
@@ -1216,39 +1238,23 @@
       osc.frequency.setValueAtTime(600, now + 0.05);
       gain.gain.setValueAtTime(0.1, now);
       gain.gain.linearRampToValueAtTime(0, now + 0.1);
-    } else if (type === 'perfect') {
-      const notes = [523, 587, 659, 784, 880, 988, 1047];
-      notes.forEach((freq, i) => {
-        const o2 = audioCtx.createOscillator();
-        const g2 = audioCtx.createGain();
-        const t = now + i * 0.08;
-        o2.type = 'triangle';
-        o2.frequency.setValueAtTime(freq, t);
-        g2.gain.setValueAtTime(0.2, t);
-        g2.gain.linearRampToValueAtTime(0, t + 0.15);
-        o2.connect(g2); g2.connect(audioCtx.destination);
-        o2.start(t); o2.stop(t + 0.15);
-      });
-      setTimeout(() => {
-        [523, 659, 784].forEach((freq, i) => {
-          const o2 = audioCtx.createOscillator();
-          const g2 = audioCtx.createGain();
-          const t = now + 0.6 + i * 0.05;
-          o2.type = 'sine';
-          o2.frequency.setValueAtTime(freq, t);
-          g2.gain.setValueAtTime(0.25, t);
-          g2.gain.linearRampToValueAtTime(0, t + 0.3);
-          o2.connect(g2); g2.connect(audioCtx.destination);
-          o2.start(t); o2.stop(t + 0.3);
-        });
-      }, 500);
-      osc.disconnect();
-      return;
     }
+
     osc.connect(gain);
     gain.connect(audioCtx.destination);
     osc.start();
     osc.stop(now + 0.3);
+  }
+
+  // Voice stop helper
+  function stopVoice(type) {
+    try {
+      const el = document.getElementById(type === 'correct' ? 'audioCorrect' : 'audioPerfect');
+      if (el) {
+        el.pause();
+        el.currentTime = 0;
+      }
+    } catch(e) {}
   }
 
   function playClick() { playSound('click'); }
@@ -1334,6 +1340,11 @@
       btn.querySelector('i').className = isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up';
       btn.classList.toggle('muted', isMuted);
     }
+    // Stop any playing voice when muting
+    if (isMuted) {
+      stopVoice('correct');
+      stopVoice('perfect');
+    }
     playClick();
   }
 
@@ -1415,6 +1426,7 @@
   function closeCelebration() {
     document.getElementById('celebrationOverlay').classList.remove('active');
     document.getElementById('celebrationGlow').classList.remove('active');
+    stopVoice('perfect');
     setTimeout(() => {
         document.getElementById('confettiContainer').innerHTML = '';
         document.getElementById('celebrationParticles').innerHTML = '';
@@ -2260,7 +2272,7 @@
         <div class="options-grid">
           ${question.options.map((opt, i) => {
             if (qz.hiddenOptions && qz.hiddenOptions.includes(i)) {
-              return ''; // Hidden via Hint or 50/50
+              return '';
             }
 
             let btnClass = 'option-btn';
@@ -2351,7 +2363,7 @@
     if (qz.idx < qz.order.length - 1) {
       qz.idx++;
     } else {
-      qz.idx = 0; // loop back to first
+      qz.idx = 0;
     }
     render();
     playClick();
@@ -2378,7 +2390,6 @@
     const question = lesson.questions[qIndex];
     const correct = question.correct;
 
-    // Find wrong options not hidden yet
     const wrongIdxs = question.options.map((_, i) => i).filter(i => i !== correct && (!qz.hiddenOptions || !qz.hiddenOptions.includes(i)));
     if (wrongIdxs.length > 0) {
       const removeIdx = wrongIdxs[Math.floor(Math.random() * wrongIdxs.length)];
@@ -2548,10 +2559,10 @@
 
   window.closeModalAndNext = function() {
     playClick();
+    // Stop voice when closing modal
+    stopVoice('correct');
+    stopVoice('perfect');
     document.getElementById('explainModal').classList.remove('active');
-    if (currentMode === MODES.STUDY) {
-      return;
-    }
   };
 
   // ============ POWER-UPS ============
@@ -2643,7 +2654,10 @@
       for (const id of openOverlays) {
         const el = document.getElementById(id);
         if (el && el.classList.contains('active')) {
-          if (id === 'explainModal') { closeModalAndNext(); if (currentMode === MODES.STUDY) return; }
+          if (id === 'explainModal') { 
+            closeModalAndNext(); 
+            if (currentMode === MODES.STUDY) return; 
+          }
           else if (id === 'celebrationOverlay') { closeCelebration(); }
           else el.classList.remove('active');
           return;
