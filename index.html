@@ -37,6 +37,8 @@
     updateProfile,
     GoogleAuthProvider,
     signInWithPopup,
+    signInWithRedirect,
+    getRedirectResult,
     EmailAuthProvider,
     reauthenticateWithCredential
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -267,22 +269,12 @@
   window.getFirebaseUser = function() {
     return auth.currentUser;
   };
-  // ===== GOOGLE SIGN IN =====
-  window.firebaseGoogleSignIn = async function() {
-    const provider = new GoogleAuthProvider();
-    provider.setCustomParameters({
-      prompt: 'select_account'
-    });
-    
-    const result = await signInWithPopup(auth, provider);
-    const user = result.user;
-    
-    // Check if user document exists
+  // ===== GOOGLE SIGN IN (REDIRECT METHOD - Popup block වැඩ කරන්නේ නෑ) =====
+  async function handleGoogleUser(user) {
     const userDocRef = doc(db, 'users', user.uid);
     const userDoc = await getDoc(userDocRef);
     
     if (!userDoc.exists()) {
-      // Create new user document for Google sign-in
       await setDoc(userDocRef, {
         uid: user.uid,
         name: user.displayName || user.email.split('@')[0],
@@ -319,15 +311,35 @@
         }
       });
     } else {
-      // Update last login
       await updateDoc(userDocRef, {
         lastLogin: serverTimestamp(),
         avatar: user.photoURL || userDoc.data().avatar || ''
       }).catch(() => {});
     }
+  }
+
+  window.firebaseGoogleSignIn = async function() {
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({
+      prompt: 'select_account'
+    });
     
-    return user;
+    // Redirect method - popup block වෙන්නේ නෑ
+    await signInWithRedirect(auth, provider);
   };
+
+  // Page load වෙද්දි Google redirect result check කරන්න
+  (async function checkRedirectResult() {
+    try {
+      const result = await getRedirectResult(auth);
+      if (result) {
+        console.log('[Firebase] Google redirect sign-in successful:', result.user.uid);
+        await handleGoogleUser(result.user);
+      }
+    } catch (error) {
+      console.warn('[Firebase] Redirect check:', error.message);
+    }
+  })();
   // Set flag that Firebase is initialized
   window.firebaseInitialized = true;
   
@@ -1986,40 +1998,34 @@
 
     try {
       if (!window.firebaseGoogleSignIn) {
-        throw new Error('Google Sign-In not available yet. Please wait...');
+        throw new Error('Google Sign-In not available. Please wait...');
       }
       
-      const user = await window.firebaseGoogleSignIn();
-      console.log('[Firebase] Google sign-in successful:', user.uid);
+      // Redirect method - page redirect වෙනවා Google login එකට
+      showAuthSuccess('authLoginSuccess', '🔄 Google වෙත හරවා යවමින්...');
+      await window.firebaseGoogleSignIn();
+      // මෙතනට code එක එන්නේ නෑ - redirect වෙන නිසා
       
-      showAuthSuccess('authLoginSuccess', '✅ Google පුරනය සාර්ථකයි!');
-      
-      setTimeout(() => {
-        closeFirebaseAuthModal();
-      }, 1000);
     } catch (error) {
       console.error('[Firebase] Google sign-in error:', error);
-      if (error.code === 'auth/popup-closed-by-user') {
-        showAuthError('authLoginError', 'Google popup එක වැසී ඇත. නැවත උත්සාහ කරන්න.');
-      } else if (error.code === 'auth/cancelled-popup-request') {
-        showAuthError('authLoginError', 'තවත් popup එකක් විවෘතව ඇත.');
-      } else {
-        showAuthError('authLoginError', getFirebaseErrorMessage(error));
-      }
+      showAuthError('authLoginError', getFirebaseErrorMessage(error));
     } finally {
       setButtonLoading('authGoogleBtn', false);
     }
   }
 
   function retryGoogleSignIn() {
-    // Wait a moment for Firebase to fully initialize
-    setTimeout(() => {
-      if (window.firebaseGoogleSignIn) {
-        handleFirebaseGoogleSignIn();
-      } else {
-        showAuthError('authLoginError', 'Firebase තවමත් පූරණය වෙමින් පවතී. මොහොතකින් නැවත උත්සාහ කරන්න.');
-      }
-    }, 1000);
+    if (window.firebaseGoogleSignIn) {
+      handleFirebaseGoogleSignIn();
+    } else {
+      setTimeout(() => {
+        if (window.firebaseGoogleSignIn) {
+          handleFirebaseGoogleSignIn();
+        } else {
+          showAuthError('authLoginError', 'Firebase තවමත් පූරණය වෙමින් පවතී. මොහොතකින් නැවත උත්සාහ කරන්න.');
+        }
+      }, 2000);
+    }
   }
   async function handleFirebaseForgotPassword() {
     const email = document.getElementById('authForgotEmail').value.trim();
