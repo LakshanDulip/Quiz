@@ -1659,17 +1659,21 @@ window.performanceManager = new PerformanceManager();
     <span style="font-size: 3rem; display: block; margin-bottom: 10px;">👋</span>
     <h2 class="modal-title" style="margin-bottom: 10px;">Quiz Hub වෙත සාදරයෙන් පිළිගනිමු!</h2>
     <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 0.9rem;">
-      ඔබේ ප්‍රගතිය සුරැකීමට නම ඇතුළත් කරන්න, නැතහොත් අමුත්තෙක් ලෙස ක්‍රීඩා කරන්න.
+      ඔබේ ප්‍රගතිය සුරැකීමට Google ගිණුමෙන් ඇතුළු වන්න, නැතහොත් අමුත්තෙක් ලෙස ක්‍රීඩා කරන්න.
     </p>
     
-    <input type="text" id="usernameInput" placeholder="ඔබේ නම ඇතුළත් කරන්න..." maxlength="24" autocomplete="off"
-           onkeydown="if(event.key==='Enter'){event.preventDefault();handleLogin();}"
-           style="width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary); font-family: inherit; font-size: 1rem;">
-    
     <div style="display: flex; flex-direction: column; gap: 10px;">
-      <button class="btn btn-primary" onclick="handleLogin()" style="width: 100%; justify-content: center;">
-        <i class="fas fa-sign-in-alt"></i> ඇතුළු වන්න (Login)
+      <!-- Google Login Button -->
+      <button class="btn btn-primary" onclick="handleGoogleLogin()" style="width: 100%; justify-content: center; background: #fff; color: #4285F4; border: 1px solid #4285F4; box-shadow: none;">
+        <i class="fab fa-google" style="color: #EA4335;"></i> Google මගින් ඇතුළු වන්න
       </button>
+      
+      <div style="margin: 10px 0; color: var(--text-secondary); font-size: 0.8rem;">හෝ</div>
+
+      <input type="text" id="usernameInput" placeholder="ඔබේ නම ඇතුළත් කරන්න (අමුත්තෙක් ලෙස)..." maxlength="24" autocomplete="off"
+             onkeydown="if(event.key==='Enter'){event.preventDefault();handleGuest();}"
+             style="width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-main); color: var(--text-primary); font-family: inherit; font-size: 1rem;">
+      
       <button class="btn btn-outline" onclick="handleGuest()" style="width: 100%; justify-content: center;">
         <i class="fas fa-user-secret"></i> අමුත්තෙක් ලෙස (Play as Guest)
       </button>
@@ -1829,66 +1833,28 @@ window.performanceManager = new PerformanceManager();
   let currentUser = localStorage.getItem('quizUsername') || sessionStorage.getItem('quizGuestName');
   let isGuest = sessionStorage.getItem('isGuest') === 'true';
 
+  // Firebase onAuthStateChanged එකෙන් මෙය පාලනය වන නිසා හිස්ව තබමු හෝ Guest සඳහා පමණක් check කරමු
   function checkAuth() {
-    const loginModal = document.getElementById('loginModal');
-    if (!currentUser) {
-      loginModal.classList.add('active');
-    } else {
-      loginModal.classList.remove('active');
+    if (!currentUser && !sessionStorage.getItem('isGuest')) {
+      document.getElementById('loginModal').classList.add('active');
     }
   }
 
-  function handleLogin() {
+  window.handleGuest = function() {
     const nameInput = document.getElementById('usernameInput').value.trim();
-    if (nameInput.length < 2) {
-      alert("කරුණාකර වලංගු නමක් ඇතුළත් කරන්න.");
-      return;
-    }
+    const finalName = nameInput.length >= 2 ? nameInput : 'Guest';
     
     audioManager.playClick();
-    currentUser = nameInput;
-    isGuest = false;
-    
-    localStorage.setItem('quizUsername', currentUser);
-    sessionStorage.removeItem('isGuest');
-    sessionStorage.removeItem('quizGuestName');
-    
-    document.getElementById('loginModal').classList.remove('active');
-    syncAppState();
-    render();
-  }
-
-  function handleGuest() {
-    audioManager.playClick();
-    currentUser = 'Guest';
+    currentUser = finalName;
     isGuest = true;
     
     sessionStorage.setItem('isGuest', 'true');
-    sessionStorage.setItem('quizGuestName', 'Guest');
+    sessionStorage.setItem('quizGuestName', finalName);
     
     document.getElementById('loginModal').classList.remove('active');
     syncAppState();
     render();
-  }
-
-  function handleLogout() {
-    if (confirm("ඔබට නිසැකවම ඉවත් වීමට අවශ්‍යද?")) {
-      audioManager.playClick();
-      localStorage.removeItem('quizUsername');
-      sessionStorage.removeItem('isGuest');
-      sessionStorage.removeItem('quizGuestName');
-      
-      if (isGuest) {
-        sessionStorage.removeItem('guest_quizProgress');
-      }
-      
-      currentUser = null;
-      isGuest = false;
-      appState.route = { name: 'home' };
-      checkAuth();
-      render();
-    }
-  }
+  };
 
   function syncAppState() {
     const p = getProgress();
@@ -3797,5 +3763,92 @@ const GRADES = ['8', '9', '10', '11'];
   });
 </script>
 
+<!-- Firebase Authentication Integration -->
+<script type="module">
+  // Firebase SDKs Import කිරීම (CDN හරහා)
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+
+  // ඔබ ලබා දුන් Quiz Hub Firebase Configuration එක
+  const firebaseConfig = {
+    apiKey: "AIzaSyAhfgx0t-E6wrz6zEFIU_tpKTIbELp00ss",
+    authDomain: "quiz-hub-225eb.firebaseapp.com",
+    projectId: "quiz-hub-225eb",
+    storageBucket: "quiz-hub-225eb.firebasestorage.app",
+    messagingSenderId: "387012755680",
+    appId: "1:387012755680:web:36108ab447a8a2f2ab9085",
+    measurementId: "G-14HG0JFW0W"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app); // Analytics සක්‍රිය කිරීම
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+
+  // Google Login Function එක
+  window.handleGoogleLogin = function() {
+    audioManager.playClick();
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        const user = result.user;
+        
+        currentUser = user.displayName;
+        isGuest = false;
+        
+        // Session Data Save කිරීම
+        localStorage.setItem('quizUserId', user.uid); 
+        localStorage.setItem('quizUsername', currentUser);
+        sessionStorage.removeItem('isGuest');
+        
+        document.getElementById('loginModal').classList.remove('active');
+        syncAppState();
+        render();
+      }).catch((error) => {
+        console.error("Google Login Error:", error);
+        alert("ලොග් වීමේදී දෝෂයක් මතු විය! කරුණාකර නැවත උත්සාහ කරන්න.");
+      });
+  };
+
+  // Logout Function එක
+  window.handleLogout = function() {
+    if (confirm("ඔබට නිසැකවම ඉවත් වීමට අවශ්‍යද?")) {
+      audioManager.playClick();
+      
+      signOut(auth).then(() => {
+        localStorage.removeItem('quizUsername');
+        localStorage.removeItem('quizUserId');
+        sessionStorage.removeItem('isGuest');
+        
+        currentUser = null;
+        isGuest = false;
+        appState.route = { name: 'home' };
+        
+        document.getElementById('loginModal').classList.add('active');
+        render();
+      }).catch((error) => {
+        console.error("Sign Out Error:", error);
+      });
+    }
+  };
+
+  // Auth State Listener (Page Refresh කරන විට ලොග් වී ඇත්දැයි පරීක්ෂා කිරීමට)
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      currentUser = user.displayName;
+      isGuest = false;
+      localStorage.setItem('quizUserId', user.uid);
+      document.getElementById('loginModal').classList.remove('active');
+      syncAppState();
+      render();
+    } else {
+      // User කෙනෙක් ලොග් වී නැත්නම්, ඔහු Guest කෙනෙක්ද යන්න බලන්න
+      if (!sessionStorage.getItem('isGuest')) {
+        document.getElementById('loginModal').classList.add('active');
+      }
+    }
+  });
+</script>
 </body>
 </html>
