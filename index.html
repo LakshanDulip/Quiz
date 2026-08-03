@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="si" data-theme="dark" class="notranslate">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8"> 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Quiz Hub — Study, Flashcards & Game Mode</title>
 
@@ -1916,6 +1916,92 @@
       opacity: 0;
       transform: translate(var(--tx), calc(var(--ty) - 30px)) scale(0.3) rotate(calc(var(--rot) + 90deg));
     }
+  }
+    /* Emotion: Happy */
+  .mascot-container.happy .mascot-mouth {
+    width: 26px;
+    height: 12px;
+    border-bottom: 3.5px solid #1a1a1a;
+    border-radius: 0 0 50% 50%;
+  }
+  .mascot-container.happy .mascot-eye {
+    height: 14px;
+  }
+  
+  /* Emotion: Love */
+  .mascot-container.love .mascot-eye {
+    width: 14px;
+    height: 14px;
+  }
+  .mascot-container.love .mascot-eye::after {
+    width: 5px;
+    height: 7px;
+    background: transparent;
+    border-radius: 50%;
+    box-shadow: none;
+    top: 4px;
+    left: 4px;
+  }
+  .mascot-container.love .mascot-eye::before {
+    content: '❤';
+    font-size: 0.5rem;
+    color: #ff4444;
+    background: transparent;
+    box-shadow: none;
+    top: -2px;
+    left: 0px;
+    animation: none;
+  }
+  
+  /* Emotion: Surprised */
+  .mascot-container.surprised .mascot-eye {
+    width: 18px;
+    height: 18px;
+    animation: none;
+  }
+  .mascot-container.surprised .mascot-eye::after {
+    width: 5px;
+    height: 5px;
+    top: 6px;
+    left: 6px;
+  }
+  .mascot-container.surprised .mascot-mouth {
+    width: 12px;
+    height: 12px;
+    border-bottom: none;
+    border: 3px solid #1a1a1a;
+    border-radius: 50%;
+    background: #1a1a1a;
+  }
+  
+  /* Emotion: Cool */
+  .mascot-container.cool .mascot-mouth {
+    width: 20px;
+    height: 4px;
+    border-bottom: 3px solid #1a1a1a;
+    border-radius: 0;
+    transform: translateX(-50%) rotate(-5deg);
+  }
+  .mascot-container.cool .mascot-eye {
+    height: 10px;
+    border-radius: 40%;
+    animation: none;
+  }
+  
+  /* Emotion: Wink */
+  .mascot-container.wink .mascot-eye:last-child {
+    animation: mascotWink 0.3s ease-in-out forwards;
+    transform: scaleY(0.1);
+  }
+  @keyframes mascotWink {
+    0% { transform: scaleY(1); }
+    50% { transform: scaleY(0.05); }
+    100% { transform: scaleY(1); }
+  }
+  .mascot-container.wink .mascot-mouth {
+    width: 22px;
+    border-radius: 50% 50% 30% 30%;
+    transform: translateX(-50%) rotate(3deg);
   }
   @keyframes mascotSad {
     0%, 100% { transform: translateY(0); }
@@ -4307,13 +4393,23 @@ window.performanceManager = new PerformanceManager();
     }
   }
   
-  function handleMascotClick() {
+   function handleMascotClick() {
     const container = document.getElementById('mascotContainer');
     if (!container) return;
     
-    // Bounce + heart burst animation
+    // Random emotion
+    const emotions = ['happy', 'love', 'surprised', 'cool', 'wink'];
+    const randomEmotion = emotions[Math.floor(Math.random() * emotions.length)];
+    
+    // Remove previous emotion classes
+    container.classList.remove('happy', 'love', 'surprised', 'cool', 'wink', 'sad');
+    
+    // Add new emotion
+    container.classList.add(randomEmotion);
+    
+    // Bounce animation
     container.style.transition = 'transform 0.15s cubic-bezier(.2,.8,.3,1)';
-    container.style.transform = 'scale(1.15)';
+    container.style.transform = 'scale(1.2)';
     
     setTimeout(() => {
       container.style.transform = 'scale(0.85)';
@@ -4321,16 +4417,23 @@ window.performanceManager = new PerformanceManager();
     
     setTimeout(() => {
       container.style.transform = '';
-    }, 300);
+      container.classList.remove(randomEmotion);
+    }, 1500);
     
-    // Show random click message
-    const randomMsg = mascotMessages.click[Math.floor(Math.random() * mascotMessages.click.length)];
+    // Emotion message & sound
+    const emotionMessages = {
+      happy: ['😊 හෙලෝ!', '😄 සතුටුයි!', '🎉 යාළුවා!'],
+      love: ['💕 ආදරෙයි!', '💖 ඔබ නියමයි!', '💝 මගේ යාළුවා!'],
+      surprised: ['😲 ආශ්චර්යයි!', '😮 වාව්!', '🤩 අපූරුයි!'],
+      cool: ['😎 Cool!', '🦊 සුපිරි!', '💪 ශක්තිමත්!'],
+      wink: ['😉 හරි හරි!', '😜 දඟයා!', '🦊 බොරුවට නෙමෙයි!']
+    };
+    
+    const messages = emotionMessages[randomEmotion];
+    const randomMsg = messages[Math.floor(Math.random() * messages.length)];
     showMascotSpeech(randomMsg, 2500);
     
-    // Play cute sound
     audioManager.playClick();
-    
-    // Spawn floating hearts burst
     spawnClickHearts();
   }
   
