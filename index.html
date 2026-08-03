@@ -1484,7 +1484,87 @@
 
   .animate-pop { animation: popIn 0.25s ease forwards; }
   @keyframes popIn { 0% { opacity: 0; transform: scale(0.97); } 100% { opacity: 1; transform: scale(1); } }
+  /* ===== FLOATING INFO BUTTON ===== */
+  .info-floating-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 500;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--primary-gradient);
+    color: #fff;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3), 0 0 15px var(--glow-color);
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s cubic-bezier(.2,.8,.3,1);
+    animation: infoPulse 2.5s ease-in-out infinite;
+  }
+  .info-floating-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4), 0 0 25px var(--glow-color);
+  }
+  .info-floating-btn:active {
+    transform: scale(0.92);
+  }
+  @keyframes infoPulse {
+    0%, 100% { box-shadow: 0 6px 20px rgba(0,0,0,0.3), 0 0 15px var(--glow-color); }
+    50% { box-shadow: 0 6px 25px rgba(0,0,0,0.35), 0 0 28px var(--glow-color); }
+  }
 
+  /* Info Modal Styles */
+  .info-section {
+    margin-bottom: 18px;
+  }
+  .info-section h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    color: var(--primary-color);
+    margin-bottom: 8px;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .info-section p, .info-section li {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.7;
+  }
+  .info-section ul {
+    list-style: none;
+    padding: 0;
+  }
+  .info-section ul li {
+    padding: 4px 0;
+    padding-left: 4px;
+  }
+  .info-tip-box {
+    background: rgba(250, 204, 21, 0.08);
+    border-left: 3px solid var(--primary-color);
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+  }
+  .info-dev-credit {
+    text-align: center;
+    padding: 12px;
+    background: var(--bg-main);
+    border-radius: 10px;
+    margin-top: 15px;
+  }
+  .info-dev-credit .name {
+    font-weight: 700;
+    color: var(--primary-color);
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  
   footer { text-align: center; padding: 20px; color: var(--text-secondary); font-size: 0.8rem; border-top: 1px solid var(--border-color); background: var(--bg-card); backdrop-filter: blur(10px); }
   .dev-credit { margin-top: 5px; font-weight: 600; color: var(--primary-color); }
 
@@ -2667,6 +2747,23 @@ window.performanceManager = new PerformanceManager();
 </div>
 <!-- ===== FIREBASE AUTH END ===== -->
 
+  <!-- ===== INFO BUTTON (floating) ===== -->
+<button class="info-floating-btn" onclick="showInfoModal()" title="තොරතුරු">
+  <i class="fas fa-info"></i>
+</button>
+
+<!-- Info Modal -->
+<div class="modal-overlay" id="infoModal">
+  <div class="modal-content" style="max-width:520px; text-align:left;">
+    <button class="modal-close-btn" onclick="closeInfoModal()" aria-label="වසන්න">✕</button>
+    <div id="infoModalContent" style="max-height:65vh; overflow-y:auto; padding-right:5px;">
+      <div style="text-align:center; padding:20px;">
+        <i class="fas fa-spinner fa-spin" style="font-size:2rem; color:var(--primary-color);"></i>
+        <p style="color:var(--text-secondary); margin-top:10px;">පූරණය වෙමින්...</p>
+      </div>
+    </div>
+  </div>
+</div>
 <!-- Lesson Summary Modal -->
 <div class="modal-overlay" id="summaryModal">
   <div class="modal-content" style="max-width:550px; text-align:left;">
@@ -3637,7 +3734,87 @@ window.performanceManager = new PerformanceManager();
   function closeProgress() {
     document.getElementById('progressModal').classList.remove('active');
   }
-
+  // ============ INFO MODAL ============
+  async function showInfoModal() {
+    const modal = document.getElementById('infoModal');
+    const content = document.getElementById('infoModalContent');
+    
+    modal.classList.add('active');
+    
+    // Show loading
+    content.innerHTML = `
+      <div style="text-align:center; padding:20px;">
+        <i class="fas fa-spinner fa-spin" style="font-size:2rem; color:var(--primary-color);"></i>
+        <p style="color:var(--text-secondary); margin-top:10px;">තොරතුරු පූරණය වෙමින්...</p>
+      </div>
+    `;
+    
+    try {
+      const response = await fetch('info.json');
+      if (!response.ok) throw new Error('Failed to load info');
+      const data = await response.json();
+      
+      const info = data.appInfo;
+      const tips = data.tips || [];
+      
+      content.innerHTML = `
+        <h2 class="modal-title" style="text-align:center; margin-bottom:16px;">
+          ${escapeHtml(info.title || 'Quiz Hub ගැන')}
+        </h2>
+        
+        <div class="info-section">
+          <p>${escapeHtml(info.description || '')}</p>
+        </div>
+        
+        ${info.features && info.features.length > 0 ? `
+          <div class="info-section">
+            <h3>✨ පහසුකම්</h3>
+            <ul>
+              ${info.features.map(f => `<li>${escapeHtml(f)}</li>`).join('')}
+            </ul>
+          </div>
+        ` : ''}
+        
+        ${info.howToUse ? `
+          <div class="info-section">
+            <h3>📖 භාවිතා කරන ආකාරය</h3>
+            <p style="white-space:pre-line;">${escapeHtml(info.howToUse)}</p>
+          </div>
+        ` : ''}
+        
+        ${tips.length > 0 ? `
+          <div class="info-section">
+            <h3>💡 උපදෙස්</h3>
+            ${tips.map(t => `<div class="info-tip-box">💡 ${escapeHtml(t)}</div>`).join('')}
+          </div>
+        ` : ''}
+        
+        <div class="info-dev-credit">
+          <div style="font-size:0.8rem; color:var(--text-secondary);">Developed by</div>
+          <div class="name">🦊 ${escapeHtml(info.developer || 'Lakshan Dulip')}</div>
+          <div style="font-size:0.7rem; color:var(--text-secondary); margin-top:4px;">
+            Version ${escapeHtml(info.version || '2.0.0')}
+            ${info.contact ? ` • ${escapeHtml(info.contact)}` : ''}
+          </div>
+        </div>
+      `;
+      
+    } catch (error) {
+      console.error('[Info] Load error:', error);
+      content.innerHTML = `
+        <div style="text-align:center; padding:20px;">
+          <span style="font-size:2rem;">😅</span>
+          <p style="color:var(--text-secondary); margin-top:10px;">තොරතුරු පූරණය කළ නොහැක.</p>
+          <p style="color:var(--text-secondary); font-size:0.8rem;">info.json file එක check කරන්න.</p>
+        </div>
+      `;
+    }
+  }
+  
+  function closeInfoModal() {
+    document.getElementById('infoModal').classList.remove('active');
+    audioManager.playModalClose();
+  }
   // ============ LESSON SUMMARY MODAL ============
   function showSummaryModal(subject, grade, lessonId) {
     const lesson = findLesson(subject, grade, lessonId);
@@ -4719,7 +4896,7 @@ window.performanceManager = new PerformanceManager();
     const typingInField = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA';
 
     if (e.key === 'Escape') {
-      const openOverlays = ['explainModal', 'leaderboardModal', 'achievementsModal', 'progressModal', 'saveScoreModal', 'summaryModal', 'celebrationOverlay', 'updateOverlay', 'firebaseAuthModal'];
+      const openOverlays = ['explainModal', 'leaderboardModal', 'achievementsModal', 'progressModal', 'saveScoreModal', 'summaryModal', 'celebrationOverlay', 'updateOverlay', 'firebaseAuthModal', 'infoModal'];
       for (const id of openOverlays) {
         const el = document.getElementById(id);
         if (el && el.classList.contains('active')) {
