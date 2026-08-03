@@ -3799,6 +3799,13 @@ window.performanceManager = new PerformanceManager();
               <i class="fab fa-telegram-plane"></i> ${escapeHtml(info.telegram)}
             </div>
           ` : ''}
+           ${info.whatsapp ? `
+            <a href="${escapeHtml(info.whatsapp)}" target="_blank" rel="noopener" 
+               style="display:block; font-size:0.78rem; color:var(--correct-color); margin-top:6px; text-decoration:none;"
+               onclick="event.stopPropagation();">
+              <i class="fab fa-whatsapp"></i> ${escapeHtml(info.whatsappLabel || 'WhatsApp Channel')}
+            </a>
+          ` : ''}
         </div>
       `;
       
