@@ -1,8 +1,8 @@
 // ============ SERVICE WORKER - QUIZ HUB ============
 // Enhanced service worker with cache management, versioning, and update handling
 
-const CACHE_NAME = 'quizhub-v2';
-const RUNTIME_CACHE = 'quizhub-runtime-v2';
+const CACHE_NAME = 'quizhub-v3';
+const RUNTIME_CACHE = 'quizhub-runtime-v3';
 const VERSION = '2.0.1';
 
 // Assets to cache on install
