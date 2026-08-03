@@ -10,7 +10,6 @@
 
 <!-- ✅ Favicon Fix -->
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💡</text></svg>">
-<!-- ... rest of head -->
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1556,10 +1555,6 @@ window.performanceManager = new PerformanceManager();
 })();
 </script>
 
-<!-- Voice Audio Files -->
-<audio id="audioCorrect" preload="none" src="voice/15correct.mp3"></audio>
-<audio id="audioPerfect" preload="none" src="voice/100score.mp3"></audio>
-
 <!-- Login / Guest Modal -->
 <div class="modal-overlay" id="loginModal" style="background: var(--bg-main); z-index: 9999;">
   <div class="modal-content" style="max-width:400px; text-align:center;">
@@ -1752,7 +1747,7 @@ window.performanceManager = new PerformanceManager();
       return;
     }
     
-    playClick();
+    audioManager.playClick();
     currentUser = nameInput;
     isGuest = false;
     
@@ -1766,7 +1761,7 @@ window.performanceManager = new PerformanceManager();
   }
 
   function handleGuest() {
-    playClick();
+    audioManager.playClick();
     currentUser = 'Guest';
     isGuest = true;
     
@@ -1780,7 +1775,7 @@ window.performanceManager = new PerformanceManager();
 
   function handleLogout() {
     if (confirm("ඔබට නිසැකවම ඉවත් වීමට අවශ්‍යද?")) {
-      playClick();
+      audioManager.playClick();
       localStorage.removeItem('quizUsername');
       sessionStorage.removeItem('isGuest');
       sessionStorage.removeItem('quizGuestName');
@@ -1831,106 +1826,268 @@ window.performanceManager = new PerformanceManager();
     document.getElementById('installBanner').style.display = 'none';
   }
 
-  // ============ AUDIO ============
-  let audioCtx = null;
-
-  function getAudioContext() {
-    if (!audioCtx) {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    return audioCtx;
-  }
-
-  document.addEventListener('click', function resumeAudioOnce() {
-    if (audioCtx && audioCtx.state === 'suspended') {
-      audioCtx.resume();
-    }
-  }, { once: true });
-
-  function playSound(type) {
-    if (isMuted) return;
-    
-    const ctx = getAudioContext();
-    
-    if (type === 'correct') {
-      try {
-        const audioEl = document.getElementById('audioCorrect');
-        if (audioEl) {
-          audioEl.currentTime = 0;
-          audioEl.play().catch(() => {});
-          return;
-        }
-      } catch(e) {}
-    }
-    
-    if (type === 'perfect') {
-      try {
-        const audioEl = document.getElementById('audioPerfect');
-        if (audioEl) {
-          audioEl.currentTime = 0;
-          audioEl.play().catch(() => {});
-        }
-      } catch(e) {}
+  // ============ PREMIUM AUDIO MANAGER ============
+  class PremiumAudioManager {
+    constructor() {
+      this.ctx = null;
+      this.isMuted = localStorage.getItem('quizMuted') === 'true' || false;
+      this.unlocked = false;
+      this.suspendTimer = null;
+      
+      // Bind interaction events to unlock AudioContext on strict browsers (Safari/Chrome)
+      const unlock = () => this.init();
+      ['click', 'touchstart', 'keydown'].forEach(evt => 
+        document.addEventListener(evt, unlock, { once: true, passive: true })
+      );
     }
 
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    const now = ctx.currentTime;
-
-    switch(type) {
-      case 'click':
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(600, now);
-        osc.frequency.exponentialRampToValueAtTime(300, now + 0.08);
-        gain.gain.setValueAtTime(0.2, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
-        break;
-      case 'wrong':
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(400, now);
-        osc.frequency.linearRampToValueAtTime(250, now + 0.15);
-        gain.gain.setValueAtTime(0.15, now);
-        gain.gain.linearRampToValueAtTime(0, now + 0.3);
-        break;
-      case 'lose':
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(200, now);
-        osc.frequency.linearRampToValueAtTime(100, now + 0.3);
-        gain.gain.setValueAtTime(0.15, now);
-        gain.gain.linearRampToValueAtTime(0, now + 0.3);
-        break;
-      case 'timer':
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(800, now);
-        osc.frequency.setValueAtTime(600, now + 0.05);
-        gain.gain.setValueAtTime(0.1, now);
-        gain.gain.linearRampToValueAtTime(0, now + 0.1);
-        break;
-    }
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start();
-    osc.stop(now + 0.3);
-  }
-
-  function stopVoice(type) {
-    try {
-      const el = document.getElementById(type === 'correct' ? 'audioCorrect' : 'audioPerfect');
-      if (el) {
-        el.pause();
-        el.currentTime = 0;
+    init() {
+      if (this.ctx) {
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+        return this.ctx;
       }
-    } catch(e) {}
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      this.ctx = new AudioContext();
+      this.unlocked = true;
+      this.playAppStart(); 
+      return this.ctx;
+    }
+
+    toggleMute(state) {
+      this.isMuted = state;
+      if (!this.isMuted && this.ctx && this.ctx.state === 'suspended') {
+        this.ctx.resume();
+      }
+    }
+
+    // Prevent memory leaks / CPU usage by suspending when not in use
+    autoSuspend() {
+      if (this.suspendTimer) clearTimeout(this.suspendTimer);
+      this.suspendTimer = setTimeout(() => {
+        if (this.ctx && this.ctx.state === 'running') this.ctx.suspend();
+      }, 10000); // Suspend after 10s of silence
+    }
+
+    // Master Tone Generator with ADSR Envelope
+    playTone({ freq = 440, type = 'sine', vol = 0.1, attack = 0.01, decay = 0.1, sustain = 0.05, release = 0.2, duration = 0.3, detune = 0, slideTo = null, slideTime = null }) {
+      if (this.isMuted) return;
+      const ctx = this.init();
+      if (ctx.state === 'suspended') ctx.resume();
+
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const now = ctx.currentTime;
+
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, now);
+      if (slideTo && slideTime) {
+        osc.frequency.exponentialRampToValueAtTime(slideTo, now + slideTime);
+      }
+      if (detune) osc.detune.value = detune;
+
+      // ADSR Envelope
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(vol, now + attack); // Attack
+      gain.gain.exponentialRampToValueAtTime(sustain, now + attack + decay); // Decay
+      gain.gain.setValueAtTime(sustain, now + duration - release); // Sustain
+      gain.gain.exponentialRampToValueAtTime(0.001, now + duration); // Release
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      osc.start(now);
+      osc.stop(now + duration);
+      this.autoSuspend();
+    }
+
+    // ================= UNIQUE SOUND EFFECTS =================
+
+    // 1. App Start
+    playAppStart() {
+      [261.63, 329.63, 392.00, 523.25].forEach((freq, i) => {
+        setTimeout(() => this.playTone({ freq, type: 'sine', vol: 0.1, attack: 0.05, duration: 0.8 }), i * 150);
+      });
+    }
+
+    // 2. Button Click
+    playClick() {
+      this.playTone({ freq: 600, slideTo: 300, slideTime: 0.05, type: 'sine', vol: 0.15, duration: 0.05, release: 0.01 });
+    }
+
+    // 3. Page Navigation
+    playNav() {
+      this.playTone({ freq: 200, slideTo: 400, slideTime: 0.15, type: 'triangle', vol: 0.08, duration: 0.2, attack: 0.05 });
+    }
+
+    // 4. Quiz Start
+    playQuizStart() {
+      [0, 500, 1000].forEach(delay => setTimeout(() => this.playTone({ freq: 440, type: 'square', vol: 0.05, duration: 0.1 }), delay));
+      setTimeout(() => this.playTone({ freq: 880, type: 'square', vol: 0.08, duration: 0.4 }), 1500);
+    }
+
+    // 5. Timer Tick
+    playTimerTick(timeLeft) {
+      const isUrgent = timeLeft <= 5;
+      const freq = isUrgent ? 800 : 400;
+      const vol = isUrgent ? 0.15 : 0.05;
+      const type = isUrgent ? 'triangle' : 'sine';
+      this.playTone({ freq, type, vol, duration: 0.05, attack: 0.01, release: 0.02 });
+    }
+
+    // 6. Correct Answer
+    playCorrect() {
+      this.playTone({ freq: 440, type: 'sine', vol: 0.1, duration: 0.2 });
+      setTimeout(() => this.playTone({ freq: 659.25, type: 'sine', vol: 0.15, duration: 0.4 }), 100);
+    }
+
+    // 7. Wrong Answer
+    playWrong() {
+      this.playTone({ freq: 300, slideTo: 200, slideTime: 0.2, type: 'triangle', vol: 0.15, duration: 0.3 });
+    }
+
+    // 8. Streak Bonus
+    playStreak(streakCount) {
+      const baseFreq = 400;
+      const multiplier = Math.min(streakCount, 15);
+      const freq = baseFreq + (multiplier * 50);
+      this.playTone({ freq, type: 'sine', vol: 0.1, duration: 0.3 });
+      setTimeout(() => this.playTone({ freq: freq * 1.5, type: 'sine', vol: 0.1, duration: 0.4 }), 100);
+    }
+
+    // 9. Achievement Unlocked
+    playAchievement() {
+      [880, 1108.73, 1318.51, 1760].forEach((freq, i) => {
+        setTimeout(() => this.playTone({ freq, type: 'sine', vol: 0.1, duration: 0.6, attack: 0.05 }), i * 80);
+      });
+    }
+
+    // 10. Level Complete
+    playLevelComplete() {
+      const melody = [392.00, 523.25, 659.25, 783.99];
+      melody.forEach((freq, i) => {
+        setTimeout(() => this.playTone({ freq, type: 'triangle', vol: 0.1, duration: 0.3 }), i * 120);
+      });
+    }
+
+    // 11. 100% Perfect Score - Premium Victory Fanfare
+    playPerfectScore() {
+      if (this.isMuted) return;
+      const ctx = this.init();
+      const now = ctx.currentTime;
+      
+      const playBrass = (freq, startTime, dur) => {
+        const osc = ctx.createOscillator();
+        const filter = ctx.createBiquadFilter();
+        const gain = ctx.createGain();
+        
+        osc.type = 'sawtooth';
+        osc.frequency.value = freq;
+        
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(800, startTime);
+        filter.frequency.exponentialRampToValueAtTime(3000, startTime + 0.1);
+        filter.frequency.exponentialRampToValueAtTime(800, startTime + dur);
+
+        gain.gain.setValueAtTime(0, startTime);
+        gain.gain.linearRampToValueAtTime(0.15, startTime + 0.05);
+        gain.gain.setValueAtTime(0.15, startTime + dur - 0.1);
+        gain.gain.linearRampToValueAtTime(0.001, startTime + dur);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(startTime);
+        osc.stop(startTime + dur);
+      };
+
+      playBrass(261.63, now, 0.2);
+      playBrass(349.23, now + 0.2, 0.2);
+      playBrass(392.00, now + 0.4, 0.3);
+      
+      playBrass(261.63, now + 0.7, 1.5); // C4
+      playBrass(329.63, now + 0.7, 1.5); // E4
+      playBrass(392.00, now + 0.7, 1.5); // G4
+      playBrass(523.25, now + 0.7, 1.5); // C5
+
+      setTimeout(() => this.playAchievement(), 700);
+      this.autoSuspend();
+    }
+
+    // 12. Game Over
+    playGameOver() {
+      this.playTone({ freq: 200, slideTo: 50, slideTime: 0.8, type: 'sawtooth', vol: 0.2, duration: 1.0, attack: 0.1 });
+    }
+
+    // 13. High Score
+    playHighScore() {
+      const notes = [440, 554.37, 659.25, 880, 1108.73];
+      notes.forEach((freq, i) => {
+        setTimeout(() => this.playTone({ freq, type: 'square', vol: 0.05, duration: 0.2 }), i * 100);
+      });
+    }
+
+    // 14. Unlock New Lesson
+    playUnlock() {
+      [261.63, 293.66, 329.63, 370.00, 392.00].forEach((freq, i) => {
+        setTimeout(() => this.playTone({ freq, type: 'sine', vol: 0.1, duration: 0.3 }), i * 100);
+      });
+    }
+
+    // 15. Notification Popup
+    playNotification() {
+      this.playTone({ freq: 800, slideTo: 300, slideTime: 0.05, type: 'sine', vol: 0.1, duration: 0.1 });
+    }
+
+    // 16. Modal Open
+    playModalOpen() {
+      this.playTone({ freq: 600, type: 'sine', vol: 0.08, duration: 0.15, attack: 0.01 });
+      setTimeout(() => this.playTone({ freq: 800, type: 'triangle', vol: 0.05, duration: 0.2 }), 50);
+    }
+
+    // 17. Modal Close
+    playModalClose() {
+      this.playTone({ freq: 400, slideTo: 200, slideTime: 0.1, type: 'sine', vol: 0.05, duration: 0.15 });
+    }
+
+    // 18. Power-ups
+    playPowerupFifty() {
+      this.playTone({ freq: 700, type: 'square', vol: 0.05, duration: 0.05 });
+      setTimeout(() => this.playTone({ freq: 700, type: 'square', vol: 0.05, duration: 0.05 }), 100);
+    }
+
+    playPowerupSkip() {
+      this.playTone({ freq: 300, slideTo: 900, slideTime: 0.2, type: 'triangle', vol: 0.1, duration: 0.25 });
+    }
+
+    // 19. Countdown Finished
+    playTimeUp() {
+      this.playTone({ freq: 150, slideTo: 100, slideTime: 0.5, type: 'sawtooth', vol: 0.2, duration: 0.8, attack: 0.01 });
+    }
+
+    // 20. Theme Changed
+    playThemeChange() {
+      this.playTone({ freq: 1046.50, type: 'sine', vol: 0.05, duration: 0.5, attack: 0.1 });
+      setTimeout(() => this.playTone({ freq: 1318.51, type: 'triangle', vol: 0.03, duration: 0.6 }), 100);
+    }
   }
 
-  function playClick() { playSound('click'); }
-  function playCorrect() { playSound('correct'); }
-  function playWrong() { playSound('wrong'); }
-  function playLoseLife() { playSound('lose'); }
-  function playTimerWarning() { playSound('timer'); }
-  function playPerfect() { playSound('perfect'); }
+  // Initialize global audio manager
+  const audioManager = new PremiumAudioManager();
+
+  window.toggleMute = function() {
+    isMuted = !isMuted;
+    localStorage.setItem('quizMuted', isMuted);
+    audioManager.toggleMute(isMuted);
+    
+    const btn = document.getElementById('muteBtn');
+    if (btn) {
+      const icon = btn.querySelector('i');
+      if (icon) icon.className = isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up';
+      btn.classList.toggle('muted', isMuted);
+    }
+    audioManager.playClick();
+  };
+
 
   // ============ EMOJIS ============
   const correctEmojis = ['🎉', '🌟', '✨', '🎊', '💫', '🏆', '🥳', '👏', '🎯', '⭐', '🌈', '🔥', '💪', '🤩', '😍', '🥰'];
@@ -1949,13 +2106,14 @@ window.performanceManager = new PerformanceManager();
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
     render();
+    audioManager.playThemeChange();
     const p = document.getElementById('themePopover');
     if (p) p.classList.remove('open');
   }
 
   function toggleThemePopover(e) {
     e.stopPropagation();
-    playClick();
+    audioManager.playClick();
     const p = document.getElementById('themePopover');
     if (p) p.classList.toggle('open');
   }
@@ -1971,7 +2129,7 @@ window.performanceManager = new PerformanceManager();
     localStorage.setItem('quizMode', mode);
     appState.quiz = null;
     render();
-    playClick();
+    audioManager.playClick();
   }
 
   // ============ FULLSCREEN ============
@@ -1985,7 +2143,7 @@ window.performanceManager = new PerformanceManager();
       if (document.exitFullscreen) document.exitFullscreen();
       else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
     }
-    playClick();
+    audioManager.playClick();
   }
 
   document.addEventListener('fullscreenchange', updateFullscreenBtn);
@@ -1998,23 +2156,6 @@ window.performanceManager = new PerformanceManager();
     btn.classList.toggle('is-fullscreen', isFull);
     const icon = btn.querySelector('i');
     if (icon) icon.className = isFull ? 'fas fa-compress' : 'fas fa-expand';
-  }
-
-  // ============ MUTE ============
-  function toggleMute() {
-    isMuted = !isMuted;
-    localStorage.setItem('quizMuted', isMuted);
-    const btn = document.getElementById('muteBtn');
-    if (btn) {
-      const icon = btn.querySelector('i');
-      if (icon) icon.className = isMuted ? 'fas fa-volume-mute' : 'fas fa-volume-up';
-      btn.classList.toggle('muted', isMuted);
-    }
-    if (isMuted) {
-      stopVoice('correct');
-      stopVoice('perfect');
-    }
-    playClick();
   }
 
   // ============ CONFETTI (80-99% only) & CELEBRATION (100%) ============
@@ -2045,15 +2186,13 @@ window.performanceManager = new PerformanceManager();
 
     document.getElementById('celebrationGlow').classList.add('active');
     document.getElementById('celebrationOverlay').classList.add('active');
-    playPerfect();
-
+    
     celebrationTimeout = setTimeout(closeCelebration, 8000);
   }
 
   function closeCelebration() {
     document.getElementById('celebrationOverlay').classList.remove('active');
     document.getElementById('celebrationGlow').classList.remove('active');
-    stopVoice('perfect');
     if (celebrationTimeout) {
       clearTimeout(celebrationTimeout);
       celebrationTimeout = null;
@@ -2131,13 +2270,13 @@ window.performanceManager = new PerformanceManager();
     saveToLeaderboard(name, pendingSaveScore.score, pendingSaveScore.total, pendingSaveScore.mode);
     document.getElementById('saveScoreModal').classList.remove('active');
     pendingSaveScore = null;
-    playClick();
+    audioManager.playClick();
   }
 
   function skipSaveScore() {
     document.getElementById('saveScoreModal').classList.remove('active');
     pendingSaveScore = null;
-    playClick();
+    audioManager.playClick();
   }
 
   function showLeaderboard() {
@@ -2175,6 +2314,7 @@ window.performanceManager = new PerformanceManager();
       const a = ACHIEVEMENTS[id];
       if (a) {
         setTimeout(() => {
+          audioManager.playAchievement();
           alert(`🏅 ${a.icon} ${a.name}\n${a.desc}\n\n🎉 ජයග්‍රහණය අගුළු හැරියා!`);
         }, 500);
       }
@@ -2367,12 +2507,12 @@ window.performanceManager = new PerformanceManager();
       </ul>
     `;
     document.getElementById('summaryModal').classList.add('active');
-    playClick();
+    audioManager.playUnlock();
   }
 
   function closeSummaryModal() {
     document.getElementById('summaryModal').classList.remove('active');
-    playClick();
+    audioManager.playModalClose();
   }
 
   // ============ APP STATE ============
@@ -2476,7 +2616,7 @@ const GRADES = ['8', '9', '10', '11'];
   }
 
   function navigate(hash) { 
-    playClick(); 
+    audioManager.playNav(); 
     location.hash = hash; 
   }
 
@@ -2688,7 +2828,7 @@ const GRADES = ['8', '9', '10', '11'];
     const meta = subjectMeta(subject);
     const sorted = [...GRADES].sort((a, b) => parseInt(a) - parseInt(b));
     return `
-      <div class="breadcrumb"><a href="#/" onclick="playClick()">Home</a> <span>/</span> ${escapeHtml(meta.sinhala)}</div>
+      <div class="breadcrumb"><a href="#/" onclick="audioManager.playClick()">Home</a> <span>/</span> ${escapeHtml(meta.sinhala)}</div>
       <h2 class="page-title">📚 ශ්‍රේණිය තෝරන්න</h2>
       <p class="page-sub">ප්‍රශ්නාවලිය ආරම්භ කිරීමට ඔබේ ශ්‍රේණිය තෝරන්න.</p>
       <div class="grid-auto" style="margin-top:25px;">
@@ -2708,8 +2848,8 @@ const GRADES = ['8', '9', '10', '11'];
     const lessons = getLessons(subject, grade);
     return `
       <div class="breadcrumb">
-        <a href="#/" onclick="playClick()">Home</a> <span>/</span>
-        <a href="#/subject/${meta.key}" onclick="playClick()">${escapeHtml(meta.sinhala)}</a> <span>/</span>
+        <a href="#/" onclick="audioManager.playClick()">Home</a> <span>/</span>
+        <a href="#/subject/${meta.key}" onclick="audioManager.playClick()">${escapeHtml(meta.sinhala)}</a> <span>/</span>
         ශ්‍රේණිය ${grade}
       </div>
       <h2 class="page-title">📖 ${grade} ශ්‍රේණියේ පාඩම්</h2>
@@ -2861,10 +3001,14 @@ const GRADES = ['8', '9', '10', '11'];
 
       if (pct === 100 && !qz.celebrationTriggered) {
         qz.celebrationTriggered = true;
+        setTimeout(() => audioManager.playPerfectScore(), 500); // Trigger Fanfare
         setTimeout(triggerCelebration, 500);
       } else if (pct >= 80 && pct < 100 && !qz.confettiShown) {
         qz.confettiShown = true;
         setTimeout(spawnConfetti, 400);
+      } else if (!qz.celebrationTriggered) {
+        qz.celebrationTriggered = true;
+        audioManager.playLevelComplete(); // Standard success melody
       }
 
       if (!qz.resultsProcessed) {
@@ -2925,7 +3069,7 @@ const GRADES = ['8', '9', '10', '11'];
           </div>
           <div style="display:flex;justify-content:center;gap:12px;margin-top:20px;flex-wrap:wrap;">
             <button class="btn btn-outline" onclick="navigate('#/subject/${meta.key}/grade/${grade}')"><i class="fas fa-list"></i> පාඩම්</button>
-            <button class="btn btn-primary" onclick="appState.quiz=null;render();playClick();"><i class="fas fa-redo"></i> නැවත</button>
+            <button class="btn btn-primary" onclick="appState.quiz=null;render();audioManager.playClick();"><i class="fas fa-redo"></i> නැවත</button>
           </div>
         </div>
       `;
@@ -3093,7 +3237,7 @@ const GRADES = ['8', '9', '10', '11'];
     qz.isFlipped = !qz.isFlipped;
     const card = document.getElementById('flashCardElement');
     if (card) card.classList.toggle('flipped', qz.isFlipped);
-    playClick();
+    audioManager.playClick();
   }
 
   function nextFlashcard() {
@@ -3106,7 +3250,7 @@ const GRADES = ['8', '9', '10', '11'];
       qz.idx = 0;
     }
     renderMain();
-    playClick();
+    audioManager.playClick();
   }
 
   function prevFlashcard() {
@@ -3116,7 +3260,7 @@ const GRADES = ['8', '9', '10', '11'];
     if (qz.idx > 0) {
       qz.idx--;
       renderMain();
-      playClick();
+      audioManager.playClick();
     }
   }
 
@@ -3136,7 +3280,7 @@ const GRADES = ['8', '9', '10', '11'];
       if (!qz.hiddenOptions) qz.hiddenOptions = [];
       qz.hiddenOptions.push(removeIdx);
       renderMain();
-      playClick();
+      audioManager.playClick();
     }
   }
 
@@ -3171,16 +3315,16 @@ const GRADES = ['8', '9', '10', '11'];
         const timerDisplay = document.getElementById('timerDisplay');
         if (timerDisplay && qz.timer <= 5) {
           timerDisplay.classList.add('warning');
-          if (qz.timer <= 3) playTimerWarning();
+          if (qz.timer <= 3) audioManager.playTimerTick(qz.timer);
         }
         
         if (qz.timer <= 0) {
           if (!qz.answeredCurrent) {
+            audioManager.playTimeUp();
             qz.answeredCurrent = true;
             qz.wrong++;
             appState.streak = 0;
             qz.lives--;
-            playLoseLife();
             if (qz.lives <= 0) {
               qz.gameOver = true;
               renderMain();
@@ -3222,8 +3366,6 @@ const GRADES = ['8', '9', '10', '11'];
 
     const modal = document.getElementById('explainModal');
     if (modal) modal.classList.remove('active');
-    stopVoice('correct');
-    stopVoice('perfect');
 
     qz.hiddenOptions = [];
     if (qz.idx < qz.order.length - 1) {
@@ -3265,15 +3407,20 @@ const GRADES = ['8', '9', '10', '11'];
       appState.totalScore++;
       appState.streak++;
       if (appState.streak > appState.bestStreak) appState.bestStreak = appState.streak;
-      playCorrect();
+      
+      if (appState.streak > 1) {
+        audioManager.playStreak(appState.streak);
+      } else {
+        audioManager.playCorrect();
+      }
     } else {
       qz.wrong++;
       appState.streak = 0;
       if (isGame) {
         qz.lives--;
-        playLoseLife();
+        audioManager.playWrong(); 
       } else {
-        playWrong();
+        audioManager.playWrong();
       }
     }
 
@@ -3295,12 +3442,13 @@ const GRADES = ['8', '9', '10', '11'];
   };
 
   window.nextStudyQuestion = function() {
-    playClick();
+    audioManager.playClick();
     goToNextQuestion();
   };
 
   // ============ MODAL ============
   function showModal(isCorrect, title, text) {
+    audioManager.playModalOpen();
     const modal = document.getElementById('explainModal');
     const icon = document.getElementById('modalIcon');
     const actions = modal.querySelector('.modal-actions');
@@ -3324,9 +3472,7 @@ const GRADES = ['8', '9', '10', '11'];
   }
 
   window.closeModalAndNext = function() {
-    playClick();
-    stopVoice('correct');
-    stopVoice('perfect');
+    audioManager.playModalClose();
     document.getElementById('explainModal').classList.remove('active');
   };
 
@@ -3344,7 +3490,7 @@ const GRADES = ['8', '9', '10', '11'];
     if (!qz.hiddenOptions) qz.hiddenOptions = [];
     qz.hiddenOptions.push(...toRemove);
     renderMain();
-    playClick();
+    audioManager.playPowerupFifty();
   };
 
   window.useSkip = function() {
@@ -3355,7 +3501,7 @@ const GRADES = ['8', '9', '10', '11'];
     qz.wrong++;
     appState.streak = 0;
     qz.lives--;
-    playLoseLife();
+    audioManager.playPowerupSkip();
 
     if (timerInterval) {
       cancelAnimationFrame(timerInterval);
@@ -3374,6 +3520,7 @@ const GRADES = ['8', '9', '10', '11'];
 
   // ============ GAME OVER ============
   function showGameOver(correct, wrong) {
+    audioManager.playGameOver();
     const total = correct + wrong;
     const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
     document.getElementById('goCorrect').textContent = correct;
