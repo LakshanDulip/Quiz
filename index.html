@@ -684,7 +684,36 @@
     --silver: #94a3b8;
     --bronze: #b45309;
   }
-
+  /* ===== 3D THEME ===== */
+  :root[data-theme="3d"] {
+    --bg-main: #0a0e17;
+    --bg-card: rgba(20, 25, 40, 0.92);
+    --bg-card-hover: rgba(30, 40, 60, 0.95);
+    --text-primary: #e0e8ff;
+    --text-secondary: #8899bb;
+    --border-color: #2a3550;
+    --primary-color: #00e5ff;
+    --primary-hover: #00b8d4;
+    --primary-gradient: linear-gradient(135deg, #00e5ff, #7c4dff);
+    --science-color: #00e676;
+    --correct-color: #00e676;
+    --wrong-color: #ff5252;
+    --accent: #ff9100;
+    --grid-dot: rgba(0, 229, 255, 0.12);
+    --radius: 16px;
+    --radius-lg: 24px;
+    --shadow-sm: 0 4px 8px rgba(0,0,0,0.5), 0 1px 3px rgba(0,229,255,0.1);
+    --shadow-md: 0 12px 28px -8px rgba(0,0,0,0.6), 0 0 20px rgba(0,229,255,0.15);
+    --shadow-lg: 0 25px 50px -12px rgba(0,0,0,0.7), 0 0 40px rgba(124,77,255,0.2);
+    --modal-overlay: rgba(10, 14, 23, 0.95);
+    --card-border: #2a3550;
+    --glow-color: rgba(0, 229, 255, 0.6);
+    --heart-color: #ff5252;
+    --timer-color: #00e5ff;
+    --gold: #ffd740;
+    --silver: #b0bec5;
+    --bronze: #ff9100;
+  }
   /* Amber (Copper) Theme */
   :root[data-theme="amber"] {
     --bg-main: #1a1207;
@@ -783,6 +812,12 @@
     box-shadow: var(--shadow-sm);
     z-index: 50;
     transition: all 0.4s ease;
+  }
+  [data-theme="3d"] header {
+    border-bottom: 1px solid rgba(0,229,255,0.2);
+    box-shadow: 
+      0 2px 10px rgba(0,0,0,0.4),
+      0 0 20px rgba(0,229,255,0.1);
   }
   .header-inner {
     max-width: 1100px; margin: 0 auto; padding: 0 20px;
@@ -909,6 +944,7 @@
   .theme-dot-midnight { background: #05070f; }
   .theme-dot-mint { background: #f1fbf6; border-color: #cdefe0; }
   .theme-dot-amber { background: #1a1207; }
+  .theme-dot-3d { background: linear-gradient(135deg, #0a0e17, #1a2540, #0a0e17); border: 1px solid rgba(0,229,255,0.4); }
 
   .page-title { font-family: 'Space Grotesk', 'Noto Sans Sinhala', sans-serif; font-size: clamp(1.5rem, 4vw, 2.15rem); font-weight: 700; letter-spacing: -0.01em; margin-bottom: 8px; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
   .page-sub { color: var(--text-secondary); margin-bottom: 30px; font-size: 1rem; }
@@ -921,8 +957,40 @@
   .grid-auto { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 210px)); gap: 20px; justify-content: center; }
   .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
 
-  .card { background: var(--bg-card); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 25px; box-shadow: var(--shadow-sm); transition: transform 0.3s cubic-bezier(.2,.8,.3,1), box-shadow 0.3s ease, border-color 0.3s ease; position: relative; overflow: hidden; backdrop-filter: blur(6px); }
+  .card { background: var(--bg-card); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 25px; box-shadow: var(--shadow-sm); transition: transform 0.4s cubic-bezier(.2,.8,.3,1), box-shadow 0.4s ease, border-color 0.3s ease; position: relative; overflow: hidden; backdrop-filter: blur(6px); }
   .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--primary-color); }
+  [data-theme="3d"] .card {
+    transform-style: preserve-3d;
+    perspective: 800px;
+    border: 1px solid rgba(0, 229, 255, 0.2);
+    box-shadow: 
+      0 4px 6px rgba(0,0,0,0.4),
+      0 1px 3px rgba(0,229,255,0.1),
+      inset 0 1px 0 rgba(255,255,255,0.03);
+  }
+  [data-theme="3d"] .card:hover {
+    transform: translateY(-6px) rotateX(3deg) rotateY(2deg);
+    box-shadow: 
+      0 20px 40px rgba(0,0,0,0.6),
+      0 0 25px rgba(0,229,255,0.2),
+      0 0 50px rgba(124,77,255,0.15),
+      inset 0 1px 0 rgba(255,255,255,0.05);
+    border-color: var(--primary-color);
+  }
+  [data-theme="3d"] .card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0,229,255,0.5), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  [data-theme="3d"] .card:hover::after {
+    opacity: 1;
+  }
 
   .subject-card { display: flex; flex-direction: column; gap: 4px; cursor: pointer; border-left: 4px solid var(--science-color); isolation: isolate; }
   .subject-card::before {
@@ -961,6 +1029,21 @@
   .btn:active { transform: scale(0.96); }
   .btn-primary { background: var(--primary-gradient); color: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
   .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
+  [data-theme="3d"] .btn-primary {
+    box-shadow: 
+      0 4px 15px rgba(0,0,0,0.3),
+      0 0 20px rgba(0,229,255,0.3),
+      inset 0 1px 0 rgba(255,255,255,0.1);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  }
+  [data-theme="3d"] .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 
+      0 8px 25px rgba(0,0,0,0.4),
+      0 0 35px rgba(0,229,255,0.4),
+      0 0 60px rgba(124,77,255,0.3),
+      inset 0 1px 0 rgba(255,255,255,0.15);
+  }
   .btn-outline { border: 2px solid var(--border-color); color: var(--text-primary); }
   .btn-outline:hover { border-color: var(--primary-color); color: var(--primary-color); background: var(--bg-card-hover); }
   .btn-success { background: var(--correct-color); color: #1a1a1a; }
@@ -1121,6 +1204,13 @@
     border: 1px solid var(--card-border); text-align: center;
     max-height: 90vh;
     overflow-y: auto;
+  }
+  [data-theme="3d"] .modal-content {
+    border: 1px solid rgba(0,229,255,0.3);
+    box-shadow: 
+      0 25px 60px rgba(0,0,0,0.6),
+      0 0 40px rgba(0,229,255,0.15),
+      0 0 80px rgba(124,77,255,0.1);
   }
   .modal-overlay.active .modal-content { transform: translateY(0) scale(1); }
   .modal-icon { font-size: 3.5rem; margin-bottom: 12px; display: block; animation: iconBounceIn 0.5s cubic-bezier(.3,1.6,.4,1); }
@@ -2716,7 +2806,7 @@ window.performanceManager = new PerformanceManager();
 <script>
   // ============ CONFIG ============
   const MODES = { STUDY: 'study', GAME: 'game', FLASHCARD: 'flashcard' };
-  const THEMES = ['dark', 'light', 'purple', 'ocean', 'forest', 'sunset', 'pink', 'pure-white', 'sakura', 'midnight', 'mint', 'amber'];
+    const THEMES = ['dark', 'light', 'purple', 'ocean', 'forest', 'sunset', 'pink', 'pure-white', 'sakura', 'midnight', 'mint', 'amber', '3d'];
   const MAX_TIMER = 20;
   const MAX_LIVES = 3;
 
@@ -3124,7 +3214,7 @@ window.performanceManager = new PerformanceManager();
   }
 
   function getThemeIcon(theme) {
-    const icons = { dark: '🌙', light: '☀️', purple: '💜', ocean: '🌊', forest: '🌿', sunset: '🌅', pink: '🌺', 'pure-white': '⚪', sakura: '🌸', midnight: '🌌', mint: '🍃', amber: '🟠' };
+        const icons = { dark: '🌙', light: '☀️', purple: '💜', ocean: '🌊', forest: '🌿', sunset: '🌅', pink: '🌺', 'pure-white': '⚪', sakura: '🌸', midnight: '🌌', mint: '🍃', amber: '🟠', '3d': '🧊' };
     return icons[theme] || '🎨';
   }
 
