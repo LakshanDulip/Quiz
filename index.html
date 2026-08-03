@@ -22,6 +22,8 @@
 
 <!-- ===== FIREBASE AUTH START ===== -->
 <!-- Firebase SDK -->
+<!-- ===== FIREBASE AUTH START ===== -->
+<!-- Firebase SDK -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { 
@@ -86,12 +88,53 @@
     reauthenticateWithCredential
   };
 
-  // ===== FIREBASE AUTH STATE LISTENER =====
-  const { onAuthStateChanged } = window.firebaseAuthModule;
+  // ===== DEFINE ALL FUNCTIONS IMMEDIATELY =====
   
+  // ===== RESTORE USER DATA FROM FIRESTORE =====
+  function restoreUserData(userData) {
+    if (!userData) return;
+    
+    if (userData.name) {
+      currentUser = userData.name;
+      localStorage.setItem('quizUsername', currentUser);
+      sessionStorage.removeItem('isGuest');
+      sessionStorage.removeItem('quizGuestName');
+    }
+    
+    const storage = localStorage;
+    const storageKey = `user_${currentUser}_quizProgress`;
+    
+    if (userData.progress) {
+      storage.setItem(storageKey, JSON.stringify(userData.progress));
+    }
+    if (userData.achievements) {
+      localStorage.setItem('quizAchievements', JSON.stringify(userData.achievements));
+    }
+    if (userData.theme) {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      if (userData.theme !== currentTheme) {
+        document.documentElement.setAttribute('data-theme', userData.theme);
+        localStorage.setItem('theme', userData.theme);
+      }
+    }
+    
+    appState.totalScore = userData.totalScore || 0;
+    appState.totalQuestions = userData.progress?.totalQuestions || 0;
+    appState.bestStreak = userData.progress?.bestStreak || 0;
+    appState.perfectCount = userData.progress?.perfectCount || 0;
+    appState.streak = 0;
+    
+    syncAppState();
+    render();
+  }
+
+  // ===== FIREBASE AUTH STATE LISTENER =====
   onAuthStateChanged(auth, async (user) => {
     if (user) {
       console.log('[Firebase] User logged in:', user.uid);
+      
+      // Set Firebase auth ready flag
+      window.firebaseAuthReady = true;
       
       // Load user profile from Firestore
       const userDocRef = doc(db, 'users', user.uid);
@@ -127,38 +170,13 @@
         
         // Restore user data
         restoreUserData(userData);
-        
-        // Sync app state
-        syncAppState();
-        render();
       }
     } else {
       console.log('[Firebase] User logged out');
       localStorage.removeItem('firebaseUser');
+      window.firebaseAuthReady = true;
     }
   });
-
-  // ===== RESTORE USER DATA FROM FIRESTORE =====
-  function restoreUserData(userData) {
-    const storage = isGuest ? sessionStorage : localStorage;
-    const storageKey = isGuest ? 'guest_quizProgress' : `user_${currentUser}_quizProgress`;
-    
-    if (userData.progress) {
-      storage.setItem(storageKey, JSON.stringify(userData.progress));
-    }
-    if (userData.achievements) {
-      localStorage.setItem('quizAchievements', JSON.stringify(userData.achievements));
-    }
-    if (userData.theme) {
-      setTheme(userData.theme);
-    }
-    
-    appState.totalScore = userData.totalScore || 0;
-    appState.totalQuestions = userData.progress?.totalQuestions || 0;
-    appState.bestStreak = userData.progress?.bestStreak || 0;
-    appState.perfectCount = userData.progress?.perfectCount || 0;
-    appState.streak = 0;
-  }
 
   // ===== SYNC DATA TO FIRESTORE =====
   window.syncToFirestore = async function(data) {
@@ -172,10 +190,8 @@
     }).catch(err => console.warn('Firestore sync failed:', err));
   };
 
-  // ===== FIREBASE AUTH FUNCTIONS =====
+  // ===== FIREBASE AUTH FUNCTIONS (Defined immediately, not waiting for DOM) =====
   window.firebaseSignUp = async function(email, password, name) {
-    const { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } = window.firebaseAuthModule;
-    
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
     
@@ -227,19 +243,16 @@
   };
 
   window.firebaseLogin = async function(email, password) {
-    const { signInWithEmailAndPassword } = window.firebaseAuthModule;
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     return userCredential.user;
   };
 
   window.firebaseLogout = async function() {
-    const { signOut } = window.firebaseAuthModule;
     await signOut(auth);
     localStorage.removeItem('firebaseUser');
   };
 
   window.firebaseResetPassword = async function(email) {
-    const { sendPasswordResetEmail } = window.firebaseAuthModule;
     await sendPasswordResetEmail(auth, email);
   };
 
@@ -251,8 +264,13 @@
     return auth.currentUser;
   };
 
-  console.log('[Firebase] Initialized successfully');
+  // Set flag that Firebase is initialized
+  window.firebaseInitialized = true;
+  
+  console.log('[Firebase] Initialized successfully. Functions available:', 
+    Object.keys(window).filter(k => k.startsWith('firebase')).join(', '));
 </script>
+<!-- ===== FIREBASE AUTH END ===== -->
 <!-- ===== FIREBASE AUTH END ===== -->
 
 <style>
