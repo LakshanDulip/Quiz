@@ -1484,6 +1484,38 @@
 
   .animate-pop { animation: popIn 0.25s ease forwards; }
   @keyframes popIn { 0% { opacity: 0; transform: scale(0.97); } 100% { opacity: 1; transform: scale(1); } }
+
+  /* ===== MASCOT TOGGLE BUTTON ===== */
+  .mascot-toggle-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 68px;
+    z-index: 500;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    opacity: 0.5;
+  }
+  .mascot-toggle-btn:hover {
+    color: #ff5722;
+    border-color: #ff5722;
+    opacity: 0.9;
+  }
+  .mascot-toggle-btn.hidden-mascot {
+    color: var(--text-secondary);
+    opacity: 0.3;
+  }
+  
   /* ===== FLOATING INFO BUTTON ===== */
   .info-floating-btn {
     position: fixed;
@@ -3210,6 +3242,10 @@ window.performanceManager = new PerformanceManager();
   </div>
 </div>
 <!-- ===== FIREBASE AUTH END ===== -->
+  <!-- Mascot Toggle Button -->
+<button class="mascot-toggle-btn" id="mascotToggleBtn" onclick="toggleMascot()" title="Mascot On/Off">
+  <i class="fas fa-paw"></i>
+</button>
 <!-- ===== ANIMATED FOX MASCOT ===== -->
 <div class="mascot-container" id="mascotContainer" onclick="handleMascotClick()">
   <div class="mascot-body">
@@ -4470,7 +4506,40 @@ window.performanceManager = new PerformanceManager();
       }, 1800);
     }
   }
+    // ============ MASCOT TOGGLE ============
+  let mascotVisible = localStorage.getItem('mascotVisible') !== 'false';
   
+  function toggleMascot() {
+    mascotVisible = !mascotVisible;
+    localStorage.setItem('mascotVisible', mascotVisible);
+    
+    const mascot = document.getElementById('mascotContainer');
+    const toggleBtn = document.getElementById('mascotToggleBtn');
+    
+    if (mascot) {
+      mascot.style.display = mascotVisible ? 'block' : 'none';
+    }
+    if (toggleBtn) {
+      toggleBtn.classList.toggle('hidden-mascot', !mascotVisible);
+    }
+    
+    if (mascotVisible) {
+      showMascotSpeech('🦊 මම ආපහු ආවා!', 2000);
+    }
+    
+    audioManager.playClick();
+  }
+  
+  // Apply saved state on load
+  setTimeout(() => {
+    const mascot = document.getElementById('mascotContainer');
+    const toggleBtn = document.getElementById('mascotToggleBtn');
+    
+    if (!mascotVisible) {
+      if (mascot) mascot.style.display = 'none';
+      if (toggleBtn) toggleBtn.classList.add('hidden-mascot');
+    }
+  }, 100);
   // Show welcome message on load
   setTimeout(() => {
     const welcomeMsg = mascotMessages.welcome[Math.floor(Math.random() * mascotMessages.welcome.length)];
