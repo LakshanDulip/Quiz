@@ -3,7 +3,7 @@
 
 const CACHE_NAME = 'quizhub-v2';
 const RUNTIME_CACHE = 'quizhub-runtime-v2';
-const VERSION = '2.0.0';
+const VERSION = '2.0.1';
 
 // Assets to cache on install
 const PRECACHE_ASSETS = [
