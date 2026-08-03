@@ -1902,6 +1902,21 @@
     animation-duration: 2s;
     transform: rotate(-10deg);
   }
+    /* Click heart burst */
+  @keyframes clickHeartBurst {
+    0% {
+      opacity: 1;
+      transform: translate(0, 0) scale(0.5) rotate(0deg);
+    }
+    50% {
+      opacity: 1;
+      transform: translate(var(--tx), var(--ty)) scale(1.3) rotate(var(--rot));
+    }
+    100% {
+      opacity: 0;
+      transform: translate(var(--tx), calc(var(--ty) - 30px)) scale(0.3) rotate(calc(var(--rot) + 90deg));
+    }
+  }
   @keyframes mascotSad {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-4px); }
@@ -4296,19 +4311,68 @@ window.performanceManager = new PerformanceManager();
     const container = document.getElementById('mascotContainer');
     if (!container) return;
     
-    // Random bounce animation
-    container.style.animation = 'none';
-    container.offsetHeight; // Trigger reflow
-    container.style.animation = '';
+    // Bounce + heart burst animation
+    container.style.transition = 'transform 0.15s cubic-bezier(.2,.8,.3,1)';
+    container.style.transform = 'scale(1.15)';
     
-    showMascotSpeech(getRandomMessage('idle'), 3000);
+    setTimeout(() => {
+      container.style.transform = 'scale(0.85)';
+    }, 150);
+    
+    setTimeout(() => {
+      container.style.transform = '';
+    }, 300);
+    
+    // Show random click message
+    const randomMsg = mascotMessages.click[Math.floor(Math.random() * mascotMessages.click.length)];
+    showMascotSpeech(randomMsg, 2500);
+    
+    // Play cute sound
     audioManager.playClick();
+    
+    // Spawn floating hearts burst
+    spawnClickHearts();
+  }
+  
+  function spawnClickHearts() {
+    const container = document.getElementById('mascotContainer');
+    if (!container) return;
+    
+    const hearts = ['💕', '💖', '💗', '💝', '✨', '💫', '🌟', '🦊'];
+    const rect = container.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    
+    for (let i = 0; i < 8; i++) {
+      const heart = document.createElement('span');
+      heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+      heart.style.cssText = `
+        position: fixed;
+        left: ${centerX}px;
+        top: ${centerY}px;
+        font-size: ${14 + Math.random() * 20}px;
+        pointer-events: none;
+        z-index: 99999;
+        animation: clickHeartBurst ${0.8 + Math.random() * 0.6}s ease-out forwards;
+        animation-delay: ${Math.random() * 0.2}s;
+      `;
+      heart.style.setProperty('--tx', (Math.random() - 0.5) * 120 + 'px');
+      heart.style.setProperty('--ty', -(Math.random() * 100 + 40) + 'px');
+      heart.style.setProperty('--rot', (Math.random() - 0.5) * 180 + 'deg');
+      
+      document.body.appendChild(heart);
+      
+      setTimeout(() => {
+        if (heart.parentNode) heart.parentNode.removeChild(heart);
+      }, 1800);
+    }
   }
   
   // Show welcome message on load
   setTimeout(() => {
-    showMascotSpeech(getRandomMessage('idle'), 4000);
-  }, 5000);
+    const welcomeMsg = mascotMessages.welcome[Math.floor(Math.random() * mascotMessages.welcome.length)];
+    showMascotSpeech(welcomeMsg, 5000);
+  }, 3000);
   
   // Random idle messages
   setInterval(() => {
