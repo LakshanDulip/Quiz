@@ -20,8 +20,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Sinhala:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-<!-- ===== FIREBASE AUTH START ===== -->
-<!-- Firebase SDK -->
+ <!-- Three.js for 3D Mascot -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script> 
+
 <!-- ===== FIREBASE AUTH START ===== -->
 <!-- Firebase SDK -->
 <script type="module">
@@ -1485,6 +1493,43 @@
   .animate-pop { animation: popIn 0.25s ease forwards; }
   @keyframes popIn { 0% { opacity: 0; transform: scale(0.97); } 100% { opacity: 1; transform: scale(1); } }
 
+  /* ===== 3D FOX MASCOT CONTAINER ===== */
+  .mascot-3d-container {
+    position: fixed;
+    bottom: 60px;
+    right: 10px;
+    z-index: 9998;
+    width: 120px;
+    height: 120px;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    filter: drop-shadow(0 8px 20px rgba(0,0,0,0.4));
+  }
+  .mascot-3d-container:hover {
+    transform: translateY(-6px);
+    filter: drop-shadow(0 14px 30px rgba(0,0,0,0.5));
+  }
+  .mascot-3d-container:active {
+    transform: scale(0.9);
+  }
+  .mascot-3d-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+  .mascot-3d-container .mascot-speech {
+    position: absolute;
+    bottom: 110px;
+    right: -10px;
+  }
+  @media (max-width: 768px) {
+    .mascot-3d-container {
+      width: 90px;
+      height: 90px;
+      bottom: 50px;
+      right: 4px;
+    }
+  }
+  
   /* ===== MASCOT TOGGLE BUTTON ===== */
   .mascot-toggle-btn {
     position: fixed;
@@ -3128,6 +3173,11 @@ window.performanceManager = new PerformanceManager();
   </div>
 </div>
 <!-- ===== FIREBASE AUTH END ===== -->
+  <!-- 3D Fox Mascot Container -->
+<div class="mascot-3d-container" id="mascot3DContainer">
+  <canvas id="mascotCanvas"></canvas>
+  <div class="mascot-speech" id="mascotSpeech" style="display:none;"></div>
+</div>
   <!-- Mascot Toggle Button -->
 <button class="mascot-toggle-btn" id="mascotToggleBtn" onclick="toggleMascot()" title="Mascot On/Off">
   <i class="fas fa-paw"></i>
@@ -4152,292 +4202,292 @@ window.performanceManager = new PerformanceManager();
   function closeProgress() {
     document.getElementById('progressModal').classList.remove('active');
   }
-    // ============ FOX MASCOT ============
-    const mascotMessages = {
+    // ============ 3D FOX MASCOT ============
+  const mascotMessages = {
     idle: [
-      '👋 ආයුබෝවන්!',
-      '📚 ඉගෙන ගමු!',
-      '🎯 අද දිනන්න!',
-      '💪 ඔබට පුළුවන්!',
-      '🌟 දිගටම කරන්න!',
-      '🦊 මම මෙතන ඉන්නම්!',
-      '🔥 Let\'s Go!',
-      '🧠 දැනුම බලයයි!',
-      '💡 ඉගෙනීම විනෝදයි!',
-      '🎒 පාඩම් කරමු!',
-      '📝 පුහුණු වන්න!',
-      '⏰ වෙලාව නාස්ති නොකරන්න!',
-      '🌈 අලුත් දේවල් ඉගෙන ගන්න!',
-      '🍀 වාසනාව ඔබටයි!',
-      '🦸 ඔබ වීරයෙක්!'
+      '👋 ආයුබෝවන්!', '📚 ඉගෙන ගමු!', '🎯 අද දිනන්න!',
+      '💪 ඔබට පුළුවන්!', '🌟 දිගටම කරන්න!', '🦊 මම මෙතන ඉන්නම්!',
+      '🔥 Let\'s Go!', '🧠 දැනුම බලයයි!', '💡 ඉගෙනීම විනෝදයි!'
     ],
     correct: [
-      '✅ නියමයි!',
-      '🎉 සුපිරි!',
-      '🌟 විශිෂ්ටයි!',
-      '👏 හරිම දක්ෂයි!',
-      '💯 Perfect!',
-      '🏆 ඔබ දක්ෂයෙක්!',
-      '✨ Amazing!',
-      '🎯 ඉලක්කයට ළංවෙනවා!',
-      '🦊 හරි උත්තරේ!',
-      '💪 දිගටම මෙහෙම!',
-      '🥇 ජයග්‍රාහකයෙක්!',
-      '🔔 නිවැරදියි!',
-      '🎊 සතුටුයි ඔබ ගැන!',
-      '💎 බුද්ධිමත්!',
-      '🧩 ප්‍රහේලිකාව විසඳුවා!'
+      '✅ නියමයි!', '🎉 සුපිරි!', '🌟 විශිෂ්ටයි!', '👏 හරිම දක්ෂයි!',
+      '💯 Perfect!', '🏆 ඔබ දක්ෂයෙක්!', '✨ Amazing!'
     ],
     wrong: [
-      '😅 පරිස්සමෙන්!',
-      '💪 නැවත උත්සාහ කරන්න!',
-      '📖 පාඩම් කරන්න!',
-      '🤗 අතපසු වීමක්!',
-      '🔄 ඊළඟ පාර හරි!',
-      '🌱 ඉගෙන ගන්න!',
-      '💡 වැරදි වලින් ඉගෙන ගන්න!',
-      '🧠 තව පුහුණු වන්න!',
-      '🎯 ඊළඟ උත්තරේ හරි!',
-      '🍀 ඊළඟ වතාවේ වාසනාවන්තයි!',
-      '📚 පාඩම නැවත බලන්න!',
-      '🤔 ටිකක් හිතන්න!',
-      '💭 කල්පනා කරන්න!',
-      '🦊 දුක් වෙන්න එපා!',
-      '🌈 ඊළඟ පාර දීප්තිමත්!'
+      '😅 පරිස්සමෙන්!', '💪 නැවත උත්සාහ කරන්න!', '📖 පාඩම් කරන්න!',
+      '🤗 අතපසු වීමක්!', '🔄 ඊළඟ පාර හරි!', '🌱 ඉගෙන ගන්න!'
     ],
     streak: [
-      '🔥 ගිනි ඇවිලෙනවා!',
-      '⚡ නතර කරන්න එපා!',
-      '🚀 ඉස්සරහට!',
-      '💪 දිගටම!',
-      '🎯 ඉලක්කය ළඟයි!',
-      '🌟 ඔබ තරුවක්!',
-      '🦊 ලස්සන Streak එකක්!',
-      '🏆 අපරාජිතයි!',
-      '💎 දීප්තිමත්!',
-      '🔔 දිගටම නාද වෙන්න!'
+      '🔥 ගිනි ඇවිලෙනවා!', '⚡ නතර කරන්න එපා!', '🚀 ඉස්සරහට!'
     ],
     perfect: [
-      '🏆 පරිපූර්ණයි!',
-      '👑 ඔබ රජෙක්!',
-      '🌟 සුපිරි තරුව!',
-      '💯 100% දක්ෂයා!',
-      '🎉 අතිවිශිෂ්ටයි!',
-      '🦊 සියල්ල නිවැරදියි!',
-      '🥇 ප්‍රථමයා!',
-      '💎 මැණිකක්!',
-      '🌈 පරිපූර්ණ දේදුන්න!',
-      '🎊 ඉතිහාසයක් නිර්මාණය කළා!'
-    ],
-    welcome: [
-      '🦊 මම Quiz Hub Fox!',
-      '📚 ඔබේ ඉගෙනුම් සගයා!',
-      '💪 අපි එක්ව ජය ගනිමු!',
-      '🌟 මාව Click කරන්න!'
+      '🏆 පරිපූර්ණයි!', '👑 ඔබ රජෙක්!', '🌟 සුපිරි තරුව!', '💯 100% දක්ෂයා!'
     ],
     click: [
-      '😊 හෙලෝ!',
-      '🦊 ඔබ මට කැමතිද?',
-      '💕 ඔබ නියමයි!',
-      '🎮 Quiz Hub සෙල්ලම් කරමු!',
-      '📖 දැනුම ලබා ගනිමු!',
-      '🤗 මට ඔබව හමුවීම සතුටක්!'
+      '😊 හෙලෝ!', '🦊 ඔබ මට කැමතිද?', '💕 ඔබ නියමයි!', '🤗 සතුටුයි!'
     ]
   };
-  
+
   let mascotSpeechTimeout = null;
-  
+  let mascotVisible = localStorage.getItem('mascotVisible') !== 'false';
+  let foxModel = null;
+  let foxScene = null;
+  let foxRenderer = null;
+  let foxCamera = null;
+  let foxAnimationId = null;
+
   function showMascotSpeech(message, duration = 3000) {
     const speech = document.getElementById('mascotSpeech');
     if (!speech) return;
-    
     if (mascotSpeechTimeout) clearTimeout(mascotSpeechTimeout);
-    
     speech.textContent = message;
     speech.style.display = 'block';
     speech.classList.add('show');
-    
     mascotSpeechTimeout = setTimeout(() => {
       speech.classList.remove('show');
-      setTimeout(() => {
-        speech.style.display = 'none';
-      }, 350);
+      setTimeout(() => { speech.style.display = 'none'; }, 350);
     }, duration);
   }
-  
+
   function getRandomMessage(type) {
     const messages = mascotMessages[type] || mascotMessages.idle;
     return messages[Math.floor(Math.random() * messages.length)];
   }
-  
-  function mascotCelebrate() {
-    const container = document.getElementById('mascotContainer');
-    if (!container) return;
-    
-    container.classList.add('celebrating');
-    showMascotSpeech(getRandomMessage('perfect'), 4000);
-    
-    setTimeout(() => {
-      container.classList.remove('celebrating');
-    }, 3000);
-  }
-  
-  function mascotSad() {
-    const container = document.getElementById('mascotContainer');
-    if (!container) return;
-    
-    container.classList.add('sad');
-    showMascotSpeech(getRandomMessage('wrong'), 2500);
-    
-    setTimeout(() => {
-      container.classList.remove('sad');
-    }, 2500);
-  }
-  
-  function mascotReact(isCorrect, isStreak = false) {
-    const container = document.getElementById('mascotContainer');
-    if (!container) return;
-    
-    if (isCorrect) {
-      container.classList.add('celebrating');
-      if (isStreak) {
-        showMascotSpeech(getRandomMessage('streak'), 2500);
-      } else {
-        showMascotSpeech(getRandomMessage('correct'), 2000);
+
+  // Initialize 3D Fox
+  async function init3DFox() {
+    try {
+      const { Scene, PerspectiveCamera, WebGLRenderer, AmbientLight, DirectionalLight, Mesh, SphereGeometry, ConeGeometry, CylinderGeometry, MeshStandardMaterial, Group, MathUtils } = await import('three');
+
+      const container = document.getElementById('mascot3DContainer');
+      const canvas = document.getElementById('mascotCanvas');
+      if (!container || !canvas) return;
+
+      // Scene
+      foxScene = new Scene();
+
+      // Camera
+      foxCamera = new PerspectiveCamera(45, 1, 0.1, 100);
+      foxCamera.position.set(0, 1.5, 5);
+      foxCamera.lookAt(0, 0, 0);
+
+      // Renderer
+      foxRenderer = new WebGLRenderer({ canvas, alpha: true, antialias: true });
+      foxRenderer.setSize(120, 120);
+      foxRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      foxRenderer.shadowMap.enabled = true;
+
+      // Lights
+      const ambientLight = new AmbientLight(0xffffff, 0.6);
+      foxScene.add(ambientLight);
+      
+      const mainLight = new DirectionalLight(0xffffff, 1.2);
+      mainLight.position.set(5, 10, 5);
+      mainLight.castShadow = true;
+      foxScene.add(mainLight);
+
+      const rimLight = new DirectionalLight(0xff9966, 0.4);
+      rimLight.position.set(-3, 0, -2);
+      foxScene.add(rimLight);
+
+      // Fox Group
+      foxModel = new Group();
+
+      // Body
+      const bodyGeo = new SphereGeometry(0.7, 32, 32);
+      bodyGeo.scale(1, 0.8, 0.9);
+      const bodyMat = new MeshStandardMaterial({ color: 0xe8753c, roughness: 0.6, metalness: 0.1 });
+      const body = new Mesh(bodyGeo, bodyMat);
+      body.position.y = -0.1;
+      body.castShadow = true;
+      foxModel.add(body);
+
+      // White chest
+      const chestGeo = new SphereGeometry(0.4, 16, 16);
+      chestGeo.scale(1, 0.6, 0.5);
+      const chestMat = new MeshStandardMaterial({ color: 0xfff5e8, roughness: 0.7 });
+      const chest = new Mesh(chestGeo, chestMat);
+      chest.position.set(0, -0.15, 0.4);
+      foxModel.add(chest);
+
+      // Head
+      const headGeo = new SphereGeometry(0.45, 32, 32);
+      headGeo.scale(1, 0.9, 0.95);
+      const headMat = new MeshStandardMaterial({ color: 0xf09050, roughness: 0.5, metalness: 0.1 });
+      const head = new Mesh(headGeo, headMat);
+      head.position.y = 0.5;
+      head.castShadow = true;
+      foxModel.add(head);
+
+      // Muzzle
+      const muzzleGeo = new SphereGeometry(0.22, 16, 16);
+      muzzleGeo.scale(1, 0.7, 0.8);
+      const muzzleMat = new MeshStandardMaterial({ color: 0xfff8f0, roughness: 0.6 });
+      const muzzle = new Mesh(muzzleGeo, muzzleMat);
+      muzzle.position.set(0, 0.4, 0.35);
+      foxModel.add(muzzle);
+
+      // Nose
+      const noseGeo = new SphereGeometry(0.06, 16, 16);
+      const noseMat = new MeshStandardMaterial({ color: 0x1a0a00, roughness: 0.3 });
+      const nose = new Mesh(noseGeo, noseMat);
+      nose.position.set(0, 0.42, 0.55);
+      foxModel.add(nose);
+
+      // Eyes
+      const eyeGeo = new SphereGeometry(0.07, 16, 16);
+      const eyeWhiteMat = new MeshStandardMaterial({ color: 0xffffff, roughness: 0.2 });
+      const eyePupilMat = new MeshStandardMaterial({ color: 0x1a1008, roughness: 0.1 });
+      
+      const leftEye = new Mesh(eyeGeo, eyeWhiteMat);
+      leftEye.position.set(-0.14, 0.55, 0.38);
+      foxModel.add(leftEye);
+      
+      const rightEye = new Mesh(eyeGeo, eyeWhiteMat);
+      rightEye.position.set(0.14, 0.55, 0.38);
+      foxModel.add(rightEye);
+
+      const pupilGeo = new SphereGeometry(0.04, 8, 8);
+      const leftPupil = new Mesh(pupilGeo, eyePupilMat);
+      leftPupil.position.set(-0.14, 0.56, 0.44);
+      foxModel.add(leftPupil);
+      
+      const rightPupil = new Mesh(pupilGeo, eyePupilMat);
+      rightPupil.position.set(0.14, 0.56, 0.44);
+      foxModel.add(rightPupil);
+
+      // Ears
+      const earGeo = new ConeGeometry(0.12, 0.35, 8);
+      const earMat = new MeshStandardMaterial({ color: 0xe8753c, roughness: 0.5 });
+      
+      const leftEar = new Mesh(earGeo, earMat);
+      leftEar.position.set(-0.2, 0.8, 0);
+      leftEar.rotation.z = 0.3;
+      leftEar.rotation.x = -0.2;
+      foxModel.add(leftEar);
+      
+      const rightEar = new Mesh(earGeo, earMat);
+      rightEar.position.set(0.2, 0.8, 0);
+      rightEar.rotation.z = -0.3;
+      rightEar.rotation.x = -0.2;
+      foxModel.add(rightEar);
+
+      // Inner ears
+      const innerEarGeo = new ConeGeometry(0.07, 0.2, 8);
+      const innerEarMat = new MeshStandardMaterial({ color: 0xffccb0, roughness: 0.4 });
+      
+      const leftInnerEar = new Mesh(innerEarGeo, innerEarMat);
+      leftInnerEar.position.copy(leftEar.position);
+      leftInnerEar.position.y -= 0.02;
+      leftInnerEar.rotation.copy(leftEar.rotation);
+      foxModel.add(leftInnerEar);
+      
+      const rightInnerEar = new Mesh(innerEarGeo, innerEarMat);
+      rightInnerEar.position.copy(rightEar.position);
+      rightInnerEar.position.y -= 0.02;
+      rightInnerEar.rotation.copy(rightEar.rotation);
+      foxModel.add(rightInnerEar);
+
+      // Tail
+      const tailGeo = new SphereGeometry(0.15, 16, 16);
+      tailGeo.scale(1.5, 1, 1);
+      const tailMat = new MeshStandardMaterial({ color: 0xf09050, roughness: 0.5 });
+      const tail = new Mesh(tailGeo, tailMat);
+      tail.position.set(0.5, -0.2, -0.5);
+      tail.rotation.z = 0.5;
+      foxModel.add(tail);
+
+      // White tail tip
+      const tailTipGeo = new SphereGeometry(0.12, 8, 8);
+      const tailTipMat = new MeshStandardMaterial({ color: 0xffffff, roughness: 0.4 });
+      const tailTip = new Mesh(tailTipGeo, tailTipMat);
+      tailTip.position.set(0.62, -0.08, -0.55);
+      foxModel.add(tailTip);
+
+      // Legs
+      const legGeo = new CylinderGeometry(0.08, 0.1, 0.3, 8);
+      const legMat = new MeshStandardMaterial({ color: 0x3a1a08, roughness: 0.7 });
+      
+      const positions = [[-0.2, -0.5, 0.2], [0.2, -0.5, 0.2], [-0.2, -0.5, -0.3], [0.2, -0.5, -0.3]];
+      positions.forEach(([x, y, z]) => {
+        const leg = new Mesh(legGeo, legMat);
+        leg.position.set(x, y, z);
+        leg.castShadow = true;
+        foxModel.add(leg);
+      });
+
+      foxScene.add(foxModel);
+      foxModel.position.y = 0.3;
+
+      // Apply visibility
+      if (!mascotVisible) {
+        container.style.display = 'none';
+        const toggleBtn = document.getElementById('mascotToggleBtn');
+        if (toggleBtn) toggleBtn.classList.add('hidden-mascot');
       }
+
+      // Animation loop
+      function animate() {
+        foxAnimationId = requestAnimationFrame(animate);
+        
+        if (foxModel) {
+          foxModel.rotation.y += 0.005;
+          foxModel.position.y = 0.3 + Math.sin(Date.now() * 0.002) * 0.1;
+        }
+        
+        if (foxRenderer && foxScene && foxCamera) {
+          foxRenderer.render(foxScene, foxCamera);
+        }
+      }
+      animate();
+
+      // Welcome message
       setTimeout(() => {
-        container.classList.remove('celebrating');
-      }, 1500);
-    } else {
-      mascotSad();
+        showMascotSpeech(getRandomMessage('idle'), 4000);
+      }, 3000);
+
+      console.log('[3D Fox] Initialized! 🦊');
+    } catch (error) {
+      console.warn('[3D Fox] Failed to load, using 2D fallback:', error.message);
+      // Fallback: hide 3D, show 2D
+      const container3D = document.getElementById('mascot3DContainer');
+      if (container3D) container3D.style.display = 'none';
     }
   }
-  
-   function handleMascotClick() {
-    const container = document.getElementById('mascotContainer');
-    if (!container) return;
-    
-    // Random emotion
-    const emotions = ['happy', 'love', 'surprised', 'cool', 'wink'];
-    const randomEmotion = emotions[Math.floor(Math.random() * emotions.length)];
-    
-    // Remove previous emotion classes
-    container.classList.remove('happy', 'love', 'surprised', 'cool', 'wink', 'sad');
-    
-    // Add new emotion
-    container.classList.add(randomEmotion);
-    
-    // Bounce animation
-    container.style.transition = 'transform 0.15s cubic-bezier(.2,.8,.3,1)';
-    container.style.transform = 'scale(1.2)';
-    
-    setTimeout(() => {
-      container.style.transform = 'scale(0.85)';
-    }, 150);
-    
-    setTimeout(() => {
-      container.style.transform = '';
-      container.classList.remove(randomEmotion);
-    }, 1500);
-    
-    // Emotion message & sound
-    const emotionMessages = {
-      happy: ['😊 හෙලෝ!', '😄 සතුටුයි!', '🎉 යාළුවා!'],
-      love: ['💕 ආදරෙයි!', '💖 ඔබ නියමයි!', '💝 මගේ යාළුවා!'],
-      surprised: ['😲 ආශ්චර්යයි!', '😮 වාව්!', '🤩 අපූරුයි!'],
-      cool: ['😎 Cool!', '🦊 සුපිරි!', '💪 ශක්තිමත්!'],
-      wink: ['😉 හරි හරි!', '😜 දඟයා!', '🦊 බොරුවට නෙමෙයි!']
-    };
-    
-    const messages = emotionMessages[randomEmotion];
-    const randomMsg = messages[Math.floor(Math.random() * messages.length)];
-    showMascotSpeech(randomMsg, 2500);
-    
-    audioManager.playClick();
-    spawnClickHearts();
-  }
-  
-  function spawnClickHearts() {
-    const container = document.getElementById('mascotContainer');
-    if (!container) return;
-    
-    const hearts = ['💕', '💖', '💗', '💝', '✨', '💫', '🌟', '🦊'];
-    const rect = container.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    
-    for (let i = 0; i < 8; i++) {
-      const heart = document.createElement('span');
-      heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
-      heart.style.cssText = `
-        position: fixed;
-        left: ${centerX}px;
-        top: ${centerY}px;
-        font-size: ${14 + Math.random() * 20}px;
-        pointer-events: none;
-        z-index: 99999;
-        animation: clickHeartBurst ${0.8 + Math.random() * 0.6}s ease-out forwards;
-        animation-delay: ${Math.random() * 0.2}s;
-      `;
-      heart.style.setProperty('--tx', (Math.random() - 0.5) * 120 + 'px');
-      heart.style.setProperty('--ty', -(Math.random() * 100 + 40) + 'px');
-      heart.style.setProperty('--rot', (Math.random() - 0.5) * 180 + 'deg');
-      
-      document.body.appendChild(heart);
-      
-      setTimeout(() => {
-        if (heart.parentNode) heart.parentNode.removeChild(heart);
-      }, 1800);
-    }
-  }
-    // ============ MASCOT TOGGLE ============
-  let mascotVisible = localStorage.getItem('mascotVisible') !== 'false';
-  
+
+  // Start 3D Fox
+  setTimeout(() => init3DFox(), 2000);
+
+  // Toggle
   function toggleMascot() {
     mascotVisible = !mascotVisible;
     localStorage.setItem('mascotVisible', mascotVisible);
-    
-    const mascot = document.getElementById('mascotContainer');
+    const container = document.getElementById('mascot3DContainer');
     const toggleBtn = document.getElementById('mascotToggleBtn');
-    
-    if (mascot) {
-      mascot.style.display = mascotVisible ? 'block' : 'none';
-    }
-    if (toggleBtn) {
-      toggleBtn.classList.toggle('hidden-mascot', !mascotVisible);
-    }
-    
-    if (mascotVisible) {
-      showMascotSpeech('🦊 මම ආපහු ආවා!', 2000);
-    }
-    
+    if (container) container.style.display = mascotVisible ? 'block' : 'none';
+    if (toggleBtn) toggleBtn.classList.toggle('hidden-mascot', !mascotVisible);
+    if (mascotVisible) showMascotSpeech('🦊 මම ආපහු ආවා!', 2000);
     audioManager.playClick();
   }
-  
-  // Apply saved state on load
-  setTimeout(() => {
-    const mascot = document.getElementById('mascotContainer');
-    const toggleBtn = document.getElementById('mascotToggleBtn');
-    
-    if (!mascotVisible) {
-      if (mascot) mascot.style.display = 'none';
-      if (toggleBtn) toggleBtn.classList.add('hidden-mascot');
+
+  // Click handler
+  document.getElementById('mascot3DContainer')?.addEventListener('click', () => {
+    showMascotSpeech(getRandomMessage('click'), 2500);
+    audioManager.playClick();
+  });
+
+  // Mascot react functions
+  function mascotReact(isCorrect, isStreak) {
+    if (isCorrect) {
+      showMascotSpeech(isStreak ? getRandomMessage('streak') : getRandomMessage('correct'), 2000);
+    } else {
+      showMascotSpeech(getRandomMessage('wrong'), 2500);
     }
-  }, 100);
-  // Show welcome message on load
-  setTimeout(() => {
-    const welcomeMsg = mascotMessages.welcome[Math.floor(Math.random() * mascotMessages.welcome.length)];
-    showMascotSpeech(welcomeMsg, 5000);
-  }, 3000);
-  
-  // Random idle messages
-  setInterval(() => {
-    const speech = document.getElementById('mascotSpeech');
-    if (!speech || speech.style.display === 'block') return;
-    if (Math.random() < 0.3) { // 30% chance
-      showMascotSpeech(getRandomMessage('idle'), 3000);
-    }
-  }, 30000); // Every 30 seconds
+  }
+
+  function mascotCelebrate() {
+    showMascotSpeech(getRandomMessage('perfect'), 4000);
+  }
   // ============ INFO MODAL ============
   async function showInfoModal() {
     const modal = document.getElementById('infoModal');
