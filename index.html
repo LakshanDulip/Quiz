@@ -4132,7 +4132,7 @@ window.performanceManager = new PerformanceManager();
     document.getElementById('progressModal').classList.remove('active');
   }
     // ============ FOX MASCOT ============
-  const mascotMessages = {
+    const mascotMessages = {
     idle: [
       '👋 ආයුබෝවන්!',
       '📚 ඉගෙන ගමු!',
@@ -4140,7 +4140,15 @@ window.performanceManager = new PerformanceManager();
       '💪 ඔබට පුළුවන්!',
       '🌟 දිගටම කරන්න!',
       '🦊 මම මෙතන ඉන්නම්!',
-      '🔥 Let\'s Go!'
+      '🔥 Let\'s Go!',
+      '🧠 දැනුම බලයයි!',
+      '💡 ඉගෙනීම විනෝදයි!',
+      '🎒 පාඩම් කරමු!',
+      '📝 පුහුණු වන්න!',
+      '⏰ වෙලාව නාස්ති නොකරන්න!',
+      '🌈 අලුත් දේවල් ඉගෙන ගන්න!',
+      '🍀 වාසනාව ඔබටයි!',
+      '🦸 ඔබ වීරයෙක්!'
     ],
     correct: [
       '✅ නියමයි!',
@@ -4149,7 +4157,15 @@ window.performanceManager = new PerformanceManager();
       '👏 හරිම දක්ෂයි!',
       '💯 Perfect!',
       '🏆 ඔබ දක්ෂයෙක්!',
-      '✨ Amazing!'
+      '✨ Amazing!',
+      '🎯 ඉලක්කයට ළංවෙනවා!',
+      '🦊 හරි උත්තරේ!',
+      '💪 දිගටම මෙහෙම!',
+      '🥇 ජයග්‍රාහකයෙක්!',
+      '🔔 නිවැරදියි!',
+      '🎊 සතුටුයි ඔබ ගැන!',
+      '💎 බුද්ධිමත්!',
+      '🧩 ප්‍රහේලිකාව විසඳුවා!'
     ],
     wrong: [
       '😅 පරිස්සමෙන්!',
@@ -4157,21 +4173,54 @@ window.performanceManager = new PerformanceManager();
       '📖 පාඩම් කරන්න!',
       '🤗 අතපසු වීමක්!',
       '🔄 ඊළඟ පාර හරි!',
-      '🌱 ඉගෙන ගන්න!'
+      '🌱 ඉගෙන ගන්න!',
+      '💡 වැරදි වලින් ඉගෙන ගන්න!',
+      '🧠 තව පුහුණු වන්න!',
+      '🎯 ඊළඟ උත්තරේ හරි!',
+      '🍀 ඊළඟ වතාවේ වාසනාවන්තයි!',
+      '📚 පාඩම නැවත බලන්න!',
+      '🤔 ටිකක් හිතන්න!',
+      '💭 කල්පනා කරන්න!',
+      '🦊 දුක් වෙන්න එපා!',
+      '🌈 ඊළඟ පාර දීප්තිමත්!'
     ],
     streak: [
       '🔥 ගිනි ඇවිලෙනවා!',
       '⚡ නතර කරන්න එපා!',
       '🚀 ඉස්සරහට!',
       '💪 දිගටම!',
-      '🎯 ඉලක්කය ළඟයි!'
+      '🎯 ඉලක්කය ළඟයි!',
+      '🌟 ඔබ තරුවක්!',
+      '🦊 ලස්සන Streak එකක්!',
+      '🏆 අපරාජිතයි!',
+      '💎 දීප්තිමත්!',
+      '🔔 දිගටම නාද වෙන්න!'
     ],
     perfect: [
       '🏆 පරිපූර්ණයි!',
       '👑 ඔබ රජෙක්!',
       '🌟 සුපිරි තරුව!',
       '💯 100% දක්ෂයා!',
-      '🎉 අතිවිශිෂ්ටයි!'
+      '🎉 අතිවිශිෂ්ටයි!',
+      '🦊 සියල්ල නිවැරදියි!',
+      '🥇 ප්‍රථමයා!',
+      '💎 මැණිකක්!',
+      '🌈 පරිපූර්ණ දේදුන්න!',
+      '🎊 ඉතිහාසයක් නිර්මාණය කළා!'
+    ],
+    welcome: [
+      '🦊 මම Quiz Hub Fox!',
+      '📚 ඔබේ ඉගෙනුම් සගයා!',
+      '💪 අපි එක්ව ජය ගනිමු!',
+      '🌟 මාව Click කරන්න!'
+    ],
+    click: [
+      '😊 හෙලෝ!',
+      '🦊 ඔබ මට කැමතිද?',
+      '💕 ඔබ නියමයි!',
+      '🎮 Quiz Hub සෙල්ලම් කරමු!',
+      '📖 දැනුම ලබා ගනිමු!',
+      '🤗 මට ඔබව හමුවීම සතුටක්!'
     ]
   };
   
@@ -4185,13 +4234,13 @@ window.performanceManager = new PerformanceManager();
     
     speech.textContent = message;
     speech.style.display = 'block';
-    speech.classList.remove('hide');
+    speech.classList.add('show');
     
     mascotSpeechTimeout = setTimeout(() => {
-      speech.classList.add('hide');
+      speech.classList.remove('show');
       setTimeout(() => {
         speech.style.display = 'none';
-      }, 300);
+      }, 350);
     }, duration);
   }
   
