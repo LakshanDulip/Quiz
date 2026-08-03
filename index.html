@@ -1558,7 +1558,254 @@
     color: var(--primary-color);
     font-family: 'Space Grotesk', sans-serif;
   }
+    /* ===== ANIMATED FOX MASCOT ===== */
+  .mascot-container {
+    position: fixed;
+    bottom: 80px;
+    right: 16px;
+    z-index: 400;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(.2,.8,.3,1);
+  }
+  .mascot-container:hover {
+    transform: translateY(-8px);
+  }
+  .mascot-container:active {
+    transform: scale(0.9);
+  }
   
+  .mascot-body {
+    position: relative;
+    width: 64px;
+    height: 64px;
+    animation: mascotFloat 3s ease-in-out infinite;
+  }
+  @keyframes mascotFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  .mascot-face {
+    width: 64px;
+    height: 56px;
+    background: linear-gradient(135deg, #ff7b42, #ff5722);
+    border-radius: 50% 50% 45% 45%;
+    position: relative;
+    box-shadow: 0 6px 20px rgba(255,87,34,0.35), 0 2px 6px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+  }
+  .mascot-container:hover .mascot-face {
+    box-shadow: 0 10px 28px rgba(255,87,34,0.5), 0 3px 10px rgba(0,0,0,0.25);
+  }
+  
+  /* Fox Ears */
+  .mascot-ear-left, .mascot-ear-right {
+    position: absolute;
+    top: -14px;
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 20px solid #ff5722;
+  }
+  .mascot-ear-left {
+    left: 6px;
+    transform: rotate(-15deg);
+  }
+  .mascot-ear-right {
+    right: 6px;
+    transform: rotate(15deg);
+  }
+  .mascot-ear-inner {
+    position: absolute;
+    top: -10px;
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 13px solid #ffccbc;
+  }
+  .mascot-ear-left .mascot-ear-inner { left: -6px; }
+  .mascot-ear-right .mascot-ear-inner { left: -6px; }
+  
+  /* Eyes */
+  .mascot-eyes {
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 12px;
+  }
+  .mascot-eye {
+    width: 10px;
+    height: 12px;
+    background: #fff;
+    border-radius: 50%;
+    position: relative;
+    animation: mascotBlink 4s ease-in-out infinite;
+  }
+  .mascot-eye::after {
+    content: '';
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background: #1a1a1a;
+    border-radius: 50%;
+    top: 3px;
+    left: 2.5px;
+  }
+  @keyframes mascotBlink {
+    0%, 95%, 100% { transform: scaleY(1); }
+    97% { transform: scaleY(0.1); }
+  }
+  
+  /* Nose */
+  .mascot-nose {
+    position: absolute;
+    top: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 10px;
+    height: 8px;
+    background: #1a1a1a;
+    border-radius: 50%;
+  }
+  
+  /* Mouth */
+  .mascot-mouth {
+    position: absolute;
+    top: 36px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 16px;
+    height: 6px;
+    border-bottom: 2px solid #1a1a1a;
+    border-radius: 0 0 50% 50%;
+    transition: all 0.3s ease;
+  }
+  .mascot-container:active .mascot-mouth {
+    width: 20px;
+    height: 8px;
+    border-bottom-width: 2.5px;
+  }
+  
+  /* Tail */
+  .mascot-tail {
+    position: absolute;
+    bottom: -8px;
+    right: -16px;
+    width: 24px;
+    height: 14px;
+    background: linear-gradient(135deg, #ff7b42, #ff5722);
+    border-radius: 50%;
+    animation: mascotTailWag 1.5s ease-in-out infinite;
+    transform-origin: left center;
+  }
+  .mascot-tail::after {
+    content: '';
+    position: absolute;
+    right: -4px;
+    top: -2px;
+    width: 10px;
+    height: 10px;
+    background: #fff;
+    border-radius: 50%;
+  }
+  @keyframes mascotTailWag {
+    0%, 100% { transform: rotate(-15deg); }
+    50% { transform: rotate(15deg); }
+  }
+  
+  /* Speech Bubble */
+  .mascot-speech {
+    position: absolute;
+    bottom: 70px;
+    right: -10px;
+    background: var(--bg-card);
+    border: 1.5px solid var(--border-color);
+    border-radius: 16px;
+    padding: 10px 14px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    box-shadow: var(--shadow-md);
+    opacity: 0;
+    transform: translateY(10px) scale(0.8);
+    transition: all 0.35s cubic-bezier(.2,.8,.3,1);
+    pointer-events: none;
+    z-index: 401;
+    animation: speechBubbleIn 0.4s cubic-bezier(.2,.8,.3,1) forwards;
+  }
+  .mascot-speech::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    right: 28px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid var(--bg-card);
+  }
+  @keyframes speechBubbleIn {
+    from { opacity: 0; transform: translateY(10px) scale(0.8); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .mascot-speech.hide {
+    animation: speechBubbleOut 0.3s ease forwards;
+  }
+  @keyframes speechBubbleOut {
+    from { opacity: 1; transform: translateY(0) scale(1); }
+    to { opacity: 0; transform: translateY(-10px) scale(0.8); }
+  }
+  
+  /* Mascot Celebration */
+  .mascot-container.celebrating .mascot-body {
+    animation: mascotCelebrate 0.6s ease-in-out infinite;
+  }
+  @keyframes mascotCelebrate {
+    0%, 100% { transform: translateY(0) rotate(0); }
+    25% { transform: translateY(-20px) rotate(-8deg); }
+    75% { transform: translateY(-12px) rotate(8deg); }
+  }
+  
+  /* Mascot Sad */
+  .mascot-container.sad .mascot-mouth {
+    border-bottom: none;
+    border-top: 2px solid #1a1a1a;
+    border-radius: 50% 50% 0 0;
+    top: 38px;
+  }
+  .mascot-container.sad .mascot-body {
+    animation: mascotSad 2s ease-in-out infinite;
+  }
+  @keyframes mascotSad {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+  }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .mascot-container {
+      bottom: 70px;
+      right: 8px;
+    }
+    .mascot-body {
+      width: 52px;
+      height: 52px;
+    }
+    .mascot-face {
+      width: 52px;
+      height: 46px;
+    }
+    .mascot-speech {
+      font-size: 0.7rem;
+      right: -5px;
+      bottom: 58px;
+    }
+  }
   footer { text-align: center; padding: 20px; color: var(--text-secondary); font-size: 0.8rem; border-top: 1px solid var(--border-color); background: var(--bg-card); backdrop-filter: blur(10px); }
   .dev-credit { margin-top: 5px; font-weight: 600; color: var(--primary-color); }
 
@@ -2740,7 +2987,23 @@ window.performanceManager = new PerformanceManager();
   </div>
 </div>
 <!-- ===== FIREBASE AUTH END ===== -->
-
+<!-- ===== ANIMATED FOX MASCOT ===== -->
+<div class="mascot-container" id="mascotContainer" onclick="handleMascotClick()">
+  <div class="mascot-body">
+    <div class="mascot-tail"></div>
+    <div class="mascot-face">
+      <div class="mascot-ear-left"><div class="mascot-ear-inner"></div></div>
+      <div class="mascot-ear-right"><div class="mascot-ear-inner"></div></div>
+      <div class="mascot-eyes">
+        <div class="mascot-eye"></div>
+        <div class="mascot-eye"></div>
+      </div>
+      <div class="mascot-nose"></div>
+      <div class="mascot-mouth"></div>
+    </div>
+  </div>
+  <div class="mascot-speech" id="mascotSpeech" style="display:none;"></div>
+</div>
   <!-- ===== INFO BUTTON (floating) ===== -->
 <button class="info-floating-btn" onclick="showInfoModal()" title="තොරතුරු">
   <i class="fas fa-info"></i>
@@ -3728,6 +3991,144 @@ window.performanceManager = new PerformanceManager();
   function closeProgress() {
     document.getElementById('progressModal').classList.remove('active');
   }
+    // ============ FOX MASCOT ============
+  const mascotMessages = {
+    idle: [
+      '👋 ආයුබෝවන්!',
+      '📚 ඉගෙන ගමු!',
+      '🎯 අද දිනන්න!',
+      '💪 ඔබට පුළුවන්!',
+      '🌟 දිගටම කරන්න!',
+      '🦊 මම මෙතන ඉන්නම්!',
+      '🔥 Let\'s Go!'
+    ],
+    correct: [
+      '✅ නියමයි!',
+      '🎉 සුපිරි!',
+      '🌟 විශිෂ්ටයි!',
+      '👏 හරිම දක්ෂයි!',
+      '💯 Perfect!',
+      '🏆 ඔබ දක්ෂයෙක්!',
+      '✨ Amazing!'
+    ],
+    wrong: [
+      '😅 පරිස්සමෙන්!',
+      '💪 නැවත උත්සාහ කරන්න!',
+      '📖 පාඩම් කරන්න!',
+      '🤗 අතපසු වීමක්!',
+      '🔄 ඊළඟ පාර හරි!',
+      '🌱 ඉගෙන ගන්න!'
+    ],
+    streak: [
+      '🔥 ගිනි ඇවිලෙනවා!',
+      '⚡ නතර කරන්න එපා!',
+      '🚀 ඉස්සරහට!',
+      '💪 දිගටම!',
+      '🎯 ඉලක්කය ළඟයි!'
+    ],
+    perfect: [
+      '🏆 පරිපූර්ණයි!',
+      '👑 ඔබ රජෙක්!',
+      '🌟 සුපිරි තරුව!',
+      '💯 100% දක්ෂයා!',
+      '🎉 අතිවිශිෂ්ටයි!'
+    ]
+  };
+  
+  let mascotSpeechTimeout = null;
+  
+  function showMascotSpeech(message, duration = 3000) {
+    const speech = document.getElementById('mascotSpeech');
+    if (!speech) return;
+    
+    if (mascotSpeechTimeout) clearTimeout(mascotSpeechTimeout);
+    
+    speech.textContent = message;
+    speech.style.display = 'block';
+    speech.classList.remove('hide');
+    
+    mascotSpeechTimeout = setTimeout(() => {
+      speech.classList.add('hide');
+      setTimeout(() => {
+        speech.style.display = 'none';
+      }, 300);
+    }, duration);
+  }
+  
+  function getRandomMessage(type) {
+    const messages = mascotMessages[type] || mascotMessages.idle;
+    return messages[Math.floor(Math.random() * messages.length)];
+  }
+  
+  function mascotCelebrate() {
+    const container = document.getElementById('mascotContainer');
+    if (!container) return;
+    
+    container.classList.add('celebrating');
+    showMascotSpeech(getRandomMessage('perfect'), 4000);
+    
+    setTimeout(() => {
+      container.classList.remove('celebrating');
+    }, 3000);
+  }
+  
+  function mascotSad() {
+    const container = document.getElementById('mascotContainer');
+    if (!container) return;
+    
+    container.classList.add('sad');
+    showMascotSpeech(getRandomMessage('wrong'), 2500);
+    
+    setTimeout(() => {
+      container.classList.remove('sad');
+    }, 2500);
+  }
+  
+  function mascotReact(isCorrect, isStreak = false) {
+    const container = document.getElementById('mascotContainer');
+    if (!container) return;
+    
+    if (isCorrect) {
+      container.classList.add('celebrating');
+      if (isStreak) {
+        showMascotSpeech(getRandomMessage('streak'), 2500);
+      } else {
+        showMascotSpeech(getRandomMessage('correct'), 2000);
+      }
+      setTimeout(() => {
+        container.classList.remove('celebrating');
+      }, 1500);
+    } else {
+      mascotSad();
+    }
+  }
+  
+  function handleMascotClick() {
+    const container = document.getElementById('mascotContainer');
+    if (!container) return;
+    
+    // Random bounce animation
+    container.style.animation = 'none';
+    container.offsetHeight; // Trigger reflow
+    container.style.animation = '';
+    
+    showMascotSpeech(getRandomMessage('idle'), 3000);
+    audioManager.playClick();
+  }
+  
+  // Show welcome message on load
+  setTimeout(() => {
+    showMascotSpeech(getRandomMessage('idle'), 4000);
+  }, 5000);
+  
+  // Random idle messages
+  setInterval(() => {
+    const speech = document.getElementById('mascotSpeech');
+    if (!speech || speech.style.display === 'block') return;
+    if (Math.random() < 0.3) { // 30% chance
+      showMascotSpeech(getRandomMessage('idle'), 3000);
+    }
+  }, 30000); // Every 30 seconds
   // ============ INFO MODAL ============
   async function showInfoModal() {
     const modal = document.getElementById('infoModal');
@@ -4342,6 +4743,7 @@ window.performanceManager = new PerformanceManager();
         qz.celebrationTriggered = true;
         setTimeout(() => audioManager.playPerfectScore(), 500);
         setTimeout(triggerCelebration, 500);
+        setTimeout(() => mascotCelebrate(), 600);
       } else if (pct >= 80 && pct < 100 && !qz.confettiShown) {
         qz.confettiShown = true;
         setTimeout(spawnConfetti, 400);
@@ -4745,6 +5147,9 @@ window.performanceManager = new PerformanceManager();
       qz.score++;
       appState.totalScore++;
       appState.streak++;
+      // Mascot react
+      const isStreak = appState.streak >= 3;
+      mascotReact(true, isStreak);
       if (appState.streak > appState.bestStreak) appState.bestStreak = appState.streak;
       
       if (appState.streak > 1) {
@@ -4755,6 +5160,8 @@ window.performanceManager = new PerformanceManager();
     } else {
       qz.wrong++;
       appState.streak = 0;
+      // Mascot react
+      mascotReact(false);
       if (isGame) {
         qz.lives--;
         audioManager.playWrong(); 
