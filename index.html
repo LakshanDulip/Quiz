@@ -720,7 +720,6 @@
 
   html { scroll-behavior: smooth; }
 
-  ::selection { background: var(--primary-color); color: #08210f; }
 
   ::-webkit-scrollbar { width: 10px; height: 10px; }
   ::-webkit-scrollbar-track { background: var(--bg-main); }
@@ -735,6 +734,11 @@
 
   body {
     background-color: var(--bg-main);
+      /* Copy Protection */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
     color: var(--text-primary);
     line-height: 1.6;
     transition: background-color 0.4s ease, color 0.4s ease;
@@ -4617,7 +4621,21 @@ window.performanceManager = new PerformanceManager();
       goToNextQuestion();
     }
   });
-
+  // ===== COPY PROTECTION =====
+  document.addEventListener('copy', (e) => {
+    e.preventDefault();
+    return false;
+  });
+  
+  document.addEventListener('cut', (e) => {
+    e.preventDefault();
+    return false;
+  });
+  
+  document.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    return false;
+  });
   document.addEventListener('click', (e) => {
     const p = document.getElementById('themePopover');
     if (p && p.classList.contains('open') && !e.target.closest('.theme-wrap')) p.classList.remove('open');
