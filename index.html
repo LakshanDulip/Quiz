@@ -1536,6 +1536,69 @@
     font-size: 4rem; pointer-events: none; z-index: 10000;
     animation: feedbackPopAnim 0.7s ease forwards;
   }
+    /* ===== DEVELOPER POPUP ANIMATION ===== */
+  .dev-popup-content {
+    background: var(--bg-card);
+    border: 2px solid var(--primary-color);
+    border-radius: var(--radius-lg);
+    padding: 16px 22px;
+    text-align: center;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5), 0 0 30px var(--glow-color);
+    backdrop-filter: blur(16px);
+    min-width: 180px;
+  }
+  .dev-popup-icon {
+    font-size: 2.4rem;
+    animation: devIconBounce 1.2s ease-in-out infinite;
+  }
+  .dev-popup-title {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+  .dev-popup-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-top: 2px;
+  }
+  .dev-popup-sub {
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    margin-top: 4px;
+    opacity: 0.7;
+  }
+  @keyframes devPopupIn {
+    from {
+      opacity: 0;
+      transform: scale(0.7) translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+  @keyframes devPopupOut {
+    from {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: scale(0.7) translateY(-10px);
+    }
+  }
+  @keyframes devIconBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
   @keyframes feedbackPopAnim {
     0% { transform: translate(-50%, -50%) scale(0.4); opacity: 0; }
     35% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
@@ -4636,6 +4699,107 @@ window.performanceManager = new PerformanceManager();
     e.preventDefault();
     return false;
   });
+    // ===== LONG PRESS - DEVELOPER CREDIT =====
+  let longPressTimer = null;
+  let longPressTriggered = false;
+  
+  document.addEventListener('touchstart', (e) => {
+    // Empty space එකක touch කරාද check කරන්න
+    const target = e.target;
+    const isInteractive = target.closest('button, a, input, textarea, select, .card, .option-btn, .flashcard, .modal-content');
+    
+    if (!isInteractive) {
+      longPressTriggered = false;
+      longPressTimer = setTimeout(() => {
+        longPressTriggered = true;
+        showDeveloperPopup(e);
+      }, 3000);
+    }
+  }, { passive: false });
+  
+  document.addEventListener('touchend', () => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      longPressTimer = null;
+    }
+  });
+  
+  document.addEventListener('touchmove', () => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      longPressTimer = null;
+    }
+  });
+  
+  // Mouse long press (Desktop)
+  let mousePressTimer = null;
+  
+  document.addEventListener('mousedown', (e) => {
+    const target = e.target;
+    const isInteractive = target.closest('button, a, input, textarea, select, .card, .option-btn, .flashcard, .modal-content, .btn, .icon-btn');
+    
+    if (!isInteractive) {
+      longPressTriggered = false;
+      mousePressTimer = setTimeout(() => {
+        longPressTriggered = true;
+        showDeveloperPopup(e);
+      }, 3000);
+    }
+  });
+  
+  document.addEventListener('mouseup', () => {
+    if (mousePressTimer) {
+      clearTimeout(mousePressTimer);
+      mousePressTimer = null;
+    }
+  });
+  
+  document.addEventListener('mousemove', () => {
+    if (mousePressTimer) {
+      clearTimeout(mousePressTimer);
+      mousePressTimer = null;
+    }
+  });
+  
+  function showDeveloperPopup(e) {
+    // Remove existing popup
+    const existing = document.getElementById('devCreditPopup');
+    if (existing) existing.remove();
+    
+    const popup = document.createElement('div');
+    popup.id = 'devCreditPopup';
+    popup.innerHTML = `
+      <div class="dev-popup-content">
+        <div class="dev-popup-icon">🦊</div>
+        <div class="dev-popup-title">Developed by</div>
+        <div class="dev-popup-name">Lakshan Dulip</div>
+        <div class="dev-popup-sub">Quiz Hub - Learn • Play • Grow</div>
+      </div>
+    `;
+    popup.style.cssText = `
+      position: fixed;
+      z-index: 99999;
+      animation: devPopupIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      pointer-events: none;
+    `;
+    
+    // Position near touch/mouse
+    const x = e.clientX || (e.touches && e.touches[0].clientX) || window.innerWidth / 2;
+    const y = e.clientY || (e.touches && e.touches[0].clientY) || window.innerHeight / 2;
+    
+    popup.style.left = Math.min(x, window.innerWidth - 220) + 'px';
+    popup.style.top = Math.min(y - 120, window.innerHeight - 200) + 'px';
+    
+    document.body.appendChild(popup);
+    
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+      popup.style.animation = 'devPopupOut 0.3s ease forwards';
+      setTimeout(() => {
+        if (popup.parentNode) popup.parentNode.removeChild(popup);
+      }, 300);
+    }, 3000);
+  }
   document.addEventListener('click', (e) => {
     const p = document.getElementById('themePopover');
     if (p && p.classList.contains('open') && !e.target.closest('.theme-wrap')) p.classList.remove('open');
