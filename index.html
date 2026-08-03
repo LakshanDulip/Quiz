@@ -992,7 +992,7 @@
     opacity: 1;
   }
 
-  .subject-card { display: flex; flex-direction: column; gap: 4px; cursor: pointer; border-left: 4px solid var(--science-color); isolation: isolate; }
+  .subject-card { display: flex; flex-direction: column; gap: 4px; cursor: pointer; border-left: 4px solid var(--primary-color); isolation: isolate; }
   .subject-card::before {
     content: ''; position: absolute; top: -40px; right: -40px; width: 140px; height: 140px;
     background: var(--primary-gradient); opacity: 0.1; border-radius: 50%; filter: blur(10px);
@@ -3662,7 +3662,8 @@ window.performanceManager = new PerformanceManager();
 
   // ============ APP STATE ============
   const SUBJECTS = {
-    science: { key: 'science', name: 'Science', sinhala: 'විද්‍යාව', icon: 'fa-flask', desc: 'විද්‍යාව ගවේෂණය කරන්න', emoji: '🔬' }
+    science: { key: 'science', name: 'Science', sinhala: 'විද්‍යාව', icon: 'fa-flask', desc: 'විද්‍යාව ගවේෂණය කරන්න', emoji: '🔬' },
+    maths: { key: 'maths', name: 'Mathematics', sinhala: 'ගණිතය', icon: 'fa-calculator', desc: 'ගණිත ගැටළු විසඳන්න', emoji: '📐' }
   };
   const GRADES = ['8', '9', '10', '11'];
 
