@@ -2,7 +2,7 @@
 // ============ Update Manager (FIXED) ============
 class UpdateManager {
   constructor() {
-    this.currentVersion = '2.0.0';
+    this.currentVersion = '2.0.1';
     this.versionUrl = 'version.json';
     this.checkInterval = 300000; // 5 minutes
     this.isChecking = false;
