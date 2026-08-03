@@ -20,16 +20,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Sinhala:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
- <!-- Three.js for 3D Mascot -->
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-  }
-}
-</script> 
-
+<!-- ===== FIREBASE AUTH START ===== -->
+<!-- Firebase SDK -->
 <!-- ===== FIREBASE AUTH START ===== -->
 <!-- Firebase SDK -->
 <script type="module">
@@ -1493,43 +1485,6 @@
   .animate-pop { animation: popIn 0.25s ease forwards; }
   @keyframes popIn { 0% { opacity: 0; transform: scale(0.97); } 100% { opacity: 1; transform: scale(1); } }
 
-  /* ===== 3D FOX MASCOT CONTAINER ===== */
-  .mascot-3d-container {
-    position: fixed;
-    bottom: 60px;
-    right: 10px;
-    z-index: 9998;
-    width: 120px;
-    height: 120px;
-    cursor: pointer;
-    transition: all 0.4s ease;
-    filter: drop-shadow(0 8px 20px rgba(0,0,0,0.4));
-  }
-  .mascot-3d-container:hover {
-    transform: translateY(-6px);
-    filter: drop-shadow(0 14px 30px rgba(0,0,0,0.5));
-  }
-  .mascot-3d-container:active {
-    transform: scale(0.9);
-  }
-  .mascot-3d-container canvas {
-    width: 100% !important;
-    height: 100% !important;
-  }
-  .mascot-3d-container .mascot-speech {
-    position: absolute;
-    bottom: 110px;
-    right: -10px;
-  }
-  @media (max-width: 768px) {
-    .mascot-3d-container {
-      width: 90px;
-      height: 90px;
-      bottom: 50px;
-      right: 4px;
-    }
-  }
-  
   /* ===== MASCOT TOGGLE BUTTON ===== */
   .mascot-toggle-btn {
     position: fixed;
@@ -1635,7 +1590,7 @@
     color: var(--primary-color);
     font-family: 'Space Grotesk', sans-serif;
   }
-        /* ===== REALISTIC FOX MASCOT ===== */
+      /* ===== ANIMATED FOX MASCOT - ULTRA CUTE ===== */
   .mascot-container {
     position: fixed;
     bottom: 80px;
@@ -1643,258 +1598,253 @@
     z-index: 9998;
     cursor: pointer;
     transition: all 0.4s cubic-bezier(.2,.8,.3,1);
-    filter: drop-shadow(0 10px 25px rgba(0,0,0,0.5));
+    filter: drop-shadow(0 8px 24px rgba(255,107,53,0.45));
   }
   .mascot-container:hover {
-    transform: translateY(-8px) scale(1.04);
-    filter: drop-shadow(0 16px 35px rgba(0,0,0,0.55));
+    transform: translateY(-10px) scale(1.05);
+    filter: drop-shadow(0 16px 32px rgba(255,107,53,0.6));
   }
   .mascot-container:active {
-    transform: scale(0.9);
+    transform: scale(0.88);
     transition: transform 0.1s ease;
   }
   
   .mascot-body {
     position: relative;
-    width: 85px;
-    height: 75px;
-    animation: realisticFloat 3.5s ease-in-out infinite;
+    width: 78px;
+    height: 78px;
+    animation: mascotBounce 2.5s ease-in-out infinite;
   }
-  @keyframes realisticFloat {
-    0%, 100% { transform: translateY(0); }
-    30% { transform: translateY(-6px); }
-    60% { transform: translateY(-2px); }
-  }
-  
-  /* Body fur */
-  .mascot-fox-body {
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 55px;
-    height: 35px;
-    background: linear-gradient(180deg, #e8753c 0%, #d4622a 40%, #c04e1a 100%);
-    border-radius: 50% 50% 40% 40%;
-    box-shadow: 
-      inset 0 -4px 10px rgba(0,0,0,0.3),
-      0 4px 8px rgba(0,0,0,0.2);
-  }
-  
-  /* White chest */
-  .mascot-chest {
-    position: absolute;
-    bottom: 2px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 30px;
-    height: 22px;
-    background: linear-gradient(180deg, #fff5e8 0%, #ffe4c8 100%);
-    border-radius: 50% 50% 40% 40%;
+  @keyframes mascotBounce {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    15% { transform: translateY(-16px) rotate(-2deg); }
+    30% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-8px) rotate(1deg); }
+    70% { transform: translateY(0) rotate(-1deg); }
   }
   
   .mascot-face {
-    width: 85px;
-    height: 55px;
-    background: linear-gradient(180deg, #f09050 0%, #e8753c 30%, #d4622a 70%, #b84518 100%);
-    border-radius: 55% 55% 45% 45%;
-    position: absolute;
-    top: 0;
-    left: 0;
+    width: 78px;
+    height: 68px;
+    background: linear-gradient(160deg, #ffb07c 0%, #ff8a50 20%, #ff6d35 50%, #ff5722 80%, #e64a19 100%);
+    border-radius: 52% 52% 46% 46%;
+    position: relative;
     box-shadow: 
-      inset 0 2px 8px rgba(255,255,255,0.2),
-      inset 0 -6px 15px rgba(0,0,0,0.25),
-      0 8px 20px rgba(0,0,0,0.35);
+      inset 0 -6px 16px rgba(0,0,0,0.2),
+      inset 0 6px 16px rgba(255,255,255,0.35),
+      0 10px 30px rgba(255,87,34,0.5),
+      0 4px 10px rgba(0,0,0,0.25);
+    transition: all 0.3s ease;
+  }
+  .mascot-container:hover .mascot-face {
+    box-shadow: 
+      inset 0 -6px 16px rgba(0,0,0,0.2),
+      inset 0 6px 18px rgba(255,255,255,0.4),
+      0 16px 40px rgba(255,87,34,0.6),
+      0 6px 16px rgba(0,0,0,0.3);
   }
   
-  /* Forehead darker patch */
-  .mascot-forehead {
-    position: absolute;
-    top: 5px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 40px;
-    height: 18px;
-    background: rgba(180,70,30,0.3);
-    border-radius: 50%;
-    filter: blur(4px);
-  }
-  
-  /* White muzzle */
-  .mascot-muzzle {
-    position: absolute;
-    bottom: 2px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 42px;
-    height: 22px;
-    background: linear-gradient(180deg, #fff8f0 0%, #ffe8d0 100%);
-    border-radius: 50% 50% 45% 45%;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
-  }
-  
-  /* Ears */
+  /* Ears - floppy cute */
   .mascot-ear-left, .mascot-ear-right {
     position: absolute;
-    top: -22px;
-    width: 22px;
-    height: 30px;
-    background: linear-gradient(180deg, #f09050 0%, #d4622a 60%, #8b3a12 100%);
-    border-radius: 60% 60% 20% 20%;
-    box-shadow: 
-      inset 0 2px 4px rgba(255,255,255,0.2),
-      0 2px 6px rgba(0,0,0,0.3);
-    transform-origin: bottom center;
+    top: -20px;
+    width: 0;
+    height: 0;
+    border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+    border-bottom: 26px solid #e64a19;
+    filter: drop-shadow(0 -3px 5px rgba(0,0,0,0.35));
   }
-  .mascot-ear-left {
-    left: 10px;
-    transform: rotate(-15deg);
-  }
-  .mascot-ear-right {
-    right: 10px;
-    transform: rotate(15deg);
-  }
+  .mascot-ear-left { left: 8px; transform: rotate(-22deg); }
+  .mascot-ear-right { right: 8px; transform: rotate(22deg); }
   .mascot-ear-inner {
     position: absolute;
-    top: 3px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 13px;
-    height: 20px;
-    background: linear-gradient(180deg, #ffccb0 0%, #ffb890 100%);
-    border-radius: 50% 50% 20% 20%;
+    top: -7px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 18px solid #ffccbc;
   }
-  .mascot-container:hover .mascot-ear-left {
-    animation: earTwitchLeft 0.5s ease-in-out;
-  }
-  .mascot-container:hover .mascot-ear-right {
-    animation: earTwitchRight 0.5s ease-in-out;
-  }
-  @keyframes earTwitchLeft {
-    0%, 100% { transform: rotate(-15deg); }
-    50% { transform: rotate(-25deg); }
-  }
-  @keyframes earTwitchRight {
-    0%, 100% { transform: rotate(15deg); }
-    50% { transform: rotate(25deg); }
-  }
+  .mascot-ear-left .mascot-ear-inner { left: -8px; }
+  .mascot-ear-right .mascot-ear-inner { left: -8px; }
   
-  /* Eyes */
+  /* Eyes - sparkly anime style */
   .mascot-eyes {
     position: absolute;
-    top: 16px;
+    top: 18px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
-    gap: 18px;
+    gap: 16px;
   }
   .mascot-eye {
-    width: 14px;
-    height: 16px;
+    width: 16px;
+    height: 18px;
     background: #fff;
-    border-radius: 55% 55% 50% 50%;
+    border-radius: 50%;
     position: relative;
-    animation: realisticBlink 5s ease-in-out infinite;
-    box-shadow: 
-      inset 0 1px 3px rgba(0,0,0,0.2),
-      0 0 0 1.5px rgba(0,0,0,0.15);
+    animation: mascotBlink 4s ease-in-out infinite;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.15), 0 0 6px rgba(255,255,255,0.6);
   }
   .mascot-eye::after {
     content: '';
     position: absolute;
-    width: 7px;
-    height: 9px;
-    background: #1a1008;
+    width: 8px;
+    height: 8px;
+    background: #1a1a1a;
     border-radius: 50%;
-    top: 4px;
+    top: 5px;
     left: 4px;
   }
   .mascot-eye::before {
     content: '';
     position: absolute;
-    width: 3px;
-    height: 3px;
+    width: 5px;
+    height: 5px;
     background: #fff;
     border-radius: 50%;
-    top: 3px;
-    left: 3px;
+    top: 2px;
+    left: 2px;
     z-index: 1;
+    box-shadow: 0 0 4px rgba(255,255,255,0.8);
   }
-  @keyframes realisticBlink {
-    0%, 94%, 100% { transform: scaleY(1); }
-    96% { transform: scaleY(0.08); }
+  @keyframes mascotBlink {
+    0%, 93%, 100% { transform: scaleY(1); }
+    96% { transform: scaleY(0.06); }
   }
   
-  /* Nose */
-  .mascot-nose {
+  /* Blush - extra cute */
+  .mascot-cheek-left, .mascot-cheek-right {
     position: absolute;
     top: 28px;
+    width: 14px;
+    height: 9px;
+    background: rgba(255,150,140,0.6);
+    border-radius: 50%;
+    filter: blur(3px);
+  }
+  .mascot-cheek-left { left: 6px; }
+  .mascot-cheek-right { right: 6px; }
+  
+  /* Nose - tiny boop */
+  .mascot-nose {
+    position: absolute;
+    top: 34px;
     left: 50%;
     transform: translateX(-50%);
-    width: 11px;
-    height: 8px;
-    background: #1a0a00;
-    border-radius: 45% 45% 50% 50%;
-    box-shadow: inset 0 1px 2px rgba(255,255,255,0.3);
+    width: 13px;
+    height: 10px;
+    background: #1a1a1a;
+    border-radius: 50% 50% 45% 45%;
+    box-shadow: inset 0 1px 3px rgba(255,255,255,0.4), 0 1px 2px rgba(0,0,0,0.3);
   }
   
-  /* Mouth */
+  /* Mouth - smile */
   .mascot-mouth {
     position: absolute;
-    top: 37px;
+    top: 44px;
     left: 50%;
     transform: translateX(-50%);
-    width: 20px;
-    height: 6px;
-    border-bottom: 2px solid #1a0a00;
+    width: 22px;
+    height: 10px;
+    border-bottom: 3px solid #1a1a1a;
     border-radius: 0 0 50% 50%;
     transition: all 0.3s ease;
   }
   .mascot-container:active .mascot-mouth {
-    width: 26px;
-    height: 10px;
+    width: 30px;
+    height: 14px;
+    border-bottom-width: 3.5px;
   }
   
-  /* Whiskers */
-  .mascot-whiskers-left, .mascot-whiskers-right {
-    position: absolute;
-    top: 30px;
-    width: 20px;
-    height: 1px;
-    background: rgba(0,0,0,0.2);
-  }
-  .mascot-whiskers-left {
-    left: -12px;
-    transform: rotate(-10deg);
-  }
-  .mascot-whiskers-right {
-    right: -12px;
-    transform: rotate(10deg);
-  }
-  
-  /* Tail */
+  /* Tail - rainbow tip */
   .mascot-tail {
     position: absolute;
-    bottom: 10px;
-    right: -28px;
-    width: 38px;
-    height: 22px;
-    background: linear-gradient(135deg, #f09050 0%, #e07038 50%, #c05020 80%, #fff 80%, #fff 100%);
-    border-radius: 55% 60% 50% 45%;
-    animation: realisticTailWag 1.8s ease-in-out infinite;
+    bottom: -8px;
+    right: -22px;
+    width: 34px;
+    height: 20px;
+    background: linear-gradient(135deg, #ffb07c, #ff6d35, #e64a19);
+    border-radius: 50% 65% 50% 40%;
+    animation: mascotTailWag 1.3s ease-in-out infinite;
     transform-origin: left center;
-    box-shadow: -2px 4px 8px rgba(0,0,0,0.2);
+    box-shadow: -2px 4px 10px rgba(0,0,0,0.25);
+    overflow: visible;
   }
-  @keyframes realisticTailWag {
-    0%, 100% { transform: rotate(-20deg) scaleX(1); }
-    30% { transform: rotate(12deg) scaleX(1.04); }
-    60% { transform: rotate(-8deg) scaleX(0.97); }
+  .mascot-tail::after {
+    content: '';
+    position: absolute;
+    right: -3px;
+    top: -1px;
+    width: 16px;
+    height: 16px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 
+      inset 0 -3px 5px rgba(0,0,0,0.1),
+      0 0 8px rgba(255,255,255,0.6);
+  }
+  /* Rainbow shimmer on tail */
+  .mascot-tail::before {
+    content: '';
+    position: absolute;
+    right: 2px;
+    top: 4px;
+    width: 10px;
+    height: 6px;
+    background: linear-gradient(90deg, #ff6b6b, #ffd93d, #6bcb77, #4d96ff, #ff6b6b);
+    border-radius: 50%;
+    opacity: 0.5;
+    animation: rainbowShimmer 2s linear infinite;
+  }
+  @keyframes rainbowShimmer {
+    0% { filter: hue-rotate(0deg); }
+    100% { filter: hue-rotate(360deg); }
+  }
+  @keyframes mascotTailWag {
+    0%, 100% { transform: rotate(-25deg) scaleX(1); }
+    30% { transform: rotate(18deg) scaleX(1.08); }
+    60% { transform: rotate(-12deg) scaleX(0.94); }
   }
   
-  /* Front paws */
+  /* Floating hearts */
+  .mascot-heart {
+    position: absolute;
+    pointer-events: none;
+    animation: heartFloat 2s ease-in-out infinite;
+    font-size: 0.7rem;
+    opacity: 0;
+  }
+  .mascot-heart:nth-child(1) { top: -8px; left: -6px; animation-delay: 0s; }
+  .mascot-heart:nth-child(2) { top: 10px; right: -10px; animation-delay: 0.7s; }
+  .mascot-heart:nth-child(3) { bottom: 5px; left: -12px; animation-delay: 1.4s; }
+  @keyframes heartFloat {
+    0%, 100% { opacity: 0; transform: translateY(0) scale(0.4); }
+    30% { opacity: 1; transform: translateY(-18px) scale(1.1); }
+    60% { opacity: 0.5; transform: translateY(-10px) scale(0.8); }
+  }
+  
+  /* Sparkles */
+  .mascot-sparkle {
+    position: absolute;
+    pointer-events: none;
+    animation: sparkleTwinkle 1.8s ease-in-out infinite;
+    font-size: 0.6rem;
+    opacity: 0;
+  }
+  .mascot-sparkle:nth-child(4) { top: -2px; right: 2px; animation-delay: 0.3s; }
+  .mascot-sparkle:nth-child(5) { bottom: 15px; left: -5px; animation-delay: 0.9s; }
+  .mascot-sparkle:nth-child(6) { top: 20px; right: -8px; animation-delay: 1.5s; }
+  @keyframes sparkleTwinkle {
+    0%, 100% { opacity: 0; transform: scale(0.3) rotate(0deg); }
+    50% { opacity: 1; transform: scale(1.3) rotate(180deg); }
+  }
+  
+  /* Paws - squishy */
   .mascot-paws {
     position: absolute;
-    bottom: -8px;
+    bottom: -18px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -1902,43 +1852,39 @@
   }
   .mascot-paw {
     width: 16px;
-    height: 10px;
-    background: linear-gradient(180deg, #3a1a08 0%, #1a0a00 100%);
-    border-radius: 40% 40% 45% 45%;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    height: 11px;
+    background: linear-gradient(180deg, #ff8a50, #e64a19);
+    border-radius: 40% 40% 50% 50%;
+    box-shadow: 
+      0 3px 6px rgba(0,0,0,0.25),
+      inset 0 1px 2px rgba(255,255,255,0.3);
+    transition: transform 0.2s ease;
   }
-  .mascot-paw::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 3px;
-    width: 3px;
-    height: 3px;
-    background: #1a0a00;
-    border-radius: 50%;
+  .mascot-container:hover .mascot-paw {
+    transform: scaleY(1.2);
   }
   
   /* Speech Bubble */
   .mascot-speech {
     position: absolute;
-    bottom: 90px;
+    bottom: 82px;
     right: -12px;
-    background: rgba(255,255,255,0.95);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1.5px solid rgba(0,0,0,0.1);
-    border-radius: 16px;
-    padding: 10px 16px;
+    background: rgba(30,30,40,0.95);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1.5px solid rgba(255,255,255,0.2);
+    border-radius: 18px;
+    padding: 12px 18px;
     font-size: 0.8rem;
     font-weight: 600;
-    color: #1a1a1a;
+    color: #fff;
     white-space: nowrap;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    box-shadow: 0 12px 35px rgba(0,0,0,0.5), 0 0 25px rgba(255,107,53,0.3);
     opacity: 0;
     transform: translateY(10px) scale(0.8);
     transition: all 0.35s cubic-bezier(.2,.8,.3,1);
     pointer-events: none;
-    z-index: 19999;
+    z-index: 9999;
   }
   .mascot-speech.show {
     opacity: 1;
@@ -1947,50 +1893,173 @@
   .mascot-speech::after {
     content: '';
     position: absolute;
-    bottom: -8px;
+    bottom: -9px;
     right: 24px;
     width: 0;
     height: 0;
-    border-left: 8px solid transparent;
-    border-right: 8px solid transparent;
-    border-top: 8px solid rgba(255,255,255,0.95);
+    border-left: 9px solid transparent;
+    border-right: 9px solid transparent;
+    border-top: 9px solid rgba(30,30,40,0.95);
   }
   
-  /* Emotions */
-  .mascot-container.happy .mascot-mouth { width: 26px; height: 10px; border-bottom-width: 2.5px; }
+  /* Celebration */
+  .mascot-container.celebrating .mascot-body {
+    animation: mascotCelebrate 0.4s ease-in-out infinite;
+  }
+  .mascot-container.celebrating .mascot-eye {
+    animation: mascotHappyEyes 0.25s ease-in-out infinite;
+  }
+  @keyframes mascotCelebrate {
+    0%, 100% { transform: translateY(0) rotate(0) scale(1); }
+    25% { transform: translateY(-28px) rotate(-12deg) scale(1.08); }
+    75% { transform: translateY(-16px) rotate(12deg) scale(1.04); }
+  }
+  @keyframes mascotHappyEyes {
+    0%, 100% { transform: scaleY(1); }
+    50% { transform: scaleY(0.2); }
+  }
+  
+  /* Sad */
+  .mascot-container.sad .mascot-mouth {
+    border-bottom: none;
+    border-top: 3px solid #1a1a1a;
+    border-radius: 50% 50% 0 0;
+    top: 47px;
+  }
+  .mascot-container.sad .mascot-body {
+    animation: mascotSad 2.5s ease-in-out infinite;
+    filter: brightness(0.75) saturate(0.6);
+  }
+  .mascot-container.sad .mascot-tail {
+    animation-duration: 2s;
+    transform: rotate(-10deg);
+  }
+    /* Click heart burst */
+  @keyframes clickHeartBurst {
+    0% {
+      opacity: 1;
+      transform: translate(0, 0) scale(0.5) rotate(0deg);
+    }
+    50% {
+      opacity: 1;
+      transform: translate(var(--tx), var(--ty)) scale(1.3) rotate(var(--rot));
+    }
+    100% {
+      opacity: 0;
+      transform: translate(var(--tx), calc(var(--ty) - 30px)) scale(0.3) rotate(calc(var(--rot) + 90deg));
+    }
+  }
+    /* Emotion: Happy */
+  .mascot-container.happy .mascot-mouth {
+    width: 26px;
+    height: 12px;
+    border-bottom: 3.5px solid #1a1a1a;
+    border-radius: 0 0 50% 50%;
+  }
+  .mascot-container.happy .mascot-eye {
+    height: 14px;
+  }
+  
+  /* Emotion: Love */
+  .mascot-container.love .mascot-eye {
+    width: 14px;
+    height: 14px;
+  }
+  .mascot-container.love .mascot-eye::after {
+    width: 5px;
+    height: 7px;
+    background: transparent;
+    border-radius: 50%;
+    box-shadow: none;
+    top: 4px;
+    left: 4px;
+  }
   .mascot-container.love .mascot-eye::before {
-    content: '♥';
-    font-size: 0.45rem;
-    color: #e04040;
+    content: '❤';
+    font-size: 0.5rem;
+    color: #ff4444;
     background: transparent;
     box-shadow: none;
-    top: -1px;
+    top: -2px;
     left: 0px;
-  }
-  .mascot-container.surprised .mascot-eye { width: 17px; height: 17px; }
-  .mascot-container.surprised .mascot-mouth {
-    width: 10px; height: 10px; border: 2px solid #1a0a00; border-radius: 50%; background: #1a0a00;
-  }
-  .mascot-container.cool .mascot-mouth { width: 18px; border-radius: 0; transform: translateX(-50%) rotate(-3deg); }
-  .mascot-container.wink .mascot-eye:last-child { transform: scaleY(0.08); }
-  .mascot-container.sad .mascot-mouth {
-    border-bottom: none; border-top: 2px solid #1a0a00; border-radius: 50% 50% 0 0; top: 39px;
-  }
-  .mascot-container.celebrating .mascot-body {
-    animation: celebBounce 0.4s ease-in-out infinite;
-  }
-  @keyframes celebBounce {
-    0%, 100% { transform: translateY(0) rotate(0); }
-    25% { transform: translateY(-20px) rotate(-8deg); }
-    75% { transform: translateY(-10px) rotate(8deg); }
+    animation: none;
   }
   
+  /* Emotion: Surprised */
+  .mascot-container.surprised .mascot-eye {
+    width: 18px;
+    height: 18px;
+    animation: none;
+  }
+  .mascot-container.surprised .mascot-eye::after {
+    width: 5px;
+    height: 5px;
+    top: 6px;
+    left: 6px;
+  }
+  .mascot-container.surprised .mascot-mouth {
+    width: 12px;
+    height: 12px;
+    border-bottom: none;
+    border: 3px solid #1a1a1a;
+    border-radius: 50%;
+    background: #1a1a1a;
+  }
+  
+  /* Emotion: Cool */
+  .mascot-container.cool .mascot-mouth {
+    width: 20px;
+    height: 4px;
+    border-bottom: 3px solid #1a1a1a;
+    border-radius: 0;
+    transform: translateX(-50%) rotate(-5deg);
+  }
+  .mascot-container.cool .mascot-eye {
+    height: 10px;
+    border-radius: 40%;
+    animation: none;
+  }
+  
+  /* Emotion: Wink */
+  .mascot-container.wink .mascot-eye:last-child {
+    animation: mascotWink 0.3s ease-in-out forwards;
+    transform: scaleY(0.1);
+  }
+  @keyframes mascotWink {
+    0% { transform: scaleY(1); }
+    50% { transform: scaleY(0.05); }
+    100% { transform: scaleY(1); }
+  }
+  .mascot-container.wink .mascot-mouth {
+    width: 22px;
+    border-radius: 50% 50% 30% 30%;
+    transform: translateX(-50%) rotate(3deg);
+  }
+  @keyframes mascotSad {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+
+  /* Mobile */
   @media (max-width: 768px) {
-    .mascot-container { bottom: 65px; right: 6px; }
-    .mascot-body { width: 68px; height: 60px; }
-    .mascot-face { width: 68px; height: 45px; }
-    .mascot-speech { font-size: 0.7rem; right: -5px; bottom: 75px; padding: 8px 12px; }
-    .mascot-toggle-btn { right: 52px; bottom: 16px; width: 26px; height: 26px; font-size: 0.6rem; }
+    .mascot-container {
+      bottom: 65px;
+      right: 6px;
+    }
+    .mascot-body {
+      width: 60px;
+      height: 60px;
+    }
+    .mascot-face {
+      width: 60px;
+      height: 54px;
+    }
+    .mascot-speech {
+      font-size: 0.7rem;
+      right: -5px;
+      bottom: 70px;
+      padding: 8px 12px;
+    }
   }
   footer { text-align: center; padding: 20px; color: var(--text-secondary); font-size: 0.8rem; border-top: 1px solid var(--border-color); background: var(--bg-card); backdrop-filter: blur(10px); }
   .dev-credit { margin-top: 5px; font-weight: 600; color: var(--primary-color); }
@@ -3173,11 +3242,6 @@ window.performanceManager = new PerformanceManager();
   </div>
 </div>
 <!-- ===== FIREBASE AUTH END ===== -->
-  <!-- 3D Fox Mascot Container -->
-<div class="mascot-3d-container" id="mascot3DContainer">
-  <canvas id="mascotCanvas"></canvas>
-  <div class="mascot-speech" id="mascotSpeech" style="display:none;"></div>
-</div>
   <!-- Mascot Toggle Button -->
 <button class="mascot-toggle-btn" id="mascotToggleBtn" onclick="toggleMascot()" title="Mascot On/Off">
   <i class="fas fa-paw"></i>
@@ -3185,26 +3249,28 @@ window.performanceManager = new PerformanceManager();
 <!-- ===== ANIMATED FOX MASCOT ===== -->
 <div class="mascot-container" id="mascotContainer" onclick="handleMascotClick()">
   <div class="mascot-body">
+        <!-- Hearts -->
+    <span class="mascot-heart">💕</span>
+    <span class="mascot-heart">💖</span>
+    <span class="mascot-heart">💗</span>
+    <!-- Sparkles -->
+    <span class="mascot-sparkle">✨</span>
+    <span class="mascot-sparkle">⭐</span>
+    <span class="mascot-sparkle">💫</span>
     <!-- Tail -->
     <div class="mascot-tail"></div>
     <!-- Face -->
     <div class="mascot-face">
-      <div class="mascot-forehead"></div>
       <div class="mascot-ear-left"><div class="mascot-ear-inner"></div></div>
       <div class="mascot-ear-right"><div class="mascot-ear-inner"></div></div>
       <div class="mascot-eyes">
         <div class="mascot-eye"></div>
         <div class="mascot-eye"></div>
       </div>
+      <div class="mascot-cheek-left"></div>
+      <div class="mascot-cheek-right"></div>
       <div class="mascot-nose"></div>
       <div class="mascot-mouth"></div>
-      <div class="mascot-whiskers-left"></div>
-      <div class="mascot-whiskers-right"></div>
-      <div class="mascot-muzzle"></div>
-    </div>
-    <!-- Body -->
-    <div class="mascot-fox-body">
-      <div class="mascot-chest"></div>
     </div>
     <!-- Paws -->
     <div class="mascot-paws">
@@ -4202,292 +4268,292 @@ window.performanceManager = new PerformanceManager();
   function closeProgress() {
     document.getElementById('progressModal').classList.remove('active');
   }
-    // ============ 3D FOX MASCOT ============
-  const mascotMessages = {
+    // ============ FOX MASCOT ============
+    const mascotMessages = {
     idle: [
-      '👋 ආයුබෝවන්!', '📚 ඉගෙන ගමු!', '🎯 අද දිනන්න!',
-      '💪 ඔබට පුළුවන්!', '🌟 දිගටම කරන්න!', '🦊 මම මෙතන ඉන්නම්!',
-      '🔥 Let\'s Go!', '🧠 දැනුම බලයයි!', '💡 ඉගෙනීම විනෝදයි!'
+      '👋 ආයුබෝවන්!',
+      '📚 ඉගෙන ගමු!',
+      '🎯 අද දිනන්න!',
+      '💪 ඔබට පුළුවන්!',
+      '🌟 දිගටම කරන්න!',
+      '🦊 මම මෙතන ඉන්නම්!',
+      '🔥 Let\'s Go!',
+      '🧠 දැනුම බලයයි!',
+      '💡 ඉගෙනීම විනෝදයි!',
+      '🎒 පාඩම් කරමු!',
+      '📝 පුහුණු වන්න!',
+      '⏰ වෙලාව නාස්ති නොකරන්න!',
+      '🌈 අලුත් දේවල් ඉගෙන ගන්න!',
+      '🍀 වාසනාව ඔබටයි!',
+      '🦸 ඔබ වීරයෙක්!'
     ],
     correct: [
-      '✅ නියමයි!', '🎉 සුපිරි!', '🌟 විශිෂ්ටයි!', '👏 හරිම දක්ෂයි!',
-      '💯 Perfect!', '🏆 ඔබ දක්ෂයෙක්!', '✨ Amazing!'
+      '✅ නියමයි!',
+      '🎉 සුපිරි!',
+      '🌟 විශිෂ්ටයි!',
+      '👏 හරිම දක්ෂයි!',
+      '💯 Perfect!',
+      '🏆 ඔබ දක්ෂයෙක්!',
+      '✨ Amazing!',
+      '🎯 ඉලක්කයට ළංවෙනවා!',
+      '🦊 හරි උත්තරේ!',
+      '💪 දිගටම මෙහෙම!',
+      '🥇 ජයග්‍රාහකයෙක්!',
+      '🔔 නිවැරදියි!',
+      '🎊 සතුටුයි ඔබ ගැන!',
+      '💎 බුද්ධිමත්!',
+      '🧩 ප්‍රහේලිකාව විසඳුවා!'
     ],
     wrong: [
-      '😅 පරිස්සමෙන්!', '💪 නැවත උත්සාහ කරන්න!', '📖 පාඩම් කරන්න!',
-      '🤗 අතපසු වීමක්!', '🔄 ඊළඟ පාර හරි!', '🌱 ඉගෙන ගන්න!'
+      '😅 පරිස්සමෙන්!',
+      '💪 නැවත උත්සාහ කරන්න!',
+      '📖 පාඩම් කරන්න!',
+      '🤗 අතපසු වීමක්!',
+      '🔄 ඊළඟ පාර හරි!',
+      '🌱 ඉගෙන ගන්න!',
+      '💡 වැරදි වලින් ඉගෙන ගන්න!',
+      '🧠 තව පුහුණු වන්න!',
+      '🎯 ඊළඟ උත්තරේ හරි!',
+      '🍀 ඊළඟ වතාවේ වාසනාවන්තයි!',
+      '📚 පාඩම නැවත බලන්න!',
+      '🤔 ටිකක් හිතන්න!',
+      '💭 කල්පනා කරන්න!',
+      '🦊 දුක් වෙන්න එපා!',
+      '🌈 ඊළඟ පාර දීප්තිමත්!'
     ],
     streak: [
-      '🔥 ගිනි ඇවිලෙනවා!', '⚡ නතර කරන්න එපා!', '🚀 ඉස්සරහට!'
+      '🔥 ගිනි ඇවිලෙනවා!',
+      '⚡ නතර කරන්න එපා!',
+      '🚀 ඉස්සරහට!',
+      '💪 දිගටම!',
+      '🎯 ඉලක්කය ළඟයි!',
+      '🌟 ඔබ තරුවක්!',
+      '🦊 ලස්සන Streak එකක්!',
+      '🏆 අපරාජිතයි!',
+      '💎 දීප්තිමත්!',
+      '🔔 දිගටම නාද වෙන්න!'
     ],
     perfect: [
-      '🏆 පරිපූර්ණයි!', '👑 ඔබ රජෙක්!', '🌟 සුපිරි තරුව!', '💯 100% දක්ෂයා!'
+      '🏆 පරිපූර්ණයි!',
+      '👑 ඔබ රජෙක්!',
+      '🌟 සුපිරි තරුව!',
+      '💯 100% දක්ෂයා!',
+      '🎉 අතිවිශිෂ්ටයි!',
+      '🦊 සියල්ල නිවැරදියි!',
+      '🥇 ප්‍රථමයා!',
+      '💎 මැණිකක්!',
+      '🌈 පරිපූර්ණ දේදුන්න!',
+      '🎊 ඉතිහාසයක් නිර්මාණය කළා!'
+    ],
+    welcome: [
+      '🦊 මම Quiz Hub Fox!',
+      '📚 ඔබේ ඉගෙනුම් සගයා!',
+      '💪 අපි එක්ව ජය ගනිමු!',
+      '🌟 මාව Click කරන්න!'
     ],
     click: [
-      '😊 හෙලෝ!', '🦊 ඔබ මට කැමතිද?', '💕 ඔබ නියමයි!', '🤗 සතුටුයි!'
+      '😊 හෙලෝ!',
+      '🦊 ඔබ මට කැමතිද?',
+      '💕 ඔබ නියමයි!',
+      '🎮 Quiz Hub සෙල්ලම් කරමු!',
+      '📖 දැනුම ලබා ගනිමු!',
+      '🤗 මට ඔබව හමුවීම සතුටක්!'
     ]
   };
-
+  
   let mascotSpeechTimeout = null;
-  let mascotVisible = localStorage.getItem('mascotVisible') !== 'false';
-  let foxModel = null;
-  let foxScene = null;
-  let foxRenderer = null;
-  let foxCamera = null;
-  let foxAnimationId = null;
-
+  
   function showMascotSpeech(message, duration = 3000) {
     const speech = document.getElementById('mascotSpeech');
     if (!speech) return;
+    
     if (mascotSpeechTimeout) clearTimeout(mascotSpeechTimeout);
+    
     speech.textContent = message;
     speech.style.display = 'block';
     speech.classList.add('show');
+    
     mascotSpeechTimeout = setTimeout(() => {
       speech.classList.remove('show');
-      setTimeout(() => { speech.style.display = 'none'; }, 350);
+      setTimeout(() => {
+        speech.style.display = 'none';
+      }, 350);
     }, duration);
   }
-
+  
   function getRandomMessage(type) {
     const messages = mascotMessages[type] || mascotMessages.idle;
     return messages[Math.floor(Math.random() * messages.length)];
   }
-
-  // Initialize 3D Fox
-  async function init3DFox() {
-    try {
-      const { Scene, PerspectiveCamera, WebGLRenderer, AmbientLight, DirectionalLight, Mesh, SphereGeometry, ConeGeometry, CylinderGeometry, MeshStandardMaterial, Group, MathUtils } = await import('three');
-
-      const container = document.getElementById('mascot3DContainer');
-      const canvas = document.getElementById('mascotCanvas');
-      if (!container || !canvas) return;
-
-      // Scene
-      foxScene = new Scene();
-
-      // Camera
-      foxCamera = new PerspectiveCamera(45, 1, 0.1, 100);
-      foxCamera.position.set(0, 1.5, 5);
-      foxCamera.lookAt(0, 0, 0);
-
-      // Renderer
-      foxRenderer = new WebGLRenderer({ canvas, alpha: true, antialias: true });
-      foxRenderer.setSize(120, 120);
-      foxRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      foxRenderer.shadowMap.enabled = true;
-
-      // Lights
-      const ambientLight = new AmbientLight(0xffffff, 0.6);
-      foxScene.add(ambientLight);
-      
-      const mainLight = new DirectionalLight(0xffffff, 1.2);
-      mainLight.position.set(5, 10, 5);
-      mainLight.castShadow = true;
-      foxScene.add(mainLight);
-
-      const rimLight = new DirectionalLight(0xff9966, 0.4);
-      rimLight.position.set(-3, 0, -2);
-      foxScene.add(rimLight);
-
-      // Fox Group
-      foxModel = new Group();
-
-      // Body
-      const bodyGeo = new SphereGeometry(0.7, 32, 32);
-      bodyGeo.scale(1, 0.8, 0.9);
-      const bodyMat = new MeshStandardMaterial({ color: 0xe8753c, roughness: 0.6, metalness: 0.1 });
-      const body = new Mesh(bodyGeo, bodyMat);
-      body.position.y = -0.1;
-      body.castShadow = true;
-      foxModel.add(body);
-
-      // White chest
-      const chestGeo = new SphereGeometry(0.4, 16, 16);
-      chestGeo.scale(1, 0.6, 0.5);
-      const chestMat = new MeshStandardMaterial({ color: 0xfff5e8, roughness: 0.7 });
-      const chest = new Mesh(chestGeo, chestMat);
-      chest.position.set(0, -0.15, 0.4);
-      foxModel.add(chest);
-
-      // Head
-      const headGeo = new SphereGeometry(0.45, 32, 32);
-      headGeo.scale(1, 0.9, 0.95);
-      const headMat = new MeshStandardMaterial({ color: 0xf09050, roughness: 0.5, metalness: 0.1 });
-      const head = new Mesh(headGeo, headMat);
-      head.position.y = 0.5;
-      head.castShadow = true;
-      foxModel.add(head);
-
-      // Muzzle
-      const muzzleGeo = new SphereGeometry(0.22, 16, 16);
-      muzzleGeo.scale(1, 0.7, 0.8);
-      const muzzleMat = new MeshStandardMaterial({ color: 0xfff8f0, roughness: 0.6 });
-      const muzzle = new Mesh(muzzleGeo, muzzleMat);
-      muzzle.position.set(0, 0.4, 0.35);
-      foxModel.add(muzzle);
-
-      // Nose
-      const noseGeo = new SphereGeometry(0.06, 16, 16);
-      const noseMat = new MeshStandardMaterial({ color: 0x1a0a00, roughness: 0.3 });
-      const nose = new Mesh(noseGeo, noseMat);
-      nose.position.set(0, 0.42, 0.55);
-      foxModel.add(nose);
-
-      // Eyes
-      const eyeGeo = new SphereGeometry(0.07, 16, 16);
-      const eyeWhiteMat = new MeshStandardMaterial({ color: 0xffffff, roughness: 0.2 });
-      const eyePupilMat = new MeshStandardMaterial({ color: 0x1a1008, roughness: 0.1 });
-      
-      const leftEye = new Mesh(eyeGeo, eyeWhiteMat);
-      leftEye.position.set(-0.14, 0.55, 0.38);
-      foxModel.add(leftEye);
-      
-      const rightEye = new Mesh(eyeGeo, eyeWhiteMat);
-      rightEye.position.set(0.14, 0.55, 0.38);
-      foxModel.add(rightEye);
-
-      const pupilGeo = new SphereGeometry(0.04, 8, 8);
-      const leftPupil = new Mesh(pupilGeo, eyePupilMat);
-      leftPupil.position.set(-0.14, 0.56, 0.44);
-      foxModel.add(leftPupil);
-      
-      const rightPupil = new Mesh(pupilGeo, eyePupilMat);
-      rightPupil.position.set(0.14, 0.56, 0.44);
-      foxModel.add(rightPupil);
-
-      // Ears
-      const earGeo = new ConeGeometry(0.12, 0.35, 8);
-      const earMat = new MeshStandardMaterial({ color: 0xe8753c, roughness: 0.5 });
-      
-      const leftEar = new Mesh(earGeo, earMat);
-      leftEar.position.set(-0.2, 0.8, 0);
-      leftEar.rotation.z = 0.3;
-      leftEar.rotation.x = -0.2;
-      foxModel.add(leftEar);
-      
-      const rightEar = new Mesh(earGeo, earMat);
-      rightEar.position.set(0.2, 0.8, 0);
-      rightEar.rotation.z = -0.3;
-      rightEar.rotation.x = -0.2;
-      foxModel.add(rightEar);
-
-      // Inner ears
-      const innerEarGeo = new ConeGeometry(0.07, 0.2, 8);
-      const innerEarMat = new MeshStandardMaterial({ color: 0xffccb0, roughness: 0.4 });
-      
-      const leftInnerEar = new Mesh(innerEarGeo, innerEarMat);
-      leftInnerEar.position.copy(leftEar.position);
-      leftInnerEar.position.y -= 0.02;
-      leftInnerEar.rotation.copy(leftEar.rotation);
-      foxModel.add(leftInnerEar);
-      
-      const rightInnerEar = new Mesh(innerEarGeo, innerEarMat);
-      rightInnerEar.position.copy(rightEar.position);
-      rightInnerEar.position.y -= 0.02;
-      rightInnerEar.rotation.copy(rightEar.rotation);
-      foxModel.add(rightInnerEar);
-
-      // Tail
-      const tailGeo = new SphereGeometry(0.15, 16, 16);
-      tailGeo.scale(1.5, 1, 1);
-      const tailMat = new MeshStandardMaterial({ color: 0xf09050, roughness: 0.5 });
-      const tail = new Mesh(tailGeo, tailMat);
-      tail.position.set(0.5, -0.2, -0.5);
-      tail.rotation.z = 0.5;
-      foxModel.add(tail);
-
-      // White tail tip
-      const tailTipGeo = new SphereGeometry(0.12, 8, 8);
-      const tailTipMat = new MeshStandardMaterial({ color: 0xffffff, roughness: 0.4 });
-      const tailTip = new Mesh(tailTipGeo, tailTipMat);
-      tailTip.position.set(0.62, -0.08, -0.55);
-      foxModel.add(tailTip);
-
-      // Legs
-      const legGeo = new CylinderGeometry(0.08, 0.1, 0.3, 8);
-      const legMat = new MeshStandardMaterial({ color: 0x3a1a08, roughness: 0.7 });
-      
-      const positions = [[-0.2, -0.5, 0.2], [0.2, -0.5, 0.2], [-0.2, -0.5, -0.3], [0.2, -0.5, -0.3]];
-      positions.forEach(([x, y, z]) => {
-        const leg = new Mesh(legGeo, legMat);
-        leg.position.set(x, y, z);
-        leg.castShadow = true;
-        foxModel.add(leg);
-      });
-
-      foxScene.add(foxModel);
-      foxModel.position.y = 0.3;
-
-      // Apply visibility
-      if (!mascotVisible) {
-        container.style.display = 'none';
-        const toggleBtn = document.getElementById('mascotToggleBtn');
-        if (toggleBtn) toggleBtn.classList.add('hidden-mascot');
+  
+  function mascotCelebrate() {
+    const container = document.getElementById('mascotContainer');
+    if (!container) return;
+    
+    container.classList.add('celebrating');
+    showMascotSpeech(getRandomMessage('perfect'), 4000);
+    
+    setTimeout(() => {
+      container.classList.remove('celebrating');
+    }, 3000);
+  }
+  
+  function mascotSad() {
+    const container = document.getElementById('mascotContainer');
+    if (!container) return;
+    
+    container.classList.add('sad');
+    showMascotSpeech(getRandomMessage('wrong'), 2500);
+    
+    setTimeout(() => {
+      container.classList.remove('sad');
+    }, 2500);
+  }
+  
+  function mascotReact(isCorrect, isStreak = false) {
+    const container = document.getElementById('mascotContainer');
+    if (!container) return;
+    
+    if (isCorrect) {
+      container.classList.add('celebrating');
+      if (isStreak) {
+        showMascotSpeech(getRandomMessage('streak'), 2500);
+      } else {
+        showMascotSpeech(getRandomMessage('correct'), 2000);
       }
-
-      // Animation loop
-      function animate() {
-        foxAnimationId = requestAnimationFrame(animate);
-        
-        if (foxModel) {
-          foxModel.rotation.y += 0.005;
-          foxModel.position.y = 0.3 + Math.sin(Date.now() * 0.002) * 0.1;
-        }
-        
-        if (foxRenderer && foxScene && foxCamera) {
-          foxRenderer.render(foxScene, foxCamera);
-        }
-      }
-      animate();
-
-      // Welcome message
       setTimeout(() => {
-        showMascotSpeech(getRandomMessage('idle'), 4000);
-      }, 3000);
-
-      console.log('[3D Fox] Initialized! 🦊');
-    } catch (error) {
-      console.warn('[3D Fox] Failed to load, using 2D fallback:', error.message);
-      // Fallback: hide 3D, show 2D
-      const container3D = document.getElementById('mascot3DContainer');
-      if (container3D) container3D.style.display = 'none';
+        container.classList.remove('celebrating');
+      }, 1500);
+    } else {
+      mascotSad();
     }
   }
-
-  // Start 3D Fox
-  setTimeout(() => init3DFox(), 2000);
-
-  // Toggle
+  
+   function handleMascotClick() {
+    const container = document.getElementById('mascotContainer');
+    if (!container) return;
+    
+    // Random emotion
+    const emotions = ['happy', 'love', 'surprised', 'cool', 'wink'];
+    const randomEmotion = emotions[Math.floor(Math.random() * emotions.length)];
+    
+    // Remove previous emotion classes
+    container.classList.remove('happy', 'love', 'surprised', 'cool', 'wink', 'sad');
+    
+    // Add new emotion
+    container.classList.add(randomEmotion);
+    
+    // Bounce animation
+    container.style.transition = 'transform 0.15s cubic-bezier(.2,.8,.3,1)';
+    container.style.transform = 'scale(1.2)';
+    
+    setTimeout(() => {
+      container.style.transform = 'scale(0.85)';
+    }, 150);
+    
+    setTimeout(() => {
+      container.style.transform = '';
+      container.classList.remove(randomEmotion);
+    }, 1500);
+    
+    // Emotion message & sound
+    const emotionMessages = {
+      happy: ['😊 හෙලෝ!', '😄 සතුටුයි!', '🎉 යාළුවා!'],
+      love: ['💕 ආදරෙයි!', '💖 ඔබ නියමයි!', '💝 මගේ යාළුවා!'],
+      surprised: ['😲 ආශ්චර්යයි!', '😮 වාව්!', '🤩 අපූරුයි!'],
+      cool: ['😎 Cool!', '🦊 සුපිරි!', '💪 ශක්තිමත්!'],
+      wink: ['😉 හරි හරි!', '😜 දඟයා!', '🦊 බොරුවට නෙමෙයි!']
+    };
+    
+    const messages = emotionMessages[randomEmotion];
+    const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+    showMascotSpeech(randomMsg, 2500);
+    
+    audioManager.playClick();
+    spawnClickHearts();
+  }
+  
+  function spawnClickHearts() {
+    const container = document.getElementById('mascotContainer');
+    if (!container) return;
+    
+    const hearts = ['💕', '💖', '💗', '💝', '✨', '💫', '🌟', '🦊'];
+    const rect = container.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    
+    for (let i = 0; i < 8; i++) {
+      const heart = document.createElement('span');
+      heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+      heart.style.cssText = `
+        position: fixed;
+        left: ${centerX}px;
+        top: ${centerY}px;
+        font-size: ${14 + Math.random() * 20}px;
+        pointer-events: none;
+        z-index: 99999;
+        animation: clickHeartBurst ${0.8 + Math.random() * 0.6}s ease-out forwards;
+        animation-delay: ${Math.random() * 0.2}s;
+      `;
+      heart.style.setProperty('--tx', (Math.random() - 0.5) * 120 + 'px');
+      heart.style.setProperty('--ty', -(Math.random() * 100 + 40) + 'px');
+      heart.style.setProperty('--rot', (Math.random() - 0.5) * 180 + 'deg');
+      
+      document.body.appendChild(heart);
+      
+      setTimeout(() => {
+        if (heart.parentNode) heart.parentNode.removeChild(heart);
+      }, 1800);
+    }
+  }
+    // ============ MASCOT TOGGLE ============
+  let mascotVisible = localStorage.getItem('mascotVisible') !== 'false';
+  
   function toggleMascot() {
     mascotVisible = !mascotVisible;
     localStorage.setItem('mascotVisible', mascotVisible);
-    const container = document.getElementById('mascot3DContainer');
+    
+    const mascot = document.getElementById('mascotContainer');
     const toggleBtn = document.getElementById('mascotToggleBtn');
-    if (container) container.style.display = mascotVisible ? 'block' : 'none';
-    if (toggleBtn) toggleBtn.classList.toggle('hidden-mascot', !mascotVisible);
-    if (mascotVisible) showMascotSpeech('🦊 මම ආපහු ආවා!', 2000);
-    audioManager.playClick();
-  }
-
-  // Click handler
-  document.getElementById('mascot3DContainer')?.addEventListener('click', () => {
-    showMascotSpeech(getRandomMessage('click'), 2500);
-    audioManager.playClick();
-  });
-
-  // Mascot react functions
-  function mascotReact(isCorrect, isStreak) {
-    if (isCorrect) {
-      showMascotSpeech(isStreak ? getRandomMessage('streak') : getRandomMessage('correct'), 2000);
-    } else {
-      showMascotSpeech(getRandomMessage('wrong'), 2500);
+    
+    if (mascot) {
+      mascot.style.display = mascotVisible ? 'block' : 'none';
     }
+    if (toggleBtn) {
+      toggleBtn.classList.toggle('hidden-mascot', !mascotVisible);
+    }
+    
+    if (mascotVisible) {
+      showMascotSpeech('🦊 මම ආපහු ආවා!', 2000);
+    }
+    
+    audioManager.playClick();
   }
-
-  function mascotCelebrate() {
-    showMascotSpeech(getRandomMessage('perfect'), 4000);
-  }
+  
+  // Apply saved state on load
+  setTimeout(() => {
+    const mascot = document.getElementById('mascotContainer');
+    const toggleBtn = document.getElementById('mascotToggleBtn');
+    
+    if (!mascotVisible) {
+      if (mascot) mascot.style.display = 'none';
+      if (toggleBtn) toggleBtn.classList.add('hidden-mascot');
+    }
+  }, 100);
+  // Show welcome message on load
+  setTimeout(() => {
+    const welcomeMsg = mascotMessages.welcome[Math.floor(Math.random() * mascotMessages.welcome.length)];
+    showMascotSpeech(welcomeMsg, 5000);
+  }, 3000);
+  
+  // Random idle messages
+  setInterval(() => {
+    const speech = document.getElementById('mascotSpeech');
+    if (!speech || speech.style.display === 'block') return;
+    if (Math.random() < 0.3) { // 30% chance
+      showMascotSpeech(getRandomMessage('idle'), 3000);
+    }
+  }, 30000); // Every 30 seconds
   // ============ INFO MODAL ============
   async function showInfoModal() {
     const modal = document.getElementById('infoModal');
