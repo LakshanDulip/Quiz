@@ -5379,8 +5379,11 @@ window.performanceManager = new PerformanceManager();
 
   function subjectMeta(key) { return SUBJECTS[key] || SUBJECTS.science; }
 
-  function getLessons(subject, grade) {
+  async function getLessons(subject, grade) {
     try {
+      // Load subject if not loaded yet
+      await loadOtherSubject(subject);
+      
       if (appState.content && appState.content.subjects && 
           appState.content.subjects[subject] && 
           appState.content.subjects[subject].grades && 
@@ -5405,29 +5408,98 @@ window.performanceManager = new PerformanceManager();
   }
 
   // ============ LOAD DATA ============
+  // ============ LAZY LOAD SUBJECT DATA ============
+  const subjectFiles = {
+    science: 'data/science.json',
+    maths: 'data/maths.json'
+  };
+  
+  async function loadSubjectData(subject) {
+    const file = subjectFiles[subject];
+    if (!file) return null;
+    
+    // Check cache
+    const cacheKey = `subject_${subject}`;
+    const cached = window.cacheManager?.get(cacheKey);
+    if (cached) return cached;
+    
+    try {
+      const response = await fetch(file);
+      if (!response.ok) throw new Error('Failed to load');
+      const data = await response.json();
+      window.cacheManager?.set(cacheKey, data, 600000);
+      return data;
+    } catch (error) {
+      console.error(`[Load] ${subject} failed:`, error);
+      return null;
+    }
+  }
+  
+  // ============ LAZY LOAD SUBJECT DATA ============
+  const subjectFiles = {
+    science: 'data/science.json',
+    maths: 'data/maths.json'
+  };
+  
+  async function loadSubjectData(subject) {
+    const file = subjectFiles[subject];
+    if (!file) return null;
+    
+    // Check cache
+    const cacheKey = `subject_${subject}`;
+    const cached = window.cacheManager?.get(cacheKey);
+    if (cached) return cached;
+    
+    try {
+      const response = await fetch(file);
+      if (!response.ok) throw new Error('Failed to load');
+      const data = await response.json();
+      window.cacheManager?.set(cacheKey, data, 600000);
+      return data;
+    } catch (error) {
+      console.error(`[Load] ${subject} failed:`, error);
+      return null;
+    }
+  }
+  
   async function loadData() {
     try {
-      const cached = window.cacheManager?.get('quizData');
-      if (cached) {
-        appState.content = cached;
-        appState.loading = false;
-        render();
-        return;
-      }
+      // Load first subject only (science)
+      const scienceData = await loadSubjectData('science');
       
-      const response = await fetch('data.json?t=' + new Date().getTime());
-      if (!response.ok) throw new Error('HTTP error!');
-      const data = await response.json();
+      if (!scienceData) throw new Error('No data loaded');
       
-      window.cacheManager?.set('quizData', data, 300000);
-      
-      appState.content = data;
+      appState.content = {
+        subjects: {
+          science: scienceData
+        }
+      };
       appState.loading = false;
       render();
     } catch (error) {
-      appState.error = 'දත්ත ලබාගැනීමේ දෝෂයකි. data.json පරීක්ෂා කරන්න.';
+      appState.error = 'දත්ත ලබාගැනීමේ දෝෂයකි.';
       appState.loading = false;
       render();
+    }
+  }
+  
+  // Load other subject when needed
+  async function loadOtherSubject(subject) {
+    if (appState.content?.subjects?.[subject]) return;
+    
+    const data = await loadSubjectData(subject);
+    if (data && appState.content) {
+      appState.content.subjects[subject] = data;
+    }
+  }
+  
+  // Load other subject when needed
+  async function loadOtherSubject(subject) {
+    if (appState.content?.subjects?.[subject]) return;
+    
+    const data = await loadSubjectData(subject);
+    if (data && appState.content) {
+      appState.content.subjects[subject] = data;
     }
   }
 
@@ -5657,9 +5729,10 @@ window.performanceManager = new PerformanceManager();
       </div>
     `;
   }
-
-  function renderGrades(subject) {
+  async function renderGrades(subject) {
     const meta = subjectMeta(subject);
+    await loadOtherSubject(subject);
+    const lessonsData = appState.content?.subjects?.[subject]?.grades || {};
     const sorted = [...GRADES].sort((a, b) => parseInt(a) - parseInt(b));
     return `
       <div class="breadcrumb"><a href="#/" onclick="audioManager.playClick()">Home</a> <span>/</span> ${escapeHtml(meta.sinhala)}</div>
@@ -5670,16 +5743,15 @@ window.performanceManager = new PerformanceManager();
           <div class="card grade-card" onclick="navigate('#/subject/${meta.key}/grade/${g}')">
             <h2>${g}</h2>
             <span>ශ්‍රේණිය</span>
-            <div class="lesson-count"><i class="fas fa-book"></i> පාඩම් ${getLessons(subject, g).length}</div>
+            <div class="lesson-count"><i class="fas fa-book"></i> පාඩම් ${(lessonsData[g]?.lessons || []).length}</div>
           </div>
         `).join('')}
       </div>
     `;
   }
-
-  function renderLessons(subject, grade) {
+  async function renderLessons(subject, grade) {
     const meta = subjectMeta(subject);
-    const lessons = getLessons(subject, grade);
+    const lessons = await getLessons(subject, grade);
     return `
       <div class="breadcrumb">
         <a href="#/" onclick="audioManager.playClick()">Home</a> <span>/</span>
