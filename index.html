@@ -5446,16 +5446,15 @@ window.performanceManager = new PerformanceManager();
 
   async function loadData() {
     try {
-      // Load first subject only (science)
-      const scienceData = await loadSubjectData('science');
+      // Load both subjects
+      const [scienceData, mathsData] = await Promise.all([
+        loadSubjectData('science'),
+        loadSubjectData('maths')
+      ]);
       
-      if (!scienceData) throw new Error('No data loaded');
-      
-      // Wrap in same structure as old data.json
-      appState.content = {
-        subjects: {}
-      };
-      appState.content.subjects['science'] = scienceData;
+      appState.content = { subjects: {} };
+      if (scienceData) appState.content.subjects['science'] = scienceData;
+      if (mathsData) appState.content.subjects['maths'] = mathsData;
       
       appState.loading = false;
       render();
@@ -5463,15 +5462,6 @@ window.performanceManager = new PerformanceManager();
       appState.error = 'දත්ත ලබාගැනීමේ දෝෂයකි.';
       appState.loading = false;
       render();
-    }
-  }
-  // Load other subject when needed
-  async function loadOtherSubject(subject) {
-    if (appState.content?.subjects?.[subject]) return;
-    
-    const data = await loadSubjectData(subject);
-    if (data && appState.content) {
-      appState.content.subjects[subject] = data;
     }
   }
   
