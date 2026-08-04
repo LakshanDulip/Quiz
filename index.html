@@ -4776,14 +4776,19 @@ window.performanceManager = new PerformanceManager();
     const toggleBtn = document.getElementById('mascotToggleBtn');
     
     if (mascot) {
-      mascot.style.display = mascotVisible ? 'block' : 'none';
+      if (!mascotVisible) {
+        // Bye message before hiding
+        showMascotSpeech('👋 මම යනවා... ආයෙත් එන්නම්! 💕', 2000);
+        setTimeout(() => {
+          mascot.style.display = 'none';
+        }, 2000);
+      } else {
+        mascot.style.display = 'block';
+        showMascotSpeech('🦊 මම ආපහු ආවා!', 2000);
+      }
     }
     if (toggleBtn) {
       toggleBtn.classList.toggle('hidden-mascot', !mascotVisible);
-    }
-    
-    if (mascotVisible) {
-      showMascotSpeech('🦊 මම ආපහු ආවා!', 2000);
     }
     
     audioManager.playClick();
