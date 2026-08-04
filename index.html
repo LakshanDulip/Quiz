@@ -1485,6 +1485,36 @@
   .animate-pop { animation: popIn 0.25s ease forwards; }
   @keyframes popIn { 0% { opacity: 0; transform: scale(0.97); } 100% { opacity: 1; transform: scale(1); } }
 
+  /* ===== SCREENSHOT BUTTON ===== */
+  .mascot-screenshot-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 104px;
+    z-index: 500;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    font-size: 0.65rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    opacity: 0.5;
+  }
+  .mascot-screenshot-btn:hover {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    opacity: 0.9;
+  }
+  @media (max-width: 768px) {
+    .mascot-screenshot-btn { right: 84px; bottom: 16px; width: 26px; height: 26px; }
+  }
+  
   /* ===== MASCOT TOGGLE BUTTON ===== */
   .mascot-toggle-btn {
     position: fixed;
@@ -3572,6 +3602,12 @@ window.performanceManager = new PerformanceManager();
   </div>
 </div>
 <!-- ===== FIREBASE AUTH END ===== -->
+  
+<!-- Screenshot Button -->
+<button class="mascot-screenshot-btn" id="screenshotBtn" onclick="takeScreenshot()" title="Screenshot">
+  <i class="fas fa-camera"></i>
+</button>
+  
   <!-- Mascot Toggle Button -->
 <button class="mascot-toggle-btn" id="mascotToggleBtn" onclick="toggleMascot()" title="Mascot On/Off">
   <i class="fas fa-paw"></i>
@@ -5062,7 +5098,46 @@ window.performanceManager = new PerformanceManager();
       }, 1800);
     }
   }
-  
+  // ============ SCREENSHOT POSE ============
+  function takeScreenshot() {
+    const container = document.getElementById('mascotContainer');
+    if (!container || container.style.display === 'none') return;
+    
+    // Pose: big smile + wink
+    container.classList.remove('sleepy', 'angry', 'singing', 'crying', 'smile', 'dance', 'happy', 'love', 'surprised', 'cool', 'wink', 'sad', 'dead');
+    container.classList.add('happy');
+    container.style.transform = 'scale(1.15)';
+    
+    showMascotSpeech('📸 Cheese! 😉✨', 3000);
+    audioManager.playAchievement();
+    spawnClickHearts();
+    
+    // Flash effect
+    const flash = document.createElement('div');
+    flash.style.cssText = `
+      position: fixed; inset: 0; background: #fff;
+      z-index: 99999; pointer-events: none;
+      opacity: 0.8; transition: opacity 0.5s ease;
+    `;
+    document.body.appendChild(flash);
+    
+    setTimeout(() => {
+      flash.style.opacity = '0';
+      setTimeout(() => flash.remove(), 500);
+    }, 100);
+    
+    // Reset after pose
+    setTimeout(() => {
+      container.style.transform = '';
+      container.classList.remove('happy');
+    }, 2500);
+    
+    // Try actual screenshot if supported
+    if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+      // Desktop screenshot prompt (optional)
+      console.log('📸 Screenshot mode activated!');
+    }
+  }  
   // ============ MASCOT TOGGLE ============
   let mascotVisible = localStorage.getItem('mascotVisible') !== 'false';
   
