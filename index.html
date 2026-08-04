@@ -1090,8 +1090,45 @@
   .quiz-header { display: flex; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 15px; flex-wrap: wrap; }
   .quiz-stats-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   .question-number { font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; margin-bottom: 5px; }
-  .question-text { font-size: 1.25rem; font-weight: 600; margin-bottom: 25px; line-height: 1.6; }
-
+  .question-text {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 25px;
+    line-height: 1.8;
+    letter-spacing: 0.03em;
+    font-family: 'Inter', 'Noto Sans Sinhala', sans-serif;
+  }
+  /* Math formatting */
+  .math-fraction {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    vertical-align: middle;
+    line-height: 1;
+    margin: 0 2px;
+    font-size: 0.9em;
+  }
+  .math-fraction .num {
+    border-bottom: 1.5px solid currentColor;
+    padding: 0 4px 2px;
+  }
+  .math-fraction .den {
+    padding: 2px 4px 0;
+  }
+  .math-sqrt {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+  }
+  .math-sqrt::before {
+    content: '√';
+    font-size: 1.2em;
+    font-weight: 700;
+  }
+  sup, sub {
+    font-size: 0.75em;
+    line-height: 0;
+  }
    .question-image-wrap {
     width: 100%;
     margin-bottom: 20px;
@@ -5410,6 +5447,50 @@ window.performanceManager = new PerformanceManager();
     perfectCount: 0
   };
 
+    // ============ MATH FORMATTER ============
+  function formatMath(text) {
+    if (!text) return '';
+    let formatted = escapeHtml(text);
+    
+    // Fractions: 3/4 → styled fraction
+    formatted = formatted.replace(/(\d+)\/(\d+)/g, '<span class="math-fraction"><span class="num">$1</span><span class="den">$2</span></span>');
+    
+    // Superscript: x^2 → x²
+    formatted = formatted.replace(/\^(\d+)/g, '<sup>$1</sup>');
+    formatted = formatted.replace(/\^\{([^}]+)\}/g, '<sup>$1</sup>');
+    
+    // Subscript: log_2 → log₂
+    formatted = formatted.replace(/_(\d+)/g, '<sub>$1</sub>');
+    formatted = formatted.replace(/\{([^}]+)\}/g, '<sub>$1</sub>');
+    
+    // Square root: √ or sqrt()
+    formatted = formatted.replace(/√(\d+)/g, '<span class="math-sqrt">$1</span>');
+    formatted = formatted.replace(/sqrt\(([^)]+)\)/g, '<span class="math-sqrt">$1</span>');
+    
+    // Common symbols
+    formatted = formatted.replace(/\bpi\b/g, 'π');
+    formatted = formatted.replace(/\btheta\b/g, 'θ');
+    formatted = formatted.replace(/\bdegrees\b/g, '°');
+    formatted = formatted.replace(/\binfinity\b/g, '∞');
+    formatted = formatted.replace(/\bdelta\b/g, 'Δ');
+    formatted = formatted.replace(/\bsum\b/g, 'Σ');
+    formatted = formatted.replace(/\bproduct\b/g, 'Π');
+    formatted = formatted.replace(/\b(<=)\b/g, '≤');
+    formatted = formatted.replace(/\b(>=)\b/g, '≥');
+    formatted = formatted.replace(/\b(!=)\b/g, '≠');
+    formatted = formatted.replace(/\b(->)\b/g, '→');
+    formatted = formatted.replace(/\b(=>)\b/g, '⇒');
+    
+    // Multiplication: 2×3 or 2*3
+    formatted = formatted.replace(/(\d)\*(\d)/g, '$1×$2');
+    formatted = formatted.replace(/\bx\b(?=\d)/g, '×');
+    
+    // Division: ÷
+    formatted = formatted.replace(/\bdiv\b/g, '÷');
+    
+    return formatted;
+  }
+  
   // ============ HELPERS ============
   function escapeHtml(str) { 
     if (str == null) return '';
@@ -5880,7 +5961,7 @@ window.performanceManager = new PerformanceManager();
               <div class="flashcard-front">
                 <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:8px;">❓ ප්‍රශ්නය (ක්ලික් කර මාරු කරන්න)</div>
                 ${question.image ? renderQuestionImage(question.image) : ''}
-                <div style="font-size:1.25rem; font-weight:600;">${escapeHtml(question.q)}</div>
+                <div style="font-size:1.25rem; font-weight:600;">${formatMath(question.q)}</div>
                 <div style="margin-top:20px; font-size:0.8rem; color:var(--primary-color);"><i class="fas fa-sync-alt"></i> පිළිතුර බලන්න Flip කරන්න</div>
               </div>
               <div class="flashcard-back">
@@ -6041,7 +6122,7 @@ window.performanceManager = new PerformanceManager();
 
         <div class="question-number">${isGame ? '🎯' : '📖'} ප්‍රශ්නය ${qz.idx + 1}</div>
         ${question.image ? renderQuestionImage(question.image) : ''}
-        <div class="question-text">${escapeHtml(question.q)}</div>
+        <div class="question-text">${formatMath(question.q)}</div>
 
         <div class="options-grid">
           ${question.options.map((opt, i) => {
@@ -6075,7 +6156,7 @@ window.performanceManager = new PerformanceManager();
             return `
               <button class="${btnClass}" id="opt-${i}" onclick="handleOptionClick(${i})" ${disabled ? 'disabled' : ''}>
                 <div class="opt-letter">${letters[i]}</div>
-                <div>${escapeHtml(opt)}</div>
+                <div>${formatMath(opt)}</div>
                 ${extra}
               </button>
             `;
