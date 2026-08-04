@@ -873,7 +873,13 @@
   .controls.hidden-panel .mode-selector,
   .controls.hidden-panel .game-stats,
   .controls.hidden-panel .control-group {
-    display: none;
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    transition: all 0.4s ease;
   }
   .controls.hidden-panel {
     gap: 4px;
@@ -5916,7 +5922,7 @@ window.performanceManager = new PerformanceManager();
     return `
       <header>
         <div class="header-inner">
-          <div class="logo" onclick="navigate('#/')">
+          <div class="logo" onclick="navigate('#/')" ondblclick="toggleControlPanel()" title="Double click to hide/show panel">
             <svg class="logo-mark" viewBox="0 0 40 40" width="32" height="32">
               <circle cx="20" cy="20" r="3.4" fill="var(--accent)"/>
               <ellipse cx="20" cy="20" rx="17" ry="7" fill="none" stroke="var(--primary-color)" stroke-width="2.2"/>
@@ -5961,9 +5967,7 @@ window.performanceManager = new PerformanceManager();
               <button id="muteBtn" class="icon-btn ${muteClass}" onclick="toggleMute()" title="Mute (M)">
                 <i class="fas ${muteIcon}"></i>
               </button>
-              <button id="hidePanelBtn" class="icon-btn" onclick="toggleControlPanel()" title="Panel Hide/Show (H)">
-  <i class="fas fa-eye-slash"></i>
-</button>
+
 
               <div class="theme-wrap">
                 <button class="icon-btn" onclick="toggleThemePopover(event)" title="Theme (T)">🎨</button>
