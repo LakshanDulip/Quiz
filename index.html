@@ -20,8 +20,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Sinhala:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-<!-- html2canvas for Screenshot -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<!-- ===== FIREBASE AUTH START ===== -->
+<!-- Firebase SDK -->
 <!-- ===== FIREBASE AUTH START ===== -->
 <!-- Firebase SDK -->
 <script type="module">
@@ -1485,36 +1485,6 @@
   .animate-pop { animation: popIn 0.25s ease forwards; }
   @keyframes popIn { 0% { opacity: 0; transform: scale(0.97); } 100% { opacity: 1; transform: scale(1); } }
 
-  /* ===== SCREENSHOT BUTTON ===== */
-  .mascot-screenshot-btn {
-    position: fixed;
-    bottom: 20px;
-    right: 104px;
-    z-index: 500;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background: var(--bg-card);
-    color: var(--text-secondary);
-    font-size: 0.65rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: var(--shadow-sm);
-    cursor: pointer;
-    border: 1px solid var(--border-color);
-    transition: all 0.3s ease;
-    opacity: 0.5;
-  }
-  .mascot-screenshot-btn:hover {
-    color: var(--primary-color);
-    border-color: var(--primary-color);
-    opacity: 0.9;
-  }
-  @media (max-width: 768px) {
-    .mascot-screenshot-btn { right: 84px; bottom: 16px; width: 26px; height: 26px; }
-  }
-  
   /* ===== MASCOT TOGGLE BUTTON ===== */
   .mascot-toggle-btn {
     position: fixed;
@@ -3602,12 +3572,6 @@ window.performanceManager = new PerformanceManager();
   </div>
 </div>
 <!-- ===== FIREBASE AUTH END ===== -->
-  
-<!-- Screenshot Button -->
-<button class="mascot-screenshot-btn" id="screenshotBtn" onclick="takeScreenshot()" title="Screenshot">
-  <i class="fas fa-camera"></i>
-</button>
-  
   <!-- Mascot Toggle Button -->
 <button class="mascot-toggle-btn" id="mascotToggleBtn" onclick="toggleMascot()" title="Mascot On/Off">
   <i class="fas fa-paw"></i>
@@ -5098,74 +5062,7 @@ window.performanceManager = new PerformanceManager();
       }, 1800);
     }
   }
-  // ============ SCREENSHOT POSE ============
-  function takeScreenshot() {
-    const container = document.getElementById('mascotContainer');
-    if (!container || container.style.display === 'none') return;
-    
-    // Hide mascot buttons temporarily
-    const toggleBtn = document.getElementById('mascotToggleBtn');
-    const screenshotBtn = document.getElementById('screenshotBtn');
-    const infoBtn = document.querySelector('.info-floating-btn');
-    if (toggleBtn) toggleBtn.style.display = 'none';
-    if (screenshotBtn) screenshotBtn.style.display = 'none';
-    if (infoBtn) infoBtn.style.display = 'none';
-    
-    // Pose: big smile
-    container.classList.remove('sleepy', 'angry', 'singing', 'crying', 'smile', 'dance', 'happy', 'love', 'surprised', 'cool', 'wink', 'sad', 'dead');
-    container.classList.add('happy');
-    container.style.transform = 'scale(1.15)';
-    
-    showMascotSpeech('📸 Cheese! 😉✨', 2000);
-    audioManager.playAchievement();
-    
-    // Flash effect
-    const flash = document.createElement('div');
-    flash.style.cssText = `
-      position: fixed; inset: 0; background: #fff;
-      z-index: 99999; pointer-events: none;
-      opacity: 0.8; transition: opacity 0.3s ease;
-    `;
-    document.body.appendChild(flash);
-    
-    // Capture screenshot
-    setTimeout(() => {
-      flash.style.opacity = '0';
-      
-      if (typeof html2canvas !== 'undefined') {
-        html2canvas(document.body, {
-          useCORS: true,
-          scale: 2,
-          backgroundColor: getComputedStyle(document.body).backgroundColor,
-          logging: false
-        }).then(canvas => {
-          const link = document.createElement('a');
-          link.download = `QuizHub_Screenshot_${new Date().toISOString().slice(0,10)}.png`;
-          link.href = canvas.toDataURL('image/png');
-          link.click();
-          
-          showMascotSpeech('✅ Save වුනා! 📸', 2500);
-        }).catch(() => {
-          showMascotSpeech('😅 Screenshot fail!', 2000);
-        });
-      } else {
-        showMascotSpeech('📸 Pose! 📷', 2000);
-      }
-      
-      setTimeout(() => flash.remove(), 300);
-    }, 150);
-    
-    // Reset
-    setTimeout(() => {
-      container.style.transform = '';
-      container.classList.remove('happy');
-      if (toggleBtn) toggleBtn.style.display = '';
-      if (screenshotBtn) screenshotBtn.style.display = '';
-      if (infoBtn) infoBtn.style.display = '';
-    }, 2500);
-    
-    spawnClickHearts();
-  } 
+  
   // ============ MASCOT TOGGLE ============
   let mascotVisible = localStorage.getItem('mascotVisible') !== 'false';
   
