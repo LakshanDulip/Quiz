@@ -2171,6 +2171,55 @@
     opacity: 1;
     transform: translateY(0) scale(1);
   }
+    /* Chat Input */
+  .mascot-chat {
+    position: absolute;
+    bottom: -50px;
+    right: -10px;
+    display: flex;
+    gap: 6px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 5px 5px 5px 14px;
+    box-shadow: var(--shadow-md);
+    z-index: 19999;
+    animation: chatSlideUp 0.3s ease forwards;
+  }
+  @keyframes chatSlideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .mascot-chat input {
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    font-size: 0.8rem;
+    width: 120px;
+    outline: none;
+    font-family: inherit;
+  }
+  .mascot-chat input::placeholder {
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+  }
+  .mascot-chat button {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--primary-gradient);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+  }
+  .mascot-chat button:hover {
+    transform: scale(1.1);
+  }
   .mascot-speech::after {
     content: '';
     position: absolute;
@@ -3546,6 +3595,12 @@ window.performanceManager = new PerformanceManager();
     </div>
   </div>
   <div class="mascot-speech" id="mascotSpeech" style="display:none;"></div>
+  <!-- Chat Input -->
+  <div class="mascot-chat" id="mascotChat" style="display:none;">
+    <input type="text" id="mascotChatInput" placeholder="මොකද්ද කියන්න..." maxlength="50"
+           onkeydown="if(event.key==='Enter')sendMascotChat()">
+    <button onclick="sendMascotChat()"><i class="fas fa-paper-plane"></i></button>
+  </div>
 </div>
   <!-- ===== INFO BUTTON (floating) ===== -->
 <button class="info-floating-btn" onclick="showInfoModal()" title="තොරතුරු">
@@ -4754,12 +4809,19 @@ window.performanceManager = new PerformanceManager();
     const container = document.getElementById('mascotContainer');
     if (!container) return;
     
+    // Toggle chat mode
+    const chatEl = document.getElementById('mascotChat');
+    if (chatEl && chatEl.style.display === 'flex') {
+      closeMascotChat();
+      return;
+    }
+    
     // Random emotion - ALL 11 emotions
     const emotions = ['sleepy', 'angry', 'singing', 'crying', 'smile', 'dance', 'happy', 'love', 'surprised', 'cool', 'wink'];
     const randomEmotion = emotions[Math.floor(Math.random() * emotions.length)];
     
     // Remove all emotion classes
-    container.classList.remove('sleepy', 'angry', 'singing', 'crying', 'smile', 'dance', 'happy', 'love', 'surprised', 'cool', 'wink', 'sad');
+    container.classList.remove('sleepy', 'angry', 'singing', 'crying', 'smile', 'dance', 'happy', 'love', 'surprised', 'cool', 'wink', 'sad', 'dead');
     
     // Add new emotion
     container.classList.add(randomEmotion);
@@ -4806,6 +4868,118 @@ window.performanceManager = new PerformanceManager();
     }
     
     spawnClickHearts();
+    
+    // Show chat after click
+    setTimeout(() => {
+      const chatEl2 = document.getElementById('mascotChat');
+      if (chatEl2 && Math.random() < 0.3) {
+        openMascotChat();
+      }
+    }, 2500);
+  }
+  
+  function spawnClickHearts() {
+    const container = document.getElementById('mascotContainer');
+    if (!container) return;
+    
+    const hearts = ['💕', '💖', '💗', '💝', '✨', '💫', '🌟', '🦊'];
+    const rect = container.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    
+    for (let i = 0; i < 8; i++) {
+      const heart = document.createElement('span');
+      heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+      heart.style.cssText = `
+        position: fixed;
+        left: ${centerX}px;
+        top: ${centerY}px;
+        font-size: ${14 + Math.random() * 20}px;
+        pointer-events: none;
+        z-index: 99999;
+        animation: clickHeartBurst ${0.8 + Math.random() * 0.6}s ease-out forwards;
+        animation-delay: ${Math.random() * 0.2}s;
+      `;
+      heart.style.setProperty('--tx', (Math.random() - 0.5) * 120 + 'px');
+      heart.style.setProperty('--ty', -(Math.random() * 100 + 40) + 'px');
+      heart.style.setProperty('--rot', (Math.random() - 0.5) * 180 + 'deg');
+      
+      document.body.appendChild(heart);
+      
+      setTimeout(() => {
+        if (heart.parentNode) heart.parentNode.removeChild(heart);
+      }, 1800);
+    }
+  }
+  
+  // ============ MASCOT CHAT ============
+  function openMascotChat() {
+    const chatEl = document.getElementById('mascotChat');
+    const input = document.getElementById('mascotChatInput');
+    if (chatEl) {
+      chatEl.style.display = 'flex';
+      if (input) {
+        input.value = '';
+        setTimeout(() => input.focus(), 300);
+      }
+    }
+    showMascotSpeech('💬 මගෙන් අහන්න!', 2000);
+  }
+  
+  function closeMascotChat() {
+    const chatEl = document.getElementById('mascotChat');
+    if (chatEl) chatEl.style.display = 'none';
+  }
+  
+  function sendMascotChat() {
+    const input = document.getElementById('mascotChatInput');
+    if (!input) return;
+    
+    const message = input.value.trim().toLowerCase();
+    if (!message) return;
+    
+    input.value = '';
+    
+    let reply = '';
+    
+    if (message.includes('hello') || message.includes('හලෝ') || message.includes('ආයුබෝවන්') || message.includes('හායි') || message.includes('hi')) {
+      const replies = ['👋 හෙලෝ යාළුවා!', '😊 ආයුබෝවන්! කොහොමද?', '🦊 හායි! සතුටුයි ඔබව දැකලා!', '💕 හෙලෝ! ඉගෙන ගමු!'];
+      reply = replies[Math.floor(Math.random() * replies.length)];
+    } else if (message.includes('name') || message.includes('නම') || message.includes('කවුද')) {
+      reply = '🦊 මම Quiz Hub Fox! ඔබේ ඉගෙනුම් සගයා!';
+    } else if (message.includes('help') || message.includes('උදව්') || message.includes('උදවු')) {
+      reply = '💡 Study Mode, Game Mode, Flashcards use කරන්න. ප්‍රශ්න තියෙනවද?';
+    } else if (message.includes('thanks') || message.includes('ස්තුති') || message.includes('thank') || message.includes('ඉස්තුති')) {
+      const replies = ['😊 ඔබට ස්තුතියි!', '💕 Welcome!', '🦊 සතුටුයි උදව් කරන්න ලැබීම ගැන!'];
+      reply = replies[Math.floor(Math.random() * replies.length)];
+    } else if (message.includes('love') || message.includes('ආදරේ') || message.includes('ආදර')) {
+      const replies = ['💕 මමත් ඔබට ආදරෙයි!', '💖 ආදරෙයි යාළුවා!', '🦊💝 මගේ හිතේ ඔබට ලොකු තැනක්!'];
+      reply = replies[Math.floor(Math.random() * replies.length)];
+    } else if (message.includes('bye') || message.includes('ගිහින්') || message.includes('යනව')) {
+      const replies = ['👋 ආයුබෝවන්! ආයෙත් එන්න!', '😊 ගිහින් එන්නම්!', '🦊 මම මෙතන ඉන්නම්!'];
+      reply = replies[Math.floor(Math.random() * replies.length)];
+    } else if (message.includes('song') || message.includes('සිංදු') || message.includes('sing')) {
+      reply = '🎵 ලලලා... 🎶 ලාලාලා... 🎤 මම සිංදු කියන්න දන්නවා!';
+    } else if (message.includes('dance') || message.includes('නට') || message.includes('ඩාන්ස්')) {
+      reply = '💃 නටමු නටමු! 🕺 ඩාන්ස් ඩාන්ස්!';
+    } else if (message.includes('sad') || message.includes('දුක') || message.includes('අඬ')) {
+      reply = '😢 දුක් වෙන්න එපා... 💪 ඔබට පුළුවන්! මම ඉන්නවා!';
+    } else if (message.includes('joke') || message.includes('විහිලු') || message.includes('හාස්‍ය')) {
+      const jokes = ['😄 පොතක් වැටුනා... පිටු 100ක් කියෙව්වා! 😂', '🤣 ගණිතය පොත අඬන්නේ ඇයි? ගොඩක් ප්‍රශ්න තියෙන නිසා!', '😜 පෑන කැඩුනේ ඇයි? ලියන්න බැරිව!'];
+      reply = jokes[Math.floor(Math.random() * jokes.length)];
+    } else {
+      const defaultReplies = [
+        '🤔 මට තේරුනේ නෑ... නැවත කියන්න!',
+        '🦊 ඒක ගැන මම දන්නේ නෑ...',
+        '💬 වෙන දෙයක් අහන්න!',
+        '😊 මම පුංචි ෆොක්ස් කෙනෙක් විතරයි!',
+        '📚 ඉගෙන ගන්න දෙයක් අහන්න!'
+      ];
+      reply = defaultReplies[Math.floor(Math.random() * defaultReplies.length)];
+    }
+    
+    showMascotSpeech(reply, 4000);
+    audioManager.playClick();
   }
   
   function spawnClickHearts() {
