@@ -18,6 +18,10 @@
     {
       "source": "/robots.txt",
       "destination": "/robots.txt"
+    },
+    {
+      "source": "/data/:file",
+      "destination": "/data/:file"
     }
   ]
 }
