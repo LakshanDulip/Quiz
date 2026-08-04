@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://quiz-blue-ten.vercel.app/sitemap.xml
