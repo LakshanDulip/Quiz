@@ -1644,30 +1644,51 @@
       0 0 25px rgba(255,130,60,0.5);
   }
   
-  /* Ears - floppy cute */
+  /* Ears - extra cute floppy */
   .mascot-ear-left, .mascot-ear-right {
     position: absolute;
-    top: -16px;
-    width: 0;
-    height: 0;
-    border-left: 12px solid transparent;
-    border-right: 12px solid transparent;
-    border-bottom: 24px solid #e64a19;
-    filter: drop-shadow(0 -2px 4px rgba(0,0,0,0.3));
+    top: -18px;
+    width: 14px;
+    height: 28px;
+    background: linear-gradient(180deg, #f09050 0%, #e8753c 30%, #d4622a 60%, #8b3a12 100%);
+    border-radius: 65% 65% 25% 25%;
+    box-shadow: 
+      inset 0 2px 4px rgba(255,255,255,0.25),
+      inset 0 -4px 8px rgba(0,0,0,0.2),
+      0 2px 5px rgba(0,0,0,0.3);
+    transform-origin: bottom center;
+    transition: transform 0.3s ease;
   }
-  .mascot-ear-left { left: 5px; transform: rotate(-18deg); }
-  .mascot-ear-right { right: 5px; transform: rotate(18deg); }
+  .mascot-ear-left { left: 6px; transform: rotate(-20deg); }
+  .mascot-ear-right { right: 6px; transform: rotate(20deg); }
+  .mascot-container:hover .mascot-ear-left {
+    animation: earWiggleLeft 0.5s ease-in-out;
+  }
+  .mascot-container:hover .mascot-ear-right {
+    animation: earWiggleRight 0.5s ease-in-out;
+  }
+  @keyframes earWiggleLeft {
+    0%, 100% { transform: rotate(-20deg); }
+    30% { transform: rotate(-30deg); }
+    60% { transform: rotate(-14deg); }
+  }
+  @keyframes earWiggleRight {
+    0%, 100% { transform: rotate(20deg); }
+    30% { transform: rotate(30deg); }
+    60% { transform: rotate(14deg); }
+  }
+  
   .mascot-ear-inner {
     position: absolute;
-    top: -7px;
-    width: 0;
-    height: 0;
-    border-left: 8px solid transparent;
-    border-right: 8px solid transparent;
-    border-bottom: 18px solid #ffccbc;
+    top: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 8px;
+    height: 16px;
+    background: linear-gradient(180deg, #ffccb0 0%, #ffb890 60%, #f09060 100%);
+    border-radius: 55% 55% 25% 25%;
+    box-shadow: inset 0 1px 2px rgba(255,255,255,0.3);
   }
-  .mascot-ear-left .mascot-ear-inner { left: -8px; }
-  .mascot-ear-right .mascot-ear-inner { left: -8px; }
 
   /* Eyebrows */
   .mascot-eyebrows {
