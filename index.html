@@ -906,19 +906,34 @@
     font-size: 0.7rem;
     font-weight: 600;
     color: var(--text-secondary);
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(.34,1.56,.64,1);
     font-family: 'Space Grotesk', sans-serif;
+    position: relative;
+    overflow: hidden;
   }
-  .mode-btn:hover { color: var(--text-primary); }
+  .mode-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--primary-gradient);
+    border-radius: 50px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: -1;
+  }
+  .mode-btn:hover { color: var(--text-primary); transform: translateY(-2px); }
   .mode-btn.active {
     background: var(--primary-gradient);
     color: #fff;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2), 0 0 10px var(--glow-color);
+    transform: scale(1.05);
+    animation: modePopIn 0.4s cubic-bezier(.34,1.56,.64,1);
   }
-  :root[data-theme="light"] .mode-btn.active, :root[data-theme="pure-white"] .mode-btn.active, :root[data-theme="sakura"] .mode-btn.active {
-    color: #fff;
+  @keyframes modePopIn {
+    0% { transform: scale(0.9); }
+    60% { transform: scale(1.08); }
+    100% { transform: scale(1.05); }
   }
-
   .lives-display { display: flex; gap: 3px; font-size: 1.1rem; }
   .lives-display .heart { color: var(--heart-color); transition: all 0.3s ease; }
   .lives-display .heart.lost { opacity: 0.2; transform: scale(0.7); }
