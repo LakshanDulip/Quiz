@@ -1092,7 +1092,7 @@
   .question-number { font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; margin-bottom: 5px; }
   .question-text { font-size: 1.25rem; font-weight: 600; margin-bottom: 25px; line-height: 1.6; }
 
-  .question-image-wrap {
+   .question-image-wrap {
     width: 100%;
     margin-bottom: 20px;
     border-radius: 14px;
@@ -1101,6 +1101,31 @@
     border: 1px solid var(--border-color);
     position: relative;
     min-height: 60px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .question-image-wrap:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  }
+  .question-image-wrap::after {
+    content: '🔍';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 0.9rem;
+    background: rgba(0,0,0,0.5);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  .question-image-wrap:hover::after {
+    opacity: 1;
   }
   .question-image-wrap img {
     display: block;
@@ -1123,7 +1148,6 @@
     font-size: 0.85rem;
   }
   .question-image-placeholder i { font-size: 1.8rem; opacity: 0.6; }
-
   .quiz-progress-track {
     width: 100%; height: 6px; background: var(--bg-main); border-radius: 50px;
     overflow: hidden; margin-bottom: 22px; border: 1px solid var(--border-color);
@@ -2711,6 +2735,15 @@
   .btn-loading .btn-text {
     display: none;
   }
+
+    #imageModal img {
+    cursor: zoom-out;
+    transition: transform 0.3s ease;
+  }
+  #imageModal img:hover {
+    transform: scale(1.02);
+  }
+  
   #firebaseAuthModal .modal-content {
     max-width: 440px;
   }
@@ -3645,6 +3678,14 @@ window.performanceManager = new PerformanceManager();
   <i class="fas fa-info"></i>
 </button>
 
+<!-- Fullscreen Image Modal -->
+<div class="modal-overlay" id="imageModal" onclick="closeImageModal()" style="z-index:10001;">
+  <div class="modal-content" style="max-width:95vw; max-height:95vh; padding:10px; background:transparent; border:none; box-shadow:none; text-align:center;">
+    <button class="modal-close-btn" onclick="closeImageModal()" style="position:fixed; top:16px; right:20px; font-size:1.5rem; color:#fff; z-index:1;">✕</button>
+    <img id="fullscreenImage" src="" alt="Fullscreen" style="max-width:95vw; max-height:90vh; object-fit:contain; border-radius:12px;">
+  </div>
+</div>
+  
 <!-- Info Modal -->
 <div class="modal-overlay" id="infoModal">
   <div class="modal-content" style="max-width:520px; text-align:left;">
@@ -5328,6 +5369,22 @@ window.performanceManager = new PerformanceManager();
     audioManager.playUnlock();
   }
 
+
+    // ============ IMAGE FULLSCREEN ============
+  function openImageModal(src) {
+    const modal = document.getElementById('imageModal');
+    const img = document.getElementById('fullscreenImage');
+    if (modal && img) {
+      img.src = src;
+      modal.classList.add('active');
+    }
+  }
+  
+  function closeImageModal() {
+    const modal = document.getElementById('imageModal');
+    if (modal) modal.classList.remove('active');
+  }
+  
   function closeSummaryModal() {
     document.getElementById('summaryModal').classList.remove('active');
     audioManager.playModalClose();
@@ -5752,17 +5809,12 @@ window.performanceManager = new PerformanceManager();
   function renderQuestionImage(image) {
     if (!image) return '';
     const safeSrc = escapeHtml(image);
-    // Auto WebP support
-    const webpSrc = safeSrc.replace(/\.(png|jpg|jpeg)$/i, '.webp');
     return `
-      <div class="question-image-wrap" id="questionImageWrap">
-        <picture>
-          <source srcset="${webpSrc}" type="image/webp">
-          <img src="${safeSrc}"
-               alt="ප්‍රශ්නයට අදාළ රූපය"
-               loading="lazy"
-               onerror="this.closest('.question-image-wrap').classList.add('img-error')">
-        </picture>
+      <div class="question-image-wrap" onclick="openImageModal('${safeSrc}')" title="Click to zoom 🔍">
+        <img src="${safeSrc}"
+             alt="ප්‍රශ්නයට අදාළ රූපය"
+             loading="lazy"
+             onerror="this.closest('.question-image-wrap').classList.add('img-error')">
         <div class="question-image-placeholder">
           <i class="fas fa-image"></i>
           <span>රූපය පූරණය කළ නොහැක</span>
@@ -6484,7 +6536,7 @@ window.performanceManager = new PerformanceManager();
     const typingInField = e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA';
 
     if (e.key === 'Escape') {
-      const openOverlays = ['explainModal', 'leaderboardModal', 'achievementsModal', 'progressModal', 'saveScoreModal', 'summaryModal', 'celebrationOverlay', 'updateOverlay', 'firebaseAuthModal', 'infoModal'];
+      const openOverlays = ['explainModal', 'leaderboardModal', 'achievementsModal', 'progressModal', 'saveScoreModal', 'summaryModal', 'celebrationOverlay', 'updateOverlay', 'firebaseAuthModal', 'infoModal', 'imageModal'];
       for (const id of openOverlays) {
         const el = document.getElementById(id);
         if (el && el.classList.contains('active')) {
