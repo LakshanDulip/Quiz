@@ -5923,17 +5923,15 @@ window.performanceManager = new PerformanceManager();
     updateFullscreenBtn();
     updateInstallButton();
     
-    // Restore panel state after render
-    setTimeout(() => {
+    // Immediately restore panel state (no glitch)
+    if (panelHidden) {
       const controls = document.querySelector('.controls');
       const arrow = document.getElementById('panelToggleArrow');
       const headerInner = document.querySelector('.header-inner');
-      if (panelHidden) {
-        if (controls) controls.classList.add('hidden-panel');
-        if (headerInner) headerInner.classList.add('hidden-panel');
-        if (arrow) arrow.classList.add('showing');
-      }
-    }, 50);
+      if (controls) controls.classList.add('hidden-panel');
+      if (headerInner) headerInner.classList.add('hidden-panel');
+      if (arrow) arrow.classList.add('showing');
+    }
 
     window.performanceManager?.scheduleUpdate(() => {
       const ring = document.getElementById('ringFg');
