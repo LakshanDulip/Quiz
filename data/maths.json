@@ -7,7 +7,32 @@
             "id": "grade_8_maths_l1",
             "title": "🔒📖 මෙම පඩම් තවමත් සූදානම් වෙමින් පවතී... 🚀",
             "description": "Lesson Coming Soon... ✨",
-            "questions": []
+            "questions": [
+              {
+                "q": "1+1",
+                "options": [
+                  "1",
+                  "2",
+                  "3",
+                  "4"
+                ],
+                "correct": 1,
+                "explanation": "1+1=2",
+                "image": "https://i.ibb.co/BV0w5T7N/gaston-abascal-8-F-6p-Xy-Qy-LU-unsplash.webp"
+              },
+              {
+                "q": "1+1",
+                "options": [
+                  "1",
+                  "2",
+                  "3",
+                  "4"
+                ],
+                "correct": 1,
+                "explanation": "1+1=2",
+                "image": "https://i.ibb.co/BV0w5T7N/gaston-abascal-8-F-6p-Xy-Qy-LU-unsplash.webp"
+              }
+            ]
           }
         ]
       },
