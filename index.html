@@ -1825,6 +1825,58 @@
   }
 
   /* ===== EMOTIONS ===== */
+
+  /* 💀 Dead / Game Over */
+  .mascot-container.dead .mascot-face {
+    background: linear-gradient(180deg, #b0b0b0 0%, #888 30%, #666 100%) !important;
+    filter: grayscale(0.8);
+  }
+  .mascot-container.dead .mascot-eye {
+    height: 2px;
+    border-radius: 0;
+    background: #333;
+    animation: none;
+    overflow: hidden;
+  }
+  .mascot-container.dead .mascot-eye::after { display: none; }
+  .mascot-container.dead .mascot-eye::before { display: none; }
+  .mascot-container.dead .mascot-mouth {
+    width: 14px;
+    height: 8px;
+    border: 2px solid #333;
+    border-radius: 50%;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    top: 38px;
+  }
+  .mascot-container.dead .mascot-nose {
+    background: #555;
+  }
+  .mascot-container.dead .mascot-eyebrow {
+    background: #444;
+    transform: rotate(15deg) translateY(-2px);
+  }
+  .mascot-container.dead .mascot-eyebrow:last-child {
+    transform: rotate(-15deg) translateY(-2px);
+  }
+  .mascot-container.dead .mascot-ear-left,
+  .mascot-container.dead .mascot-ear-right {
+    border-bottom-color: #666 !important;
+    filter: grayscale(0.8);
+  }
+  .mascot-container.dead .mascot-ear-inner {
+    border-bottom-color: #aaa !important;
+  }
+  .mascot-container.dead .mascot-body {
+    animation: deadDrop 0.5s ease-in forwards;
+  }
+  @keyframes deadDrop {
+    0% { transform: translateY(0) rotate(0); }
+    30% { transform: translateY(-5px) rotate(-5deg); }
+    60% { transform: translateY(5px) rotate(10deg); }
+    100% { transform: translateY(15px) rotate(90deg); opacity: 0.5; }
+  }
   
   /* 😴 Sleepy */
   .mascot-container.sleepy .mascot-eye {
@@ -4482,36 +4534,41 @@ window.performanceManager = new PerformanceManager();
   function closeProgress() {
     document.getElementById('progressModal').classList.remove('active');
   }
-    // Auto trigger emotion for quiz answers
+  // Auto trigger emotion for quiz answers
   function triggerMascotEmotion(emotion, type, isStreak) {
     const container = document.getElementById('mascotContainer');
     if (!container) return;
     
     // Remove all emotion classes
-    container.classList.remove('sleepy', 'angry', 'singing', 'crying', 'smile', 'dance', 'happy', 'love', 'surprised', 'cool', 'wink', 'sad');
+    container.classList.remove('sleepy', 'angry', 'singing', 'crying', 'smile', 'dance', 'happy', 'love', 'surprised', 'cool', 'wink', 'sad', 'dead');
     
     // Add emotion
     container.classList.add(emotion);
     
-    // Auto remove after duration
-    setTimeout(() => {
-      container.classList.remove(emotion);
-    }, 2000);
+    // Auto remove after duration (except dead - stays)
+    if (emotion !== 'dead') {
+      setTimeout(() => {
+        container.classList.remove(emotion);
+      }, 2000);
+    }
     
     // Show message
     const messages = {
       correct: ['✅ නියමයි!', '🎉 සුපිරි!', '🌟 විශිෂ්ටයි!', '👏 හරිම දක්ෂයි!', '💯 Perfect!'],
       streak: ['🔥 ගිනි ඇවිලෙනවා!', '⚡ නතර කරන්න එපා!', '🚀 ඉස්සරහට!'],
-      wrong: ['😅 පරිස්සමෙන්!', '💪 නැවත උත්සාහ කරන්න!', '📖 පාඩම් කරන්න!', '🤗 අතපසු වීමක්!']
+      wrong: ['😅 පරිස්සමෙන්!', '💪 නැවත උත්සාහ කරන්න!', '📖 පාඩම් කරන්න!', '🤗 අතපසු වීමක්!'],
+      gameover: ['💀 මැරුණා!', '☠️ Game Over!', '😵 ඉවරයි!', '🪦 RIP!']
     };
     
-    let msgType = type === 'correct' ? (isStreak ? 'streak' : 'correct') : 'wrong';
+    let msgType = type === 'correct' ? (isStreak ? 'streak' : 'correct') : (type === 'gameover' ? 'gameover' : 'wrong');
     const msgList = messages[msgType];
     const msg = msgList[Math.floor(Math.random() * msgList.length)];
-    showMascotSpeech(msg, 2000);
+    showMascotSpeech(msg, 3000);
     
     // Sound
-    if (type === 'correct') {
+    if (type === 'gameover') {
+      audioManager.playGameOver();
+    } else if (type === 'correct') {
       audioManager.playCorrect();
     } else {
       audioManager.playWrong();
@@ -5921,14 +5978,24 @@ window.performanceManager = new PerformanceManager();
       qz.wrong++;
       appState.streak = 0;
       // Mascot react
-            // Mascot react - Wrong = sad emotions
-      const wrongEmotions = ['crying', 'angry', 'sleepy'];
-      const randomEmotion = wrongEmotions[Math.floor(Math.random() * wrongEmotions.length)];
-      triggerMascotEmotion(randomEmotion, 'wrong', false);
+      // Mascot react - Wrong = sad emotions (based on lives left)
       if (isGame) {
         qz.lives--;
+        const livesLeft = qz.lives;
+        if (livesLeft <= 0) {
+          triggerMascotEmotion('dead', 'gameover', false);
+        } else if (livesLeft === 1) {
+          triggerMascotEmotion('crying', 'wrong', false);
+        } else {
+          const wrongEmotions = ['crying', 'angry', 'sleepy'];
+          const randomEmotion = wrongEmotions[Math.floor(Math.random() * wrongEmotions.length)];
+          triggerMascotEmotion(randomEmotion, 'wrong', false);
+        }
         audioManager.playWrong(); 
       } else {
+        const wrongEmotions = ['crying', 'angry', 'sleepy'];
+        const randomEmotion = wrongEmotions[Math.floor(Math.random() * wrongEmotions.length)];
+        triggerMascotEmotion(randomEmotion, 'wrong', false);
         audioManager.playWrong();
       }
     }
@@ -6044,6 +6111,14 @@ window.performanceManager = new PerformanceManager();
 
   function closeGameOver() {
     document.getElementById('gameOverModal').classList.remove('active');
+    // Revive mascot from dead
+    const container = document.getElementById('mascotContainer');
+    if (container) {
+      container.classList.remove('dead');
+      container.classList.add('showing');
+      showMascotSpeech('🦊 මම ආපහු ජීවත් වුනා! 💪', 2500);
+      setTimeout(() => container.classList.remove('showing'), 600);
+    }
     if (appState.quiz) {
       const qz = appState.quiz;
       if (qz.autoAdvanceTimer) { clearTimeout(qz.autoAdvanceTimer); qz.autoAdvanceTimer = null; }
