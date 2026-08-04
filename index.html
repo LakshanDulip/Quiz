@@ -4018,6 +4018,7 @@ window.performanceManager = new PerformanceManager();
   function setTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
+    updateMascotTheme(theme);
     render();
     audioManager.playThemeChange();
     
@@ -4462,6 +4463,73 @@ window.performanceManager = new PerformanceManager();
   function closeProgress() {
     document.getElementById('progressModal').classList.remove('active');
   }
+
+  // ============ MASCOT THEME COLORS ============
+  function updateMascotTheme(theme) {
+    const face = document.querySelector('.mascot-face');
+    const ears = document.querySelectorAll('.mascot-ear-left, .mascot-ear-right');
+    const innerEars = document.querySelectorAll('.mascot-ear-inner');
+    const nose = document.querySelector('.mascot-nose');
+    const eyebrows = document.querySelectorAll('.mascot-eyebrow');
+    const mouth = document.querySelector('.mascot-mouth');
+    
+    if (!face) return;
+    
+    const themeColors = {
+      dark:       { face: 'linear-gradient(180deg, #ffb07c 0%, #ff8a50 25%, #ff6d35 55%, #e64a19 100%)', ear: '#e64a19', innerEar: '#ffccbc', nose: '#1a0800', eyebrow: '#8b3a12' },
+      light:      { face: 'linear-gradient(180deg, #ffcc80 0%, #ffa040 25%, #ff7b20 55%, #e05510 100%)', ear: '#e05510', innerEar: '#ffe0c0', nose: '#3a1500', eyebrow: '#a04010' },
+      purple:     { face: 'linear-gradient(180deg, #d4a0ff 0%, #b870ff 25%, #9a40f0 55%, #6a10c0 100%)', ear: '#6a10c0', innerEar: '#e8d0ff', nose: '#1a0040', eyebrow: '#5a20a0' },
+      ocean:      { face: 'linear-gradient(180deg, #80d0ff 0%, #40b0f0 25%, #1090d0 55%, #0050a0 100%)', ear: '#0050a0', innerEar: '#c0e8ff', nose: '#001030', eyebrow: '#1040a0' },
+      forest:     { face: 'linear-gradient(180deg, #90e0a0 0%, #50c070 25%, #20a040 55%, #006020 100%)', ear: '#006020', innerEar: '#d0ffe0', nose: '#001008', eyebrow: '#105020' },
+      sunset:     { face: 'linear-gradient(180deg, #ff9070 0%, #f06050 25%, #d03030 55%, #a01020 100%)', ear: '#a01020', innerEar: '#ffd0c0', nose: '#200008', eyebrow: '#801020' },
+      pink:       { face: 'linear-gradient(180deg, #ffb0d0 0%, #ff80b0 25%, #f05090 55%, #c02060 100%)', ear: '#c02060', innerEar: '#ffe0f0', nose: '#200010', eyebrow: '#801040' },
+      'pure-white': { face: 'linear-gradient(180deg, #e0e0e0 0%, #c0c0c0 25%, #a0a0a0 55%, #606060 100%)', ear: '#606060', innerEar: '#f0f0f0', nose: '#000000', eyebrow: '#404040' },
+      sakura:     { face: 'linear-gradient(180deg, #ffc0d0 0%, #ff90b0 25%, #f06080 55%, #c03050 100%)', ear: '#c03050', innerEar: '#ffe0e8', nose: '#200808', eyebrow: '#802030' },
+      midnight:   { face: 'linear-gradient(180deg, #8090d0 0%, #5060b0 25%, #203090 55%, #001060 100%)', ear: '#001060', innerEar: '#d0d8ff', nose: '#000818', eyebrow: '#102050' },
+      mint:       { face: 'linear-gradient(180deg, #80e8c0 0%, #40c090 25%, #10a060 55%, #006030 100%)', ear: '#006030', innerEar: '#d0ffe8', nose: '#001008', eyebrow: '#105030' },
+      amber:      { face: 'linear-gradient(180deg, #ffc070 0%, #f09030 25%, #d06010 55%, '#a03000 100%)', ear: '#a03000', innerEar: '#ffe8d0', nose: '#1a0800', eyebrow: '#803010' },
+      '3d':       { face: 'linear-gradient(180deg, #00e5ff 0%, #00b8d4 25%, #0090b0 55%, #005070 100%)', ear: '#005070', innerEar: '#c0f8ff', nose: '#000818', eyebrow: '#104050' }
+    };
+    
+    const colors = themeColors[theme] || themeColors.dark;
+    
+    // Update face
+    face.style.background = colors.face;
+    
+    // Update ears
+    ears.forEach(ear => {
+      ear.style.borderBottomColor = colors.ear;
+    });
+    
+    // Update inner ears
+    innerEars.forEach(inner => {
+      inner.style.borderBottomColor = colors.innerEar;
+    });
+    
+    // Update nose
+    if (nose) nose.style.background = colors.nose;
+    
+    // Update eyebrows
+    eyebrows.forEach(brow => {
+      brow.style.background = colors.eyebrow;
+    });
+    
+    // Show theme change message
+    const themeNames = {
+      dark: '🌙 Dark', light: '☀️ Light', purple: '💜 Purple', ocean: '🌊 Ocean',
+      forest: '🌿 Forest', sunset: '🌅 Sunset', pink: '🌺 Pink', 'pure-white': '⚪ White',
+      sakura: '🌸 Sakura', midnight: '🌌 Midnight', mint: '🍃 Mint', amber: '🟠 Amber', '3d': '🧊 3D'
+    };
+    
+    showMascotSpeech(`🎨 ${themeNames[theme] || theme} Theme!`, 2000);
+  }
+  
+  // Apply theme on load
+  setTimeout(() => {
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+    updateMascotTheme(currentTheme);
+  }, 500);  
+  
     // Auto trigger emotion for quiz answers
   function triggerMascotEmotion(emotion, type, isStreak) {
     const container = document.getElementById('mascotContainer');
