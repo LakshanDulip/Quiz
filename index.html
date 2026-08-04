@@ -1264,7 +1264,8 @@
   .flashcard-front, .flashcard-back {
     position: absolute;
     inset: 0;
-    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden !important;
+    backface-visibility: hidden !important;
     border-radius: 20px;
     padding: 35px 30px;
     display: flex;
@@ -1274,14 +1275,13 @@
     text-align: center;
     overflow-y: auto;
   }
-  
   .flashcard-front {
-    background: var(--bg-card);
-    border: 2px solid var(--border-color);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    -webkit-backface-visibility: hidden !important;
-    backface-visibility: hidden !important;
+    background: var(--bg-card) !important;
     z-index: 2;
+  }
+  .flashcard-back {
+    background: var(--bg-card) !important;
+    z-index: 1;
   }
   .flashcard-front::before {
     content: '❓';
@@ -1303,13 +1303,7 @@
   }
   
   .flashcard-back {
-    transform: rotateY(180deg);
-    -webkit-transform: rotateY(180deg);
-    background: var(--bg-card);
-    border: 2px solid var(--correct-color);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    -webkit-backface-visibility: hidden !important;
-    backface-visibility: hidden !important;
+    background: var(--bg-card) !important;
     z-index: 1;
   }
   .flashcard-back::before {
