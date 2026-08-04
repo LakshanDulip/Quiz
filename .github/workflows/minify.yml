@@ -1,9 +1,8 @@
-name: Minify Files
+name: Minify JSON
 
 on:
   push:
     paths:
-      - 'index.html'
       - 'data.json'
   workflow_dispatch:
 
@@ -19,32 +18,32 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install Minifiers
-        run: npm install -g html-minifier-terser clean-css-cli
-
-      - name: Minify HTML
-        run: |
-          html-minifier-terser index.html -o index.min.html \
-            --collapse-whitespace \
-            --remove-comments \
-            --minify-css true \
-            --minify-js true
-
       - name: Minify JSON
         run: |
           node -e "
             const fs = require('fs');
             const data = JSON.parse(fs.readFileSync('data.json', 'utf8'));
-            fs.writeFileSync('data.json', JSON.stringify(data));
+            fs.writeFileSync('data.min.json', JSON.stringify(data));
           "
+          
+      - name: Check if changed
+        id: check
+        run: |
+          if diff data.json data.min.json > /dev/null 2>&1; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
 
-      - name: Copy minified HTML
-        run: mv index.min.html index.html
+      - name: Copy minified file
+        if: steps.check.outputs.changed == 'true'
+        run: mv data.min.json data.json
 
       - name: Commit & Push
+        if: steps.check.outputs.changed == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add index.html data.json
-          git diff --staged --quiet || git commit -m "⚡ Minify CSS/HTML/JSON"
+          git add data.json
+          git commit -m "⚡ Minify data.json"
           git push
