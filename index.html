@@ -4942,40 +4942,80 @@ window.performanceManager = new PerformanceManager();
     
     let reply = '';
     
-    if (message.includes('hello') || message.includes('හලෝ') || message.includes('ආයුබෝවන්') || message.includes('හායි') || message.includes('hi')) {
-      const replies = ['👋 හෙලෝ යාළුවා!', '😊 ආයුබෝවන්! කොහොමද?', '🦊 හායි! සතුටුයි ඔබව දැකලා!', '💕 හෙලෝ! ඉගෙන ගමු!'];
-      reply = replies[Math.floor(Math.random() * replies.length)];
-    } else if (message.includes('name') || message.includes('නම') || message.includes('කවුද')) {
-      reply = '🦊 මම Quiz Hub Fox! ඔබේ ඉගෙනුම් සගයා!';
-    } else if (message.includes('help') || message.includes('උදව්') || message.includes('උදවු')) {
-      reply = '💡 Study Mode, Game Mode, Flashcards use කරන්න. ප්‍රශ්න තියෙනවද?';
-    } else if (message.includes('thanks') || message.includes('ස්තුති') || message.includes('thank') || message.includes('ඉස්තුති')) {
-      const replies = ['😊 ඔබට ස්තුතියි!', '💕 Welcome!', '🦊 සතුටුයි උදව් කරන්න ලැබීම ගැන!'];
-      reply = replies[Math.floor(Math.random() * replies.length)];
-    } else if (message.includes('love') || message.includes('ආදරේ') || message.includes('ආදර')) {
-      const replies = ['💕 මමත් ඔබට ආදරෙයි!', '💖 ආදරෙයි යාළුවා!', '🦊💝 මගේ හිතේ ඔබට ලොකු තැනක්!'];
-      reply = replies[Math.floor(Math.random() * replies.length)];
-    } else if (message.includes('bye') || message.includes('ගිහින්') || message.includes('යනව')) {
-      const replies = ['👋 ආයුබෝවන්! ආයෙත් එන්න!', '😊 ගිහින් එන්නම්!', '🦊 මම මෙතන ඉන්නම්!'];
-      reply = replies[Math.floor(Math.random() * replies.length)];
-    } else if (message.includes('song') || message.includes('සිංදු') || message.includes('sing')) {
-      reply = '🎵 ලලලා... 🎶 ලාලාලා... 🎤 මම සිංදු කියන්න දන්නවා!';
-    } else if (message.includes('dance') || message.includes('නට') || message.includes('ඩාන්ස්')) {
-      reply = '💃 නටමු නටමු! 🕺 ඩාන්ස් ඩාන්ස්!';
-    } else if (message.includes('sad') || message.includes('දුක') || message.includes('අඬ')) {
-      reply = '😢 දුක් වෙන්න එපා... 💪 ඔබට පුළුවන්! මම ඉන්නවා!';
-    } else if (message.includes('joke') || message.includes('විහිලු') || message.includes('හාස්‍ය')) {
-      const jokes = ['😄 පොතක් වැටුනා... පිටු 100ක් කියෙව්වා! 😂', '🤣 ගණිතය පොත අඬන්නේ ඇයි? ගොඩක් ප්‍රශ්න තියෙන නිසා!', '😜 පෑන කැඩුනේ ඇයි? ලියන්න බැරිව!'];
-      reply = jokes[Math.floor(Math.random() * jokes.length)];
-    } else {
-      const defaultReplies = [
-        '🤔 මට තේරුනේ නෑ... නැවත කියන්න!',
-        '🦊 ඒක ගැන මම දන්නේ නෑ...',
-        '💬 වෙන දෙයක් අහන්න!',
-        '😊 මම පුංචි ෆොක්ස් කෙනෙක් විතරයි!',
-        '📚 ඉගෙන ගන්න දෙයක් අහන්න!'
-      ];
-      reply = defaultReplies[Math.floor(Math.random() * defaultReplies.length)];
+    // Check if quiz is active - give lesson-related help
+    if (appState.quiz && !appState.quiz.showResult && !appState.quiz.gameOver) {
+      const qz = appState.quiz;
+      const lesson = findLesson(qz.subject, qz.grade, qz.lessonId);
+      
+      if (lesson && qz.order && qz.idx < qz.order.length) {
+        const qIndex = qz.order[qz.idx];
+        const question = lesson.questions[qIndex];
+        
+        // Help keywords
+        if (message.includes('help') || message.includes('උදව්') || message.includes('උත්තර') || message.includes('answer') || message.includes('පිළිතුර')) {
+          const correctOption = question.options[question.correct];
+          const hints = [
+            `💡 Hint: පිළිතුර "${correctOption}" වගේ දෙයක්!`,
+            `🤔 හිතන්න... පාඩමේ තියෙන කරුණක්!`,
+            `📖 මේක ${lesson.title} පාඩමේ ප්‍රශ්නයක්!`,
+            `🦊 මට කියන්න බෑ... ඒත් හිතන්න හොඳින්!`
+          ];
+          reply = hints[Math.floor(Math.random() * hints.length)];
+        } else if (message.includes('lesson') || message.includes('පාඩම') || message.includes('subject') || message.includes('විෂය')) {
+          reply = `📚 දැන් "${lesson.title}" පාඩමේ ප්‍රශ්න ${qz.idx + 1}/${qz.order.length}! ඉදිරියට යන්න! 💪`;
+        } else if (message.includes('score') || message.includes('ලකුණු') || message.includes('කීයක්')) {
+          reply = `📊 දැන් ලකුණු: ${qz.score} නිවැරදි, ${qz.wrong} වැරදි. දිගටම කරන්න! 🔥`;
+        } else if (message.includes('streak') || message.includes('දිගිය')) {
+          reply = `🔥 Streak: ${appState.streak}! ${appState.streak >= 3 ? 'ගිනි ඇවිලෙනවා!' : 'දිගටම කරන්න!'}`;
+        } else if (message.includes('skip') || message.includes('මඟ') || message.includes('යන්න')) {
+          if (qz.powerups && qz.powerups.skip > 0) {
+            reply = `⏭️ Skip power-up එකක් තියෙනවා (${qz.powerups.skip})! Use කරන්න!`;
+          } else {
+            reply = '😅 Skip power-ups ඉවරයි! දැන් උත්තර දෙන්න!';
+          }
+        } else if (message.includes('fifty') || message.includes('50')) {
+          if (qz.powerups && qz.powerups.fiftyFifty > 0) {
+            reply = `✂️ 50/50 power-up එකක් තියෙනවා (${qz.powerups.fiftyFifty})! Use කරන්න!`;
+          } else {
+            reply = '😅 50/50 power-ups ඉවරයි!';
+          }
+        } else if (message.includes('lives') || message.includes('ජීවිත') || message.includes('life')) {
+          reply = `❤️ ජීවිත: ${qz.lives}/${MAX_LIVES}. පරිස්සමෙන්!`;
+        } else if (message.includes('timer') || message.includes('වෙලා') || message.includes('කාල')) {
+          reply = `⏱️ Timer: ${qz.timer}s. ඉක්මන් කරන්න!`;
+        }
+      }
+    }
+    
+    // General replies (if no quiz-specific reply)
+    if (!reply) {
+      if (message.includes('hello') || message.includes('හලෝ') || message.includes('ආයුබෝවන්') || message.includes('හායි') || message.includes('hi')) {
+        const replies = ['👋 හෙලෝ යාළුවා!', '😊 ආයුබෝවන්! කොහොමද?', '🦊 හායි! සතුටුයි ඔබව දැකලා!', '💕 හෙලෝ! ඉගෙන ගමු!'];
+        reply = replies[Math.floor(Math.random() * replies.length)];
+      } else if (message.includes('name') || message.includes('නම') || message.includes('කවුද')) {
+        reply = '🦊 මම Quiz Hub Fox! ඔබේ ඉගෙනුම් සගයා!';
+      } else if (message.includes('thanks') || message.includes('ස්තුති') || message.includes('thank')) {
+        reply = '😊 ඔබට ස්තුතියි! 💕';
+      } else if (message.includes('love') || message.includes('ආදරේ')) {
+        reply = '💕 මමත් ඔබට ආදරෙයි! 🦊';
+      } else if (message.includes('bye') || message.includes('ගිහින්') || message.includes('යනව')) {
+        reply = '👋 ආයුබෝවන්! ආයෙත් එන්න!';
+      } else if (message.includes('song') || message.includes('සිංදු')) {
+        reply = '🎵 ලලලා... 🎶 ලාලාලා... 🎤';
+      } else if (message.includes('dance') || message.includes('නට')) {
+        reply = '💃 නටමු නටමු! 🕺';
+      } else if (message.includes('joke') || message.includes('විහිලු')) {
+        const jokes = ['😄 පොතක් වැටුනා... පිටු 100ක් කියෙව්වා! 😂', '🤣 ගණිතය පොත අඬන්නේ ඇයි? ගොඩක් ප්‍රශ්න තියෙන නිසා!'];
+        reply = jokes[Math.floor(Math.random() * jokes.length)];
+      } else {
+        const defaultReplies = [
+          '🤔 මට තේරුනේ නෑ... නැවත කියන්න!',
+          '🦊 ඒක ගැන මම දන්නේ නෑ...',
+          '💬 Quiz එකක් තියෙද්දි help, score, streak, lives, timer අහන්න!',
+          '📚 "help" කියලා type කරන්න hint එකක් ගන්න!'
+        ];
+        reply = defaultReplies[Math.floor(Math.random() * defaultReplies.length)];
+      }
     }
     
     showMascotSpeech(reply, 4000);
