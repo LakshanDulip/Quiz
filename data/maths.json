@@ -1,0 +1,11 @@
+{
+  "subject": "maths",
+  "name": "Mathematics",
+  "sinhala": "ගණිතය",
+  "grades": {
+    "8": { "lessons": [...] },
+    "9": { "lessons": [...] },
+    "10": { "lessons": [...] },
+    "11": { "lessons": [...] }
+  }
+}
