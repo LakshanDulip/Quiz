@@ -2201,11 +2201,11 @@
     opacity: 1;
     transform: translateY(0) scale(1);
   }
-    /* Chat Input */
+  /* Chat Input */
   .mascot-chat {
-    position: absolute;
-    bottom: -50px;
-    right: -10px;
+    position: fixed;
+    bottom: 120px;
+    right: 10px;
     display: flex;
     gap: 6px;
     background: var(--bg-card);
@@ -2214,20 +2214,18 @@
     padding: 5px 5px 5px 14px;
     box-shadow: var(--shadow-md);
     z-index: 19999;
-    animation: chatSlideUp 0.3s ease forwards;
-  }
-  @keyframes chatSlideUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    width: 180px;
   }
   .mascot-chat input {
     border: none;
     background: transparent;
     color: var(--text-primary);
-    font-size: 0.8rem;
-    width: 120px;
+    font-size: 16px;
+    width: 130px;
     outline: none;
     font-family: inherit;
+    -webkit-appearance: none;
+    border-radius: 0;
   }
   .mascot-chat input::placeholder {
     color: var(--text-secondary);
@@ -2246,22 +2244,11 @@
     align-items: center;
     justify-content: center;
     transition: transform 0.2s ease;
+    flex-shrink: 0;
   }
   .mascot-chat button:hover {
     transform: scale(1.1);
   }
-  .mascot-speech::after {
-    content: '';
-    position: absolute;
-    bottom: -9px;
-    right: 24px;
-    width: 0;
-    height: 0;
-    border-left: 9px solid transparent;
-    border-right: 9px solid transparent;
-    border-top: 9px solid rgba(30,30,40,0.95);
-  }
-  
   /* Celebration */
   .mascot-container.celebrating .mascot-body {
     animation: mascotCelebrate 0.4s ease-in-out infinite;
