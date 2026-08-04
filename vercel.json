@@ -10,11 +10,14 @@
       ]
     }
   ],
-  "redirects": [
+  "rewrites": [
     {
-      "source": "/home",
-      "destination": "/",
-      "permanent": true
+      "source": "/sitemap.xml",
+      "destination": "/sitemap.xml"
+    },
+    {
+      "source": "/robots.txt",
+      "destination": "/robots.txt"
     }
   ]
 }
