@@ -869,8 +869,15 @@
   }
   .logo-text .sub { font-size: 0.45rem; color: var(--text-secondary); letter-spacing: 2px; text-transform: uppercase; font-weight: 700; }
 
-  .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-
+  .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; transition: all 0.4s ease; }
+  .controls.hidden-panel {
+    opacity: 0;
+    pointer-events: none;
+    max-height: 0;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+  }
   .control-group { display: flex; gap: 6px; align-items: center; padding: 0 8px; }
   .control-group + .control-group { border-left: 1px solid var(--border-color); }
 
@@ -4406,6 +4413,26 @@ window.performanceManager = new PerformanceManager();
 
   const audioManager = new PremiumAudioManager();
 
+  // ============ CONTROL PANEL TOGGLE ============
+  window.toggleControlPanel = function() {
+    const controls = document.querySelector('.controls');
+    const btn = document.getElementById('hidePanelBtn');
+    const icon = btn?.querySelector('i');
+    
+    if (controls) {
+      controls.classList.toggle('hidden-panel');
+      
+      if (controls.classList.contains('hidden-panel')) {
+        if (icon) icon.className = 'fas fa-eye';
+        btn.title = 'Show Panel (H)';
+      } else {
+        if (icon) icon.className = 'fas fa-eye-slash';
+        btn.title = 'Hide Panel (H)';
+      }
+    }
+    audioManager.playClick();
+  };
+  
   window.toggleMute = function() {
     isMuted = !isMuted;
     localStorage.setItem('quizMuted', isMuted);
@@ -5915,7 +5942,9 @@ window.performanceManager = new PerformanceManager();
               <button id="fullscreenBtn" class="icon-btn ${isFull ? 'is-fullscreen' : ''}" onclick="toggleFullscreen()" title="Fullscreen (F)">
                 <i class="fas ${isFull ? 'fa-compress' : 'fa-expand'}"></i>
               </button>
-
+              <button id="hidePanelBtn" class="icon-btn" onclick="toggleControlPanel()" title="Panel Hide/Show (H)">
+                <i class="fas fa-eye-slash"></i>
+              </button>
               <button id="muteBtn" class="icon-btn ${muteClass}" onclick="toggleMute()" title="Mute (M)">
                 <i class="fas ${muteIcon}"></i>
               </button>
@@ -6826,6 +6855,7 @@ window.performanceManager = new PerformanceManager();
       return;
     }
     if (e.key === 'm' || e.key === 'M') { e.preventDefault(); toggleMute(); return; }
+    if (e.key === 'h' || e.key === 'H') { e.preventDefault(); toggleControlPanel(); return; }
     if (e.key === 't' || e.key === 'T') { e.preventDefault(); setTheme(THEMES[(THEMES.indexOf(document.documentElement.getAttribute('data-theme')) + 1) % THEMES.length]); return; }
 
     const r = appState.route;
