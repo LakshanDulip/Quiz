@@ -3988,11 +3988,12 @@ window.performanceManager = new PerformanceManager();
     playTone({ freq = 440, type = 'sine', vol = 0.1, attack = 0.01, decay = 0.1, sustain = 0.05, release = 0.2, duration = 0.3, detune = 0, slideTo = null, slideTime = null }) {
       if (this.isMuted) return;
       const ctx = this.init();
+      if (!ctx || ctx.state === 'closed') return;
       if (ctx.state === 'suspended') ctx.resume();
 
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      const now = ctx.currentTime;
+      const now = Math.max(ctx.currentTime, 0);
 
       osc.type = type;
       osc.frequency.setValueAtTime(freq, now);
