@@ -5384,12 +5384,18 @@ window.performanceManager = new PerformanceManager();
       // Load subject if not loaded yet
       await loadOtherSubject(subject);
       
-      if (appState.content && appState.content.subjects && 
-          appState.content.subjects[subject] && 
-          appState.content.subjects[subject].grades && 
-          appState.content.subjects[subject].grades[grade]) {
-        return appState.content.subjects[subject].grades[grade].lessons || [];
+      const subjectData = appState.content?.subjects?.[subject];
+      
+      // Check if data is nested under "subjects" key (from old data.json format)
+      if (subjectData?.subjects?.[subject]?.grades?.[grade]?.lessons) {
+        return subjectData.subjects[subject].grades[grade].lessons;
       }
+      
+      // Direct format (new per-subject files)
+      if (subjectData?.grades?.[grade]?.lessons) {
+        return subjectData.grades[grade].lessons;
+      }
+      
       return [];
     } catch (e) { return []; }
   }
@@ -5443,11 +5449,12 @@ window.performanceManager = new PerformanceManager();
       
       if (!scienceData) throw new Error('No data loaded');
       
+      // Wrap in same structure as old data.json
       appState.content = {
-        subjects: {
-          science: scienceData
-        }
+        subjects: {}
       };
+      appState.content.subjects['science'] = scienceData;
+      
       appState.loading = false;
       render();
     } catch (error) {
@@ -5456,7 +5463,6 @@ window.performanceManager = new PerformanceManager();
       render();
     }
   }
-  
   // Load other subject when needed
   async function loadOtherSubject(subject) {
     if (appState.content?.subjects?.[subject]) return;
