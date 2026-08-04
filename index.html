@@ -6362,8 +6362,9 @@ window.performanceManager = new PerformanceManager();
 
   // ============ MODAL ============
   function showModal(isCorrect, title, text) {
-    audioManager.playModalOpen();
     const modal = document.getElementById('explainModal');
+    if (!modal) return;
+    
     const icon = document.getElementById('modalIcon');
     const actions = modal.querySelector('.modal-actions');
     const closeBtn = modal.querySelector('.modal-close-btn');
@@ -6371,25 +6372,29 @@ window.performanceManager = new PerformanceManager();
     document.getElementById('modalTitle').textContent = title;
     document.getElementById('modalTitle').style.color = isCorrect ? 'var(--correct-color)' : 'var(--wrong-color)';
     document.getElementById('modalText').innerHTML = text ? `<strong>💡 පැහැදිලි කිරීම:</strong><br>${escapeHtml(text)}` : "පැහැදිලි කිරීමක් නැත.";
-    icon.textContent = getRandomEmoji(isCorrect);
-    icon.className = `modal-icon ${isCorrect ? 'correct' : 'wrong'}`;
-
-    if (currentMode === MODES.GAME) {
-      actions.style.display = 'none';
-      closeBtn.style.display = 'none';
-    } else {
-      actions.style.display = 'flex';
-      closeBtn.style.display = 'block';
+    if (icon) {
+      icon.textContent = getRandomEmoji(isCorrect);
+      icon.className = `modal-icon ${isCorrect ? 'correct' : 'wrong'}`;
     }
 
-    setTimeout(() => { modal.classList.add('active'); }, 300);
+    if (currentMode === MODES.GAME) {
+      if (actions) actions.style.display = 'none';
+      if (closeBtn) closeBtn.style.display = 'none';
+    } else {
+      if (actions) actions.style.display = 'flex';
+      if (closeBtn) closeBtn.style.display = 'block';
+    }
+
+    modal.classList.add('active');
+    
+    try { audioManager.playModalOpen(); } catch(e) {}
   }
 
   window.closeModalAndNext = function() {
-    audioManager.playModalClose();
-    document.getElementById('explainModal').classList.remove('active');
+    const modal = document.getElementById('explainModal');
+    if (modal) modal.classList.remove('active');
+    try { audioManager.playModalClose(); } catch(e) {}
   };
-
   // ============ POWER-UPS ============
   window.useFiftyFifty = function() {
     const qz = appState.quiz;
