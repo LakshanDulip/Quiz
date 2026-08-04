@@ -881,8 +881,48 @@
     padding: 0;
     transition: all 0.4s ease;
   }
+  .controls.hidden-panel .mode-selector,
+  .controls.hidden-panel .game-stats,
+  .controls.hidden-panel .control-group {
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    transition: all 0.4s ease;
+  }
   .controls.hidden-panel {
     gap: 4px;
+  }
+  
+  /* Panel Toggle Arrow */
+  .panel-toggle-arrow {
+    display: none;
+    width: 100%;
+    padding: 4px 0;
+    background: var(--bg-card);
+    border: none;
+    border-top: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 0.7rem;
+    transition: all 0.3s ease;
+    text-align: center;
+    opacity: 0.5;
+  }
+  .panel-toggle-arrow:hover {
+    opacity: 1;
+    color: var(--primary-color);
+  }
+  .panel-toggle-arrow.visible {
+    display: block;
+  }
+  .panel-toggle-arrow i {
+    transition: transform 0.3s ease;
+  }
+  .panel-toggle-arrow.showing i {
+    transform: rotate(180deg);
   }
   .control-group { display: flex; gap: 6px; align-items: center; padding: 0 8px; }
   .control-group + .control-group { border-left: 1px solid var(--border-color); }
@@ -4439,13 +4479,22 @@ window.performanceManager = new PerformanceManager();
   
   window.toggleControlPanel = function() {
     const controls = document.querySelector('.controls');
+    const arrow = document.getElementById('panelToggleArrow');
     panelHidden = !panelHidden;
     
     if (controls) {
       if (panelHidden) {
         controls.classList.add('hidden-panel');
+        if (arrow) {
+          arrow.classList.add('visible');
+          arrow.classList.add('showing');
+        }
       } else {
         controls.classList.remove('hidden-panel');
+        if (arrow) {
+          arrow.classList.remove('visible');
+          arrow.classList.remove('showing');
+        }
       }
     }
     audioManager.playClick();
@@ -5994,6 +6043,10 @@ window.performanceManager = new PerformanceManager();
             </button>
           </div>
         </div>
+          <!-- Panel Toggle Arrow -->
+  <button class="panel-toggle-arrow" id="panelToggleArrow" onclick="toggleControlPanel()" title="Show/Hide Panel (H)">
+    <i class="fas fa-chevron-up"></i>
+  </button>
       </header>
       <main class="animate-pop" id="mainContent">${body}</main>
       <footer>
