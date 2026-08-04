@@ -5915,6 +5915,18 @@ window.performanceManager = new PerformanceManager();
     window.scrollTo(0, 0);
     updateFullscreenBtn();
     updateInstallButton();
+    
+    // Restore panel state after render
+    setTimeout(() => {
+      const controls = document.querySelector('.controls');
+      const arrow = document.getElementById('panelToggleArrow');
+      const headerInner = document.querySelector('.header-inner');
+      if (panelHidden) {
+        if (controls) controls.classList.add('hidden-panel');
+        if (headerInner) headerInner.classList.add('hidden-panel');
+        if (arrow) arrow.classList.add('showing');
+      }
+    }, 50);
 
     window.performanceManager?.scheduleUpdate(() => {
       const ring = document.getElementById('ringFg');
