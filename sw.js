@@ -9,8 +9,8 @@ const VERSION = '2.0.0';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
-  '/data/science.json',
-  '/data/maths.json',
+  '/data/science/grade_8/lesson1.json',
+  '/data/science/grade_8/lesson1.json',
   '/version.json',
   '/manifest.json',
   '/icon-192.png',
