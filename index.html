@@ -4462,6 +4462,56 @@ window.performanceManager = new PerformanceManager();
   function closeProgress() {
     document.getElementById('progressModal').classList.remove('active');
   }
+    // Auto trigger emotion for quiz answers
+  function triggerMascotEmotion(emotion, type, isStreak) {
+    const container = document.getElementById('mascotContainer');
+    if (!container) return;
+    
+    // Remove all emotion classes
+    container.classList.remove('sleepy', 'angry', 'singing', 'crying', 'smile', 'dance', 'happy', 'love', 'surprised', 'cool', 'wink', 'sad');
+    
+    // Add emotion
+    container.classList.add(emotion);
+    
+    // Auto remove after duration
+    setTimeout(() => {
+      container.classList.remove(emotion);
+    }, 2000);
+    
+    // Show message
+    const messages = {
+      correct: ['✅ නියමයි!', '🎉 සුපිරි!', '🌟 විශිෂ්ටයි!', '👏 හරිම දක්ෂයි!', '💯 Perfect!'],
+      streak: ['🔥 ගිනි ඇවිලෙනවා!', '⚡ නතර කරන්න එපා!', '🚀 ඉස්සරහට!'],
+      wrong: ['😅 පරිස්සමෙන්!', '💪 නැවත උත්සාහ කරන්න!', '📖 පාඩම් කරන්න!', '🤗 අතපසු වීමක්!']
+    };
+    
+    let msgType = type === 'correct' ? (isStreak ? 'streak' : 'correct') : 'wrong';
+    const msgList = messages[msgType];
+    const msg = msgList[Math.floor(Math.random() * msgList.length)];
+    showMascotSpeech(msg, 2000);
+    
+    // Sound
+    if (type === 'correct') {
+      audioManager.playCorrect();
+    } else {
+      audioManager.playWrong();
+    }
+  }
+  
+  // Keep old mascotReact for compatibility
+  function mascotReact(isCorrect, isStreak) {
+    const emotion = isCorrect ? (isStreak ? 'dance' : 'smile') : 'crying';
+    triggerMascotEmotion(emotion, isCorrect ? 'correct' : 'wrong', isStreak);
+  }
+  
+  function mascotCelebrate() {
+    const container = document.getElementById('mascotContainer');
+    if (!container) return;
+    container.classList.add('dance');
+    showMascotSpeech('🏆 පරිපූර්ණයි!', 4000);
+    audioManager.playAchievement();
+    setTimeout(() => container.classList.remove('dance'), 3000);
+  }
     // ============ FOX MASCOT ============
     const mascotMessages = {
     idle: [
@@ -5783,8 +5833,10 @@ window.performanceManager = new PerformanceManager();
       appState.totalScore++;
       appState.streak++;
       // Mascot react
-      const isStreak = appState.streak >= 3;
-      mascotReact(true, isStreak);
+      // Mascot react - Correct = happy emotions
+      const correctEmotions = ['smile', 'dance', 'singing', 'happy', 'cool'];
+      const randomEmotion = correctEmotions[Math.floor(Math.random() * correctEmotions.length)];
+      triggerMascotEmotion(randomEmotion, 'correct', appState.streak >= 3);
       if (appState.streak > appState.bestStreak) appState.bestStreak = appState.streak;
       
       if (appState.streak > 1) {
@@ -5796,7 +5848,10 @@ window.performanceManager = new PerformanceManager();
       qz.wrong++;
       appState.streak = 0;
       // Mascot react
-      mascotReact(false);
+            // Mascot react - Wrong = sad emotions
+      const wrongEmotions = ['crying', 'angry', 'sleepy'];
+      const randomEmotion = wrongEmotions[Math.floor(Math.random() * wrongEmotions.length)];
+      triggerMascotEmotion(randomEmotion, 'wrong', false);
       if (isGame) {
         qz.lives--;
         audioManager.playWrong(); 
