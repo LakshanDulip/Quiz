@@ -1642,152 +1642,6 @@
     50% { transform: translateY(-8px) rotate(1deg); }
     70% { transform: translateY(0) rotate(-1deg); }
   }
-    /* Hair tuft */
-/* ===========================
-   Mascot Hair
-=========================== */
-
-.mascot-hair{
-    position:absolute;
-    top:-14px;
-    left:50%;
-    transform:translateX(-50%);
-    display:flex;
-    align-items:flex-end;
-    gap:2px;
-    z-index:5;
-    animation:hairSway 2.8s ease-in-out infinite;
-}
-
-/* Hair Spike */
-.mascot-hair-spike{
-    width:8px;
-    background:linear-gradient(
-        to bottom,
-        #ffe082 0%,
-        #ffca28 40%,
-        #ff9800 75%,
-        #ef6c00 100%
-    );
-    border-radius:70% 70% 20% 20%;
-    transform-origin:bottom center;
-    box-shadow:
-        inset 1px 2px 2px rgba(255,255,255,.45),
-        inset -1px -2px 2px rgba(0,0,0,.18),
-        0 2px 4px rgba(0,0,0,.18);
-}
-
-/* Spike 1 */
-.mascot-hair-spike:nth-child(1){
-    height:12px;
-    transform:rotate(-28deg);
-    animation:hairSpike1 2.8s ease-in-out infinite;
-}
-
-/* Spike 2 */
-.mascot-hair-spike:nth-child(2){
-    width:8px;
-    height:16px;
-    transform:rotate(-12deg);
-    animation:hairSpike2 2.8s ease-in-out infinite;
-}
-
-/* Center Spike */
-.mascot-hair-spike:nth-child(3){
-    width:10px;
-    height:21px;
-    transform:rotate(0deg);
-    animation:hairSpike3 2.8s ease-in-out infinite;
-}
-
-/* Spike 4 */
-.mascot-hair-spike:nth-child(4){
-    width:8px;
-    height:16px;
-    transform:rotate(12deg);
-    animation:hairSpike4 2.8s ease-in-out infinite;
-}
-
-/* Spike 5 */
-.mascot-hair-spike:nth-child(5){
-    height:12px;
-    transform:rotate(28deg);
-    animation:hairSpike5 2.8s ease-in-out infinite;
-}
-
-
-/* ===========================
-   Hair Animations
-=========================== */
-
-@keyframes hairSway{
-    0%,100%{
-        transform:translateX(-50%) rotate(0deg);
-    }
-    20%{
-        transform:translateX(-50%) rotate(-2deg);
-    }
-    50%{
-        transform:translateX(-50%) rotate(2deg);
-    }
-    80%{
-        transform:translateX(-50%) rotate(-1deg);
-    }
-}
-
-@keyframes hairSpike1{
-    0%,100%{
-        transform:rotate(-28deg) scaleY(1);
-    }
-    50%{
-        transform:rotate(-38deg) scaleY(1.12);
-    }
-}
-
-@keyframes hairSpike2{
-    0%,100%{
-        transform:rotate(-12deg);
-    }
-    50%{
-        transform:rotate(-20deg) translateY(-1px);
-    }
-}
-
-@keyframes hairSpike3{
-    0%,100%{
-        transform:rotate(0deg);
-    }
-    50%{
-        transform:rotate(4deg) translateY(-3px) scaleY(1.08);
-    }
-}
-
-@keyframes hairSpike4{
-    0%,100%{
-        transform:rotate(12deg);
-    }
-    50%{
-        transform:rotate(20deg) translateY(-1px);
-    }
-}
-
-@keyframes hairSpike5{
-    0%,100%{
-        transform:rotate(28deg) scaleY(1);
-    }
-    50%{
-        transform:rotate(38deg) scaleY(1.12);
-    }
-}
-
-/* Hover Animation */
-.mascot:hover .mascot-hair{
-    animation-duration:1.2s;
-}
-
-.mascot:hover .mascot-hair-spike{
-    filter:brightness(1.08);
-}
   
   .mascot-face {
     width: 60px;
@@ -1912,14 +1766,14 @@
   .mascot-eye::before {
     content: '';
     position: absolute;
-    width: 3px;
-    height: 3px;
+    width: 4px;
+    height: 4px;
     background: #fff;
     border-radius: 50%;
-    top: 2px;
-    left: 2px;
-    z-index: 2;
-    box-shadow: 6px 4px 0 -1px rgba(255,255,255,0.6);
+    top: 1px;
+    left: 1px;
+    z-index: 1;
+    box-shadow: 0 0 2px rgba(255,255,255,0.8);
   }
   @keyframes mascotBlink {
     0%, 93%, 100% { transform: scaleY(1); }
@@ -1969,17 +1823,7 @@
     height: 12px;
     border-bottom-width: 3px;
   }
-  /* Tongue */
-  .mascot-tongue {
-    position: absolute;
-    bottom: -3px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 12px;
-    height: 6px;
-    background: #ef5350;
-    border-radius: 50% 50% 40% 40%;
-  }
+
   /* ===== EMOTIONS ===== */
 
   /* 💀 Dead / Game Over */
@@ -3734,47 +3578,23 @@ window.performanceManager = new PerformanceManager();
 </button>
 <!-- ===== ANIMATED FOX MASCOT ===== -->
 <div class="mascot-container" id="mascotContainer" onclick="handleMascotClick()">
-  <div class="mascot-body" style="width:64px; height:64px;">
-    <div class="mascot-face" style="width:64px; height:60px;">
-      <!-- Hair tuft -->
-<div class="mascot-hair">
-  <div class="mascot-hair-spike"></div>
-  <div class="mascot-hair-spike"></div>
-  <div class="mascot-hair-spike"></div>
-  <div class="mascot-hair-spike"></div>
-  <div class="mascot-hair-spike"></div>
-</div>
-      <!-- Ears -->
+  <div class="mascot-body" style="width:60px; height:60px;">
+    <div class="mascot-face" style="width:60px; height:56px;">
       <div class="mascot-ear-left"><div class="mascot-ear-inner"></div></div>
       <div class="mascot-ear-right"><div class="mascot-ear-inner"></div></div>
-      <!-- Cheeks -->
-      <div class="mascot-cheek-left"></div>
-      <div class="mascot-cheek-right"></div>
-      <!-- Eyebrows -->
       <div class="mascot-eyebrows">
         <div class="mascot-eyebrow"></div>
         <div class="mascot-eyebrow"></div>
       </div>
-      <!-- Eyes -->
       <div class="mascot-eyes">
         <div class="mascot-eye"></div>
         <div class="mascot-eye"></div>
       </div>
-      <!-- Nose -->
       <div class="mascot-nose"></div>
-      <!-- Mouth with tongue -->
-      <div class="mascot-mouth">
-        <div class="mascot-tongue"></div>
-      </div>
+      <div class="mascot-mouth"></div>
     </div>
   </div>
   <div class="mascot-speech" id="mascotSpeech" style="display:none;"></div>
-  <div class="mascot-chat" id="mascotChat" style="display:none;">
-    <input type="text" id="mascotChatInput" placeholder="මොකද්ද කියන්න..." maxlength="50"
-           onkeydown="if(event.key==='Enter')sendMascotChat()">
-    <button onclick="sendMascotChat()"><i class="fas fa-paper-plane"></i></button>
-  </div>
-</div>
   <!-- Chat Input -->
   <div class="mascot-chat" id="mascotChat" style="display:none;">
     <input type="text" id="mascotChatInput" placeholder="මොකද්ද කියන්න..." maxlength="50"
