@@ -6274,11 +6274,11 @@ window.performanceManager = new PerformanceManager();
   window.goToNextQuestion = goToNextQuestion;
 
   // ============ HANDLE OPTION CLICK ============
-  window.handleOptionClick = function(selectedIndex) {
+  window.handleOptionClick = async function(selectedIndex) {
     const qz = appState.quiz;
     if (!qz || qz.answeredCurrent) return;
 
-    const lesson = findLesson(qz.subject, qz.grade, qz.lessonId);
+    const lesson = await findLesson(qz.subject, qz.grade, qz.lessonId);
     const qIndexLookup = qz.order[qz.idx];
     const question = lesson ? lesson.questions[qIndexLookup] : null;
     if (!question) return;
