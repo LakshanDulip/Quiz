@@ -1057,6 +1057,27 @@
   body.lite-mode .subject-card::before {
     display: none;
   }
+
+
+    /* ===== LITE MODE BANNER ===== */
+  .lite-banner {
+    background: var(--correct-color);
+    color: #000;
+    text-align: center;
+    padding: 6px 10px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    animation: liteBannerSlide 0.4s ease;
+  }
+  @keyframes liteBannerSlide {
+    from { transform: translateY(-100%); }
+    to { transform: translateY(0); }
+  }
+
   
   /* Panel Toggle Arrow */
   .panel-toggle-arrow {
@@ -4673,20 +4694,21 @@ window.performanceManager = new PerformanceManager();
     
     const btn = document.getElementById('perfBtn');
     const icon = btn?.querySelector('i');
+    const banner = document.getElementById('liteBanner');
     
     if (liteMode) {
       document.body.classList.add('lite-mode');
-      if (icon) { icon.className = 'fas fa-bolt'; icon.textContent = '⚡'; }
+      if (banner) banner.style.display = 'flex';
+      if (icon) { icon.className = 'fas fa-bolt'; }
       btn.style.background = 'var(--correct-color)';
       btn.style.color = '#fff';
-      btn.style.fontSize = '1rem';
       showMascotSpeech('⚡ Lite Mode ON', 2000);
     } else {
       document.body.classList.remove('lite-mode');
-      if (icon) { icon.className = 'fas fa-bolt'; icon.textContent = ''; }
+      if (banner) banner.style.display = 'none';
+      if (icon) { icon.className = 'fas fa-bolt'; }
       btn.style.background = '';
       btn.style.color = '';
-      btn.style.fontSize = '';
       showMascotSpeech('✨ Full Mode ON', 2000);
     }
     audioManager.playClick();
@@ -4696,6 +4718,8 @@ window.performanceManager = new PerformanceManager();
   if (liteMode) {
     setTimeout(() => {
       document.body.classList.add('lite-mode');
+      const banner = document.getElementById('liteBanner');
+      if (banner) banner.style.display = 'flex';
       const btn = document.getElementById('perfBtn');
       if (btn) {
         btn.style.background = 'var(--correct-color)';
@@ -6266,6 +6290,13 @@ window.performanceManager = new PerformanceManager();
   <button class="panel-toggle-arrow" id="panelToggleArrow" onclick="toggleControlPanel()" title="Show/Hide Panel (H)">
     <i class="fas fa-chevron-up"></i>
   </button>
+
+  <!-- Lite Mode Banner -->
+  <div class="lite-banner" id="liteBanner" style="display:none;">
+    <span>⚡ Lite Mode ON - Low End Device</span>
+    <button onclick="togglePerformanceMode()" style="background:var(--correct-color);color:#000;border:none;padding:2px 10px;border-radius:10px;font-size:0.65rem;font-weight:700;cursor:pointer;">OFF</button>
+  </div>
+  
       </header>
       <main class="animate-pop" id="mainContent">${body}</main>
       <footer>
