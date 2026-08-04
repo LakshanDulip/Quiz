@@ -5402,8 +5402,7 @@ window.performanceManager = new PerformanceManager();
   }
 
   async function findLesson(subject, grade, lessonId) { 
-    const lessons = await getLessons(subject, grade);
-    return lessons.find(l => l.id === lessonId) || null; 
+    return await loadLessonData(subject, grade, lessonId);
   }
 
   function getResultComment(pct) {
@@ -5416,16 +5415,40 @@ window.performanceManager = new PerformanceManager();
   }
 
   // ============ LOAD DATA ============
-  // ============ LAZY LOAD SUBJECT DATA ============
+  // ============ LAZY LOAD LESSON DATA ============
   const subjectFiles = {
     science: 'data/science.json',
     maths: 'data/maths.json'
   };
   
+  // Lesson file path generator
+  function getLessonFile(subject, grade, lessonId) {
+    return `data/${subject}/grade_${grade}/${lessonId}.json`;
+  }
+  
+  // Load single lesson
+  async function loadLessonData(subject, grade, lessonId) {
+    const file = getLessonFile(subject, grade, lessonId);
+    const cacheKey = `lesson_${subject}_${grade}_${lessonId}`;
+    
+    const cached = window.cacheManager?.get(cacheKey);
+    if (cached) return cached;
+    
+    try {
+      const response = await fetch(file);
+      if (!response.ok) throw new Error('Failed');
+      const data = await response.json();
+      window.cacheManager?.set(cacheKey, data, 600000);
+      return data;
+    } catch (error) {
+      console.error(`[Load] ${file}:`, error);
+      return null;
+    }
+  }
+  
   async function loadSubjectData(subject) {
     const file = subjectFiles[subject];
     if (!file) return null;
-    
     // Check cache
     const cacheKey = `subject_${subject}`;
     const cached = window.cacheManager?.get(cacheKey);
@@ -5446,17 +5469,8 @@ window.performanceManager = new PerformanceManager();
 
   async function loadData() {
     try {
-      // Load first subject only (science)
-      const scienceData = await loadSubjectData('science');
-      
-      if (!scienceData) throw new Error('No data loaded');
-      
-      // Wrap in same structure as old data.json
-      appState.content = {
-        subjects: {}
-      };
-      appState.content.subjects['science'] = scienceData;
-      
+      // No pre-loading - lessons load on demand per click
+      appState.content = { subjects: {} };
       appState.loading = false;
       render();
     } catch (error) {
@@ -5465,13 +5479,13 @@ window.performanceManager = new PerformanceManager();
       render();
     }
   }
-  // Load other subject when needed
-  async function loadOtherSubject(subject) {
-    if (appState.content?.subjects?.[subject]) return;
-    
-    const data = await loadSubjectData(subject);
-    if (data && appState.content) {
-      appState.content.subjects[subject] = data;
+      
+      appState.loading = false;
+      render();
+    } catch (error) {
+      appState.error = 'දත්ත ලබාගැනීමේ දෝෂයකි.';
+      appState.loading = false;
+      render();
     }
   }
   
@@ -5484,6 +5498,7 @@ window.performanceManager = new PerformanceManager();
       appState.content.subjects[subject] = data;
     }
   }
+  
 
   // ============ ROUTING ============
   function parseHash() {
