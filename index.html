@@ -878,6 +878,32 @@
   .controls.hidden-panel {
     gap: 4px;
   }
+
+  /* ===== PERFORMANCE MODE ===== */
+  body.lite-mode * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  body.lite-mode .mascot-container,
+  body.lite-mode .mascot-toggle-btn,
+  body.lite-mode .info-floating-btn {
+    display: none !important;
+  }
+  body.lite-mode .screen-glow,
+  body.lite-mode .celebration-glow,
+  body.lite-mode .celebration-overlay,
+  body.lite-mode .confetti-container {
+    display: none !important;
+  }
+  body.lite-mode .card:hover {
+    transform: none !important;
+  }
+  body.lite-mode .btn:hover {
+    transform: none !important;
+  }
+  body.lite-mode .subject-card::before {
+    display: none;
+  }
   
   /* Panel Toggle Arrow */
   .panel-toggle-arrow {
@@ -4484,6 +4510,45 @@ window.performanceManager = new PerformanceManager();
     }
     audioManager.playClick();
   };
+
+  // ============ PERFORMANCE MODE ============
+  let liteMode = localStorage.getItem('liteMode') === 'true';
+  
+  window.togglePerformanceMode = function() {
+    liteMode = !liteMode;
+    localStorage.setItem('liteMode', liteMode);
+    
+    const btn = document.getElementById('perfBtn');
+    const icon = btn?.querySelector('i');
+    
+    if (liteMode) {
+      document.body.classList.add('lite-mode');
+      if (icon) icon.className = 'fas fa-bolt';
+      btn.style.background = 'var(--correct-color)';
+      btn.style.color = '#fff';
+      showMascotSpeech('⚡ Lite Mode ON', 2000);
+    } else {
+      document.body.classList.remove('lite-mode');
+      if (icon) icon.className = 'fas fa-bolt';
+      btn.style.background = '';
+      btn.style.color = '';
+      showMascotSpeech('✨ Full Mode ON', 2000);
+    }
+    audioManager.playClick();
+  };
+  
+  // Apply on load
+  if (liteMode) {
+    setTimeout(() => {
+      document.body.classList.add('lite-mode');
+      const btn = document.getElementById('perfBtn');
+      if (btn) {
+        btn.style.background = 'var(--correct-color)';
+        btn.style.color = '#fff';
+      }
+    }, 100);
+  }
+  
   window.toggleMute = function() {
     isMuted = !isMuted;
     localStorage.setItem('quizMuted', isMuted);
@@ -6004,6 +6069,10 @@ window.performanceManager = new PerformanceManager();
                 <i class="fas ${isFull ? 'fa-compress' : 'fa-expand'}"></i>
               </button>
 
+              <button id="perfBtn" class="icon-btn" onclick="togglePerformanceMode()" title="Performance Mode (P)">
+                <i class="fas fa-bolt"></i>
+              </button>
+              
               <button id="muteBtn" class="icon-btn ${muteClass}" onclick="toggleMute()" title="Mute (M)">
                 <i class="fas ${muteIcon}"></i>
               </button>
@@ -6920,6 +6989,7 @@ window.performanceManager = new PerformanceManager();
     }
     if (e.key === 'm' || e.key === 'M') { e.preventDefault(); toggleMute(); return; }
     if (e.key === 'h' || e.key === 'H') { e.preventDefault(); toggleControlPanel(); return; }
+        if (e.key === 'p' || e.key === 'P') { e.preventDefault(); togglePerformanceMode(); return; }
     if (e.key === 't' || e.key === 'T') { e.preventDefault(); setTheme(THEMES[(THEMES.indexOf(document.documentElement.getAttribute('data-theme')) + 1) % THEMES.length]); return; }
 
     const r = appState.route;
