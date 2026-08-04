@@ -20,8 +20,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Sinhala:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-<!-- ===== FIREBASE AUTH START ===== -->
-<!-- Firebase SDK -->
+<!-- html2canvas for Screenshot -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <!-- ===== FIREBASE AUTH START ===== -->
 <!-- Firebase SDK -->
 <script type="module">
@@ -5103,41 +5103,69 @@ window.performanceManager = new PerformanceManager();
     const container = document.getElementById('mascotContainer');
     if (!container || container.style.display === 'none') return;
     
-    // Pose: big smile + wink
+    // Hide mascot buttons temporarily
+    const toggleBtn = document.getElementById('mascotToggleBtn');
+    const screenshotBtn = document.getElementById('screenshotBtn');
+    const infoBtn = document.querySelector('.info-floating-btn');
+    if (toggleBtn) toggleBtn.style.display = 'none';
+    if (screenshotBtn) screenshotBtn.style.display = 'none';
+    if (infoBtn) infoBtn.style.display = 'none';
+    
+    // Pose: big smile
     container.classList.remove('sleepy', 'angry', 'singing', 'crying', 'smile', 'dance', 'happy', 'love', 'surprised', 'cool', 'wink', 'sad', 'dead');
     container.classList.add('happy');
     container.style.transform = 'scale(1.15)';
     
-    showMascotSpeech('📸 Cheese! 😉✨', 3000);
+    showMascotSpeech('📸 Cheese! 😉✨', 2000);
     audioManager.playAchievement();
-    spawnClickHearts();
     
     // Flash effect
     const flash = document.createElement('div');
     flash.style.cssText = `
       position: fixed; inset: 0; background: #fff;
       z-index: 99999; pointer-events: none;
-      opacity: 0.8; transition: opacity 0.5s ease;
+      opacity: 0.8; transition: opacity 0.3s ease;
     `;
     document.body.appendChild(flash);
     
+    // Capture screenshot
     setTimeout(() => {
       flash.style.opacity = '0';
-      setTimeout(() => flash.remove(), 500);
-    }, 100);
+      
+      if (typeof html2canvas !== 'undefined') {
+        html2canvas(document.body, {
+          useCORS: true,
+          scale: 2,
+          backgroundColor: getComputedStyle(document.body).backgroundColor,
+          logging: false
+        }).then(canvas => {
+          const link = document.createElement('a');
+          link.download = `QuizHub_Screenshot_${new Date().toISOString().slice(0,10)}.png`;
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+          
+          showMascotSpeech('✅ Save වුනා! 📸', 2500);
+        }).catch(() => {
+          showMascotSpeech('😅 Screenshot fail!', 2000);
+        });
+      } else {
+        showMascotSpeech('📸 Pose! 📷', 2000);
+      }
+      
+      setTimeout(() => flash.remove(), 300);
+    }, 150);
     
-    // Reset after pose
+    // Reset
     setTimeout(() => {
       container.style.transform = '';
       container.classList.remove('happy');
+      if (toggleBtn) toggleBtn.style.display = '';
+      if (screenshotBtn) screenshotBtn.style.display = '';
+      if (infoBtn) infoBtn.style.display = '';
     }, 2500);
     
-    // Try actual screenshot if supported
-    if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
-      // Desktop screenshot prompt (optional)
-      console.log('📸 Screenshot mode activated!');
-    }
-  }  
+    spawnClickHearts();
+  } 
   // ============ MASCOT TOGGLE ============
   let mascotVisible = localStorage.getItem('mascotVisible') !== 'false';
   
