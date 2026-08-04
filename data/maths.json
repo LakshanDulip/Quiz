@@ -1,11 +1,46 @@
 {
-  "subject": "maths",
-  "name": "Mathematics",
-  "sinhala": "ගණිතය",
-  "grades": {
-    "8": { "lessons": [...] },
-    "9": { "lessons": [...] },
-    "10": { "lessons": [...] },
-    "11": { "lessons": [...] }
+  "maths": {
+    "grades": {
+      "8": {
+        "lessons": [
+          {
+            "id": "grade_8_maths_l1",
+            "title": "🔒📖 මෙම පඩම් තවමත් සූදානම් වෙමින් පවතී... 🚀",
+            "description": "Lesson Coming Soon... ✨",
+            "questions": []
+          }
+        ]
+      },
+      "9": {
+        "lessons": [
+          {
+            "id": "grade_9_maths_l1",
+            "title": "🔒📖 මෙම පඩම් තවමත් සූදානම් වෙමින් පවතී... 🚀",
+            "description": "Lesson Coming Soon... ✨",
+            "questions": []
+          }
+        ]
+      },
+      "10": {
+        "lessons": [
+          {
+            "id": "grade_10_maths_l1",
+            "title": "🔒📖 මෙම පඩම් තවමත් සූදානම් වෙමින් පවතී... 🚀",
+            "description": "Lesson Coming Soon... ✨",
+            "questions": []
+          }
+        ]
+      },
+      "11": {
+        "lessons": [
+          {
+            "id": "grade_11_maths_l1",
+            "title": "🔒📖 මෙම පඩම් තවමත් සූදානම් වෙමින් පවතී... 🚀",
+            "description": "Lesson Coming Soon... ✨",
+            "questions": []
+          }
+        ]
+      }
+    }
   }
 }
