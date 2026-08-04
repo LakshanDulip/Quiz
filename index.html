@@ -4813,7 +4813,48 @@ window.performanceManager = new PerformanceManager();
     if (Math.random() < 0.3) {
       showMascotSpeech(getRandomMessage('idle'), 3000);
     }
-  }, 30000); // Every 30 seconds
+  }, 30000);// Every 30 seconds
+  
+  // Auto sleep after 5 seconds of inactivity
+  let mascotInactivityTimer = null;
+  let mascotIsSleeping = false;
+  
+  function resetMascotInactivity() {
+    if (mascotIsSleeping) {
+      // Wake up
+      const container = document.getElementById('mascotContainer');
+      if (container) {
+        container.classList.remove('sleepy');
+        container.classList.add('happy');
+        setTimeout(() => container.classList.remove('happy'), 1500);
+      }
+      showMascotSpeech('🥱 ඇහැරුනා!', 2000);
+      mascotIsSleeping = false;
+    }
+    
+    if (mascotInactivityTimer) clearTimeout(mascotInactivityTimer);
+    
+    mascotInactivityTimer = setTimeout(() => {
+      // Go to sleep
+      const container = document.getElementById('mascotContainer');
+      if (container) {
+        container.classList.remove('happy', 'love', 'surprised', 'cool', 'wink', 'sad', 'smile', 'dance', 'singing', 'crying', 'angry');
+        container.classList.add('sleepy');
+      }
+      showMascotSpeech('💤 zzz...', 4000);
+      mascotIsSleeping = true;
+    }, 5000);
+  }
+  
+  // Track user activity
+  ['click', 'touchstart', 'keydown', 'scroll', 'mousemove'].forEach(event => {
+    document.addEventListener(event, () => {
+      if (mascotVisible) resetMascotInactivity();
+    }, { passive: true });
+  });
+  
+  // Initial timer
+  setTimeout(() => resetMascotInactivity(), 1000); 
   // ============ INFO MODAL ============
   async function showInfoModal() {
     const modal = document.getElementById('infoModal');
