@@ -1803,6 +1803,169 @@
     height: 12px;
     border-bottom-width: 3px;
   }
+
+  /* ===== EMOTIONS ===== */
+  
+  /* 😴 Sleepy */
+  .mascot-container.sleepy .mascot-eye {
+    height: 3px;
+    border-radius: 50%;
+    animation: none;
+    background: #ddd;
+  }
+  .mascot-container.sleepy .mascot-eye::after { display: none; }
+  .mascot-container.sleepy .mascot-eye::before { display: none; }
+  .mascot-container.sleepy .mascot-mouth {
+    width: 10px;
+    height: 10px;
+    border: 2px solid #1a0800;
+    border-radius: 50%;
+    border-bottom: none;
+    border-left: none;
+    border-right: none;
+  }
+  .mascot-container.sleepy .mascot-body {
+    animation: sleepyFloat 3s ease-in-out infinite;
+  }
+  @keyframes sleepyFloat {
+    0%, 100% { transform: translateY(0) rotate(0); }
+    30% { transform: translateY(-3px) rotate(-2deg); }
+    70% { transform: translateY(0) rotate(2deg); }
+  }
+  
+  /* 😡 Angry */
+  .mascot-container.angry .mascot-face {
+    background: linear-gradient(180deg, #ff6b4a 0%, #e8452a 50%, #c02010 100%);
+  }
+  .mascot-container.angry .mascot-eyebrow {
+    transform: rotate(10deg) translateY(-3px);
+    background: #4a0000;
+    height: 5px;
+  }
+  .mascot-container.angry .mascot-eyebrow:last-child {
+    transform: rotate(-10deg) translateY(-3px);
+  }
+  .mascot-container.angry .mascot-eye {
+    animation: none;
+  }
+  .mascot-container.angry .mascot-mouth {
+    width: 16px;
+    border-bottom: none;
+    border-top: 2.5px solid #1a0800;
+    border-radius: 50% 50% 0 0;
+    top: 37px;
+  }
+  .mascot-container.angry .mascot-body {
+    animation: angryShake 0.3s ease-in-out infinite;
+  }
+  @keyframes angryShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-3px); }
+    75% { transform: translateX(3px); }
+  }
+  
+  /* 🎤 Singing */
+  .mascot-container.singing .mascot-eye {
+    height: 8px;
+    border-radius: 50%;
+    animation: none;
+  }
+  .mascot-container.singing .mascot-eye::after {
+    top: 1px;
+    width: 5px;
+    height: 5px;
+  }
+  .mascot-container.singing .mascot-mouth {
+    width: 14px;
+    height: 14px;
+    border: 2.5px solid #1a0800;
+    border-radius: 50%;
+    border-bottom: none;
+    border-left: none;
+    border-right: none;
+    top: 34px;
+  }
+  .mascot-container.singing .mascot-body {
+    animation: singBounce 0.5s ease-in-out infinite;
+  }
+  @keyframes singBounce {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-5px) scale(1.05); }
+  }
+  
+  /* 😢 Cry */
+  .mascot-container.crying .mascot-eye {
+    animation: none;
+    overflow: visible;
+  }
+  .mascot-container.crying .mascot-eye::before {
+    display: none;
+  }
+  .mascot-container.crying .mascot-eye::after {
+    content: '💧';
+    font-size: 0.5rem;
+    background: transparent;
+    box-shadow: none;
+    top: -6px;
+    left: 0px;
+    animation: tearDrop 1s ease-in-out infinite;
+  }
+  @keyframes tearDrop {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(12px); opacity: 0; }
+  }
+  .mascot-container.crying .mascot-mouth {
+    border-bottom: none;
+    border-top: 2px solid #1a0800;
+    border-radius: 50% 50% 0 0;
+    width: 16px;
+    top: 38px;
+  }
+  .mascot-container.crying .mascot-body {
+    animation: cryShake 1.5s ease-in-out infinite;
+  }
+  @keyframes cryShake {
+    0%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-2px); }
+    60% { transform: translateY(0); }
+  }
+  
+  /* 😊 Smile */
+  .mascot-container.smile .mascot-mouth {
+    width: 24px;
+    height: 12px;
+    border-bottom-width: 3px;
+  }
+  .mascot-container.smile .mascot-eye {
+    height: 10px;
+    animation: none;
+  }
+  .mascot-container.smile .mascot-eye::after {
+    top: 1px;
+    width: 5px;
+    height: 6px;
+  }
+  
+  /* 💃 Dance */
+  .mascot-container.dance .mascot-body {
+    animation: danceMove 0.4s ease-in-out infinite;
+  }
+  @keyframes danceMove {
+    0%, 100% { transform: translateY(0) rotate(0) scale(1); }
+    25% { transform: translateY(-12px) rotate(-8deg) scale(1.05); }
+    75% { transform: translateY(-5px) rotate(8deg) scale(1.02); }
+  }
+  .mascot-container.dance .mascot-ear-left {
+    animation: earWiggleLeft 0.3s ease-in-out infinite;
+  }
+  .mascot-container.dance .mascot-ear-right {
+    animation: earWiggleRight 0.3s ease-in-out infinite;
+  }
+  .mascot-container.dance .mascot-mouth {
+    width: 22px;
+    height: 10px;
+    border-bottom-width: 3px;
+  }  
   
   /* Tail - rainbow tip */
   .mascot-tail {
@@ -4460,16 +4623,16 @@ window.performanceManager = new PerformanceManager();
     }
   }
   
-   function handleMascotClick() {
+  function handleMascotClick() {
     const container = document.getElementById('mascotContainer');
     if (!container) return;
     
-    // Random emotion
-    const emotions = ['happy', 'love', 'surprised', 'cool', 'wink'];
+    // Random emotion - ALL 11 emotions
+    const emotions = ['sleepy', 'angry', 'singing', 'crying', 'smile', 'dance', 'happy', 'love', 'surprised', 'cool', 'wink'];
     const randomEmotion = emotions[Math.floor(Math.random() * emotions.length)];
     
-    // Remove previous emotion classes
-    container.classList.remove('happy', 'love', 'surprised', 'cool', 'wink', 'sad');
+    // Remove all emotion classes
+    container.classList.remove('sleepy', 'angry', 'singing', 'crying', 'smile', 'dance', 'happy', 'love', 'surprised', 'cool', 'wink', 'sad');
     
     // Add new emotion
     container.classList.add(randomEmotion);
@@ -4485,22 +4648,36 @@ window.performanceManager = new PerformanceManager();
     setTimeout(() => {
       container.style.transform = '';
       container.classList.remove(randomEmotion);
-    }, 1500);
+    }, 2000);
     
-    // Emotion message & sound
+    // Emotion messages
     const emotionMessages = {
+      sleepy: ['😴 නිදිමතයි...', '💤 zzz...', '🥱 ඇඟ බරයි...'],
+      angry: ['😡 අමාරු ප්‍රශ්න!', '🤬 දිගටම කරන්න!', '😤 මට බෑ!'],
+      singing: ['🎤 ලලලා...', '🎵 සිංදු කියමු!', '🎶 ලාලාලා...'],
+      crying: ['😢 අඬන්න හිතෙනවා...', '💧 වැරදුනා!', '😭 දුකයි!'],
+      smile: ['😊 සතුටුයි!', '😄 හරිම හොඳයි!', '☺️ ලස්සනයි!'],
+      dance: ['💃 නටමු!', '🕺 ඩාන්ස්!', '🎉 පාටියක්!'],
       happy: ['😊 හෙලෝ!', '😄 සතුටුයි!', '🎉 යාළුවා!'],
       love: ['💕 ආදරෙයි!', '💖 ඔබ නියමයි!', '💝 මගේ යාළුවා!'],
-      surprised: ['😲 ආශ්චර්යයි!', '😮 වාව්!', '🤩 අපූරුයි!'],
+      surprised: ['😲 වාව්!', '😮 ආශ්චර්යයි!', '🤩 අපූරුයි!'],
       cool: ['😎 Cool!', '🦊 සුපිරි!', '💪 ශක්තිමත්!'],
-      wink: ['😉 හරි හරි!', '😜 දඟයා!', '🦊 බොරුවට නෙමෙයි!']
+      wink: ['😉 හරි!', '😜 දඟයා!', '🦊 බොරුවට නෙමෙයි!']
     };
     
-    const messages = emotionMessages[randomEmotion];
+    const messages = emotionMessages[randomEmotion] || emotionMessages.smile;
     const randomMsg = messages[Math.floor(Math.random() * messages.length)];
     showMascotSpeech(randomMsg, 2500);
     
-    audioManager.playClick();
+    // Sound based on emotion
+    if (randomEmotion === 'angry' || randomEmotion === 'crying') {
+      audioManager.playWrong();
+    } else if (randomEmotion === 'dance' || randomEmotion === 'singing') {
+      audioManager.playAchievement();
+    } else {
+      audioManager.playClick();
+    }
+    
     spawnClickHearts();
   }
   
@@ -4537,7 +4714,8 @@ window.performanceManager = new PerformanceManager();
       }, 1800);
     }
   }
-    // ============ MASCOT TOGGLE ============
+  
+  // ============ MASCOT TOGGLE ============
   let mascotVisible = localStorage.getItem('mascotVisible') !== 'false';
   
   function toggleMascot() {
@@ -4571,6 +4749,7 @@ window.performanceManager = new PerformanceManager();
       if (toggleBtn) toggleBtn.classList.add('hidden-mascot');
     }
   }, 100);
+  
   // Show welcome message on load
   setTimeout(() => {
     const welcomeMsg = mascotMessages.welcome[Math.floor(Math.random() * mascotMessages.welcome.length)];
@@ -4581,7 +4760,7 @@ window.performanceManager = new PerformanceManager();
   setInterval(() => {
     const speech = document.getElementById('mascotSpeech');
     if (!speech || speech.style.display === 'block') return;
-    if (Math.random() < 0.3) { // 30% chance
+    if (Math.random() < 0.3) {
       showMascotSpeech(getRandomMessage('idle'), 3000);
     }
   }, 30000); // Every 30 seconds
