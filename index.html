@@ -898,25 +898,23 @@
   
   /* Panel Toggle Arrow */
   .panel-toggle-arrow {
-    display: none;
+    display: block;
     width: 100%;
-    padding: 4px 0;
+    padding: 6px 0;
     background: var(--bg-card);
     border: none;
     border-top: 1px solid var(--border-color);
     color: var(--text-secondary);
     cursor: pointer;
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     transition: all 0.3s ease;
     text-align: center;
-    opacity: 0.5;
+    opacity: 0.4;
   }
   .panel-toggle-arrow:hover {
     opacity: 1;
     color: var(--primary-color);
-  }
-  .panel-toggle-arrow.visible {
-    display: block;
+    background: var(--bg-card-hover);
   }
   .panel-toggle-arrow i {
     transition: transform 0.3s ease;
@@ -4486,13 +4484,11 @@ window.performanceManager = new PerformanceManager();
       if (panelHidden) {
         controls.classList.add('hidden-panel');
         if (arrow) {
-          arrow.classList.add('visible');
           arrow.classList.add('showing');
         }
       } else {
         controls.classList.remove('hidden-panel');
         if (arrow) {
-          arrow.classList.remove('visible');
           arrow.classList.remove('showing');
         }
       }
