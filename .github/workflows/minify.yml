@@ -1,0 +1,49 @@
+name: Minify JSON
+
+on:
+  push:
+    paths:
+      - 'data.json'
+  workflow_dispatch:
+
+jobs:
+  minify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Minify JSON
+        run: |
+          node -e "
+            const fs = require('fs');
+            const data = JSON.parse(fs.readFileSync('data.json', 'utf8'));
+            fs.writeFileSync('data.min.json', JSON.stringify(data));
+          "
+          
+      - name: Check if changed
+        id: check
+        run: |
+          if diff data.json data.min.json > /dev/null 2>&1; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Copy minified file
+        if: steps.check.outputs.changed == 'true'
+        run: mv data.min.json data.json
+
+      - name: Commit & Push
+        if: steps.check.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data.json
+          git commit -m "⚡ Minify data.json"
+          git push
