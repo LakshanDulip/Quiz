@@ -5321,8 +5321,8 @@ window.performanceManager = new PerformanceManager();
     audioManager.playModalClose();
   }
   // ============ LESSON SUMMARY MODAL ============
-  function showSummaryModal(subject, grade, lessonId) {
-    const lesson = findLesson(subject, grade, lessonId);
+  async function showSummaryModal(subject, grade, lessonId) {
+    const lesson = await findLesson(subject, grade, lessonId);
     if (!lesson) return;
     
     document.getElementById('summaryModalTitle').textContent = `📖 ${lesson.title} - සාරාංශය`;
@@ -5400,8 +5400,9 @@ window.performanceManager = new PerformanceManager();
     } catch (e) { return []; }
   }
 
-  function findLesson(subject, grade, lessonId) { 
-    return getLessons(subject, grade).find(l => l.id === lessonId) || null; 
+  async function findLesson(subject, grade, lessonId) { 
+    const lessons = await getLessons(subject, grade);
+    return lessons.find(l => l.id === lessonId) || null; 
   }
 
   function getResultComment(pct) {
@@ -5538,7 +5539,7 @@ window.performanceManager = new PerformanceManager();
     if (r.name === 'home') body = renderHome();
     else if (r.name === 'grades') body = await renderGrades(r.subject);
     else if (r.name === 'lessons') body = await renderLessons(r.subject, r.grade);
-    else if (r.name === 'quiz') body = renderQuiz(r.subject, r.grade, r.lessonId);
+    else if (r.name === 'quiz') body = await renderQuiz(r.subject, r.grade, r.lessonId);
     else body = renderHome();
 
     app.innerHTML = renderShell(body);
@@ -5785,9 +5786,9 @@ window.performanceManager = new PerformanceManager();
   }
 
   // ============ QUIZ & FLASHCARDS ============
-  function renderQuiz(subject, grade, lessonId) {
+  async function renderQuiz(subject, grade, lessonId) {
     const meta = subjectMeta(subject);
-    const lesson = findLesson(subject, grade, lessonId);
+    const lesson = await findLesson(subject, grade, lessonId);
 
     if (!lesson) {
       return `<div class="card" style="max-width:500px;margin:50px auto;text-align:center;"><h3>Lesson not found</h3><button class="btn btn-primary" style="margin-top:14px;" onclick="navigate('#/subject/${meta.key}/grade/${grade}')">Back</button></div>`;
@@ -6093,7 +6094,7 @@ window.performanceManager = new PerformanceManager();
     if (r.name === 'home') body = renderHome();
     else if (r.name === 'grades') body = await renderGrades(r.subject);
     else if (r.name === 'lessons') body = await renderLessons(r.subject, r.grade);
-    else if (r.name === 'quiz') body = renderQuiz(r.subject, r.grade, r.lessonId);
+    else if (r.name === 'quiz') body = await renderQuiz(r.subject, r.grade, r.lessonId);
     else body = renderHome();
 
     const fragment = document.createDocumentFragment();
