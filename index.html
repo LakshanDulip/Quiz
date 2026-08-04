@@ -5668,12 +5668,17 @@ window.performanceManager = new PerformanceManager();
   function renderQuestionImage(image) {
     if (!image) return '';
     const safeSrc = escapeHtml(image);
+    // Auto WebP support
+    const webpSrc = safeSrc.replace(/\.(png|jpg|jpeg)$/i, '.webp');
     return `
       <div class="question-image-wrap" id="questionImageWrap">
-        <img src="${safeSrc}"
-             alt="ප්‍රශ්නයට අදාළ රූපය"
-             loading="lazy"
-             onerror="this.closest('.question-image-wrap').classList.add('img-error')">
+        <picture>
+          <source srcset="${webpSrc}" type="image/webp">
+          <img src="${safeSrc}"
+               alt="ප්‍රශ්නයට අදාළ රූපය"
+               loading="lazy"
+               onerror="this.closest('.question-image-wrap').classList.add('img-error')">
+        </picture>
         <div class="question-image-placeholder">
           <i class="fas fa-image"></i>
           <span>රූපය පූරණය කළ නොහැක</span>
