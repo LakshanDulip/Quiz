@@ -870,13 +870,13 @@
   .logo-text .sub { font-size: 0.45rem; color: var(--text-secondary); letter-spacing: 2px; text-transform: uppercase; font-weight: 700; }
 
   .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; transition: all 0.4s ease; }
+  .controls.hidden-panel .mode-selector,
+  .controls.hidden-panel .game-stats,
+  .controls.hidden-panel .control-group {
+    display: none;
+  }
   .controls.hidden-panel {
-    opacity: 0;
-    pointer-events: none;
-    max-height: 0;
-    overflow: hidden;
-    margin: 0;
-    padding: 0;
+    gap: 4px;
   }
   .control-group { display: flex; gap: 6px; align-items: center; padding: 0 8px; }
   .control-group + .control-group { border-left: 1px solid var(--border-color); }
