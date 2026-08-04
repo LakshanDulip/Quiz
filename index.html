@@ -4951,8 +4951,11 @@ window.performanceManager = new PerformanceManager();
     }
   }
   
-  // ============ MASCOT CHAT ============
+  // ============ MASCOT CHAT (DISABLED) ============
+  const chatEnabled = false; // ← true කරාම chat enable වෙනවා
+  
   function openMascotChat() {
+    if (!chatEnabled) return;
     const chatEl = document.getElementById('mascotChat');
     const input = document.getElementById('mascotChatInput');
     if (chatEl) {
