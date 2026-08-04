@@ -1292,32 +1292,11 @@
     opacity: 0;
     z-index: 1;
     pointer-events: none;
-    background: var(--bg-card);
+    background: var(--bg-card) !important;
     border: 2px solid var(--correct-color);
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-  }
-  .flashcard-front::before {
-    content: '❓';
-    position: absolute;
-    top: 15px;
-    right: 20px;
-    font-size: 2rem;
-    opacity: 0.1;
-  }
-  .flashcard-front::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: var(--primary-gradient);
-    border-radius: 20px 20px 0 0;
-  }
-  
-  .flashcard-back {
-    background: var(--bg-card) !important;
-    z-index: 1;
+    transform: rotateY(180deg) !important;
+    -webkit-transform: rotateY(180deg) !important;
   }
   .flashcard-back::before {
     content: '✅';
@@ -1335,6 +1314,24 @@
     right: 0;
     height: 4px;
     background: var(--correct-color);
+    border-radius: 20px 20px 0 0;
+  }
+  .flashcard-front::before {
+    content: '❓';
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 2rem;
+    opacity: 0.1;
+  }
+  .flashcard-front::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--primary-gradient);
     border-radius: 20px 20px 0 0;
   }
   
