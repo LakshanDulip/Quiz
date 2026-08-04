@@ -8,6 +8,15 @@
           "value": "public, max-age=3600"
         }
       ]
+    },
+    {
+      "source": "/data/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400"
+        }
+      ]
     }
   ],
   "rewrites": [
@@ -20,8 +29,8 @@
       "destination": "/robots.txt"
     },
     {
-      "source": "/data/:file",
-      "destination": "/data/:file"
+      "source": "/data/:path*",
+      "destination": "/data/:path*"
     }
   ]
 }
