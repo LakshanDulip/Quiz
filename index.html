@@ -1254,17 +1254,18 @@
     width: 100%;
     min-height: 300px;
     position: relative;
-    transition: all 0.6s ease;
+    transition: transform 0.6s ease;
+  }
+  .flashcard.flipped {
+    transform: rotateY(180deg);
   }
   .flashcard.flipped .flashcard-front {
     opacity: 0;
     pointer-events: none;
-    transform: scale(0.9);
   }
   .flashcard.flipped .flashcard-back {
     opacity: 1;
     pointer-events: auto;
-    transform: scale(1);
   }
   
   .flashcard-front, .flashcard-back {
@@ -1278,12 +1279,11 @@
     align-items: center;
     text-align: center;
     overflow-y: auto;
-    transition: all 0.6s ease;
+    transition: opacity 0.3s ease;
   }
   .flashcard-front {
     opacity: 1;
     z-index: 2;
-    transform: scale(1);
     background: var(--bg-card);
     border: 2px solid var(--border-color);
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
@@ -1291,7 +1291,6 @@
   .flashcard-back {
     opacity: 0;
     z-index: 1;
-    transform: scale(0.9);
     pointer-events: none;
     background: var(--bg-card);
     border: 2px solid var(--correct-color);
