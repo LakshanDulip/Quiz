@@ -1228,51 +1228,220 @@
   .next-question-wrap { margin-top: 20px; }
   .next-question-btn { width: 100%; justify-content: center; font-size: 1rem; padding: 13px 22px; }
 
-  /* ============ FLASHCARDS ============ */
+  /* ============ FLASHCARDS - PREMIUM ============ */
   .flashcard-container {
-    perspective: 1000px;
+    perspective: 1200px;
     max-width: 600px;
     margin: 20px auto;
-    min-height: 280px;
+    min-height: 300px;
+    cursor: pointer;
   }
+  .flashcard-container:hover .flashcard-hint {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .flashcard-hint {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+    opacity: 0.6;
+    transform: translateY(-5px);
+    transition: all 0.3s ease;
+  }
+  
   .flashcard {
     width: 100%;
-    min-height: 280px;
+    min-height: 300px;
     position: relative;
     transform-style: preserve-3d;
-    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    cursor: pointer;
+    transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .flashcard.flipped {
     transform: rotateY(180deg);
   }
+  
   .flashcard-front, .flashcard-back {
     position: absolute;
     inset: 0;
     backface-visibility: hidden;
-    border-radius: var(--radius-lg);
-    padding: 30px;
+    border-radius: 20px;
+    padding: 35px 30px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     text-align: center;
-    border: 2px solid var(--card-border);
-    background: var(--bg-card);
-    box-shadow: var(--shadow-lg);
     overflow-y: auto;
   }
+  
+  .flashcard-front {
+    background: linear-gradient(145deg, var(--bg-card), var(--bg-main));
+    border: 2px solid var(--border-color);
+    box-shadow: 
+      0 10px 30px rgba(0,0,0,0.2),
+      0 0 0 1px rgba(255,255,255,0.05) inset,
+      0 0 20px rgba(0,0,0,0.1);
+  }
+  .flashcard-front::before {
+    content: '❓';
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 2rem;
+    opacity: 0.1;
+  }
+  .flashcard-front::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--primary-gradient);
+    border-radius: 20px 20px 0 0;
+  }
+  
   .flashcard-back {
     transform: rotateY(180deg);
-    border-color: var(--science-color);
-    background: var(--bg-main);
+    background: linear-gradient(145deg, rgba(74,222,128,0.08), var(--bg-main));
+    border: 2px solid var(--science-color);
+    box-shadow: 
+      0 10px 30px rgba(0,0,0,0.2),
+      0 0 25px rgba(74,222,128,0.2),
+      0 0 0 1px rgba(255,255,255,0.05) inset;
   }
+  .flashcard-back::before {
+    content: '✅';
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 2rem;
+    opacity: 0.1;
+  }
+  .flashcard-back::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--correct-color);
+    border-radius: 20px 20px 0 0;
+  }
+  
   .flashcard-front img, .flashcard-back img {
     max-width: 100%;
-    max-height: 120px;
+    max-height: 140px;
     object-fit: contain;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    border: 2px solid var(--border-color);
+  }
+  
+  .flashcard-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    padding: 4px 14px;
+    border-radius: 50px;
+  }
+  .flashcard-front .flashcard-label {
+    background: rgba(250,204,21,0.15);
+    color: var(--primary-color);
+  }
+  .flashcard-back .flashcard-label {
+    background: rgba(74,222,128,0.15);
+    color: var(--correct-color);
+  }
+  
+  .flashcard-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary-gradient);
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 4px 16px;
+    border-radius: 50px;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+  
+  /* Flashcard buttons */
+  .flashcard-actions {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+  .flashcard-btn {
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .flashcard-btn-prev {
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    color: var(--text-primary);
+  }
+  .flashcard-btn-flip {
+    background: var(--primary-gradient);
+    border: none;
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  }
+  .flashcard-btn-next {
+    background: var(--correct-color);
+    border: none;
+    color: #1a1a1a;
+    box-shadow: 0 4px 15px rgba(74,222,128,0.3);
+  }
+  .flashcard-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+  }
+  .flashcard-btn:active {
+    transform: scale(0.95);
+  }
+  .flashcard-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+  
+  /* Flashcard progress dots */
+  .flashcard-dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 15px;
+  }
+  .flashcard-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--border-color);
+    transition: all 0.3s ease;
+  }
+  .flashcard-dot.active {
+    background: var(--primary-color);
+    box-shadow: 0 0 8px var(--glow-color);
+    width: 24px;
     border-radius: 10px;
-    margin-bottom: 10px;
   }
 
   .powerups { display: flex; gap: 10px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
@@ -5956,30 +6125,38 @@ window.performanceManager = new PerformanceManager();
             <span class="study-badge"><i class="fas fa-clone"></i> Flashcard ${qz.idx + 1}/${total}</span>
           </div>
 
+          <div class="flashcard-hint">👆 Card එක click කර flip කරන්න</div>
+          
           <div class="flashcard-container" onclick="toggleFlashcardFlip()">
             <div class="flashcard ${qz.isFlipped ? 'flipped' : ''}" id="flashCardElement">
               <div class="flashcard-front">
-                <div style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:8px;">❓ ප්‍රශ්නය (ක්ලික් කර මාරු කරන්න)</div>
+                <span class="flashcard-label">❓ ප්‍රශ්නය</span>
                 ${question.image ? renderQuestionImage(question.image) : ''}
-                <div style="font-size:1.25rem; font-weight:600;">${formatMath(question.q)}</div>
-                <div style="margin-top:20px; font-size:0.8rem; color:var(--primary-color);"><i class="fas fa-sync-alt"></i> පිළිතුර බලන්න Flip කරන්න</div>
+                <div style="font-size:1.3rem; font-weight:700; line-height:1.8;">${formatMath(question.q)}</div>
               </div>
               <div class="flashcard-back">
-                <div style="font-size:0.82rem; color:var(--correct-color); font-weight:700; margin-bottom:6px;">✅ නිවැරදි පිළිතුර</div>
-                <div style="font-size:1.2rem; font-weight:700; margin-bottom:12px;">${escapeHtml(question.options[question.correct])}</div>
-                <div style="font-size:0.9rem; color:var(--text-secondary);">💡 ${escapeHtml(question.explanation || '')}</div>
+                <span class="flashcard-label">✅ පිළිතුර</span>
+                <div style="font-size:1.4rem; font-weight:700; margin-bottom:14px; color:var(--correct-color);">${formatMath(question.options[question.correct])}</div>
+                <div style="font-size:0.9rem; color:var(--text-secondary); line-height:1.6;">💡 ${escapeHtml(question.explanation || 'පැහැදිලි කිරීමක් නැත.')}</div>
               </div>
             </div>
           </div>
 
-          <div style="display:flex; justify-content:space-between; gap:10px; margin-top:20px;">
-            <button class="btn btn-outline" onclick="prevFlashcard()" ${qz.idx === 0 ? 'disabled' : ''}>
+          <!-- Progress dots -->
+          <div class="flashcard-dots">
+            ${Array(total).fill(0).map((_, i) => `
+              <div class="flashcard-dot ${i === qz.idx ? 'active' : ''}"></div>
+            `).join('')}
+          </div>
+
+          <div class="flashcard-actions">
+            <button class="flashcard-btn flashcard-btn-prev" onclick="event.stopPropagation();prevFlashcard()" ${qz.idx === 0 ? 'disabled' : ''}>
               <i class="fas fa-arrow-left"></i> පසුපසට
             </button>
-            <button class="btn btn-outline" onclick="toggleFlashcardFlip()">
+            <button class="flashcard-btn flashcard-btn-flip" onclick="event.stopPropagation();toggleFlashcardFlip()">
               <i class="fas fa-sync-alt"></i> Flip
             </button>
-            <button class="btn btn-primary" onclick="nextFlashcard()">
+            <button class="flashcard-btn flashcard-btn-next" onclick="event.stopPropagation();nextFlashcard()">
               ඊළඟට <i class="fas fa-arrow-right"></i>
             </button>
           </div>
