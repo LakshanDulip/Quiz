@@ -3819,8 +3819,8 @@ window.performanceManager = new PerformanceManager();
   let deferredPrompt = null;
 
   // ============ AUTHENTICATION SYSTEM ============
-  let currentUser = localStorage.getItem('quizUsername') || sessionStorage.getItem('quizGuestName');
-  let isGuest = sessionStorage.getItem('isGuest') === 'true';
+  var currentUser = localStorage.getItem('quizUsername') || sessionStorage.getItem('quizGuestName');
+  var isGuest = sessionStorage.getItem('isGuest') === 'true';
 
   function checkAuth() {
     const loginModal = document.getElementById('loginModal');
@@ -5435,33 +5435,7 @@ window.performanceManager = new PerformanceManager();
     }
   }
   
-  // ============ LAZY LOAD SUBJECT DATA ============
-  const subjectFiles = {
-    science: 'data/science.json',
-    maths: 'data/maths.json'
-  };
-  
-  async function loadSubjectData(subject) {
-    const file = subjectFiles[subject];
-    if (!file) return null;
-    
-    // Check cache
-    const cacheKey = `subject_${subject}`;
-    const cached = window.cacheManager?.get(cacheKey);
-    if (cached) return cached;
-    
-    try {
-      const response = await fetch(file);
-      if (!response.ok) throw new Error('Failed to load');
-      const data = await response.json();
-      window.cacheManager?.set(cacheKey, data, 600000);
-      return data;
-    } catch (error) {
-      console.error(`[Load] ${subject} failed:`, error);
-      return null;
-    }
-  }
-  
+
   async function loadData() {
     try {
       // Load first subject only (science)
