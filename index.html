@@ -5526,7 +5526,7 @@ window.performanceManager = new PerformanceManager();
   });
 
   // ============ RENDER ============
-  function render() {
+  async function render() {
     const app = document.getElementById('app');
     if (appState.loading) {
       app.innerHTML = renderShell(`
@@ -5556,8 +5556,8 @@ window.performanceManager = new PerformanceManager();
     const r = appState.route;
     let body = '';
     if (r.name === 'home') body = renderHome();
-    else if (r.name === 'grades') body = renderGrades(r.subject);
-    else if (r.name === 'lessons') body = renderLessons(r.subject, r.grade);
+    else if (r.name === 'grades') body = await renderGrades(r.subject);
+    else if (r.name === 'lessons') body = await renderLessons(r.subject, r.grade);
     else if (r.name === 'quiz') body = renderQuiz(r.subject, r.grade, r.lessonId);
     else body = renderHome();
 
@@ -6102,7 +6102,7 @@ window.performanceManager = new PerformanceManager();
   }
 
   // ============ LIGHTWEIGHT RE-RENDER ============
-  function renderMain() {
+  async function renderMain() {
     const mainEl = document.getElementById('mainContent');
     if (!mainEl) { render(); return; }
 
@@ -6111,8 +6111,8 @@ window.performanceManager = new PerformanceManager();
     const r = appState.route;
     let body = '';
     if (r.name === 'home') body = renderHome();
-    else if (r.name === 'grades') body = renderGrades(r.subject);
-    else if (r.name === 'lessons') body = renderLessons(r.subject, r.grade);
+    else if (r.name === 'grades') body = await renderGrades(r.subject);
+    else if (r.name === 'lessons') body = await renderLessons(r.subject, r.grade);
     else if (r.name === 'quiz') body = renderQuiz(r.subject, r.grade, r.lessonId);
     else body = renderHome();
 
