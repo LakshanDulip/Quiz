@@ -5382,19 +5382,24 @@ window.performanceManager = new PerformanceManager();
 
   async function getLessons(subject, grade) {
     try {
-      // Load subject if not loaded yet
       await loadOtherSubject(subject);
       
-      const subjectData = appState.content?.subjects?.[subject];
+      let subjectData = appState.content?.subjects?.[subject];
+      if (!subjectData) return [];
       
-      // Check if data is nested under "subjects" key (from old data.json format)
-      if (subjectData?.subjects?.[subject]?.grades?.[grade]?.lessons) {
-        return subjectData.subjects[subject].grades[grade].lessons;
+      // Nested: { maths: { grades: {...} } }
+      if (subjectData[subject]?.grades?.[grade]?.lessons) {
+        return subjectData[subject].grades[grade].lessons;
       }
       
-      // Direct format (new per-subject files)
+      // Direct: { grades: {...} }
       if (subjectData?.grades?.[grade]?.lessons) {
         return subjectData.grades[grade].lessons;
+      }
+      
+      // Science old format: { subjects: { science: { grades: {...} } } }
+      if (subjectData?.subjects?.[subject]?.grades?.[grade]?.lessons) {
+        return subjectData.subjects[subject].grades[grade].lessons;
       }
       
       return [];
