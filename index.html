@@ -873,24 +873,7 @@
   .controls.hidden-panel .mode-selector,
   .controls.hidden-panel .game-stats,
   .controls.hidden-panel .control-group {
-    opacity: 0;
-    pointer-events: none;
-    width: 0;
-    overflow: hidden;
-    margin: 0;
-    padding: 0;
-    transition: all 0.4s ease;
-  }
-  .controls.hidden-panel .mode-selector,
-  .controls.hidden-panel .game-stats,
-  .controls.hidden-panel .control-group {
-    opacity: 0;
-    pointer-events: none;
-    width: 0;
-    overflow: hidden;
-    margin: 0;
-    padding: 0;
-    transition: all 0.4s ease;
+    display: none;
   }
   .controls.hidden-panel {
     gap: 4px;
@@ -4481,16 +4464,15 @@ window.performanceManager = new PerformanceManager();
     panelHidden = !panelHidden;
     
     if (controls) {
+      const headerInner = document.querySelector('.header-inner');
       if (panelHidden) {
         controls.classList.add('hidden-panel');
-        if (arrow) {
-          arrow.classList.add('showing');
-        }
+        if (headerInner) headerInner.classList.add('hidden-panel');
+        if (arrow) arrow.classList.add('showing');
       } else {
         controls.classList.remove('hidden-panel');
-        if (arrow) {
-          arrow.classList.remove('showing');
-        }
+        if (headerInner) headerInner.classList.remove('hidden-panel');
+        if (arrow) arrow.classList.remove('showing');
       }
     }
     audioManager.playClick();
