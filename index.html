@@ -4676,15 +4676,17 @@ window.performanceManager = new PerformanceManager();
     
     if (liteMode) {
       document.body.classList.add('lite-mode');
-      if (icon) icon.className = 'fas fa-bolt';
+      if (icon) { icon.className = 'fas fa-bolt'; icon.textContent = '⚡'; }
       btn.style.background = 'var(--correct-color)';
       btn.style.color = '#fff';
+      btn.style.fontSize = '1rem';
       showMascotSpeech('⚡ Lite Mode ON', 2000);
     } else {
       document.body.classList.remove('lite-mode');
-      if (icon) icon.className = 'fas fa-bolt';
+      if (icon) { icon.className = 'fas fa-bolt'; icon.textContent = ''; }
       btn.style.background = '';
       btn.style.color = '';
+      btn.style.fontSize = '';
       showMascotSpeech('✨ Full Mode ON', 2000);
     }
     audioManager.playClick();
