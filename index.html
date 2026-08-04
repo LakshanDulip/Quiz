@@ -1254,18 +1254,22 @@
     width: 100%;
     min-height: 300px;
     position: relative;
-    transform-style: preserve-3d;
-    transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.6s ease;
   }
-  .flashcard.flipped {
-    transform: rotateY(180deg);
+  .flashcard.flipped .flashcard-front {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.9);
+  }
+  .flashcard.flipped .flashcard-back {
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1);
   }
   
   .flashcard-front, .flashcard-back {
     position: absolute;
     inset: 0;
-    -webkit-backface-visibility: hidden !important;
-    backface-visibility: hidden !important;
     border-radius: 20px;
     padding: 35px 30px;
     display: flex;
@@ -1274,14 +1278,24 @@
     align-items: center;
     text-align: center;
     overflow-y: auto;
+    transition: all 0.6s ease;
   }
   .flashcard-front {
-    background: var(--bg-card) !important;
+    opacity: 1;
     z-index: 2;
+    transform: scale(1);
+    background: var(--bg-card);
+    border: 2px solid var(--border-color);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
   }
   .flashcard-back {
-    background: var(--bg-card) !important;
+    opacity: 0;
     z-index: 1;
+    transform: scale(0.9);
+    pointer-events: none;
+    background: var(--bg-card);
+    border: 2px solid var(--correct-color);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
   }
   .flashcard-front::before {
     content: '❓';
