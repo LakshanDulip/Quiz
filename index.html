@@ -6396,12 +6396,18 @@ window.performanceManager = new PerformanceManager();
     try { audioManager.playModalClose(); } catch(e) {}
   };
   // ============ POWER-UPS ============
-  window.useFiftyFifty = function() {
+  window.useFiftyFifty = async function() {
     const qz = appState.quiz;
     if (!qz || qz.answeredCurrent || qz.powerups.fiftyFifty <= 0 || currentMode !== MODES.GAME) return;
     qz.powerups.fiftyFifty--;
+    
+    const lesson = await findLesson(qz.subject, qz.grade, qz.lessonId);
+    if (!lesson) return;
+    
     const qIndex = qz.order[qz.idx];
-    const question = findLesson(qz.subject, qz.grade, qz.lessonId).questions[qIndex];
+    const question = lesson.questions[qIndex];
+    if (!question) return;
+    
     const correct = question.correct;
     const wrongOptions = question.options.map((_, i) => i).filter(i => i !== correct);
     const shuffled = shuffleIdx(wrongOptions.length);
@@ -6411,8 +6417,7 @@ window.performanceManager = new PerformanceManager();
     renderMain();
     audioManager.playPowerupFifty();
   };
-
-  window.useSkip = function() {
+  window.useSkip = async function() {
     const qz = appState.quiz;
     if (!qz || qz.answeredCurrent || qz.powerups.skip <= 0 || currentMode !== MODES.GAME) return;
     qz.powerups.skip--;
