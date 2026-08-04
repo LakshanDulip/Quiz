@@ -1597,8 +1597,22 @@
     right: 16px;
     z-index: 9998;
     cursor: pointer;
-    transition: all 0.4s cubic-bezier(.2,.8,.3,1);
+    transition: all 0.5s cubic-bezier(.4,0,.2,1);
     filter: drop-shadow(0 8px 24px rgba(255,107,53,0.45));
+    opacity: 1;
+    transform: scale(1);
+  }
+  .mascot-container.hiding {
+    opacity: 0;
+    transform: scale(0.3) translateY(30px);
+    pointer-events: none;
+  }
+  .mascot-container.showing {
+    animation: mascotAppear 0.6s cubic-bezier(.34,1.56,.64,1) forwards;
+  }
+  @keyframes mascotAppear {
+    0% { opacity: 0; transform: scale(0.3) translateY(30px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
   }
   .mascot-container:hover {
     transform: translateY(-10px) scale(1.05);
@@ -4777,14 +4791,21 @@ window.performanceManager = new PerformanceManager();
     
     if (mascot) {
       if (!mascotVisible) {
-        // Bye message before hiding
+        // Smooth hide
         showMascotSpeech('👋 මම යනවා... ආයෙත් එන්නම්! 💕', 2000);
+        mascot.classList.add('hiding');
         setTimeout(() => {
           mascot.style.display = 'none';
-        }, 2000);
+          mascot.classList.remove('hiding');
+        }, 500);
       } else {
+        // Smooth show
         mascot.style.display = 'block';
+        mascot.classList.add('showing');
         showMascotSpeech('🦊 මම ආපහු ආවා!', 2000);
+        setTimeout(() => {
+          mascot.classList.remove('showing');
+        }, 600);
       }
     }
     if (toggleBtn) {
