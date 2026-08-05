@@ -4875,56 +4875,84 @@ window.performanceManager = new PerformanceManager();
     // ============ MULTIPLAYER LAUNCH ============
   window.openMultiplayer = function() {
     const btn = document.getElementById('multiplayerBtn');
+    if (!btn) return;
     
-    // Button animation
-    btn.style.transition = 'all 0.3s cubic-bezier(.34,1.56,.64,1)';
-    btn.style.transform = 'scale(1.4)';
+    const rect = btn.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    
+    // Button pulse
+    btn.style.transition = 'all 0.4s cubic-bezier(.34,1.56,.64,1)';
+    btn.style.transform = 'scale(1.5)';
     btn.style.background = 'var(--primary-gradient)';
     btn.style.color = '#fff';
+    btn.style.boxShadow = '0 0 30px var(--glow-color)';
     
-    // Sparkle effect
-    for (let i = 0; i < 6; i++) {
-      const spark = document.createElement('span');
-      spark.textContent = '⚡';
-      spark.style.cssText = `
-        position: fixed;
-        left: ${btn.getBoundingClientRect().left + btn.offsetWidth/2}px;
-        top: ${btn.getBoundingClientRect().top + btn.offsetHeight/2}px;
-        font-size: 1.2rem;
-        pointer-events: none;
-        z-index: 99999;
-        transition: all 0.6s ease-out;
-        opacity: 1;
-      `;
-      document.body.appendChild(spark);
-      
-      const angle = (i / 6) * Math.PI * 2;
-      const dist = 60 + Math.random() * 40;
+    // Sparkles burst
+    const emojis = ['⚡', '✨', '💫', '🌟', '🔥'];
+    for (let i = 0; i < 10; i++) {
       setTimeout(() => {
-        spark.style.transform = `translate(${Math.cos(angle)*dist}px, ${Math.sin(angle)*dist}px) scale(0)`;
-        spark.style.opacity = '0';
-      }, 10);
-      
-      setTimeout(() => spark.remove(), 700);
+        const spark = document.createElement('span');
+        spark.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        spark.style.cssText = `
+          position: fixed;
+          left: ${cx}px;
+          top: ${cy}px;
+          font-size: ${0.8 + Math.random() * 1.4}rem;
+          pointer-events: none;
+          z-index: 99999;
+          transition: all 0.7s cubic-bezier(.25,.8,.25,1);
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(0.5);
+        `;
+        document.body.appendChild(spark);
+        
+        const angle = (i / 10) * Math.PI * 2;
+        const dist = 50 + Math.random() * 60;
+        
+        requestAnimationFrame(() => {
+          spark.style.transform = `translate(calc(-50% + ${Math.cos(angle)*dist}px), calc(-50% + ${Math.sin(angle)*dist}px)) scale(1)`;
+          spark.style.opacity = '0';
+        });
+        
+        setTimeout(() => spark.remove(), 800);
+      }, i * 30);
     }
+    
+    // Ripple ring
+    const ring = document.createElement('div');
+    ring.style.cssText = `
+      position: fixed;
+      left: ${cx}px;
+      top: ${cy}px;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      border: 2px solid var(--primary-color);
+      pointer-events: none;
+      z-index: 99997;
+      transform: translate(-50%, -50%);
+      opacity: 0.8;
+      transition: all 0.8s cubic-bezier(.25,.8,.25,1);
+    `;
+    document.body.appendChild(ring);
+    
+    requestAnimationFrame(() => {
+      ring.style.width = '200px';
+      ring.style.height = '200px';
+      ring.style.opacity = '0';
+      ring.style.borderWidth = '0px';
+    });
+    
+    setTimeout(() => ring.remove(), 900);
     
     // Sound
     audioManager.playAchievement();
     
-    // Screen flash
-    const flash = document.createElement('div');
-    flash.style.cssText = `
-      position: fixed; inset: 0; background: var(--primary-color);
-      z-index: 99998; pointer-events: none; opacity: 0.3;
-      transition: opacity 0.4s ease;
-    `;
-    document.body.appendChild(flash);
-    setTimeout(() => { flash.style.opacity = '0'; setTimeout(() => flash.remove(), 400); }, 100);
-    
-    // Navigate after animation
+    // Navigate
     setTimeout(() => {
       location.href = 'game.html';
-    }, 500);
+    }, 600);
   };
   
   window.toggleMute = function() {
