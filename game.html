@@ -1070,6 +1070,40 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
+        .quiz-info-card {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 14px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .quiz-info-item {
+            flex: 1 1 40%;
+            min-width: 90px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .quiz-info-item .qi-label {
+            font-size: 0.65rem;
+            color: var(--text2);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .quiz-info-item .qi-value {
+            font-weight: 700;
+            font-size: 0.88rem;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .qi-value i {
+            font-size: 0.9rem;
+        }
         @media (max-width: 480px) {
             .mp-card {
                 padding: 20px 16px;
@@ -1199,20 +1233,17 @@
         let gameQuestionTime = 15;
         let previousPlayers = null;
 
-        // --- additive UI-only state ---
         let revealActive = false;
         let previousScores = {};
         let qrRendered = false;
         let achievementQueue = [];
         let achievementShowing = false;
 
-        // --- additive state: waiting-room chat ---
         let chatUnsubscribe = null;
         let chatMessages = [];
         let lastChatSendAt = 0;
         let chatSending = false;
 
-        // --- additive state: stability / bug-fix guards ---
         let joining = false;
         let creatingRoom = false;
         let answeringInFlight = false;
@@ -1220,12 +1251,11 @@
         let heartbeatInterval = null;
         const PRESENCE_STALE_MS = 30000;
 
-        // --- smart re-render tracking (FIX: prevent unnecessary full DOM rebuilds) ---
         let prevSnapshotStatus = null;
         let prevSnapshotQuestionIndex = -1;
         let prevSnapshotPlayersJSON = '';
         let waitingRoomFullyRendered = false;
-        let currentScreenMode = 'lobby'; // 'lobby' | 'waiting' | 'countdown' | 'playing' | 'leaderboard' | 'finished'
+        let currentScreenMode = 'lobby';
 
         // ============ AUTH ============
         async function initAuth() {
@@ -1287,7 +1317,7 @@
         });
 
         // =========================================================
-        // MODULE: SOUND SYSTEM
+        // SOUND SYSTEM
         // =========================================================
         let audioCtx = null;
 
@@ -1410,7 +1440,7 @@
         }
 
         // =========================================================
-        // MODULE: AMBIENT PARTICLE BACKGROUND
+        // AMBIENT PARTICLES
         // =========================================================
         function prefersReducedMotion() {
             return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1459,7 +1489,7 @@
         }
 
         // =========================================================
-        // MODULE: CONFETTI
+        // CONFETTI
         // =========================================================
         function launchConfetti() {
             if (prefersReducedMotion()) return;
@@ -1504,7 +1534,7 @@
         }
 
         // =========================================================
-        // MODULE: ACHIEVEMENTS
+        // ACHIEVEMENTS
         // =========================================================
         function computeAchievements(player) {
             const list = [];
@@ -1551,7 +1581,7 @@
         }
 
         // =========================================================
-        // MODULE: SHARE / INVITE / QR
+        // SHARE / INVITE / QR
         // =========================================================
         function getInviteLink() {
             return `${window.location.origin}${window.location.pathname}?room=${roomCode}`;
@@ -1717,6 +1747,11 @@
             const qTime = parseInt(document.getElementById('setQTime')?.value || 15);
             if (!lessonId) return showError('Lesson තෝරන්න!');
             if (qCount < 10 || qCount > 30) return showError('Questions 10-30 විය යුතුයි!');
+
+            // Get lesson name for display
+            const lessonSelect = document.getElementById('setLesson');
+            const lessonName = lessonSelect.options[lessonSelect.selectedIndex]?.text || lessonId;
+
             creatingRoom = true;
             const createBtn = document.querySelector('#app .mp-btn-primary');
             if (createBtn) createBtn.disabled = true;
@@ -1760,6 +1795,7 @@
                     subject,
                     grade,
                     lessonId,
+                    lessonName,
                     questionTime: qTime,
                     questionCount: questions.length,
                     status: 'waiting',
@@ -1868,11 +1904,9 @@
                 const data = snapshot.data();
                 const players = data.players || {};
 
-                // BUG FIX: derive host status from document
                 isHost = data.hostId === currentUser.uid;
                 if (players[currentUser.uid]) players[currentUser.uid].online = true;
 
-                // detect join/leave for toast notifications
                 if (previousPlayers && data.status !== 'waiting') {
                     Object.keys(previousPlayers).forEach(uid => {
                         const wasOnline = previousPlayers[uid]?.online;
@@ -1888,32 +1922,26 @@
                 }
                 previousPlayers = JSON.parse(JSON.stringify(players));
 
-                // presence maintenance
                 maintainPresence(data, players);
 
-                // chat management
                 if (data.status === 'waiting') { startChatListener(); } else { stopChatListener(); }
 
-                // --- SMART RE-RENDER LOGIC (FIX: prevent unnecessary full DOM rebuilds) ---
                 const statusChanged = data.status !== prevSnapshotStatus;
                 const questionChanged = data.status === 'playing' && data.currentQuestion !==
                     prevSnapshotQuestionIndex;
                 const playersChanged = JSON.stringify(players) !== prevSnapshotPlayersJSON;
 
-                // update tracking vars
                 const oldStatus = prevSnapshotStatus;
                 prevSnapshotStatus = data.status;
                 prevSnapshotQuestionIndex = data.currentQuestion;
                 prevSnapshotPlayersJSON = JSON.stringify(players);
 
-                // Clear timer when leaving playing state
                 if (oldStatus === 'playing' && data.status !== 'playing') {
                     if (questionTimer) { clearInterval(questionTimer);
                         questionTimer = null; }
                 }
 
                 if (statusChanged || questionChanged) {
-                    // Full re-render needed for screen transition or new question
                     waitingRoomFullyRendered = false;
                     currentScreenMode = data.status;
                     gameState = data.status;
@@ -1954,16 +1982,12 @@
                             break;
                     }
                 } else if (data.status === 'waiting' && playersChanged && waitingRoomFullyRendered) {
-                    // Only update player-related parts, don't rebuild chat
                     updatePlayerListDOM(players, data.hostId);
                     updateReadyButtonDOM(players);
                     updateStartButtonDOM(players, data.hostId);
                     updatePlayerCountDOM(players);
                 }
-                // If status is 'playing' but question hasn't changed, do NOT re-render
-                // Timer updates DOM directly via interval
 
-                // Update online count
                 const countEl = document.getElementById('onlineCount');
                 if (countEl) countEl.textContent = Object.values(players).filter(p => p.online).length;
             });
@@ -1971,9 +1995,11 @@
             startHeartbeat();
         }
 
-        // =========================================================
-        // FULL RENDERS (called only on screen transitions)
-        // =========================================================
+        function getSubjectName(subject) {
+            const map = { 'science': 'විද්‍යාව', 'maths': 'ගණිතය' };
+            return map[subject] || subject;
+        }
+
         function renderWaitingRoomFull(data) {
             const players = data.players || {};
             const playerListHTML = buildPlayerListHTML(players, data.hostId);
@@ -1982,11 +2008,42 @@
             const link = getInviteLink();
             const myReady = players[currentUser.uid]?.ready || false;
 
+            const subjectDisplay = getSubjectName(data.subject || 'science');
+            const gradeDisplay = data.grade ? `${data.grade} ශ්‍රේණිය` : 'N/A';
+            const lessonDisplay = data.lessonName || data.lessonId || 'N/A';
+            const questionCountDisplay = data.questionCount || 0;
+            const timeDisplay = `${data.questionTime || gameQuestionTime}s`;
+
             render(`
             <div class="mp-card" id="waitingRoomCard">
               <div class="mp-title">⏳ Waiting Room</div>
               <div class="mp-room-code" onclick="window.copyRoomCode()" title="Tap to copy">${roomCode}</div>
               <div class="mp-copy-hint"><i class="fa-regular fa-copy"></i>Tap the code to copy</div>
+              
+              <!-- Quiz Info Card -->
+              <div class="quiz-info-card">
+                <div class="quiz-info-item">
+                  <span class="qi-label"><i class="fa-solid fa-book"></i> Subject</span>
+                  <span class="qi-value">${subjectDisplay}</span>
+                </div>
+                <div class="quiz-info-item">
+                  <span class="qi-label"><i class="fa-solid fa-graduation-cap"></i> Grade</span>
+                  <span class="qi-value">${gradeDisplay}</span>
+                </div>
+                <div class="quiz-info-item">
+                  <span class="qi-label"><i class="fa-solid fa-layer-group"></i> Lesson</span>
+                  <span class="qi-value">${escapeHtml(lessonDisplay)}</span>
+                </div>
+                <div class="quiz-info-item">
+                  <span class="qi-label"><i class="fa-solid fa-clock"></i> Time</span>
+                  <span class="qi-value">${timeDisplay} per Q</span>
+                </div>
+                <div class="quiz-info-item" style="flex:1 1 100%;">
+                  <span class="qi-label"><i class="fa-solid fa-list-ol"></i> Questions</span>
+                  <span class="qi-value">${questionCountDisplay} questions</span>
+                </div>
+              </div>
+
               <div class="invite-actions">
                 <button class="icon-btn" onclick="window.copyRoomCode()"><i class="fa-regular fa-copy"></i>Copy Code</button>
                 <button class="icon-btn" onclick="window.shareInvite()"><i class="fa-solid fa-share-nodes"></i>Share</button>
@@ -2011,10 +2068,7 @@
             </div>
           `);
 
-            // Immediately populate chat messages if any are cached
             renderChatMessages();
-
-            // Update online count
             const countEl = document.getElementById('onlineCount');
             if (countEl) countEl.textContent = Object.values(data.players || {}).filter(p => p.online).length;
         }
@@ -2034,9 +2088,6 @@
           `).join('');
         }
 
-        // =========================================================
-        // TARGETED DOM UPDATES (no full re-render, preserves chat & input focus)
-        // =========================================================
         function updatePlayerListDOM(players, hostId) {
             const container = document.getElementById('playerListContainer');
             if (!container) return;
@@ -2057,8 +2108,6 @@
             const allReady = playerCount >= 2 && Object.values(players).filter(p => p.online).every(p => p.ready);
             if (btn) {
                 btn.disabled = !allReady;
-            } else if (isHost && allReady) {
-                // Start button doesn't exist yet but should — rare edge case, handled by full re-render on status change
             }
         }
 
@@ -2069,9 +2118,6 @@
             el.textContent = `Players: ${playerCount}/10`;
         }
 
-        // =========================================================
-        // QUESTION RENDERING
-        // =========================================================
         function renderQuestionFull(data) {
             const q = data.questions[currentQuestionIndex];
             if (!q) return;
@@ -2118,7 +2164,6 @@
           `);
         }
 
-        // Update question options only (for reveal after timer expiry, without full re-render)
         function updateQuestionOptionsDOM(data) {
             const container = document.getElementById('optionsContainer');
             const msgEl = document.getElementById('answerLockedMsg');
@@ -2292,7 +2337,6 @@
                     [`players.${currentUser.uid}.answer`]: index,
                     [`players.${currentUser.uid}.answerTime`]: Date.now()
                 });
-                // Update options visually without full re-render
                 const data = (await getDoc(doc(db, 'liveMatches', roomId))).data();
                 if (data && data.status === 'playing') {
                     updateQuestionOptionsDOM(data);
@@ -2385,7 +2429,7 @@
         }
 
         // =========================================================
-        // TIMER (drift-free, updates DOM directly — no full re-render)
+        // TIMER
         // =========================================================
         function startQuestionTimer(data) {
             if (questionTimer) clearInterval(questionTimer);
@@ -2400,8 +2444,6 @@
 
             questionTimer = setInterval(async () => {
                 questionTimeLeft = computeTimeLeft();
-
-                // Update timer DOM directly (no full re-render)
                 const timerEl = document.getElementById('timerDisplay');
                 const ringEl = document.getElementById('timerRingProgress');
                 const wrapEl = document.getElementById('timerWrap');
@@ -2424,7 +2466,6 @@
                     clearInterval(questionTimer);
                     questionTimer = null;
                     revealActive = true;
-                    // Update options to show correct/wrong (targeted, no full re-render)
                     if (data && data.questions) {
                         updateQuestionOptionsDOM(data);
                     }
@@ -2433,7 +2474,6 @@
                         playSound(selectedAnswer === correctIdx ? 'correct' : 'wrong');
                     }
 
-                    // Host scoring
                     if (isHost && roomId && !scoringInProgress) {
                         scoringInProgress = true;
                         const qRef = doc(db, 'liveMatches', roomId);
@@ -2526,7 +2566,7 @@
         }
 
         // =========================================================
-        // MODULE: WAITING ROOM CHAT
+        // CHAT
         // =========================================================
         function startChatListener() {
             if (chatUnsubscribe || !roomId) return;
@@ -2599,7 +2639,9 @@
                 });
                 lastChatSendAt = now;
                 input.value = '';
-            } catch (e) {}
+            } catch (e) {
+                showToast('❌ Message send failed. Check connection.');
+            }
             chatSending = false;
             if (sendBtn) sendBtn.disabled = false;
             input.focus();
@@ -2611,7 +2653,7 @@
         }
 
         // =========================================================
-        // MODULE: PRESENCE / GHOST-PLAYER DETECTION
+        // PRESENCE
         // =========================================================
         function startHeartbeat() {
             stopHeartbeat();
@@ -2678,7 +2720,7 @@
         }
 
         // =========================================================
-        // MODULE: RECONNECT PERSISTENCE
+        // RECONNECT
         // =========================================================
         function saveActiveRoom() {
             try { localStorage.setItem('quizhub_active_room', JSON.stringify({ roomId, roomCode })); } catch (e) {}
