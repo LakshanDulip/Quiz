@@ -1662,9 +1662,38 @@ function shareWhatsApp() {
     const lesson = window.sharedLesson || 'N/A';
     const inviteLink = getInviteLink();
 
-    const text = `🎮 *Quiz Hub Multiplayer Game* එකට එකතු වෙන්න!\n\n👑 *Created By:* ${hostName}\n📚 *Grade:* ${grade}\n📖 *Lesson:* ${lesson}\n🔑 *Room Code:* *${roomCode}*\n\n━━━━━━━━━━━━━━━━━━━━\n\n📌 *Join කරන ආකාරය*\n\n1️⃣ පහත *Join Link* එක Open කරන්න.\n2️⃣ ඔබගේ *Username* එක ඇතුළත් කරන්න.\n3️⃣ ඉහත *Room Code* එක ලබා දෙන්න.\n4️⃣ 🚀 Game එකට Join වෙලා Quiz Battle එක ආරම්භ කරන්න!\n\n🔗 *Join Link*\n${inviteLink}\n\n━━━━━━━━━━━━━━━━━━━━\n\n🏆 *Fastest Player Wins*\n⚡ *Real-time Multiplayer*\n🎯 *Challenge Your Friends*\n\n━━━━━━━━━━━━━━━━━━━━\n🦊 *ᴅᴇᴠᴇʟᴏᴘᴇᴅ ʙʏ ʟᴀᴋꜱʜᴀɴ ᴅᴜʟɪᴘ*`;
+    const text = [
+        '🎮 *Quiz Hub Multiplayer Game* එකට එකතු වෙන්න!',
+        '',
+        '👑 *Created By:* ' + hostName,
+        '📚 *Grade:* ' + grade,
+        '📖 *Lesson:* ' + lesson,
+        '🔑 *Room Code:* *' + roomCode + '*',
+        '',
+        '━━━━━━━━━━━━━━━━━━━━',
+        '',
+        '📌 *Join කරන ආකාරය*',
+        '',
+        '1️⃣ පහත *Join Link* එක Open කරන්න.',
+        '2️⃣ ඔබගේ *Username* එක ඇතුළත් කරන්න.',
+        '3️⃣ ඉහත *Room Code* එක ලබා දෙන්න.',
+        '4️⃣ 🚀 Game එකට Join වෙලා Quiz Battle එක ආරම්භ කරන්න!',
+        '',
+        '🔗 *Join Link*',
+        inviteLink,
+        '',
+        '━━━━━━━━━━━━━━━━━━━━',
+        '',
+        '🏆 *Fastest Player Wins*',
+        '⚡ *Real-time Multiplayer*',
+        '🎯 *Challenge Your Friends*',
+        '',
+        '━━━━━━━━━━━━━━━━━━━━',
+        '🦊 *ᴅᴇᴠᴇʟᴏᴘᴇᴅ ʙʏ ʟᴀᴋꜱʜᴀɴ ᴅᴜʟɪᴘ*'
+    ].join('\n');
 
-    window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+    const waUrl = 'https://wa.me/?text=' + encodeURIComponent(text);
+    window.open(waUrl, '_blank');
 }
         function toggleQRCode() {
             const wrap = document.getElementById('qrWrap');
