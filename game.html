@@ -547,7 +547,7 @@
   <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, signInAnonymously, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, collection, query, where, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -562,10 +562,9 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-
-        // iOS Safari persistence fix
-    import { setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    setPersistence(auth, browserLocalPersistence).catch(() => {});
+    
+    // Persistence fix
+    setPersistence(auth, browserLocalPersistence).then(() => console.log('[Auth] Persistence set')).catch(() => {});
 
     // ============ STATE (unchanged core + additive UI state) ============
     let currentUser = null;
@@ -591,13 +590,34 @@
 
     // ============ AUTH (unchanged) ============
     async function initAuth() {
+      await new Promise(r => setTimeout(r, 500));
+      
       return new Promise((resolve) => {
-        onAuthStateChanged(auth, async (user) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
           if (user) {
             currentUser = user;
+            unsubscribe();
             resolve(user);
           } else {
-            await signInAnonymously(auth);
+            try {
+              const cred = await signInAnonymously(auth);
+              currentUser = cred.user;
+              unsubscribe();
+              resolve(cred.user);
+            } catch(e) {
+              console.error('Guest auth failed, retrying...');
+              try {
+                await new Promise(r => setTimeout(r, 1000));
+                const cred2 = await signInAnonymously(auth);
+                currentUser = cred2.user;
+                unsubscribe();
+                resolve(cred2.user);
+              } catch(e2) {
+                console.error('Guest auth failed:', e2);
+                unsubscribe();
+                resolve(null);
+              }
+            }
           }
         });
       });
