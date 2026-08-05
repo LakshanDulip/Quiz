@@ -1,221 +1,71 @@
 <!DOCTYPE html>
+
 <html lang="si">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <!-- සදහටම Cache වීම නවත්වන Meta Tags 👇 -->
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
-  
-  <title>Quiz Hub - Multiplayer Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Hub - Multiplayer</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Noto+Sans+Sinhala:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Sinhala:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
+  <link rel="stylesheet" href="css/multiplayer.css">
   <style>
-    /* =========================================
-       PREMIUM GAMING UI - CSS STYLES
-       ========================================= */
-    :root {
-      --bg-gradient: linear-gradient(135deg, #1a0b2e, #4a154b, #120458);
-      --card-bg: rgba(255, 255, 255, 0.08);
-      --card-border: rgba(255, 255, 255, 0.15);
-      --primary: #8b5cf6;
-      --primary-hover: #7c3aed;
-      --success: #10b981;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --text: #ffffff;
-      --text-muted: #cbd5e1;
-      --shadow-glow: 0 0 20px rgba(139, 92, 246, 0.4);
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
-    body {
-      background: var(--bg-gradient);
-      background-size: 400% 400%;
-      animation: gradientBG 15s ease infinite;
+    .home-link {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      z-index: 100;
+      padding: 8px 14px;
+      border-radius: 20px;
+      background: var(--card);
+      border: 1px solid var(--border);
       color: var(--text);
-      font-family: 'Space Grotesk', 'Noto Sans Sinhala', sans-serif;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      overflow-x: hidden;
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: all 0.3s;
     }
-
-    @keyframes gradientBG {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+    .home-link:hover { border-color: var(--primary); color: var(--primary); }
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.7; }
+      100% { transform: scale(1); opacity: 1; }
     }
-
-    /* Floating Particles Background */
-    .particles {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none;
+    /* Toast Notification Styles */
+    .mp-toast {
+      position: fixed;
+      top: 60px;
+      right: 20px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-left: 4px solid #f87171;
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      color: var(--text);
+      z-index: 1000;
+      font-size: 0.9rem;
+      font-weight: 600;
+      animation: slideIn 0.3s ease-out, fadeOut 0.3s ease-in 2.7s forwards;
     }
-    .particle {
-      position: absolute; background: rgba(255,255,255,0.1); border-radius: 50%;
-      animation: float 10s infinite linear;
+    .mp-toast.joined { border-left-color: #34d399; }
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
     }
-    @keyframes float {
-      0% { transform: translateY(100vh) scale(0); opacity: 1; }
-      100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
     }
-
-    .mp-container {
-      width: 100%; max-width: 600px; padding: 20px; z-index: 1;
-      animation: slideInUp 0.5s ease-out;
-    }
-
-    /* Glassmorphism Card */
-    .mp-card {
-      background: var(--card-bg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid var(--card-border);
-      border-radius: 24px;
-      padding: 30px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-      transition: all 0.3s ease;
-    }
-
-    .mp-title {
-      font-size: 2rem; font-weight: 800; text-align: center; margin-bottom: 25px;
-      background: linear-gradient(to right, #a78bfa, #f472b6);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      text-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-
-    /* Premium Inputs & Selects */
-    .mp-input, .mp-select {
-      width: 100%; padding: 16px 20px; margin-bottom: 15px;
-      background: rgba(0, 0, 0, 0.2); border: 2px solid rgba(255,255,255,0.1);
-      border-radius: 16px; color: #fff; font-size: 1.1rem; outline: none;
-      transition: all 0.3s; font-family: inherit;
-    }
-    .mp-input:focus, .mp-select:focus {
-      border-color: var(--primary); box-shadow: var(--shadow-glow); background: rgba(0, 0, 0, 0.4);
-    }
-    .mp-select option { background: #1a0b2e; color: #fff; }
-
-    /* Modern Gaming Buttons */
-    .mp-btn {
-      width: 100%; padding: 16px; margin-bottom: 12px;
-      border: none; border-radius: 16px; font-size: 1.1rem; font-weight: 700;
-      cursor: pointer; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      font-family: inherit; position: relative; overflow: hidden;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-    }
-    .mp-btn:active { transform: scale(0.95); }
-    .mp-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-    
-    .mp-btn-primary { background: linear-gradient(135deg, var(--primary), #d946ef); color: white; box-shadow: 0 8px 20px rgba(139, 92, 246, 0.4); border-bottom: 4px solid #5b21b6; }
-    .mp-btn-success { background: linear-gradient(135deg, #10b981, #059669); color: white; border-bottom: 4px solid #064e3b; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4); }
-    .mp-btn-danger { background: linear-gradient(135deg, #ef4444, #b91c1c); color: white; border-bottom: 4px solid #7f1d1d; }
-    .mp-btn-outline { background: transparent; border: 2px solid rgba(255,255,255,0.2); color: white; border-bottom: 4px solid rgba(255,255,255,0.1); }
-    .mp-btn-outline:hover { background: rgba(255,255,255,0.1); }
-
-    /* Answer Grid */
-    .options-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;
-    }
-    @media (max-width: 480px) { .options-grid { grid-template-columns: 1fr; } }
-    
-    .mp-option {
-      background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2);
-      border-radius: 16px; padding: 20px; font-size: 1.1rem; color: #fff;
-      cursor: pointer; transition: all 0.3s; font-weight: 600; text-align: center;
-      border-bottom: 4px solid rgba(255,255,255,0.1);
-    }
-    .mp-option:hover:not(:disabled) { background: rgba(255,255,255,0.2); transform: translateY(-3px); }
-    .mp-option:active:not(:disabled) { transform: translateY(0); border-bottom-width: 2px; }
-    
-    .mp-option.selected {
-      background: var(--primary); border-color: #d946ef; border-bottom-color: #5b21b6;
-      box-shadow: 0 0 20px rgba(139, 92, 246, 0.6); animation: pop 0.3s;
-    }
-    .mp-option.correct-reveal { background: var(--success); border-color: #059669; animation: pop 0.4s; }
-    .mp-option.wrong-reveal { background: var(--danger); border-color: #b91c1c; animation: shake 0.4s; }
-
-    @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
-    @keyframes slideInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-
-    /* Circular Timer */
-    .timer-wrapper { display: flex; justify-content: center; margin: 20px 0; }
-    .circular-chart { display: block; width: 100px; max-height: 100px; }
-    .circle-bg { fill: none; stroke: rgba(255,255,255,0.1); stroke-width: 3.8; }
-    .circle {
-      fill: none; stroke-width: 3.8; stroke-linecap: round;
-      transition: stroke-dasharray 1s linear, stroke 0.5s;
-    }
-    .timer-text { fill: #fff; font-size: 12px; font-weight: 800; font-family: 'Space Grotesk'; text-anchor: middle; dominant-baseline: middle; }
-    .circle.safe { stroke: var(--success); }
-    .circle.warning { stroke: var(--warning); }
-    .circle.danger { stroke: var(--danger); animation: pulseDanger 1s infinite; }
-    @keyframes pulseDanger { 0% { transform: scale(1); filter: drop-shadow(0 0 5px red); } 50% { transform: scale(1.05); filter: drop-shadow(0 0 15px red); } 100% { transform: scale(1); filter: drop-shadow(0 0 5px red); } }
-
-    /* Players & Leaderboard */
-    .mp-player-list { display: grid; gap: 10px; margin: 20px 0; max-height: 250px; overflow-y: auto; padding-right: 5px; }
-    .mp-player-list::-webkit-scrollbar { width: 6px; }
-    .mp-player-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 10px; }
-    
-    .mp-player, .mp-leaderboard-item {
-      display: flex; align-items: center; background: rgba(0,0,0,0.3);
-      padding: 12px 16px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05);
-      animation: slideInUp 0.3s forwards;
-    }
-    .mp-player-avatar {
-      width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
-      font-size: 1.2rem; font-weight: bold; margin-right: 15px; box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
-    }
-    .mp-player-info { flex: 1; }
-    .mp-player-name { font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; }
-    .mp-badge-host { background: linear-gradient(135deg, #f59e0b, #d97706); font-size: 0.7rem; padding: 3px 8px; border-radius: 8px; }
-    
-    .mp-rank { width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; margin-right: 15px; }
-    .mp-rank.gold { background: linear-gradient(135deg, #fbbf24, #d97706); color: #000; box-shadow: 0 0 15px rgba(251, 191, 36, 0.5); }
-    .mp-rank.silver { background: linear-gradient(135deg, #e2e8f0, #94a3b8); color: #000; }
-    .mp-rank.bronze { background: linear-gradient(135deg, #f87171, #991b1b); color: #fff; }
-
-    /* Confetti Canvas */
-    #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; }
-    
-    /* Top Bar Controls */
-    .top-controls { position: fixed; top: 15px; right: 15px; z-index: 100; display: flex; gap: 10px; }
-    .control-btn {
-      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(8px);
-      width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      color: white; cursor: pointer; transition: 0.3s;
-    }
-    .control-btn:hover { background: rgba(255,255,255,0.2); }
-    
-    /* Match Stats Screen */
-    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
-    .stat-box { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; text-align: center; }
-    .stat-value { font-size: 1.4rem; font-weight: 800; color: var(--primary); }
-    .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
-
   </style>
 </head>
 <body>
-  
-  <div class="particles" id="particles"></div>
   <a href="index.html" class="home-link">← Home</a>
-  
-  <div class="top-controls">
-    <button class="control-btn" id="btnSoundToggle" onclick="window.toggleSound()"><i class="fas fa-volume-up"></i></button>
-  </div>
-
-  <canvas id="confetti-canvas"></canvas>
 
   <div class="mp-container" id="app"></div>
 
   <!-- Firebase SDK -->
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -247,184 +97,98 @@
     let questionTimer = null;
     let questionTimeLeft = 15;
     let gameQuestionTime = 15;
-    let previousPlayers = null;
-    
-    // Stats for end screen (Local tracking)
-    let localStats = { streak: 0, highestStreak: 0 };
-
-    // ============ WEB AUDIO API (SOUND SYSTEM) ============
-    let audioCtx = null;
-    let isMuted = localStorage.getItem('quizMuted') === 'true';
-
-    function initAudio() {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      }
-      if(audioCtx.state === 'suspended') audioCtx.resume();
-    }
-
-    window.toggleSound = function() {
-      isMuted = !isMuted;
-      localStorage.setItem('quizMuted', isMuted);
-      document.getElementById('btnSoundToggle').innerHTML = isMuted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>';
-      if(!isMuted) playSound('click');
-    };
-
-    function playSound(type) {
-      if (isMuted) return;
-      initAudio();
-      const osc = audioCtx.createOscillator();
-      const gainNode = audioCtx.createGain();
-      osc.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-
-      const now = audioCtx.currentTime;
-      
-      switch(type) {
-        case 'click':
-          osc.type = 'sine'; osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(300, now + 0.1);
-          gainNode.gain.setValueAtTime(0.5, now); gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-          osc.start(now); osc.stop(now + 0.1); break;
-        case 'tick':
-          osc.type = 'triangle'; osc.frequency.setValueAtTime(800, now);
-          gainNode.gain.setValueAtTime(0.2, now); gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
-          osc.start(now); osc.stop(now + 0.05); break;
-        case 'correct':
-          osc.type = 'sine'; osc.frequency.setValueAtTime(400, now); osc.frequency.setValueAtTime(600, now + 0.1); osc.frequency.setValueAtTime(1000, now + 0.2);
-          gainNode.gain.setValueAtTime(0.5, now); gainNode.gain.linearRampToValueAtTime(0, now + 0.5);
-          osc.start(now); osc.stop(now + 0.5); break;
-        case 'wrong':
-          osc.type = 'sawtooth'; osc.frequency.setValueAtTime(300, now); osc.frequency.linearRampToValueAtTime(100, now + 0.3);
-          gainNode.gain.setValueAtTime(0.5, now); gainNode.gain.linearRampToValueAtTime(0, now + 0.3);
-          osc.start(now); osc.stop(now + 0.3); break;
-        case 'win':
-          osc.type = 'square'; osc.frequency.setValueAtTime(400, now); osc.frequency.setValueAtTime(600, now+0.2); osc.frequency.setValueAtTime(800, now+0.4); osc.frequency.setValueAtTime(1200, now+0.6);
-          gainNode.gain.setValueAtTime(0.3, now); gainNode.gain.linearRampToValueAtTime(0, now + 1.5);
-          osc.start(now); osc.stop(now + 1.5); break;
-      }
-    }
+    let previousPlayers = null; // Players ලා අයින් වෙනවද බලන්න පාවිච්චි කරනවා
 
     // ============ AUTH ============
     async function initAuth() {
       return new Promise((resolve) => {
         onAuthStateChanged(auth, async (user) => {
-          if (user) { currentUser = user; resolve(user); } 
-          else { await signInAnonymously(auth); }
+          if (user) {
+            currentUser = user;
+            resolve(user);
+          } else {
+            await signInAnonymously(auth);
+          }
         });
       });
     }
 
+    // Tab එක Close කරද්දී Offline කරන්න (User Experience Fix)
     window.addEventListener('beforeunload', () => {
-      if (roomId && currentUser) updateDoc(doc(db, 'liveMatches', roomId), { [`players.${currentUser.uid}.online`]: false }).catch(()=>{});
+      if (roomId && currentUser) {
+        updateDoc(doc(db, 'liveMatches', roomId), {
+          [`players.${currentUser.uid}.online`]: false
+        }).catch(()=>{}); // Network Error ආවොත් ignore කරන්න
+      }
     });
-
-    // ============ PARTICLES & CONFETTI ============
-    function createParticles() {
-      const container = document.getElementById('particles');
-      for(let i=0; i<15; i++) {
-        let p = document.createElement('div');
-        p.className = 'particle';
-        let size = Math.random() * 20 + 5;
-        p.style.width = size + 'px'; p.style.height = size + 'px';
-        p.style.left = Math.random() * 100 + 'vw';
-        p.style.animationDuration = (Math.random() * 10 + 10) + 's';
-        p.style.animationDelay = (Math.random() * 5) + 's';
-        container.appendChild(p);
-      }
-    }
-
-    function fireConfetti() {
-      const canvas = document.getElementById('confetti-canvas');
-      const ctx = canvas.getContext('2d');
-      canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-      let pieces = [];
-      const colors = ['#fce18a', '#ff726d', '#b48def', '#f4306d'];
-      for(let i=0; i<100; i++) {
-        pieces.push({
-          x: Math.random() * canvas.width, y: Math.random() * canvas.height - canvas.height,
-          w: Math.random() * 10 + 5, h: Math.random() * 10 + 5,
-          color: colors[Math.floor(Math.random() * colors.length)],
-          speed: Math.random() * 3 + 2, angle: Math.random() * 360, rotSpeed: Math.random() * 0.2 - 0.1
-        });
-      }
-      function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        pieces.forEach(p => {
-          ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.angle);
-          ctx.fillStyle = p.color; ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h); ctx.restore();
-          p.y += p.speed; p.angle += p.rotSpeed;
-          if(p.y > canvas.height) p.y = -10;
-        });
-        requestAnimationFrame(draw);
-      }
-      draw();
-      setTimeout(() => { ctx.clearRect(0,0,canvas.width,canvas.height); pieces=[]; }, 5000);
-    }
 
     // ============ UI RENDER ============
     function render(html) {
       document.getElementById('app').innerHTML = html;
-      initAudio(); // Initialize audio context on user interaction
+    }
+
+    function showToast(msg, isJoin = false) {
+      const toast = document.createElement('div');
+      toast.className = `mp-toast ${isJoin ? 'joined' : ''}`;
+      toast.textContent = msg;
+      document.body.appendChild(toast);
+      setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3000);
     }
 
     function renderLobby() {
       render(`
         <div class="mp-card">
-          <div class="mp-title">⚡ Quiz Hub <br><span style="font-size:1.2rem;color:var(--text-muted);font-weight:500;">Multiplayer Arena</span></div>
-          <input type="text" class="mp-input" id="playerName" placeholder="ඔබේ නම (Your Name)..." maxlength="20" value="${playerName}">
+          <div class="mp-title">⚡ Quiz Hub Multiplayer</div>
+          <input type="text" class="mp-input" id="playerName" placeholder="ඔබේ නම..." maxlength="20" value="${playerName}">
+          <button class="mp-btn mp-btn-primary" onclick="window.createRoom()">🏠 Create Room</button>
           
-          <button class="mp-btn mp-btn-primary" onclick="playSound('click'); window.createRoom()"><i class="fas fa-plus-circle"></i> Create Room</button>
-          <div style="text-align:center; margin: 15px 0; color: rgba(255,255,255,0.5);">— OR —</div>
+          <div class="mp-divider">OR</div>
           
-          <div style="display:flex; gap:10px;">
-            <input type="text" class="mp-input" id="roomCodeInput" placeholder="CODE" maxlength="6" style="text-align:center;letter-spacing:4px;text-transform:uppercase;font-size:1.2rem;flex:1;margin-bottom:0;">
-            <button class="mp-btn mp-btn-success" style="width:auto; padding:0 25px; margin-bottom:0;" onclick="playSound('click'); window.joinRoom()"><i class="fas fa-play"></i> Join</button>
-          </div>
-          <div class="mp-error" id="errorMsg" style="color:var(--danger); text-align:center; margin-top:10px;"></div>
+          <input type="text" class="mp-input" id="roomCodeInput" placeholder="Room Code" maxlength="6" style="text-align:center;letter-spacing:4px;text-transform:uppercase;font-size:1.2rem;">
+          <button class="mp-btn mp-btn-outline" onclick="window.joinRoom()">🚪 Join Room</button>
+          
+          <div class="mp-error" id="errorMsg"></div>
         </div>
       `);
-      document.getElementById('btnSoundToggle').innerHTML = isMuted ? '<i class="fas fa-volume-mute"></i>' : '<i class="fas fa-volume-up"></i>';
     }
 
     function renderCreateSettings() {
       render(`
         <div class="mp-card">
-          <div class="mp-title" style="font-size:1.5rem;">⚙️ Game Settings</div>
+          <div class="mp-title">⚙️ Game Settings</div>
           
-          <label style="font-size:0.8rem;color:var(--text-muted);">Subject</label>
-          <select class="mp-select" id="setSubject" onchange="playSound('click'); window.updateSettingsLessons()">
+          <label style="font-size:0.8rem;color:var(--text2);">Subject</label>
+          <select class="mp-select" id="setSubject" onchange="window.updateSettingsLessons()">
             <option value="science">🔬 විද්‍යාව</option>
             <option value="maths">📐 ගණිතය</option>
           </select>
           
-          <label style="font-size:0.8rem;color:var(--text-muted);">Grade</label>
-          <select class="mp-select" id="setGrade" onchange="playSound('click'); window.updateSettingsLessons()">
+          <label style="font-size:0.8rem;color:var(--text2);">Grade</label>
+          <select class="mp-select" id="setGrade" onchange="window.updateSettingsLessons()">
             <option value="8">8 ශ්‍රේණිය</option>
             <option value="9">9 ශ්‍රේණිය</option>
             <option value="10">10 ශ්‍රේණිය</option>
             <option value="11">11 ශ්‍රේණිය</option>
           </select>
           
-          <label style="font-size:0.8rem;color:var(--text-muted);">Lesson</label>
-          <select class="mp-select" id="setLesson"><option value="">Loading...</option></select>
+          <label style="font-size:0.8rem;color:var(--text2);">Lesson</label>
+          <select class="mp-select" id="setLesson">
+            <option value="">Loading...</option>
+          </select>
           
-          <div style="display:flex; gap:10px;">
-            <div style="flex:1;">
-              <label style="font-size:0.8rem;color:var(--text-muted);">Questions (10-30)</label>
-              <input type="number" class="mp-input" id="setQCount" value="10" min="10" max="30">
-            </div>
-            <div style="flex:1;">
-              <label style="font-size:0.8rem;color:var(--text-muted);">Time (sec)</label>
-              <select class="mp-select" id="setQTime">
-                <option value="10">10s ⚡</option>
-                <option value="15" selected>15s</option>
-                <option value="20">20s</option>
-              </select>
-            </div>
-          </div>
+          <label style="font-size:0.8rem;color:var(--text2);">Questions (10-30)</label>
+          <input type="number" class="mp-input" id="setQCount" value="10" min="10" max="30">
           
-          <button class="mp-btn mp-btn-primary" onclick="playSound('click'); window.confirmCreateRoom()"><i class="fas fa-check"></i> Create & Invite</button>
-          <button class="mp-btn mp-btn-outline" onclick="playSound('click'); window.leaveRoom()"><i class="fas fa-arrow-left"></i> Back</button>
+          <label style="font-size:0.8rem;color:var(--text2);">Time per Question (seconds)</label>
+          <select class="mp-select" id="setQTime">
+            <option value="10">10s - Fast ⚡</option>
+            <option value="15" selected>15s - Normal</option>
+            <option value="20">20s - Easy</option>
+            <option value="30">30s - Relaxed</option>
+          </select>
+          
+          <button class="mp-btn mp-btn-primary" onclick="window.confirmCreateRoom()">✅ Create Room</button>
+          <button class="mp-btn mp-btn-outline" onclick="window.leaveRoom()">Back</button>
         </div>
       `);
       updateSettingsLessons(); 
@@ -441,23 +205,43 @@
       const grade = document.getElementById('setGrade')?.value || '8';
       const select = document.getElementById('setLesson');
       if (!select) return;
+      
       select.innerHTML = '<option value="">Loading...</option>';
       
       try {
         const resp = await fetch(`data/${subject}.json?t=${Date.now()}`);
-        if (!resp.ok) throw new Error('Failed');
+        if (!resp.ok) throw new Error('Failed to load JSON');
         const data = await resp.json();
+        
         let lessons = [];
-        if (data.grades?.[grade]?.lessons) lessons = data.grades[grade].lessons;
-        else if (data[subject]?.grades?.[grade]?.lessons) lessons = data[subject].grades[grade].lessons;
-        else if (data.subjects?.[subject]?.grades?.[grade]?.lessons) lessons = data.subjects[subject].grades[grade].lessons;
-        else {
-          for (let key in data) { if (data[key]?.grades?.[grade]?.lessons) { lessons = data[key].grades[grade].lessons; break; } }
+        
+        if (data.grades?.[grade]?.lessons) {
+          lessons = data.grades[grade].lessons;
+        } else if (data[subject]?.grades?.[grade]?.lessons) {
+          lessons = data[subject].grades[grade].lessons;
+        } else if (data.subjects?.[subject]?.grades?.[grade]?.lessons) {
+          lessons = data.subjects[subject].grades[grade].lessons;
+        } else {
+          for (let key in data) {
+            if (data[key]?.grades?.[grade]?.lessons) {
+              lessons = data[key].grades[grade].lessons;
+              break;
+            }
+          }
         }
         
-        if (!lessons || lessons.length === 0) { select.innerHTML = '<option value="">No lessons found</option>'; return; }
-        select.innerHTML = lessons.map(l => `<option value="${l.id}">${escapeHtml(l.title)} (${l.questions?.length || 0} Q)</option>`).join('');
-      } catch(e) { select.innerHTML = '<option value="">Error loading</option>'; }
+        if (!lessons || lessons.length === 0) {
+          select.innerHTML = '<option value="">No lessons found</option>';
+          return;
+        }
+        
+        select.innerHTML = lessons.map(l => 
+          `<option value="${l.id}">${escapeHtml(l.title)} (${l.questions?.length || 0} Q)</option>`
+        ).join('');
+      } catch(e) {
+        console.error(e);
+        select.innerHTML = '<option value="">Error loading</option>';
+      }
     }
 
     async function confirmCreateRoom() {
@@ -468,29 +252,56 @@
       const qTime = parseInt(document.getElementById('setQTime')?.value || 15);
       
       if (!lessonId) return showError('Lesson තෝරන්න!');
+      if (qCount < 10 || qCount > 30) return showError('Questions 10-30 විය යුතුයි!');
       
-      gameQuestionTime = qTime; roomCode = Math.random().toString(36).substring(2, 8).toUpperCase(); roomId = `room_${Date.now()}`; isHost = true; previousPlayers = null; localStats = {streak:0, highestStreak:0};
-      
+      gameQuestionTime = qTime;
+      roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+      roomId = `room_${Date.now()}`;
+      isHost = true;
+      previousPlayers = null;
+
       let questions = [];
       try {
         const resp = await fetch(`data/${subject}.json?t=${Date.now()}`);
         const data = await resp.json();
         let lessons = [];
-        if (data.grades?.[grade]?.lessons) lessons = data.grades[grade].lessons;
-        else if (data[subject]?.grades?.[grade]?.lessons) lessons = data[subject].grades[grade].lessons;
-        else if (data.subjects?.[subject]?.grades?.[grade]?.lessons) lessons = data.subjects[subject].grades[grade].lessons;
-        else { for (let key in data) { if (data[key]?.grades?.[grade]?.lessons) { lessons = data[key].grades[grade].lessons; break; } } }
+        
+        if (data.grades?.[grade]?.lessons) {
+          lessons = data.grades[grade].lessons;
+        } else if (data[subject]?.grades?.[grade]?.lessons) {
+          lessons = data[subject].grades[grade].lessons;
+        } else if (data.subjects?.[subject]?.grades?.[grade]?.lessons) {
+          lessons = data.subjects[subject].grades[grade].lessons;
+        } else {
+          for (let key in data) {
+            if (data[key]?.grades?.[grade]?.lessons) {
+              lessons = data[key].grades[grade].lessons;
+              break;
+            }
+          }
+        }
         
         const lesson = lessons.find(l => l.id === lessonId);
-        if (lesson && lesson.questions) { const shuffled = [...lesson.questions].sort(() => Math.random() - 0.5); questions = shuffled.slice(0, qCount); }
-      } catch(e) {}
+        if (lesson && lesson.questions) {
+          const shuffled = [...lesson.questions].sort(() => Math.random() - 0.5);
+          questions = shuffled.slice(0, qCount);
+        }
+      } catch(e) { console.error(e); }
       
-      if (questions.length === 0) questions = [{q:"No questions found!", options:["OK","B","C","D"], correct:0}];
+      if (questions.length === 0) {
+        questions = [{q:"No questions found for this lesson! Check your JSON.", options:["OK","B","C","D"], correct:0}];
+      }
 
       await setDoc(doc(db, 'liveMatches', roomId), {
-        roomCode, hostId: currentUser.uid, hostName: playerName, subject, grade, lessonId, questionTime: qTime, questionCount: questions.length,
+        roomCode, hostId: currentUser.uid, hostName: playerName,
+        subject, grade, lessonId, questionTime: qTime, questionCount: questions.length,
         status: 'waiting', currentQuestion: -1, createdAt: serverTimestamp(), questions,
-        players: { [currentUser.uid]: { name: playerName, score: 0, correct: 0, wrong: 0, answered: false, ready: false, online: true, joinedAt: new Date().toISOString() } }
+        players: {
+          [currentUser.uid]: {
+            name: playerName, score: 0, correct: 0, wrong: 0,
+            answered: false, ready: false, online: true, joinedAt: new Date().toISOString()
+          }
+        }
       });
       listenToRoom();
     }
@@ -500,17 +311,28 @@
       playerName = document.getElementById('playerName')?.value.trim() || 'Player';
       if (!code) return showError('Room code enter කරන්න!');
       
-      roomCode = code; previousPlayers = null; localStats = {streak:0, highestStreak:0};
-      const snapshot = await getDocs(query(collection(db, 'liveMatches'), where('roomCode', '==', code), where('status', 'in', ['waiting', 'countdown'])));
-      if (snapshot.empty) return showError('Room not found or game started!');
+      roomCode = code;
+      previousPlayers = null;
+
+      const q = query(collection(db, 'liveMatches'), where('roomCode', '==', code), where('status', 'in', ['waiting', 'countdown']));
+      const snapshot = await getDocs(q);
       
-      const docData = snapshot.docs[0]; roomId = docData.id; isHost = false;
+      if (snapshot.empty) return showError('Room not found!');
+      
+      const docData = snapshot.docs[0];
+      roomId = docData.id;
+      isHost = false;
+
       const players = docData.data().players || {};
-      if (Object.keys(players).length >= 10 && !players[currentUser.uid]) return showError('Room is full (max 10)!');
+      if (Object.keys(players).length >= 10) return showError('Room is full (max 10)!');
 
       await updateDoc(doc(db, 'liveMatches', roomId), {
-        [`players.${currentUser.uid}`]: { name: playerName, score: 0, correct: 0, wrong: 0, answered: false, ready: false, online: true, joinedAt: new Date().toISOString() }
+        [`players.${currentUser.uid}`]: {
+          name: playerName, score: 0, correct: 0, wrong: 0,
+          answered: false, ready: false, online: true, joinedAt: new Date().toISOString()
+        }
       });
+
       listenToRoom();
     }
 
@@ -519,50 +341,76 @@
       if (unsubscribe) unsubscribe();
       unsubscribe = onSnapshot(doc(db, 'liveMatches', roomId), (snapshot) => {
         if (!snapshot.exists()) { leaveRoom(); return; }
-        const data = snapshot.data(); const players = data.players || {};
+        
+        const data = snapshot.data();
+        const players = data.players || {};
+        
+        // Update online status locally
         if (players[currentUser.uid]) players[currentUser.uid].online = true;
 
+        // Player Drop/Join Detection (Toast Alerts)
+        if (previousPlayers && data.status !== 'waiting') {
+          Object.keys(previousPlayers).forEach(uid => {
+            const wasOnline = previousPlayers[uid].online;
+            const isOnline = players[uid]?.online;
+            
+            if (wasOnline && !isOnline) {
+              showToast(`🔴 ${previousPlayers[uid].name} left the game!`);
+            } else if (!wasOnline && isOnline) {
+              showToast(`🟢 ${players[uid].name} rejoined!`, true);
+            }
+          });
+        }
+        previousPlayers = JSON.parse(JSON.stringify(players)); // Save state for next check
+
         switch(data.status) {
-          case 'waiting': renderWaitingRoom(data); selectedAnswer = -1; break;
+          case 'waiting':
+            renderWaitingRoom(data);
+            selectedAnswer = -1;
+            break;
+
           case 'countdown':
-            if(gameState !== 'countdown') playSound('win'); // fanfare start
             gameState = 'countdown';
-            render(`<div class="mp-card" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height: 300px;"><div class="mp-title" style="font-size: 2.5rem;">Get Ready!</div><div style="font-size: 5rem; margin-top: 10px; animation: pulseDanger 0.5s infinite alternate;">🎮</div></div>`);
-            selectedAnswer = -1; break;
+            render(`
+              <div class="mp-card" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height: 300px;">
+                <div class="mp-title" style="font-size: 2rem;">Game is starting...</div>
+                <div style="font-size: 4rem; margin-top: 20px; animation: pulse 1s infinite;">⏳</div>
+              </div>
+            `);
+            selectedAnswer = -1;
+            break;
+            
           case 'playing':
             const isNewQuestion = currentQuestionIndex !== (data.currentQuestion || 0);
             currentQuestionIndex = data.currentQuestion || 0;
-            if (gameState !== 'playing' || isNewQuestion) { gameState = 'playing'; selectedAnswer = -1; startQuestionTimer(data); }
-            renderQuestion(data); break;
-          case 'leaderboard': gameState = 'leaderboard'; renderLeaderboard(players, getScores(players)); break;
-          case 'finished': gameState = 'finished'; renderWinner(players, getScores(players), data); break;
+            if (gameState !== 'playing' || isNewQuestion) {
+              gameState = 'playing'; selectedAnswer = -1; startQuestionTimer(data);
+            }
+            renderQuestion(data);
+            break;
+            
+          case 'leaderboard':
+            gameState = 'leaderboard';
+            renderLeaderboard(players, getScores(players));
+            break;
+            
+          case 'finished':
+            gameState = 'finished';
+            renderWinner(players, getScores(players), data);
+            break;
         }
       });
     }
 
     // ============ GAME SCREENS ============
-    window.shareWhatsApp = function() {
-      playSound('click');
-      const url = `${window.location.origin}${window.location.pathname}?room=${roomCode}`;
-      window.open(`https://api.whatsapp.com/send?text=🎮 Join my Quiz! Code: *${roomCode}* %0A🔗 Link: ${url}`, '_blank');
-    };
-    window.copyCode = function() {
-      playSound('click');
-      const url = `${window.location.origin}${window.location.pathname}?room=${roomCode}`;
-      navigator.clipboard.writeText(`Room Code: ${roomCode} \nLink: ${url}`);
-      alert('📋 Code & Link copied!');
-    };
-
     function renderWaitingRoom(data) {
       const players = data.players || {};
       const playerList = Object.entries(players).map(([uid, p]) => `
-        <div class="mp-player" style="animation: slideInUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+        <div class="mp-player">
           <div class="mp-player-avatar" style="background:${getAvatarColor(uid)}">${(p.name||'?')[0].toUpperCase()}</div>
           <div class="mp-player-info">
-            <div class="mp-player-name">${escapeHtml(p.name)} ${uid === data.hostId ? '<span class="mp-badge-host"><i class="fas fa-crown"></i> Host</span>' : ''}</div>
-            <div class="mp-player-status" style="color: ${p.online ? (p.ready ? 'var(--success)' : 'var(--warning)') : 'var(--danger)'}; font-size: 0.8rem;">
-              <i class="fas ${p.online ? (p.ready ? 'fa-check-circle' : 'fa-hourglass-half') : 'fa-times-circle'}"></i> ${p.online ? (p.ready ? 'Ready' : 'Waiting...') : 'Offline'}
-            </div>
+            <div class="mp-player-name">${escapeHtml(p.name)} ${uid === data.hostId ? '<span class="mp-badge mp-badge-host">Host</span>' : ''}</div>
+            <div class="mp-player-status">${p.online ? (p.ready ? '✅ Ready' : '⏳ Waiting') : '🔴 Offline'}</div>
           </div>
         </div>
       `).join('');
@@ -570,28 +418,14 @@
       const allReady = playerCount >= 2 && Object.values(players).filter(p => p.online).every(p => p.ready);
 
       render(`
-        <div class="mp-card" style="text-align:center;">
-          <div style="background:rgba(0,0,0,0.4); padding:15px; border-radius:16px; margin-bottom:20px; border:1px solid var(--primary);">
-            <div style="font-size:0.8rem; color:var(--text-muted); text-transform:uppercase;">Room Code</div>
-            <div style="font-size:2.5rem; font-weight:800; letter-spacing:8px; color:var(--primary); animation: pulseDanger 2s infinite;">${roomCode}</div>
-            <div style="display:flex; gap:10px; justify-content:center; margin-top:10px;">
-              <button class="mp-btn mp-btn-outline" style="width:auto; padding:8px 15px; margin:0;" onclick="window.copyCode()"><i class="far fa-copy"></i> Copy</button>
-              <button class="mp-btn mp-btn-success" style="width:auto; padding:8px 15px; margin:0; background:#25D366; border-color:#128C7E;" onclick="window.shareWhatsApp()"><i class="fab fa-whatsapp"></i> Share</button>
-            </div>
-          </div>
-          
-          <div style="font-size:0.9rem; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
-            <span>Players (${playerCount}/10)</span>
-            ${!allReady && isHost ? '<span style="color:var(--warning); font-size:0.8rem;">Waiting for all to ready...</span>' : ''}
-          </div>
+        <div class="mp-card">
+          <div class="mp-title">⏳ Waiting Room</div>
+          <div class="mp-room-code">${roomCode}</div>
+          <p style="text-align:center;">Players: ${playerCount}/10</p>
           <div class="mp-player-list">${playerList}</div>
-          
-          <div style="display:flex; gap:10px; margin-top:20px;">
-            <button class="mp-btn ${players[currentUser.uid]?.ready ? 'mp-btn-outline' : 'mp-btn-success'}" onclick="playSound('click'); window.toggleReady()">
-              <i class="fas ${players[currentUser.uid]?.ready ? 'fa-times' : 'fa-check'}"></i> ${players[currentUser.uid]?.ready ? 'Unready' : 'I am Ready!'}
-            </button>
-            ${isHost ? `<button class="mp-btn mp-btn-primary" onclick="playSound('click'); window.startGame()" ${!allReady?'disabled':''}><i class="fas fa-bolt"></i> Start Game</button>` : ''}
-          </div>
+          <button class="mp-btn mp-btn-success" onclick="window.toggleReady()">${players[currentUser.uid]?.ready ? '✅ Ready' : 'Click to Ready'}</button>
+          ${isHost ? `<button class="mp-btn mp-btn-primary" onclick="window.startGame()" ${!allReady?'disabled':''}>⚡ Start</button>` : ''}
+          <button class="mp-btn mp-btn-danger" onclick="window.leaveRoom()">Leave</button>
         </div>
       `);
     }
@@ -600,98 +434,63 @@
       const q = data.questions[currentQuestionIndex];
       if (!q) return;
       const options = q.options.map((opt, i) => `
-        <button class="mp-option ${selectedAnswer === i ? 'selected' : ''}" id="opt-${i}" onclick="playSound('click'); window.selectAnswer(${i})" ${selectedAnswer >= 0 ? 'disabled' : ''}>
-          <div style="font-size:0.8rem; opacity:0.7; margin-bottom:5px;">Option ${String.fromCharCode(65+i)}</div>
-          ${escapeHtml(opt)}
+        <button class="mp-option ${selectedAnswer === i ? 'selected' : ''}" onclick="window.selectAnswer(${i})" ${selectedAnswer >= 0 ? 'disabled' : ''}>
+          ${String.fromCharCode(65+i)}) ${escapeHtml(opt)}
         </button>
       `).join('');
-      
-      const totalQ = data.questions.length;
-      const progress = ((currentQuestionIndex + 1) / totalQ) * 100;
-
       render(`
-        <div class="mp-card" style="padding-top:15px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; font-size:0.9rem; font-weight:700;">
-            <span style="color:var(--primary);">Q ${currentQuestionIndex + 1} of ${totalQ}</span>
-            <span style="background:rgba(255,255,255,0.1); padding:4px 10px; border-radius:10px; font-size:0.8rem;">🔥 Streak: ${localStats.streak}</span>
-          </div>
-          <div style="width:100%; height:6px; background:rgba(0,0,0,0.3); border-radius:3px; margin-bottom:20px; overflow:hidden;">
-             <div style="height:100%; width:${progress}%; background:var(--primary); transition:width 0.3s;"></div>
-          </div>
-          
-          <div class="timer-wrapper">
-            <svg class="circular-chart" viewBox="0 0 36 36">
-              <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-              <path class="circle safe" id="timerCircle" stroke-dasharray="100, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-              <text x="18" y="20.35" class="timer-text" id="timerDisplay">${questionTimeLeft}</text>
-            </svg>
-          </div>
-          
-          <div class="mp-question-text" style="font-size:1.3rem; text-align:center; margin: 15px 0 25px; line-height:1.4;">${escapeHtml(q.q)}</div>
-          <div class="options-grid">${options}</div>
+        <div class="mp-card">
+          <div class="mp-question-num">Question ${currentQuestionIndex + 1}/${data.questions.length}</div>
+          <div class="mp-timer ${questionTimeLeft <= 5 ? 'urgent' : ''}" id="timerDisplay">${questionTimeLeft}s</div>
+          <div class="mp-question-text">${escapeHtml(q.q)}</div>
+          <div>${options}</div>
+          <p style="text-align:center;font-size:0.7rem;color:var(--text2);margin-top:8px;">${selectedAnswer >= 0 ? 'Answer locked! 🔒' : 'Select your answer...'}</p>
         </div>
       `);
     }
 
     function renderLeaderboard(players, scores) {
-      playSound('win');
       const sorted = Object.entries(players).map(([uid, p]) => ({ ...p, uid, score: scores[uid]?.score || 0 })).sort((a, b) => b.score - a.score);
       const list = sorted.map((p, i) => `
-        <div class="mp-leaderboard-item" style="animation-delay: ${i*0.1}s; ${!p.online ? 'opacity:0.5;' : ''}">
-          <div class="mp-rank ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${i===0?'🏆':i+1}</div>
+        <div class="mp-leaderboard-item" style="${!p.online ? 'opacity:0.6;' : ''}">
+          <div class="mp-rank ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${i+1}</div>
           <div class="mp-player-avatar" style="background:${getAvatarColor(p.uid)}">${(p.name||'?')[0].toUpperCase()}</div>
           <div class="mp-player-info">
-            <div class="mp-player-name">${escapeHtml(p.name)}</div>
-            <div style="font-size:0.75rem; color:var(--text-muted);"><i class="fas fa-check" style="color:var(--success)"></i> ${p.correct || 0} &nbsp; <i class="fas fa-times" style="color:var(--danger)"></i> ${p.wrong || 0}</div>
+            <div class="mp-player-name">
+              ${escapeHtml(p.name)} 
+              ${!p.online ? '<span style="font-size:0.6rem; color:#f87171; border:1px solid #f87171; padding:2px 4px; border-radius:4px; margin-left:4px;">Offline</span>' : ''}
+            </div>
+            <div class="mp-player-status">✅ ${p.correct || 0} / ❌ ${p.wrong || 0}</div>
           </div>
-          <div style="font-size:1.5rem; font-weight:800; color:var(--primary); text-shadow:0 0 10px rgba(139,92,246,0.5);">${p.score}</div>
+          <div class="mp-player-score">${p.score}</div>
         </div>
       `).join('');
-      render(`<div class="mp-card"><div class="mp-title">Leaderboard</div><div>${list}</div><div style="text-align:center; margin-top:20px; font-size:0.8rem; color:var(--text-muted);"><i class="fas fa-spinner fa-spin"></i> Next question getting ready...</div></div>`);
+      render(`<div class="mp-card"><div class="mp-title">📊 Leaderboard</div><div>${list}</div><p style="text-align:center;font-size:0.7rem;color:var(--text2);margin-top:8px;">Next question coming...</p></div>`);
     }
 
     function renderWinner(players, scores, data) {
-      fireConfetti(); playSound('win');
       const sorted = Object.entries(players).map(([uid, p]) => ({ ...p, uid, score: scores[uid]?.score || 0 })).sort((a, b) => b.score - a.score);
       const winner = sorted[0] || { name: 'No one', score: 0 };
-      const me = players[currentUser.uid] || {correct:0, wrong:0};
-      
-      let accuracy = 0;
-      let totalAns = (me.correct || 0) + (me.wrong || 0);
-      if(totalAns > 0) accuracy = Math.round((me.correct / totalAns) * 100);
-
-      const list = sorted.slice(0,3).map((p, i) => `
-        <div class="mp-leaderboard-item" style="padding:8px 12px; margin-bottom:5px;">
-          <div class="mp-rank ${i===0?'gold':i===1?'silver':'bronze'}" style="width:25px;height:25px;font-size:0.8rem;">${i+1}</div>
-          <div class="mp-player-info"><div class="mp-player-name" style="font-size:0.9rem;">${escapeHtml(p.name)}</div></div>
-          <div style="font-weight:700;">${p.score} pts</div>
+      const list = sorted.map((p, i) => `
+        <div class="mp-leaderboard-item" style="${!p.online ? 'opacity:0.6;' : ''}">
+          <div class="mp-rank ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${i+1}</div>
+          <div class="mp-player-avatar" style="background:${getAvatarColor(p.uid)}">${(p.name||'?')[0].toUpperCase()}</div>
+          <div class="mp-player-info">
+            <div class="mp-player-name">
+              ${escapeHtml(p.name)}
+              ${!p.online ? '<span style="font-size:0.6rem; color:#f87171; border:1px solid #f87171; padding:2px 4px; border-radius:4px; margin-left:4px;">Offline</span>' : ''}
+            </div>
+          </div>
+          <div class="mp-player-score">${p.score}</div>
         </div>
       `).join('');
-      
       render(`
         <div class="mp-card">
-          <div style="text-align:center; margin-bottom:20px;">
-            <div style="font-size:4rem; animation: pulseDanger 1s infinite alternate; text-shadow:0 0 20px rgba(251,191,36,0.8);">🏆</div>
-            <div style="font-size:2rem; font-weight:900; background:linear-gradient(135deg, #fbbf24, #f59e0b); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">${escapeHtml(winner.name)} Wins!</div>
-          </div>
-          
-          <div style="background:rgba(0,0,0,0.2); border-radius:16px; padding:15px; margin-bottom:20px;">
-            <div style="font-size:0.9rem; text-align:center; margin-bottom:10px; color:var(--primary); font-weight:700;">Your Match Stats</div>
-            <div class="stats-grid">
-              <div class="stat-box"><div class="stat-value">${accuracy}%</div><div class="stat-label">Accuracy</div></div>
-              <div class="stat-box"><div class="stat-value">${localStats.highestStreak}</div><div class="stat-label">Best Streak</div></div>
-              <div class="stat-box"><div class="stat-value" style="color:var(--success);">${me.correct||0}</div><div class="stat-label">Correct</div></div>
-              <div class="stat-box"><div class="stat-value" style="color:var(--danger);">${me.wrong||0}</div><div class="stat-label">Wrong</div></div>
-            </div>
-            ${accuracy === 100 && totalAns > 0 ? '<div style="text-align:center; margin-top:10px; color:#fbbf24; font-weight:700;"><i class="fas fa-star"></i> Perfect Player Achievement!</div>' : ''}
-          </div>
-
-          <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:10px; text-transform:uppercase; letter-spacing:1px;">Top 3 Players</div>
+          <div class="mp-winner"><div class="mp-winner-icon">🏆</div><div class="mp-winner-name">${escapeHtml(winner.name)}</div><p style="color:var(--text2);">${winner.score} points</p></div>
           <div>${list}</div>
-          
-          <div style="display:flex; gap:10px; margin-top:20px;">
-            ${isHost ? '<button class="mp-btn mp-btn-primary" onclick="playSound(\'click\'); window.rematch()"><i class="fas fa-redo"></i> Play Again</button>' : ''}
-            <button class="mp-btn mp-btn-outline" onclick="playSound(\'click\'); window.leaveRoom()"><i class="fas fa-sign-out-alt"></i> Leave</button>
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            ${isHost ? '<button class="mp-btn mp-btn-primary" onclick="window.rematch()">🔄 Rematch</button>' : ''}
+            <button class="mp-btn mp-btn-outline" onclick="window.leaveRoom()">Leave</button>
           </div>
         </div>
       `);
@@ -699,78 +498,74 @@
     }
 
     // ============ ACTIONS ============
-    window.toggleReady = async function() {
-      if (!roomId) return; const roomRef = doc(db, 'liveMatches', roomId); const snap = await getDoc(roomRef);
-      await updateDoc(roomRef, { [`players.${currentUser.uid}.ready`]: !(snap.data().players[currentUser.uid]?.ready || false) });
-    };
-    window.startGame = async function() {
-      if (!isHost || !roomId) return; await updateDoc(doc(db, 'liveMatches', roomId), { status: 'countdown' });
-      setTimeout(async () => { await updateDoc(doc(db, 'liveMatches', roomId), { status: 'playing', currentQuestion: 0, questionStartTime: Date.now() }); }, 3000);
-    };
-    window.selectAnswer = async function(index) {
-      if (selectedAnswer >= 0 || !roomId) return; selectedAnswer = index;
-      document.getElementById(`opt-${index}`).classList.add('selected');
-      await updateDoc(doc(db, 'liveMatches', roomId), { [`players.${currentUser.uid}.answered`]: true, [`players.${currentUser.uid}.answer`]: index, [`players.${currentUser.uid}.answerTime`]: Date.now() });
-    };
-    window.leaveRoom = async function() {
-      if (roomId) { try { await updateDoc(doc(db, 'liveMatches', roomId), { [`players.${currentUser.uid}.online`]: false }); } catch(e) {} }
-      if (unsubscribe) unsubscribe(); roomId = null; roomCode = null; isHost = false; selectedAnswer = -1; previousPlayers = null; renderLobby();
-    };
-    window.rematch = async function() {
-      if (!isHost || !roomId) return; localStats = {streak:0, highestStreak:0};
-      await updateDoc(doc(db, 'liveMatches', roomId), { status: 'waiting', currentQuestion: -1, 'players': Object.fromEntries( Object.entries((await getDoc(doc(db, 'liveMatches', roomId))).data().players || {}).map(([uid, p]) => [uid, {...p, score:0, correct:0, wrong:0, answered:false, ready:false}]) ) });
-    };
+    async function toggleReady() {
+      if (!roomId) return;
+      const roomRef = doc(db, 'liveMatches', roomId);
+      const snap = await getDoc(roomRef);
+      const currentReady = snap.data().players[currentUser.uid]?.ready || false;
+      await updateDoc(roomRef, { [`players.${currentUser.uid}.ready`]: !currentReady });
+    }
+
+    async function startGame() {
+      if (!isHost || !roomId) return;
+      await updateDoc(doc(db, 'liveMatches', roomId), { status: 'countdown' });
+      setTimeout(async () => {
+        await updateDoc(doc(db, 'liveMatches', roomId), {
+          status: 'playing', currentQuestion: 0, questionStartTime: Date.now()
+        });
+      }, 3000);
+    }
+
+    async function selectAnswer(index) {
+      if (selectedAnswer >= 0 || !roomId) return;
+      selectedAnswer = index;
+      await updateDoc(doc(db, 'liveMatches', roomId), {
+        [`players.${currentUser.uid}.answered`]: true,
+        [`players.${currentUser.uid}.answer`]: index,
+        [`players.${currentUser.uid}.answerTime`]: Date.now()
+      });
+    }
+
+    async function leaveRoom() {
+      if (roomId) {
+        try {
+          await updateDoc(doc(db, 'liveMatches', roomId), { [`players.${currentUser.uid}.online`]: false });
+        } catch(e) {}
+      }
+      if (unsubscribe) unsubscribe();
+      roomId = null; roomCode = null; isHost = false; selectedAnswer = -1; previousPlayers = null;
+      renderLobby();
+    }
+
+    async function rematch() {
+      if (!isHost || !roomId) return;
+      await updateDoc(doc(db, 'liveMatches', roomId), {
+        status: 'waiting', currentQuestion: -1,
+        'players': Object.fromEntries(
+          Object.entries((await getDoc(doc(db, 'liveMatches', roomId))).data().players || {}).map(([uid, p]) => [uid, {...p, score:0, correct:0, wrong:0, answered:false, ready:false}])
+        )
+      });
+    }
 
     // ============ TIMERS & SCORES ============
     function startQuestionTimer(data) {
       if (questionTimer) clearInterval(questionTimer);
-      const totalTime = data.questionTime || gameQuestionTime || 15;
-      questionTimeLeft = totalTime;
-      
-      const qIndex = data.currentQuestion || 0;
-      const questions = data.questions || [];
-      const correctAnswer = questions[qIndex]?.correct || 0;
-
+      questionTimeLeft = data.questionTime || gameQuestionTime || 15;
       questionTimer = setInterval(async () => {
         questionTimeLeft--;
         const timerEl = document.getElementById('timerDisplay');
-        const timerCircle = document.getElementById('timerCircle');
-        
-        if (timerEl && timerCircle) { 
-          timerEl.textContent = questionTimeLeft; 
-          const percentage = (questionTimeLeft / totalTime) * 100;
-          timerCircle.setAttribute('stroke-dasharray', `${percentage}, 100`);
-          
-          if (questionTimeLeft <= 5 && questionTimeLeft > 0) {
-             timerCircle.setAttribute('class', 'circle danger');
-             playSound('tick');
-          } else if (questionTimeLeft <= (totalTime/2)) {
-             timerCircle.setAttribute('class', 'circle warning');
-          }
-        }
+        if (timerEl) { timerEl.textContent = questionTimeLeft + 's'; if (questionTimeLeft <= 5) timerEl.classList.add('urgent'); }
         
         if (questionTimeLeft <= 0) {
           clearInterval(questionTimer); questionTimer = null;
-          
-          // Visual Reveal for Local User
-          const correctBtn = document.getElementById(`opt-${correctAnswer}`);
-          if (correctBtn) correctBtn.classList.add('correct-reveal');
-          if (selectedAnswer >= 0 && selectedAnswer !== correctAnswer) {
-             const wrongBtn = document.getElementById(`opt-${selectedAnswer}`);
-             if (wrongBtn) wrongBtn.classList.add('wrong-reveal');
-             playSound('wrong');
-             localStats.streak = 0;
-          } else if (selectedAnswer === correctAnswer) {
-             playSound('correct');
-             localStats.streak++;
-             if(localStats.streak > localStats.highestStreak) localStats.highestStreak = localStats.streak;
-          } else {
-             playSound('wrong'); // Time out
-             localStats.streak = 0;
-          }
-
           if (isHost && roomId) {
-            const qRef = doc(db, 'liveMatches', roomId); const snap = await getDoc(qRef); const qData = snap.data();
+            const qRef = doc(db, 'liveMatches', roomId);
+            const snap = await getDoc(qRef);
+            const qData = snap.data();
+            const questions = qData.questions || [];
+            const qIndex = qData.currentQuestion || 0;
+            const correctAnswer = questions[qIndex]?.correct || 0;
+            
             let updatePayload = { status: 'leaderboard' };
             Object.entries(qData.players || {}).forEach(([uid, p]) => {
               if (p.online && p.answered) {
@@ -781,7 +576,9 @@
               }
               updatePayload[`players.${uid}.answered`] = false;
             });
+            
             await updateDoc(qRef, updatePayload);
+            
             setTimeout(async () => {
               const nextQ = qIndex + 1;
               if (nextQ >= questions.length) await updateDoc(qRef, { status: 'finished' });
@@ -792,31 +589,52 @@
       }, 1000);
     }
 
-    function getScores(players) { const scores = {}; Object.entries(players).forEach(([uid, p]) => { scores[uid] = { score: p.score || 0, correct: p.correct || 0, wrong: p.wrong || 0 }; }); return scores; }
+    function getScores(players) {
+      const scores = {};
+      Object.entries(players).forEach(([uid, p]) => { scores[uid] = { score: p.score || 0, correct: p.correct || 0, wrong: p.wrong || 0 }; });
+      return scores;
+    }
 
     // ============ UTILS ============
     function escapeHtml(s) { return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-    function getAvatarColor(uid) { const colors = ['#f43f5e','#8b5cf6','#10b981','#f59e0b','#3b82f6','#ec4899','#14b8a6']; return colors[uid.charCodeAt(0) % colors.length]; }
-    function showError(msg) { const el = document.getElementById('errorMsg'); if (el) { el.textContent = msg; el.style.animation = 'shake 0.3s'; setTimeout(()=>el.style.animation='', 300); } }
+    function getAvatarColor(uid) { const colors = ['#38bdf8','#818cf8','#34d399','#fbbf24','#f87171','#a78bfa','#fb923c']; return colors[uid.charCodeAt(0) % colors.length]; }
+    function showError(msg) { const el = document.getElementById('errorMsg'); if (el) el.textContent = msg; }
     
     async function saveMatchHistory(data) {
       try {
         const playerArray = Object.entries(data.players || {}).map(([uid, p]) => ({ name: p.name, score: p.score || 0, correct: p.correct || 0, wrong: p.wrong || 0 })).sort((a, b) => b.score - a.score);
         playerArray.forEach((p, i) => p.rank = i + 1);
-        await addDoc(collection(db, 'matchHistory'), { roomCode: data.roomCode, date: serverTimestamp(), hostName: data.hostName, winner: playerArray[0]?.name || 'N/A', players: playerArray, totalQuestions: data.questions?.length || 0 });
+        await addDoc(collection(db, 'matchHistory'), {
+          roomCode: data.roomCode, date: serverTimestamp(), hostName: data.hostName,
+          winner: playerArray[0]?.name || 'N/A', players: playerArray, totalQuestions: data.questions?.length || 0
+        });
         await updateDoc(doc(db, 'liveMatches', roomId), { historySaved: true });
       } catch(e) {}
     }
 
+    // ============ MODULE EXPORTS ============
+    window.createRoom = createRoom;
+    window.updateSettingsLessons = updateSettingsLessons;
+    window.confirmCreateRoom = confirmCreateRoom;
+    window.joinRoom = joinRoom;
+    window.toggleReady = toggleReady;
+    window.startGame = startGame;
+    window.selectAnswer = selectAnswer;
+    window.leaveRoom = leaveRoom;
+    window.rematch = rematch;
+
     // ============ INIT ============
-    window.createRoom = createRoom; window.updateSettingsLessons = updateSettingsLessons; window.confirmCreateRoom = confirmCreateRoom; window.joinRoom = joinRoom;
-    createParticles(); // Start background particles
     async function init() {
-      await initAuth(); renderLobby();
+      await initAuth();
+      renderLobby();
       const params = new URLSearchParams(window.location.search);
-      if (params.get('room')) { setTimeout(() => { document.getElementById('roomCodeInput').value = params.get('room'); joinRoom(); }, 500); }
+      if (params.get('room')) {
+        setTimeout(() => { document.getElementById('roomCodeInput').value = params.get('room'); joinRoom(); }, 500);
+      }
     }
+
     init();
   </script>
+
 </body>
 </html>
