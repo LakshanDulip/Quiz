@@ -7614,11 +7614,20 @@ window.performanceManager = new PerformanceManager();
     renderMain();
 
     if (!isGame || !isCorrect) {
-      showModal(isCorrect, isCorrect ? "✅ නිවැරදියි!" : "❌ වැරදියි!", explanation);
+      // Live match = skip popup
+      if (!liveRoomCode) {
+        showModal(isCorrect, isCorrect ? "✅ නිවැරදියි!" : "❌ වැරදියි!", explanation);
+      }
     }
 
     if (isGame) {
-      scheduleAutoAdvance(1500);
+      // Live match = faster advance, no popup
+      if (liveRoomCode) {
+        scheduleAutoAdvance(600);
+      } else {
+        showModal(isCorrect, isCorrect ? "✅ නිවැරදියි!" : "❌ වැරදියි!", explanation);
+        scheduleAutoAdvance(1500);
+      }
     }
   };
 
