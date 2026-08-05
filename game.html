@@ -118,9 +118,6 @@
       animation: cardEnter 0.5s var(--ease-game);
       position: relative;
       overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      max-height: 88vh; /* Fix mobile breaking */
     }
     @keyframes cardEnter {
       from { opacity: 0; transform: translateY(14px) scale(0.98); }
@@ -138,7 +135,6 @@
       -webkit-text-fill-color: transparent;
       background-clip: text;
       letter-spacing: 0.3px;
-      flex-shrink: 0;
     }
 
     /* =========================================================
@@ -188,7 +184,6 @@
       position: relative;
       overflow: hidden;
       min-height: 48px;
-      flex-shrink: 0;
     }
     .mp-btn:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.06); }
     .mp-btn:active:not(:disabled) { transform: scale(0.96); }
@@ -219,22 +214,21 @@
       font-size: 2.1rem;
       font-weight: 800;
       letter-spacing: 7px;
-      margin: 4px 0 2px;
+      margin: 8px 0 2px;
       color: var(--primary);
       text-shadow: 0 0 18px rgba(56,189,248,0.5);
       cursor: pointer;
       animation: codeGlow 2.4s ease-in-out infinite;
       user-select: all;
-      flex-shrink: 0;
     }
     @keyframes codeGlow {
       0%,100% { text-shadow: 0 0 14px rgba(56,189,248,0.4); }
       50% { text-shadow: 0 0 26px rgba(56,189,248,0.75); }
     }
-    .mp-copy-hint { text-align: center; font-size: 0.7rem; color: var(--text2); margin-bottom: 8px; flex-shrink: 0; }
+    .mp-copy-hint { text-align: center; font-size: 0.7rem; color: var(--text2); margin-bottom: 14px; }
     .mp-copy-hint i { margin-right: 4px; }
 
-    .invite-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 10px; flex-shrink: 0; }
+    .invite-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
     .icon-btn {
       background: rgba(255,255,255,0.04);
       border: 1px solid var(--glass-border);
@@ -259,18 +253,12 @@
       background: #f1f5f9;
       border-radius: 14px;
       margin-bottom: 14px;
-      flex-shrink: 0;
     }
 
     /* =========================================================
        MODULE: PLAYER LIST
        ========================================================= */
-    .mp-player-list { 
-      max-height: 120px; /* Reduced to make room for chat on mobile */
-      overflow-y: auto; 
-      margin: 8px 0; 
-      flex-shrink: 0;
-    }
+    .mp-player-list { max-height: 300px; overflow-y: auto; margin: 12px 0; }
     .mp-player-list::-webkit-scrollbar { width: 6px; }
     .mp-player-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 6px; }
 
@@ -278,7 +266,7 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 8px 10px;
+      padding: 10px;
       border-radius: 12px;
       margin-bottom: 6px;
       background: rgba(15,23,42,0.5);
@@ -291,16 +279,16 @@
     }
 
     .mp-player-avatar {
-      width: 32px; height: 32px; border-radius: 50%;
+      width: 38px; height: 38px; border-radius: 50%;
       background: var(--primary);
       display: flex; align-items: center; justify-content: center;
-      font-weight: 700; font-size: 0.8rem; flex-shrink: 0;
+      font-weight: 700; font-size: 0.9rem; flex-shrink: 0;
       position: relative;
       box-shadow: 0 0 0 2px rgba(255,255,255,0.08);
     }
     .status-dot {
       position: absolute; bottom: -1px; right: -1px;
-      width: 10px; height: 10px; border-radius: 50%;
+      width: 11px; height: 11px; border-radius: 50%;
       border: 2px solid var(--bg);
     }
     .status-dot.online { background: var(--green); animation: dotPulse 1.6s ease-in-out infinite; }
@@ -308,91 +296,30 @@
     @keyframes dotPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(52,211,153,0.6); } 50% { box-shadow: 0 0 0 4px rgba(52,211,153,0); } }
 
     .mp-player-info { flex: 1; min-width: 0; }
-    .mp-player-name { font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-    .mp-player-status { font-size: 0.65rem; color: var(--text2); }
+    .mp-player-name { font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .mp-player-status { font-size: 0.7rem; color: var(--text2); }
     .mp-player-score { font-weight: 700; color: var(--primary); font-family: 'Space Grotesk', sans-serif; }
 
-    .mp-badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 0.6rem; font-weight: 700; }
+    .mp-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.65rem; font-weight: 700; }
     .mp-badge-host { background: rgba(251,191,36,0.18); color: var(--yellow); }
     .mp-badge-ready { background: rgba(52,211,153,0.18); color: var(--green); animation: readyPop 0.4s var(--ease-game); }
     .mp-badge-waiting { background: rgba(148,163,184,0.15); color: var(--text2); }
     @keyframes readyPop { 0% { transform: scale(0.5); } 60% { transform: scale(1.15); } 100% { transform: scale(1); } }
 
     /* =========================================================
-       MODULE: WAITING ROOM CHAT
-       ========================================================= */
-    .mp-chat-container { 
-      display: flex; 
-      flex-direction: column; 
-      flex: 1; /* Let chat expand to fill space */
-      min-height: 120px;
-      background: rgba(15,23,42,0.6); 
-      border: 1px solid var(--border); 
-      border-radius: 12px; 
-      margin: 8px 0; 
-      overflow: hidden; 
-    }
-    .mp-chat-messages { 
-      flex: 1; 
-      overflow-y: auto; 
-      padding: 8px; 
-      display: flex; 
-      flex-direction: column; 
-      gap: 6px; 
-      font-size: 0.85rem; 
-    }
-    .mp-chat-messages::-webkit-scrollbar { width: 4px; }
-    .mp-chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-    .mp-chat-message { 
-      display: flex; flex-direction: column; 
-      background: rgba(255,255,255,0.05); 
-      padding: 6px 10px; 
-      border-radius: 10px; border-top-left-radius: 2px; 
-      width: fit-content; max-width: 85%; 
-      word-break: break-word; 
-      animation: leaderEnter 0.2s ease-out; 
-    }
-    .mp-chat-message.self { 
-      align-self: flex-end; 
-      border-top-left-radius: 10px; border-top-right-radius: 2px; 
-      background: rgba(56,189,248,0.15); 
-      border: 1px solid rgba(56,189,248,0.3); 
-    }
-    .mp-chat-message.system { 
-      align-self: center; 
-      background: transparent; 
-      color: var(--text2); font-size: 0.75rem; 
-      font-style: italic; text-align: center; border: none; padding: 2px; 
-    }
-    .mp-chat-sender { font-size: 0.65rem; color: var(--primary); font-weight: 700; margin-bottom: 2px; }
-    .mp-chat-time { font-size: 0.55rem; color: var(--text2); align-self: flex-end; margin-top: 3px; }
-    .mp-chat-input-wrap { 
-      display: flex; gap: 6px; padding: 6px; 
-      background: rgba(10,14,26,0.5); 
-      border-top: 1px solid var(--border); 
-      flex-shrink: 0;
-    }
-    .mp-chat-input-wrap .mp-input { 
-      margin-bottom: 0; padding: 6px 12px; font-size: 0.85rem; height: 38px; border-radius: 10px;
-    }
-    .mp-chat-input-wrap .mp-btn { 
-      min-height: 38px; width: 46px; margin-bottom: 0; padding: 0; border-radius: 10px; 
-    }
-
-    /* =========================================================
        MODULE: QUESTION SCREEN
        ========================================================= */
-    .mp-progress-bar { height: 5px; border-radius: 4px; background: rgba(255,255,255,0.08); overflow: hidden; margin-bottom: 14px; flex-shrink: 0; }
+    .mp-progress-bar { height: 5px; border-radius: 4px; background: rgba(255,255,255,0.08); overflow: hidden; margin-bottom: 14px; }
     .mp-progress-fill { height: 100%; background: linear-gradient(90deg, #38bdf8, #818cf8); border-radius: 4px; transition: width 0.5s var(--ease-game); }
 
-    .mp-question-num { text-align: center; font-size: 0.78rem; color: var(--text2); margin-bottom: 10px; font-weight: 600; letter-spacing: 0.5px; flex-shrink: 0;}
+    .mp-question-num { text-align: center; font-size: 0.78rem; color: var(--text2); margin-bottom: 10px; font-weight: 600; letter-spacing: 0.5px; }
 
-    .timer-ring-wrap { display: flex; justify-content: center; margin-bottom: 16px; position: relative; flex-shrink: 0;}
+    .timer-ring-wrap { display: flex; justify-content: center; margin-bottom: 16px; position: relative; }
     .timer-ring { width: 108px; height: 108px; transform: rotate(-90deg); }
     .timer-ring-bg { fill: none; stroke: rgba(255,255,255,0.08); stroke-width: 8; }
     .timer-ring-progress {
       fill: none; stroke-width: 8; stroke-linecap: round;
-      transition: stroke-dashoffset 0.1s linear, stroke 0.4s ease;
+      transition: stroke-dashoffset 1s linear, stroke 0.4s ease;
     }
     .timer-green { stroke: var(--green); }
     .timer-yellow { stroke: var(--yellow); }
@@ -412,15 +339,8 @@
       margin-bottom: 18px;
       line-height: 1.6;
       font-family: 'Space Grotesk', sans-serif;
-      overflow-y: auto;
-      flex-shrink: 0;
     }
 
-    .mp-options-container {
-      overflow-y: auto;
-      flex: 1;
-    }
-    
     .mp-option {
       width: 100%;
       text-align: left;
@@ -450,12 +370,11 @@
     @keyframes correctPop { 0% { transform: scale(1); } 40% { transform: scale(1.03); } 100% { transform: scale(1); } }
     @keyframes shake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-8px); } 40% { transform: translateX(8px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(5px); } }
     
-    .answer-locked-msg { text-align: center; font-size: 0.72rem; color: var(--text2); margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 5px; flex-shrink: 0; }
+    .answer-locked-msg { text-align: center; font-size: 0.72rem; color: var(--text2); margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 5px; }
 
     /* =========================================================
        MODULE: LEADERBOARD
        ========================================================= */
-    .mp-leaderboard-container { flex: 1; overflow-y: auto; }
     .mp-leaderboard-item {
       display: flex; align-items: center; gap: 10px;
       padding: 11px; border-radius: 12px; margin-bottom: 7px;
@@ -472,10 +391,10 @@
     /* =========================================================
        MODULE: WINNER SCREEN
        ========================================================= */
-    .mp-winner { text-align: center; padding: 0 0 10px; flex-shrink: 0;}
-    .mp-winner-icon { font-size: 3.5rem; animation: trophyBounce 1.4s ease-in-out infinite; filter: drop-shadow(0 0 20px rgba(251,191,36,0.6)); }
+    .mp-winner { text-align: center; padding: 10px 0 20px; }
+    .mp-winner-icon { font-size: 4.5rem; animation: trophyBounce 1.4s ease-in-out infinite; filter: drop-shadow(0 0 20px rgba(251,191,36,0.6)); }
     @keyframes trophyBounce { 0%,100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-10px) rotate(4deg); } }
-    .mp-winner-name { font-family: 'Space Grotesk', sans-serif; font-size: 1.6rem; font-weight: 800; margin: 4px 0 2px; color: var(--yellow); text-shadow: var(--glow-gold); }
+    .mp-winner-name { font-family: 'Space Grotesk', sans-serif; font-size: 1.6rem; font-weight: 800; margin: 10px 0 2px; color: var(--yellow); text-shadow: var(--glow-gold); }
     .champion-badge {
       display: inline-flex; align-items: center; gap: 5px;
       background: linear-gradient(135deg, rgba(251,191,36,0.2), rgba(251,191,36,0.05));
@@ -484,7 +403,7 @@
       margin-top: 6px;
     }
 
-    .winner-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 10px 0; flex-shrink: 0;}
+    .winner-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 16px 0; }
     .stat-box { background: rgba(15,23,42,0.55); border: 1px solid var(--glass-border); border-radius: 12px; padding: 10px 6px; text-align: center; }
     .stat-box .stat-val { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; font-weight: 800; color: var(--primary); }
     .stat-box .stat-lbl { font-size: 0.62rem; color: var(--text2); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.4px; }
@@ -524,7 +443,7 @@
     @keyframes countPop { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.2); } 100% { transform: scale(1); opacity: 1; } }
 
     .mp-error { color: var(--red); font-size: 0.8rem; text-align: center; margin-top: 8px; min-height: 1em; }
-    .mp-divider { text-align: center; color: var(--text2); margin: 14px 0; font-size: 0.8rem; position: relative; flex-shrink:0; }
+    .mp-divider { text-align: center; color: var(--text2); margin: 14px 0; font-size: 0.8rem; position: relative; }
     .mp-divider::before, .mp-divider::after { content: ''; position: absolute; top: 50%; width: 40%; height: 1px; background: var(--border); }
     .mp-divider::before { left: 0; } .mp-divider::after { right: 0; }
 
@@ -563,22 +482,62 @@
     @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; transform: translateX(20px); } }
 
     /* =========================================================
+       MODULE: WAITING ROOM CHAT (additive - Feature 1)
+       ========================================================= */
+    .chat-card { padding: 16px 14px; }
+    .chat-messages {
+      max-height: 200px; min-height: 120px; overflow-y: auto;
+      display: flex; flex-direction: column; gap: 8px;
+      padding: 4px 2px; margin-bottom: 10px;
+      scroll-behavior: smooth;
+    }
+    .chat-messages::-webkit-scrollbar { width: 5px; }
+    .chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 6px; }
+    .chat-msg { max-width: 85%; align-self: flex-start; animation: playerEnter 0.3s var(--ease-game) both; }
+    .chat-msg.mine { align-self: flex-end; }
+    .chat-msg-meta { display: flex; gap: 6px; align-items: baseline; margin-bottom: 2px; padding: 0 2px; }
+    .chat-msg-name { font-size: 0.68rem; font-weight: 700; color: var(--primary); }
+    .chat-msg.mine .chat-msg-name { color: var(--secondary); }
+    .chat-msg-time { font-size: 0.6rem; color: var(--text2); }
+    .chat-msg-bubble {
+      background: rgba(15,23,42,0.6); border: 1px solid var(--glass-border);
+      border-radius: 12px; padding: 7px 11px; font-size: 0.82rem; line-height: 1.4;
+      word-break: break-word;
+    }
+    .chat-msg.mine .chat-msg-bubble { background: rgba(56,189,248,0.14); border-color: rgba(56,189,248,0.3); }
+    .chat-msg-system {
+      text-align: center; font-size: 0.68rem; color: var(--text2);
+      font-style: italic; padding: 3px 0;
+    }
+    .chat-input-row { display: flex; gap: 8px; align-items: center; }
+    .chat-input-row .chat-input { margin-bottom: 0; flex: 1; }
+    .chat-send-btn {
+      width: 44px; height: 44px; flex-shrink: 0; border: none; border-radius: 12px;
+      background: linear-gradient(135deg, #38bdf8, #818cf8); color: #fff; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; font-size: 0.95rem;
+      transition: transform 0.18s var(--ease-game), filter 0.2s;
+    }
+    .chat-send-btn:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.06); }
+    .chat-send-btn:active:not(:disabled) { transform: scale(0.94); }
+    .chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* =========================================================
        MODULE: RESPONSIVE
        ========================================================= */
     @media (max-width: 480px) {
-      .mp-card { padding: 16px 14px; }
-      .mp-title { font-size: 1.25rem; margin-bottom: 12px; }
+      .mp-card { padding: 20px 16px; }
+      .mp-title { font-size: 1.25rem; }
       .mp-room-code { font-size: 1.6rem; letter-spacing: 5px; }
       .timer-ring { width: 92px; height: 92px; }
       .timer-ring-text { font-size: 1.7rem; }
       .invite-actions { grid-template-columns: repeat(4, 1fr); gap: 6px; }
       .icon-btn { font-size: 0.58rem; padding: 8px 4px; }
+      .chat-messages { max-height: 160px; }
     }
     @media (max-height: 560px) and (orientation: landscape) {
       body { align-items: flex-start; padding-top: 50px; }
-      .mp-winner-icon { font-size: 2.5rem; }
+      .mp-winner-icon { font-size: 3rem; }
       .timer-ring { width: 72px; height: 72px; }
-      .mp-card { max-height: unset; }
     }
 
     /* =========================================================
@@ -630,7 +589,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signInAnonymously, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, collection, query, where, getDocs, addDoc, serverTimestamp, deleteDoc, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, collection, query, where, getDocs, addDoc, serverTimestamp, orderBy, limitToLast, deleteDoc, writeBatch, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAhfgx0t-E6wrz6zEFIU_tpKTIbELp00ss",
@@ -662,7 +621,6 @@
     let questionTimeLeft = 15;
     let gameQuestionTime = 15;
     let previousPlayers = null;
-    let isJoining = false;
 
     // --- additive UI-only state (does not touch game/scoring flow) ---
     let revealActive = false;         // local-only "show correct answer" flourish
@@ -671,27 +629,35 @@
     let achievementQueue = [];
     let achievementShowing = false;
 
-    // --- Chat State ---
+    // --- additive state: waiting-room chat (Feature 1) ---
     let chatUnsubscribe = null;
-    let chatMessagesData = [];
-    let systemMessages = [];
-    let lastChatTime = 0;
+    let chatMessages = [];
+    let lastChatSendAt = 0;
+    let chatSending = false;
+
+    // --- additive state: stability / bug-fix guards (Feature 2) ---
+    let joining = false;              // guards duplicate Join Room submissions (Bug 2)
+    let creatingRoom = false;         // guards duplicate Create Room submissions (Bug 2)
+    let answeringInFlight = false;    // guards duplicate/racing answer submissions (Bug 8)
+    let scoringInProgress = false;    // guards duplicate host scoring transactions (Bug 8)
+    let heartbeatInterval = null;     // presence heartbeat (Bug 4 - ghost player detection)
+    const PRESENCE_STALE_MS = 30000;  // how long before an unresponsive player is marked offline
 
     // ============ AUTH (unchanged) ============
     async function initAuth() {
       await new Promise(r => setTimeout(r, 500));
       
       return new Promise((resolve) => {
-        const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
           if (user) {
             currentUser = user;
-            unsubscribeAuth();
+            unsubscribe();
             resolve(user);
           } else {
             try {
               const cred = await signInAnonymously(auth);
               currentUser = cred.user;
-              unsubscribeAuth();
+              unsubscribe();
               resolve(cred.user);
             } catch(e) {
               console.error('Guest auth failed, retrying...');
@@ -699,11 +665,11 @@
                 await new Promise(r => setTimeout(r, 1000));
                 const cred2 = await signInAnonymously(auth);
                 currentUser = cred2.user;
-                unsubscribeAuth();
+                unsubscribe();
                 resolve(cred2.user);
               } catch(e2) {
                 console.error('Guest auth failed:', e2);
-                unsubscribeAuth();
+                unsubscribe();
                 resolve(null);
               }
             }
@@ -712,18 +678,33 @@
       });
     }
 
-    // Bug Fix 9 & Bug 6: Cleanup on navigating away
-    window.addEventListener('popstate', () => {
-      if (roomId) leaveRoom();
-    });
-
     window.addEventListener('beforeunload', () => {
       if (roomId && currentUser) {
-        // Attempt to clean up before closing tab
-        const roomRef = doc(db, 'liveMatches', roomId);
-        updateDoc(roomRef, {
+        updateDoc(doc(db, 'liveMatches', roomId), {
           [`players.${currentUser.uid}.online`]: false
         }).catch(()=>{});
+      }
+    });
+
+    // BUG FIX 9/10: pagehide fires more reliably than beforeunload on mobile
+    // (backgrounding, swipe-to-close, browser back gesture) - best-effort presence
+    // update + listener/interval cleanup so nothing keeps running in the background.
+    window.addEventListener('pagehide', () => {
+      if (roomId && currentUser) {
+        updateDoc(doc(db, 'liveMatches', roomId), {
+          [`players.${currentUser.uid}.online`]: false
+        }).catch(() => {});
+      }
+      stopHeartbeat();
+      stopChatListener();
+    });
+
+    // BUG FIX 10: keep the chat input visible above the mobile on-screen keyboard when focused
+    document.addEventListener('focusin', (e) => {
+      if (e.target && e.target.id === 'chatInput') {
+        setTimeout(() => {
+          try { e.target.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch(err) {}
+        }, 300);
       }
     });
 
@@ -787,7 +768,7 @@
 
     // global click sound + ripple for game buttons/options (additive, non-invasive)
     document.addEventListener('click', (e) => {
-      const target = e.target.closest('.mp-btn, .mp-option, .icon-btn');
+      const target = e.target.closest('.mp-btn, .mp-option, .icon-btn, .chat-send-btn');
       if (!target || target.disabled) return;
       playSound('click');
       spawnRipple(target, e);
@@ -935,89 +916,6 @@
     }
 
     // =========================================================
-    // MODULE: CHAT
-    // =========================================================
-    function initChat() {
-      if (!roomId) return;
-      if (chatUnsubscribe) chatUnsubscribe();
-      systemMessages = []; // Reset local system messages
-      const chatRef = collection(db, 'liveMatches', roomId, 'chat');
-      const qChat = query(chatRef, orderBy('timestamp', 'desc'), limit(50));
-      
-      chatUnsubscribe = onSnapshot(qChat, (snap) => {
-        const msgs = [];
-        snap.forEach(doc => {
-          const data = doc.data();
-          msgs.push({ 
-            id: doc.id, 
-            ...data, 
-            type: 'user', 
-            time: data.timestamp ? data.timestamp.toMillis() : Date.now() 
-          });
-        });
-        chatMessagesData = msgs.reverse();
-        renderChatUI();
-      });
-    }
-
-    function renderChatUI() {
-      const container = document.getElementById('chatMessages');
-      if (!container) return;
-      
-      const allMsgs = [...chatMessagesData, ...systemMessages].sort((a,b) => a.time - b.time);
-      
-      container.innerHTML = allMsgs.map(m => {
-        if (m.type === 'system') {
-          return `<div class="mp-chat-message system">${escapeHtml(m.message)}</div>`;
-        }
-        const isSelf = m.playerId === currentUser.uid;
-        const date = new Date(m.time);
-        const timeStr = `${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
-        return `
-        <div class="mp-chat-message ${isSelf ? 'self' : ''}">
-          ${!isSelf ? `<div class="mp-chat-sender">${escapeHtml(m.playerName)}</div>` : ''}
-          <div>${escapeHtml(m.message)}</div>
-          <div class="mp-chat-time">${timeStr}</div>
-        </div>
-        `;
-      }).join('');
-      container.scrollTop = container.scrollHeight;
-    }
-
-    window.sendChatMessage = async function() {
-      const input = document.getElementById('chatInput');
-      if (!input || !roomId) return;
-      const text = input.value.trim().substring(0, 150);
-      if (!text) return;
-
-      const now = Date.now();
-      if (now - lastChatTime < 1000) {
-        showToast("Please wait before sending again.");
-        return;
-      }
-      lastChatTime = now;
-      input.value = '';
-
-      try {
-        await addDoc(collection(db, 'liveMatches', roomId, 'chat'), {
-          playerId: currentUser.uid,
-          playerName: playerName,
-          message: text,
-          timestamp: serverTimestamp()
-        });
-      } catch (e) {
-        console.error("Chat error:", e);
-        showToast("Failed to send message.");
-      }
-    };
-
-    function addSystemMessage(text) {
-      systemMessages.push({ type: 'system', message: text, time: Date.now() });
-      renderChatUI();
-    }
-
-
-    // =========================================================
     // MODULE: SHARE / INVITE / QR
     // =========================================================
     function getInviteLink() {
@@ -1090,7 +988,7 @@
           <div class="mp-divider">OR</div>
 
           <input type="text" class="mp-input" id="roomCodeInput" placeholder="Room Code" maxlength="6" style="text-align:center;letter-spacing:4px;text-transform:uppercase;font-size:1.2rem;">
-          <button id="joinRoomBtn" class="mp-btn mp-btn-outline" onclick="window.joinRoom()"><i class="fa-solid fa-door-open"></i>&nbsp; Join Room</button>
+          <button class="mp-btn mp-btn-outline" onclick="window.joinRoom()"><i class="fa-solid fa-door-open"></i>&nbsp; Join Room</button>
 
           <div class="mp-error" id="errorMsg"></div>
         </div>
@@ -1099,7 +997,7 @@
 
     function renderCreateSettings() {
       render(`
-        <div class="mp-card" style="overflow-y:auto;">
+        <div class="mp-card">
           <div class="mp-title">⚙️ Game Settings</div>
 
           <label style="font-size:0.8rem;color:var(--text2);">Subject</label>
@@ -1141,7 +1039,6 @@
 
     function createRoom() {
       playerName = document.getElementById('playerName')?.value.trim() || 'Player';
-      localStorage.setItem('quizhub_playerName', playerName);
       renderCreateSettings();
     }
 
@@ -1190,6 +1087,7 @@
     }
 
     async function confirmCreateRoom() {
+      if (creatingRoom) return; // BUG FIX 2: prevent duplicate room creation from double-clicking
       const subject = document.getElementById('setSubject')?.value || 'science';
       const grade = document.getElementById('setGrade')?.value || '10';
       const lessonId = document.getElementById('setLesson')?.value;
@@ -1199,77 +1097,83 @@
       if (!lessonId) return showError('Lesson තෝරන්න!');
       if (qCount < 10 || qCount > 30) return showError('Questions 10-30 විය යුතුයි!');
 
-      gameQuestionTime = qTime;
-      roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-      roomId = `room_${Date.now()}`;
-      isHost = true;
-      previousPlayers = null;
-      previousScores = {};
-      qrRendered = false;
+      creatingRoom = true;
+      const createBtn = document.querySelector('#app .mp-btn-primary');
+      if (createBtn) createBtn.disabled = true;
 
-      let questions = [];
       try {
-        const resp = await fetch(`data/${subject}.json?t=${Date.now()}`);
-        const data = await resp.json();
-        let lessons = [];
+        gameQuestionTime = qTime;
+        roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        roomId = `room_${Date.now()}`;
+        isHost = true;
+        previousPlayers = null;
+        previousScores = {};
+        qrRendered = false;
 
-        if (data.grades?.[grade]?.lessons) {
-          lessons = data.grades[grade].lessons;
-        } else if (data[subject]?.grades?.[grade]?.lessons) {
-          lessons = data[subject].grades[grade].lessons;
-        } else if (data.subjects?.[subject]?.grades?.[grade]?.lessons) {
-          lessons = data.subjects[subject].grades[grade].lessons;
-        } else {
-          for (let key in data) {
-            if (data[key]?.grades?.[grade]?.lessons) {
-              lessons = data[key].grades[grade].lessons;
-              break;
+        let questions = [];
+        try {
+          const resp = await fetch(`data/${subject}.json?t=${Date.now()}`);
+          const data = await resp.json();
+          let lessons = [];
+
+          if (data.grades?.[grade]?.lessons) {
+            lessons = data.grades[grade].lessons;
+          } else if (data[subject]?.grades?.[grade]?.lessons) {
+            lessons = data[subject].grades[grade].lessons;
+          } else if (data.subjects?.[subject]?.grades?.[grade]?.lessons) {
+            lessons = data.subjects[subject].grades[grade].lessons;
+          } else {
+            for (let key in data) {
+              if (data[key]?.grades?.[grade]?.lessons) {
+                lessons = data[key].grades[grade].lessons;
+                break;
+              }
             }
           }
-        }
 
-        const lesson = lessons.find(l => l.id === lessonId);
-        if (lesson && lesson.questions) {
-          const shuffled = [...lesson.questions].sort(() => Math.random() - 0.5);
-          questions = shuffled.slice(0, qCount);
-        }
-      } catch(e) { console.error(e); }
-
-      if (questions.length === 0) {
-        questions = [{q:"No questions found for this lesson! Check your JSON.", options:["OK","B","C","D"], correct:0}];
-      }
-
-      await setDoc(doc(db, 'liveMatches', roomId), {
-        roomCode, hostId: currentUser.uid, hostName: playerName,
-        subject, grade, lessonId, questionTime: qTime, questionCount: questions.length,
-        status: 'waiting', currentQuestion: -1, createdAt: serverTimestamp(), questions,
-        players: {
-          [currentUser.uid]: {
-            name: playerName, score: 0, correct: 0, wrong: 0,
-            answered: false, ready: false, online: true, joinedAt: new Date().toISOString(),
-            streak: 0, longestStreak: 0, totalTime: 0, fastestTime: null
+          const lesson = lessons.find(l => l.id === lessonId);
+          if (lesson && lesson.questions) {
+            const shuffled = [...lesson.questions].sort(() => Math.random() - 0.5);
+            questions = shuffled.slice(0, qCount);
           }
+        } catch(e) { console.error(e); }
+
+        if (questions.length === 0) {
+          questions = [{q:"No questions found for this lesson! Check your JSON.", options:["OK","B","C","D"], correct:0}];
         }
-      });
-      
-      sessionStorage.setItem('currentRoomId', roomId);
-      window.history.pushState({room: roomId}, '', `?room=${roomCode}`);
-      listenToRoom();
+
+        await setDoc(doc(db, 'liveMatches', roomId), {
+          roomCode, hostId: currentUser.uid, hostName: playerName,
+          subject, grade, lessonId, questionTime: qTime, questionCount: questions.length,
+          status: 'waiting', currentQuestion: -1, createdAt: serverTimestamp(), questions,
+          players: {
+            [currentUser.uid]: {
+              name: playerName, score: 0, correct: 0, wrong: 0,
+              answered: false, ready: false, online: true, joinedAt: new Date().toISOString(),
+              streak: 0, longestStreak: 0, totalTime: 0, fastestTime: null, lastSeen: serverTimestamp()
+            }
+          }
+        });
+
+        saveActiveRoom(); // BUG FIX 3: remember this room so a refresh can reconnect
+        listenToRoom();
+      } finally {
+        creatingRoom = false;
+        if (createBtn) createBtn.disabled = false;
+      }
     }
 
     async function joinRoom() {
-      if (isJoining) return;
-      isJoining = true;
-      const btn = document.getElementById('joinRoomBtn');
-      if (btn) btn.disabled = true;
+      if (joining) return; // BUG FIX 2: prevent duplicate joins from double-clicking
+      const code = document.getElementById('roomCodeInput')?.value.trim().toUpperCase();
+      playerName = document.getElementById('playerName')?.value.trim() || 'Player';
+      if (!code) return showError('Room code enter කරන්න!');
+
+      joining = true;
+      const joinBtn = document.querySelector('#app .mp-btn-outline');
+      if (joinBtn) joinBtn.disabled = true;
 
       try {
-        const code = document.getElementById('roomCodeInput')?.value.trim().toUpperCase();
-        playerName = document.getElementById('playerName')?.value.trim() || 'Player';
-        localStorage.setItem('quizhub_playerName', playerName);
-
-        if (!code) throw new Error('Room code enter කරන්න!');
-
         roomCode = code;
         previousPlayers = null;
         previousScores = {};
@@ -1278,89 +1182,83 @@
         const q = query(collection(db, 'liveMatches'), where('roomCode', '==', code), where('status', 'in', ['waiting', 'countdown']));
         const snapshot = await getDocs(q);
 
-        if (snapshot.empty) throw new Error('Room not found!');
+        if (snapshot.empty) return showError('Room not found!');
 
         const docData = snapshot.docs[0];
         roomId = docData.id;
-        isHost = false;
+        const roomData = docData.data();
+        const existingPlayers = roomData.players || {};
 
-        const players = docData.data().players || {};
-        if (Object.keys(players).length >= 10 && !players[currentUser.uid]) {
-          throw new Error('Room is full (max 10)!');
+        // BUG FIX 1/2/3: if this browser/session is already a player here (invite link
+        // reopened, page refresh, or a double-submit), reconnect instead of overwriting
+        // the existing identity or creating a duplicate player entry.
+        if (existingPlayers[currentUser.uid]) {
+          isHost = roomData.hostId === currentUser.uid;
+          playerName = existingPlayers[currentUser.uid].name || playerName;
+          await updateDoc(doc(db, 'liveMatches', roomId), {
+            [`players.${currentUser.uid}.online`]: true,
+            [`players.${currentUser.uid}.lastSeen`]: serverTimestamp()
+          });
+        } else {
+          if (Object.keys(existingPlayers).length >= 10) return showError('Room is full (max 10)!');
+          isHost = false;
+          await updateDoc(doc(db, 'liveMatches', roomId), {
+            [`players.${currentUser.uid}`]: {
+              name: playerName, score: 0, correct: 0, wrong: 0,
+              answered: false, ready: false, online: true, joinedAt: new Date().toISOString(),
+              streak: 0, longestStreak: 0, totalTime: 0, fastestTime: null, lastSeen: serverTimestamp()
+            }
+          });
+          addSystemChatMessage(roomId, `${playerName} joined the game`);
         }
 
-        await updateDoc(doc(db, 'liveMatches', roomId), {
-          [`players.${currentUser.uid}`]: {
-            name: playerName, score: 0, correct: 0, wrong: 0,
-            answered: false, ready: false, online: true, joinedAt: new Date().toISOString(),
-            streak: 0, longestStreak: 0, totalTime: 0, fastestTime: null
-          }
-        });
-
-        sessionStorage.setItem('currentRoomId', roomId);
-        window.history.pushState({room: roomId}, '', `?room=${roomCode}`);
+        saveActiveRoom(); // BUG FIX 3: remember this room so a refresh can reconnect
         listenToRoom();
-
-      } catch (err) {
-        showError(err.message);
       } finally {
-        isJoining = false;
-        if (btn) btn.disabled = false;
+        joining = false;
+        if (joinBtn) joinBtn.disabled = false;
       }
     }
 
     function listenToRoom() {
       if (unsubscribe) unsubscribe();
+      stopHeartbeat(); // BUG FIX 9: avoid stacking multiple heartbeat intervals on rejoin
+
       unsubscribe = onSnapshot(doc(db, 'liveMatches', roomId), (snapshot) => {
         if (!snapshot.exists()) { leaveRoom(); return; }
 
         const data = snapshot.data();
         const players = data.players || {};
 
+        // BUG FIX 5: derive host status from the document itself, so a host handover
+        // (e.g. after the original host disconnects) takes effect automatically for
+        // every connected client without any extra plumbing.
+        isHost = data.hostId === currentUser.uid;
+
         if (players[currentUser.uid]) players[currentUser.uid].online = true;
 
-        // --- Bug 5 Fix: Host Migration ---
-        if (data.status !== 'finished') {
-          const onlinePlayers = Object.entries(players).filter(([u,p]) => p.online).sort((a,b) => new Date(a[1].joinedAt) - new Date(b[1].joinedAt));
-          if (onlinePlayers.length > 0) {
-            const currentHostOnline = players[data.hostId]?.online;
-            if (!currentHostOnline && onlinePlayers[0][0] === currentUser.uid) {
-               updateDoc(doc(db, 'liveMatches', roomId), { hostId: currentUser.uid, hostName: players[currentUser.uid].name }).catch(()=>{});
-               isHost = true;
-            } else {
-               isHost = data.hostId === currentUser.uid;
-            }
-          }
-        }
-
-        if (previousPlayers && data.status === 'waiting') {
+        if (previousPlayers && data.status !== 'waiting') {
           Object.keys(previousPlayers).forEach(uid => {
             const wasOnline = previousPlayers[uid].online;
             const isOnline = players[uid]?.online;
 
             if (wasOnline && !isOnline) {
-              addSystemMessage(`${previousPlayers[uid].name} left`);
               showToast(`🔴 ${previousPlayers[uid].name} left the game!`);
               playSound('leave');
             } else if (!wasOnline && isOnline) {
-              addSystemMessage(`${players[uid].name} rejoined`);
               showToast(`🟢 ${players[uid].name} rejoined!`, true);
               playSound('join');
             }
           });
-          Object.keys(players).forEach(uid => {
-             if (!previousPlayers[uid] && players[uid].online && uid !== data.hostId) {
-                addSystemMessage(`${players[uid].name} joined`);
-             }
-          });
         }
         previousPlayers = JSON.parse(JSON.stringify(players));
 
-        // Disable chat completely if game is not in 'waiting'
-        if (data.status !== 'waiting' && chatUnsubscribe) {
-          chatUnsubscribe();
-          chatUnsubscribe = null;
-        }
+        // BUG FIX 4/5/6: heartbeat-based ghost-player detection, host handover, and
+        // automatic cleanup of an empty room. Best-effort, runs on every connected client.
+        maintainPresence(data, players);
+
+        // Chat is scoped to the waiting room only (Feature 1).
+        if (data.status === 'waiting') { startChatListener(); } else { stopChatListener(); }
 
         switch(data.status) {
           case 'waiting':
@@ -1403,6 +1301,8 @@
             break;
         }
       });
+
+      startHeartbeat(); // BUG FIX 4: begin presence heartbeat for this session
     }
 
     function renderWaitingRoom(data) {
@@ -1425,7 +1325,7 @@
 
       render(`
         <div class="mp-card">
-          <div class="mp-title" style="margin-bottom:8px;">⏳ Waiting Room</div>
+          <div class="mp-title">⏳ Waiting Room</div>
           <div class="mp-room-code" onclick="window.copyRoomCode()" title="Tap to copy">${roomCode}</div>
           <div class="mp-copy-hint"><i class="fa-regular fa-copy"></i>Tap the code to copy</div>
 
@@ -1436,34 +1336,30 @@
             <button class="icon-btn" onclick="window.toggleQRCode()"><i class="fa-solid fa-qrcode"></i>QR Code</button>
           </div>
           <div class="qr-wrap" id="qrWrap"></div>
-          
-          <div class="mp-divider" style="margin: 6px 0;">Players (${playerCount}/10)</div>
+          <p style="text-align:center;font-size:0.65rem;color:var(--text2);word-break:break-all;margin-bottom:10px;">${escapeHtml(link)}</p>
+
+          <p style="text-align:center;">Players: ${playerCount}/10</p>
           <div class="mp-player-list">${playerList}</div>
+          <button class="mp-btn mp-btn-success" onclick="window.toggleReady()">${players[currentUser.uid]?.ready ? '✅ Ready' : 'Click to Ready'}</button>
+          ${isHost ? `<button class="mp-btn mp-btn-primary" onclick="window.startGame()" ${!allReady?'disabled':''}>⚡ Start</button>` : ''}
+          <button class="mp-btn mp-btn-danger" onclick="window.leaveRoom()">Leave</button>
+        </div>
 
-          <!-- Feature 1: Waiting Room Chat UI -->
-          <div class="mp-chat-container">
-            <div class="mp-chat-messages" id="chatMessages"></div>
-            <div class="mp-chat-input-wrap">
-              <input type="text" id="chatInput" class="mp-input" placeholder="Type a message..." maxlength="150" onkeypress="if(event.key==='Enter') window.sendChatMessage()">
-              <button class="mp-btn mp-btn-primary" onclick="window.sendChatMessage()"><i class="fa-solid fa-paper-plane"></i></button>
-            </div>
+        <div class="mp-card chat-card">
+          <div class="mp-title" style="font-size:1rem;">💬 Room Chat</div>
+          <div class="chat-messages" id="chatMessages"></div>
+          <div class="chat-input-row">
+            <input type="text" id="chatInput" class="mp-input chat-input" placeholder="Type a message..." maxlength="150" onkeydown="window.handleChatKeydown(event)">
+            <button class="chat-send-btn" id="chatSendBtn" onclick="window.sendChatMessage()" aria-label="Send message"><i class="fa-solid fa-paper-plane"></i></button>
           </div>
-
-          <div style="display:flex; gap:8px; margin-top:10px; flex-shrink:0;">
-             <button style="margin-bottom:0;" class="mp-btn mp-btn-success" onclick="window.toggleReady()">${players[currentUser.uid]?.ready ? '✅ Ready' : 'Click to Ready'}</button>
-             ${isHost ? `<button style="margin-bottom:0;" class="mp-btn mp-btn-primary" onclick="window.startGame()" ${!allReady?'disabled':''}>⚡ Start</button>` : ''}
-          </div>
-          <button class="mp-btn mp-btn-danger" style="margin-top:8px; flex-shrink:0;" onclick="window.leaveRoom()">Leave</button>
         </div>
       `);
 
+      renderChatMessages(); // paint any messages the chat listener already has cached
+
       // Update online count
       const countEl = document.getElementById('onlineCount');
-      if (countEl) countEl.textContent = playerCount;
-
-      if (!chatUnsubscribe) {
-        initChat();
-      }
+      if (countEl) countEl.textContent = Object.values(data.players || {}).filter(p => p.online).length;
     }
 
     function renderQuestion(data) {
@@ -1506,7 +1402,7 @@
             <div class="timer-ring-text" id="timerDisplay">${questionTimeLeft}</div>
           </div>
           <div class="mp-question-text">${escapeHtml(q.q)}</div>
-          <div class="mp-options-container">${options}</div>
+          <div>${options}</div>
           <p class="answer-locked-msg">${revealActive ? '<i class="fa-solid fa-eye"></i> Answer revealed' : (selectedAnswer >= 0 ? '<i class="fa-solid fa-lock"></i> Answer locked!' : 'Select your answer...')}</p>
         </div>
       `);
@@ -1535,7 +1431,7 @@
           <div class="mp-player-score" id="score-${p.uid}">${previousScores[p.uid] !== undefined ? previousScores[p.uid] : p.score}</div>
         </div>
       `).join('');
-      render(`<div class="mp-card"><div class="mp-title">📊 Leaderboard</div><div class="mp-leaderboard-container">${list}</div><p style="text-align:center;font-size:0.7rem;color:var(--text2);margin-top:8px;flex-shrink:0;">Next question coming...</p></div>`);
+      render(`<div class="mp-card"><div class="mp-title">📊 Leaderboard</div><div>${list}</div><p style="text-align:center;font-size:0.7rem;color:var(--text2);margin-top:8px;">Next question coming...</p></div>`);
 
       const finalScores = {};
       sorted.forEach(p => finalScores[p.uid] = p.score);
@@ -1606,8 +1502,8 @@
             <div class="stat-box"><div class="stat-val">#${myRank || '-'}</div><div class="stat-lbl">Your Rank</div></div>
           </div>
 
-          <div class="mp-leaderboard-container">${list}</div>
-          <div style="display:flex;gap:8px;margin-top:12px;flex-shrink:0;">
+          <div>${list}</div>
+          <div style="display:flex;gap:8px;margin-top:12px;">
             ${isHost ? '<button class="mp-btn mp-btn-primary" onclick="window.rematch()">🔄 Rematch</button>' : ''}
             <button class="mp-btn mp-btn-outline" onclick="window.leaveRoom()">Leave</button>
           </div>
@@ -1630,7 +1526,6 @@
       if (!roomId) return;
       const roomRef = doc(db, 'liveMatches', roomId);
       const snap = await getDoc(roomRef);
-      if (!snap.exists()) return;
       const currentReady = snap.data().players[currentUser.uid]?.ready || false;
       await updateDoc(roomRef, { [`players.${currentUser.uid}.ready`]: !currentReady });
       if (!currentReady) playSound('ready');
@@ -1638,6 +1533,7 @@
 
     async function startGame() {
       if (!isHost || !roomId) return;
+      await addSystemChatMessage(roomId, 'Host started the game! 🚀'); // Feature 1: final message before chat closes
       await updateDoc(doc(db, 'liveMatches', roomId), { status: 'countdown' });
       setTimeout(async () => {
         await updateDoc(doc(db, 'liveMatches', roomId), {
@@ -1647,51 +1543,59 @@
     }
 
     async function selectAnswer(index) {
-      if (selectedAnswer >= 0 || !roomId) return;
-      selectedAnswer = index; // Bug 8: Instant local lock
-      
-      // Update DOM instantly to prevent race condition clicks visually
-      document.querySelectorAll('.mp-option').forEach(el => el.setAttribute('disabled', 'true'));
-      
+      if (selectedAnswer >= 0 || !roomId || answeringInFlight) return; // BUG FIX 8: block duplicate/racing submissions
+      answeringInFlight = true;
+      selectedAnswer = index;
       try {
         await updateDoc(doc(db, 'liveMatches', roomId), {
           [`players.${currentUser.uid}.answered`]: true,
           [`players.${currentUser.uid}.answer`]: index,
           [`players.${currentUser.uid}.answerTime`]: Date.now()
         });
-      } catch (e) {
-        selectedAnswer = -1; // Revert if failed
-        document.querySelectorAll('.mp-option').forEach(el => el.removeAttribute('disabled'));
+      } catch(e) {
+        selectedAnswer = -1; // allow retry if the write failed
+      } finally {
+        answeringInFlight = false;
       }
     }
 
     async function leaveRoom() {
-      if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe = null; }
-      systemMessages = [];
+      stopHeartbeat();
+      stopChatListener();
 
       if (roomId && currentUser) {
         try {
-          // Bug 6 Fix: Room Cleanup
           const roomRef = doc(db, 'liveMatches', roomId);
           const snap = await getDoc(roomRef);
           if (snap.exists()) {
-             const players = snap.data().players || {};
-             const onlineCount = Object.values(players).filter(p => p.online).length;
-             
-             if (onlineCount <= 1) { // Only I am online, delete doc to avoid orphans
-                await deleteDoc(roomRef);
-             } else {
-                await updateDoc(roomRef, { [`players.${currentUser.uid}.online`]: false });
-             }
+            const data = snap.data();
+            const players = data.players || {};
+            const otherOnline = Object.keys(players).filter(uid => uid !== currentUser.uid && players[uid]?.online);
+
+            if (data.status === 'waiting') {
+              // Feature 1: system message (best-effort; chat only exists in the waiting room)
+              await addSystemChatMessage(roomId, `${players[currentUser.uid]?.name || playerName || 'A player'} left the game`);
+            }
+
+            if (otherOnline.length === 0) {
+              // BUG FIX 6: last player leaving -> delete the room and its chat, no orphan docs
+              await deleteRoomCompletely(roomId);
+            } else if (isHost) {
+              // BUG FIX 5: hand off host before leaving so the room never freezes/stops
+              await updateDoc(roomRef, {
+                hostId: otherOnline.sort()[0],
+                [`players.${currentUser.uid}.online`]: false
+              });
+            } else {
+              await updateDoc(roomRef, { [`players.${currentUser.uid}.online`]: false });
+            }
           }
-        } catch(e) {}
+        } catch(e) { /* best-effort cleanup */ }
       }
+
       if (unsubscribe) unsubscribe();
       if (questionTimer) { clearInterval(questionTimer); questionTimer = null; }
-      
-      sessionStorage.removeItem('currentRoomId');
-      window.history.pushState({}, '', window.location.pathname);
-      
+      clearActiveRoom(); // BUG FIX 3: stop offering reconnect into a room we deliberately left
       roomId = null; roomCode = null; isHost = false; selectedAnswer = -1; previousPlayers = null;
       revealActive = false; previousScores = {}; qrRendered = false; achievementQueue = [];
       renderLobby();
@@ -1713,18 +1617,26 @@
 
     // =========================================================
     // TIMER: countdown + circular ring + local reveal flourish
-    // Core scoring/flow logic (host-only Firestore writes) unchanged.
+    // Core scoring/flow logic (host-only Firestore writes) unchanged,
+    // just made drift-free (Bug 7) and race-safe (Bug 8).
     // =========================================================
     function startQuestionTimer(data) {
       if (questionTimer) clearInterval(questionTimer);
       const totalTime = data.questionTime || gameQuestionTime || 15;
 
+      // BUG FIX 7: base the countdown on the shared start time written to Firestore
+      // instead of a local per-client decrement, so every client — including one that
+      // just reconnected mid-question — always shows the same time remaining and never drifts.
+      const startMs = data.questionStartTime || Date.now();
+      function computeTimeLeft() {
+        const elapsed = (Date.now() - startMs) / 1000;
+        return Math.max(0, Math.ceil(totalTime - elapsed));
+      }
+
+      questionTimeLeft = computeTimeLeft();
+
       questionTimer = setInterval(async () => {
-        // Bug 7 Fix: Timer Synchronization based on actual elapsed time
-        const now = Date.now();
-        const startTime = data.questionStartTime || now;
-        const elapsed = Math.floor((now - startTime) / 1000);
-        questionTimeLeft = Math.max(0, totalTime - elapsed);
+        questionTimeLeft = computeTimeLeft();
 
         // --- visual updates (all clients) ---
         const timerEl = document.getElementById('timerDisplay');
@@ -1737,7 +1649,6 @@
           ringEl.style.strokeDashoffset = circumference * (1 - frac);
           ringEl.setAttribute('class', 'timer-ring-progress ' + getTimerColorClass(frac));
         }
-        
         if (questionTimeLeft <= 5 && questionTimeLeft > 0) {
           wrapEl?.classList.add('urgent');
           playSound('urgentTick');
@@ -1756,43 +1667,61 @@
             playSound(selectedAnswer === correctIdx ? 'correct' : 'wrong');
           }
 
-          if (isHost && roomId) {
+          // BUG FIX 8: guard host scoring with an in-flight flag + a Firestore transaction
+          // so simultaneous answers (or a duplicate timer firing) can never double-apply scores.
+          if (isHost && roomId && !scoringInProgress) {
+            scoringInProgress = true;
             const qRef = doc(db, 'liveMatches', roomId);
-            const snap = await getDoc(qRef);
-            const qData = snap.data();
-            const questions = qData.questions || [];
-            const qIndex = qData.currentQuestion || 0;
-            const correctAnswer = questions[qIndex]?.correct || 0;
+            try {
+              let scoredQIndex = null;
+              let totalQuestions = 0;
 
-            let updatePayload = { status: 'leaderboard' };
-            Object.entries(qData.players || {}).forEach(([uid, p]) => {
-              if (p.online && p.answered) {
-                const isCorrect = p.answer === correctAnswer;
-                updatePayload[`players.${uid}.score`] = (p.score || 0) + (isCorrect ? 10 : 0);
-                updatePayload[`players.${uid}.correct`] = (p.correct || 0) + (isCorrect ? 1 : 0);
-                updatePayload[`players.${uid}.wrong`] = (p.wrong || 0) + (isCorrect ? 0 : 1);
+              await runTransaction(db, async (tx) => {
+                const snap = await tx.get(qRef);
+                if (!snap.exists()) return;
+                const qData = snap.data();
+                if (qData.status !== 'playing') return; // already scored by another pass
 
-                // --- additive stat tracking (does not touch the +10 scoring rule above) ---
-                const newStreak = isCorrect ? (p.streak || 0) + 1 : 0;
-                updatePayload[`players.${uid}.streak`] = newStreak;
-                updatePayload[`players.${uid}.longestStreak`] = Math.max(p.longestStreak || 0, newStreak);
-                if (p.answerTime && qData.questionStartTime) {
-                  const respSec = Math.max(0, (p.answerTime - qData.questionStartTime) / 1000);
-                  updatePayload[`players.${uid}.totalTime`] = (p.totalTime || 0) + respSec;
-                  const prevFastest = p.fastestTime;
-                  updatePayload[`players.${uid}.fastestTime`] = (prevFastest === undefined || prevFastest === null || respSec < prevFastest) ? respSec : prevFastest;
-                }
+                const questions = qData.questions || [];
+                const qIndex = qData.currentQuestion || 0;
+                const correctAnswer = questions[qIndex]?.correct || 0;
+
+                let updatePayload = { status: 'leaderboard' };
+                Object.entries(qData.players || {}).forEach(([uid, p]) => {
+                  if (p.online && p.answered) {
+                    const isCorrect = p.answer === correctAnswer;
+                    updatePayload[`players.${uid}.score`] = (p.score || 0) + (isCorrect ? 10 : 0);
+                    updatePayload[`players.${uid}.correct`] = (p.correct || 0) + (isCorrect ? 1 : 0);
+                    updatePayload[`players.${uid}.wrong`] = (p.wrong || 0) + (isCorrect ? 0 : 1);
+
+                    // --- additive stat tracking (does not touch the +10 scoring rule above) ---
+                    const newStreak = isCorrect ? (p.streak || 0) + 1 : 0;
+                    updatePayload[`players.${uid}.streak`] = newStreak;
+                    updatePayload[`players.${uid}.longestStreak`] = Math.max(p.longestStreak || 0, newStreak);
+                    if (p.answerTime && qData.questionStartTime) {
+                      const respSec = Math.max(0, (p.answerTime - qData.questionStartTime) / 1000);
+                      updatePayload[`players.${uid}.totalTime`] = (p.totalTime || 0) + respSec;
+                      const prevFastest = p.fastestTime;
+                      updatePayload[`players.${uid}.fastestTime`] = (prevFastest === undefined || prevFastest === null || respSec < prevFastest) ? respSec : prevFastest;
+                    }
+                  }
+                  updatePayload[`players.${uid}.answered`] = false;
+                });
+
+                tx.update(qRef, updatePayload);
+                scoredQIndex = qIndex;
+                totalQuestions = questions.length;
+              });
+
+              if (scoredQIndex !== null) {
+                setTimeout(async () => {
+                  const nextQ = scoredQIndex + 1;
+                  if (nextQ >= totalQuestions) await updateDoc(qRef, { status: 'finished' });
+                  else await updateDoc(qRef, { status: 'playing', currentQuestion: nextQ, questionStartTime: Date.now() });
+                }, 4000);
               }
-              updatePayload[`players.${uid}.answered`] = false;
-            });
-
-            await updateDoc(qRef, updatePayload);
-
-            setTimeout(async () => {
-              const nextQ = qIndex + 1;
-              if (nextQ >= questions.length) await updateDoc(qRef, { status: 'finished' });
-              else await updateDoc(qRef, { status: 'playing', currentQuestion: nextQ, questionStartTime: Date.now() });
-            }, 4000);
+            } catch(e) { console.error(e); }
+            finally { scoringInProgress = false; }
           }
         }
       }, 1000);
@@ -1820,6 +1749,161 @@
       } catch(e) {}
     }
 
+    // =========================================================
+    // MODULE: WAITING ROOM CHAT (Feature 1)
+    // Scoped entirely to the waiting room: started whenever a room's
+    // status is 'waiting', stopped for every other status.
+    // =========================================================
+    function startChatListener() {
+      if (chatUnsubscribe || !roomId) return;
+      const chatQ = query(collection(db, 'liveMatches', roomId, 'chat'), orderBy('timestamp', 'asc'), limitToLast(50));
+      chatUnsubscribe = onSnapshot(chatQ, (snap) => {
+        chatMessages = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderChatMessages();
+      }, () => {});
+    }
+    function stopChatListener() {
+      if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe = null; }
+      chatMessages = [];
+    }
+    function renderChatMessages() {
+      const box = document.getElementById('chatMessages');
+      if (!box) return;
+      box.innerHTML = chatMessages.map(m => {
+        if (m.type === 'system') {
+          return `<div class="chat-msg-system">${escapeHtml(m.message)}</div>`;
+        }
+        const time = (m.timestamp && typeof m.timestamp.toDate === 'function') ? m.timestamp.toDate() : new Date();
+        const hh = String(time.getHours()).padStart(2, '0');
+        const mm = String(time.getMinutes()).padStart(2, '0');
+        const mine = currentUser && m.playerId === currentUser.uid;
+        return `
+        <div class="chat-msg ${mine ? 'mine' : ''}">
+          <div class="chat-msg-meta"><span class="chat-msg-name">${escapeHtml(m.playerName || 'Player')}</span><span class="chat-msg-time">${hh}:${mm}</span></div>
+          <div class="chat-msg-bubble">${escapeHtml(m.message || '')}</div>
+        </div>`;
+      }).join('');
+      box.scrollTop = box.scrollHeight;
+    }
+    async function addSystemChatMessage(rId, text) {
+      if (!rId) return;
+      try {
+        await addDoc(collection(db, 'liveMatches', rId, 'chat'), {
+          type: 'system', playerId: 'system', playerName: 'System',
+          message: text, timestamp: serverTimestamp()
+        });
+      } catch(e) { /* best-effort */ }
+    }
+    async function sendChatMessage() {
+      const input = document.getElementById('chatInput');
+      if (!input || !roomId || chatSending) return;
+      const raw = input.value.trim();
+      if (!raw) return; // ignore empty messages
+      const text = raw.slice(0, 150); // enforce max length
+      const now = Date.now();
+      if (now - lastChatSendAt < 900) return; // ~1 message per second, blocks spam
+
+      chatSending = true;
+      const sendBtn = document.getElementById('chatSendBtn');
+      if (sendBtn) sendBtn.disabled = true;
+
+      try {
+        await addDoc(collection(db, 'liveMatches', roomId, 'chat'), {
+          type: 'user', playerId: currentUser.uid, playerName: playerName || 'Player',
+          message: text, timestamp: serverTimestamp()
+        });
+        lastChatSendAt = now;
+        input.value = '';
+      } catch(e) { /* best-effort */ }
+
+      chatSending = false;
+      if (sendBtn) sendBtn.disabled = false;
+      input.focus();
+    }
+    function handleChatKeydown(e) {
+      if (e.key === 'Enter') { e.preventDefault(); sendChatMessage(); }
+    }
+
+    // =========================================================
+    // MODULE: PRESENCE / GHOST-PLAYER DETECTION / HOST HANDOVER / ROOM CLEANUP
+    // (Bug fixes 4, 5, 6 — heartbeat-based, no backend/cloud functions required)
+    // =========================================================
+    function startHeartbeat() {
+      stopHeartbeat();
+      heartbeatInterval = setInterval(() => {
+        if (roomId && currentUser) {
+          updateDoc(doc(db, 'liveMatches', roomId), {
+            [`players.${currentUser.uid}.online`]: true,
+            [`players.${currentUser.uid}.lastSeen`]: serverTimestamp()
+          }).catch(() => {});
+        }
+      }, 15000);
+    }
+    function stopHeartbeat() {
+      if (heartbeatInterval) { clearInterval(heartbeatInterval); heartbeatInterval = null; }
+    }
+    async function maintainPresence(data, players) {
+      if (!roomId || !currentUser) return;
+      const now = Date.now();
+      const updates = {};
+      const onlineUids = [];
+
+      Object.entries(players).forEach(([uid, p]) => {
+        const lastSeenMs = (p.lastSeen && typeof p.lastSeen.toMillis === 'function') ? p.lastSeen.toMillis() : null;
+        const stale = p.online && lastSeenMs && (now - lastSeenMs > PRESENCE_STALE_MS) && uid !== currentUser.uid;
+        if (stale) {
+          updates[`players.${uid}.online`] = false;
+        } else if (p.online) {
+          onlineUids.push(uid);
+        }
+      });
+
+      // BUG FIX 5: if the host looks disconnected, the lowest-uid remaining online
+      // player deterministically claims host (avoids two clients racing for it).
+      const hostEntry = players[data.hostId];
+      const hostLastSeenMs = (hostEntry?.lastSeen && typeof hostEntry.lastSeen.toMillis === 'function') ? hostEntry.lastSeen.toMillis() : null;
+      const hostLooksGone = !hostEntry || !hostEntry.online || (hostLastSeenMs && (now - hostLastSeenMs > PRESENCE_STALE_MS));
+      if (hostLooksGone && onlineUids.length > 0) {
+        const nextHost = [...onlineUids].sort()[0];
+        if (nextHost === currentUser.uid && data.hostId !== currentUser.uid) {
+          updates.hostId = currentUser.uid;
+        }
+      }
+
+      if (Object.keys(updates).length > 0) {
+        try { await updateDoc(doc(db, 'liveMatches', roomId), updates); } catch(e) {}
+      }
+
+      // BUG FIX 6: nobody left online -> remove the room and its chat (no orphan docs)
+      if (onlineUids.length === 0 && Object.keys(players).length > 0) {
+        try { await deleteRoomCompletely(roomId); } catch(e) {}
+      }
+    }
+    async function deleteRoomCompletely(rId) {
+      try {
+        const chatSnap = await getDocs(collection(db, 'liveMatches', rId, 'chat'));
+        if (!chatSnap.empty) {
+          const batch = writeBatch(db);
+          chatSnap.forEach(d => batch.delete(d.ref));
+          await batch.commit();
+        }
+      } catch(e) {}
+      try { await deleteDoc(doc(db, 'liveMatches', rId)); } catch(e) {}
+    }
+
+    // =========================================================
+    // MODULE: RECONNECT PERSISTENCE (Bug fix 3 — survive a refresh)
+    // =========================================================
+    function saveActiveRoom() {
+      try { localStorage.setItem('quizhub_active_room', JSON.stringify({ roomId, roomCode })); } catch(e) {}
+    }
+    function loadActiveRoom() {
+      try { const raw = localStorage.getItem('quizhub_active_room'); return raw ? JSON.parse(raw) : null; } catch(e) { return null; }
+    }
+    function clearActiveRoom() {
+      try { localStorage.removeItem('quizhub_active_room'); } catch(e) {}
+    }
+
     window.createRoom = createRoom;
     window.updateSettingsLessons = updateSettingsLessons;
     window.confirmCreateRoom = confirmCreateRoom;
@@ -1829,43 +1913,69 @@
     window.selectAnswer = selectAnswer;
     window.leaveRoom = leaveRoom;
     window.rematch = rematch;
+    window.sendChatMessage = sendChatMessage;
+    window.handleChatKeydown = handleChatKeydown;
 
     async function init() {
       updateMuteBtn();
       initParticles();
       await initAuth();
-      
-      // Load saved name
-      playerName = localStorage.getItem('quizhub_playerName') || '';
-      
+
       const params = new URLSearchParams(window.location.search);
-      const savedRoomId = sessionStorage.getItem('currentRoomId');
-      
-      // Bug Fix 3 & 4: Reconnect logic if page refreshed
-      if (savedRoomId && !params.get('room')) { 
-        roomId = savedRoomId;
-        try {
-          const docSnap = await getDoc(doc(db, 'liveMatches', roomId));
-          if (docSnap.exists() && docSnap.data().players[currentUser.uid]) {
-            roomCode = docSnap.data().roomCode;
-            isHost = docSnap.data().hostId === currentUser.uid;
-            playerName = docSnap.data().players[currentUser.uid].name;
-            listenToRoom();
-            return;
+      const urlRoomCode = params.get('room');
+      let reconnected = false;
+
+      try {
+        if (urlRoomCode) {
+          // BUG FIX 1: check whether THIS browser/session is already a player in that
+          // room before joining, so opening an invite link never overwrites another
+          // player's identity or creates a duplicate entry.
+          const code = urlRoomCode.trim().toUpperCase();
+          const q = query(collection(db, 'liveMatches'), where('roomCode', '==', code), where('status', 'in', ['waiting', 'countdown', 'playing', 'leaderboard']));
+          const snap = await getDocs(q);
+          if (!snap.empty) {
+            const docSnap = snap.docs[0];
+            const data = docSnap.data();
+            if (data.players && data.players[currentUser.uid]) {
+              roomId = docSnap.id;
+              roomCode = data.roomCode;
+              playerName = data.players[currentUser.uid].name || playerName;
+              isHost = data.hostId === currentUser.uid;
+              previousPlayers = null; previousScores = {}; qrRendered = false;
+              saveActiveRoom();
+              listenToRoom();
+              reconnected = true;
+            }
           }
-        } catch(e) { }
-        sessionStorage.removeItem('currentRoomId');
-        roomId = null;
-      }
+        } else {
+          // BUG FIX 3: no invite link — check if this session had an active room before a refresh
+          const saved = loadActiveRoom();
+          if (saved && saved.roomId) {
+            const roomSnap = await getDoc(doc(db, 'liveMatches', saved.roomId));
+            if (roomSnap.exists() && roomSnap.data().players && roomSnap.data().players[currentUser.uid]) {
+              const data = roomSnap.data();
+              roomId = saved.roomId;
+              roomCode = data.roomCode;
+              playerName = data.players[currentUser.uid].name || playerName;
+              isHost = data.hostId === currentUser.uid;
+              previousPlayers = null; previousScores = {}; qrRendered = false;
+              listenToRoom();
+              reconnected = true;
+            } else {
+              clearActiveRoom();
+            }
+          }
+        }
+      } catch(e) { console.error('Reconnect check failed:', e); }
 
-      renderLobby();
-
-      // Bug Fix 1: Invite Link Identity Bug - Don't auto join!
-      if (params.get('room')) {
-        setTimeout(() => { 
-          const codeInput = document.getElementById('roomCodeInput');
-          if (codeInput) codeInput.value = params.get('room').toUpperCase(); 
-        }, 500);
+      if (!reconnected) {
+        renderLobby();
+        if (urlRoomCode) {
+          setTimeout(() => {
+            const el = document.getElementById('roomCodeInput');
+            if (el) { el.value = urlRoomCode; joinRoom(); }
+          }, 500);
+        }
       }
     }
 
@@ -1875,5 +1985,7 @@
   <footer style="position:fixed;bottom:0;left:0;right:0;text-align:center;padding:12px;color:var(--text2);font-size:0.7rem;opacity:0.6;z-index:10;background:rgba(10,14,26,0.7);backdrop-filter:blur(6px);border-top:1px solid var(--glass-border);">    <p>Learning Quiz Hub</p>
     <p style="font-weight:600;color:var(--primary);margin-top:2px;">🦊 Developed by Lakshan Dulip</p>
   </footer>
+</body>
+  
 </body>
 </html>
