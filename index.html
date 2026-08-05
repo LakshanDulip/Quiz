@@ -6623,65 +6623,72 @@ window.performanceManager = new PerformanceManager();
   }
 
   // ============ PAGES ============
-   function renderHome() {
+  function renderHome() {
     const progress = getProgress();
     return `
-      <div style="text-align:center;padding:20px 10px 30px;">
+      <div style="text-align:center;padding:10px 10px 30px;">
         
-        <!-- Hero Section -->
-        <div style="margin-bottom:30px;">
-          <h2 style="font-family:'Space Grotesk',sans-serif; font-size:clamp(1.8rem,4vw,2.5rem); font-weight:800; margin-bottom:8px; background:var(--primary-gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
-            📚 Quiz Hub
-          </h2>
-          <p style="color:var(--text-secondary); font-size:1rem; max-width:500px; margin:0 auto 20px;">
-            ඉගෙන ගන්න, සෙල්ලම් කරන්න, දිනන්න! 🚀
-          </p>
-          
-          <!-- Quick Stats Row -->
-          <div style="display:inline-flex; gap:16px; flex-wrap:wrap; justify-content:center;">
-            <div style="background:var(--bg-card); padding:12px 20px; border-radius:16px; border:1px solid var(--border-color); text-align:center; min-width:80px;">
-              <div style="font-size:1.5rem; font-weight:700; color:var(--accent);">${appState.totalScore}</div>
-              <div style="font-size:0.65rem; color:var(--text-secondary); text-transform:uppercase;">Stars ⭐</div>
-            </div>
-            <div style="background:var(--bg-card); padding:12px 20px; border-radius:16px; border:1px solid var(--border-color); text-align:center; min-width:80px;">
-              <div style="font-size:1.5rem; font-weight:700; color:var(--wrong-color);">${progress.bestStreak || 0}</div>
-              <div style="font-size:0.65rem; color:var(--text-secondary); text-transform:uppercase;">Best Streak 🔥</div>
-            </div>
-            <div style="background:var(--bg-card); padding:12px 20px; border-radius:16px; border:1px solid var(--border-color); text-align:center; min-width:80px;">
-              <div style="font-size:1.5rem; font-weight:700; color:var(--gold);">${progress.perfectCount || 0}</div>
-              <div style="font-size:0.65rem; color:var(--text-secondary); text-transform:uppercase;">Perfect 🏆</div>
-            </div>
+        <!-- Hero -->
+        <div style="margin-bottom:35px; position:relative;">
+          <div style="position:absolute;top:-40px;left:50%;transform:translateX(-50%);width:200px;height:200px;background:var(--primary-gradient);filter:blur(80px);opacity:0.15;border-radius:50%;"></div>
+          <h1 style="font-family:'Space Grotesk',sans-serif; font-size:2rem; font-weight:800; margin-bottom:4px; position:relative;">
+            <span style="background:var(--primary-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Quiz Hub</span>
+          </h1>
+          <p style="color:var(--text-secondary); font-size:0.9rem; position:relative;">Learn • Play • Grow 🚀</p>
+        </div>
+        
+        <!-- Stats -->
+        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:30px;">
+          <div class="stat-card" style="background:var(--bg-card);padding:14px 18px;border-radius:16px;border:1px solid var(--border-color);text-align:center;min-width:75px;transition:all 0.3s;">
+            <div style="font-size:1.6rem;font-weight:700;color:var(--accent);">${appState.totalScore}</div>
+            <div style="font-size:0.6rem;color:var(--text-secondary);letter-spacing:1px;">STARS</div>
+          </div>
+          <div class="stat-card" style="background:var(--bg-card);padding:14px 18px;border-radius:16px;border:1px solid var(--border-color);text-align:center;min-width:75px;">
+            <div style="font-size:1.6rem;font-weight:700;color:#ef4444;">${progress.bestStreak || 0}</div>
+            <div style="font-size:0.6rem;color:var(--text-secondary);letter-spacing:1px;">STREAK</div>
+          </div>
+          <div class="stat-card" style="background:var(--bg-card);padding:14px 18px;border-radius:16px;border:1px solid var(--border-color);text-align:center;min-width:75px;">
+            <div style="font-size:1.6rem;font-weight:700;color:#f59e0b;">${progress.perfectCount || 0}</div>
+            <div style="font-size:0.6rem;color:var(--text-secondary);letter-spacing:1px;">PERFECT</div>
           </div>
         </div>
         
-        <!-- Mode Cards -->
-        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; max-width:700px; margin:0 auto 30px;">
-          <div class="card" style="padding:20px; text-align:center; cursor:pointer; border-top:3px solid var(--science-color);" onclick="setMode('${MODES.STUDY}')">
-            <div style="font-size:2rem; margin-bottom:8px;">📚</div>
-            <div style="font-weight:700; font-size:1rem;">Study Mode</div>
-            <div style="font-size:0.7rem; color:var(--text-secondary);">සැහැල්ලුවෙන් ඉගෙන ගන්න</div>
+        <!-- Modes -->
+        <p style="font-size:0.7rem;color:var(--text-secondary);letter-spacing:2px;margin-bottom:12px;">CHOOSE MODE</p>
+        <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-bottom:35px;">
+          <div onclick="setMode('study')" style="background:var(--bg-card);padding:16px 20px;border-radius:20px;border:2px solid transparent;cursor:pointer;text-align:center;width:130px;transition:all 0.3s;"
+               onmouseover="this.style.borderColor='var(--science-color)';this.style.transform='translateY(-4px)'" 
+               onmouseout="this.style.borderColor='transparent';this.style.transform=''">
+            <div style="font-size:2.2rem;">📚</div>
+            <div style="font-weight:700;font-size:0.85rem;">Study</div>
+            <div style="font-size:0.6rem;color:var(--text-secondary);">Learn</div>
           </div>
-          <div class="card" style="padding:20px; text-align:center; cursor:pointer; border-top:3px solid var(--primary-color);" onclick="setMode('${MODES.FLASHCARD}')">
-            <div style="font-size:2rem; margin-bottom:8px;">🃏</div>
-            <div style="font-weight:700; font-size:1rem;">Flashcards</div>
-            <div style="font-size:0.7rem; color:var(--text-secondary);">ඉක්මනින් මතක තබා ගන්න</div>
+          <div onclick="setMode('flashcard')" style="background:var(--bg-card);padding:16px 20px;border-radius:20px;border:2px solid transparent;cursor:pointer;text-align:center;width:130px;transition:all 0.3s;"
+               onmouseover="this.style.borderColor='var(--primary-color)';this.style.transform='translateY(-4px)'" 
+               onmouseout="this.style.borderColor='transparent';this.style.transform=''">
+            <div style="font-size:2.2rem;">🃏</div>
+            <div style="font-weight:700;font-size:0.85rem;">Flashcard</div>
+            <div style="font-size:0.6rem;color:var(--text-secondary);">Memorize</div>
           </div>
-          <div class="card" style="padding:20px; text-align:center; cursor:pointer; border-top:3px solid var(--wrong-color);" onclick="setMode('${MODES.GAME}')">
-            <div style="font-size:2rem; margin-bottom:8px;">🎮</div>
-            <div style="font-weight:700; font-size:1rem;">Game Mode</div>
-            <div style="font-size:0.7rem; color:var(--text-secondary);">සෙල්ලම් කරමින් ඉගෙන ගන්න</div>
+          <div onclick="setMode('game')" style="background:var(--bg-card);padding:16px 20px;border-radius:20px;border:2px solid transparent;cursor:pointer;text-align:center;width:130px;transition:all 0.3s;"
+               onmouseover="this.style.borderColor='#ef4444';this.style.transform='translateY(-4px)'" 
+               onmouseout="this.style.borderColor='transparent';this.style.transform=''">
+            <div style="font-size:2.2rem;">🎮</div>
+            <div style="font-weight:700;font-size:0.85rem;">Game</div>
+            <div style="font-size:0.6rem;color:var(--text-secondary);">Play</div>
           </div>
         </div>
         
         <!-- Subjects -->
-        <h3 style="font-family:'Space Grotesk',sans-serif; font-size:1.1rem; margin-bottom:16px; color:var(--text-primary);">📖 විෂයන්</h3>
-        <div class="grid-2">
+        <p style="font-size:0.7rem;color:var(--text-secondary);letter-spacing:2px;margin-bottom:12px;">SUBJECTS</p>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; max-width:500px; margin:0 auto;">
           ${Object.values(SUBJECTS).map(s => `
-            <div class="card subject-card" onclick="navigate('#/subject/${s.key}')">
-              <h3>${s.emoji} ${escapeHtml(s.sinhala)}</h3>
-              <p>${escapeHtml(s.desc)}</p>
-              <span class="btn btn-primary enter-cta"><i class="fas fa-play"></i> Start</span>
-              <i class="fas ${s.icon} subject-icon"></i>
+            <div onclick="navigate('#/subject/${s.key}')" style="background:var(--bg-card);padding:20px 14px;border-radius:16px;border:1px solid var(--border-color);cursor:pointer;text-align:center;transition:all 0.3s;"
+                 onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='var(--primary-color)'" 
+                 onmouseout="this.style.transform='';this.style.borderColor='var(--border-color)'">
+              <div style="font-size:2rem;margin-bottom:6px;">${s.emoji}</div>
+              <div style="font-weight:700;font-size:0.85rem;">${escapeHtml(s.sinhala)}</div>
+              <div style="font-size:0.6rem;color:var(--text-secondary);">${escapeHtml(s.name)}</div>
             </div>
           `).join('')}
         </div>
