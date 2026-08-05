@@ -4446,19 +4446,30 @@ window.performanceManager = new PerformanceManager();
 
   function checkAuth() {
     const loginModal = document.getElementById('loginModal');
-    // ===== FIREBASE AUTH START: Check Firebase user first =====
+    
+    // Check Firebase user
     if (window.isFirebaseUser && window.isFirebaseUser()) {
-      // Firebase user is already logged in
       if (loginModal) loginModal.classList.remove('active');
       return;
     }
-    // ===== FIREBASE AUTH END =====
     
-    if (!currentUser) {
-      loginModal.classList.add('active');
-    } else {
-      loginModal.classList.remove('active');
+    // Check localStorage saved user
+    const savedUser = localStorage.getItem('quizUsername');
+    if (savedUser) {
+      currentUser = savedUser;
+      if (loginModal) loginModal.classList.remove('active');
+      return;
     }
+    
+    // Check guest
+    if (sessionStorage.getItem('isGuest') === 'true') {
+      currentUser = sessionStorage.getItem('quizGuestName') || 'Guest';
+      if (loginModal) loginModal.classList.remove('active');
+      return;
+    }
+    
+    // Show login only for new users
+    if (loginModal) loginModal.classList.add('active');
   }
 
   function handleLogin() {
@@ -4472,7 +4483,9 @@ window.performanceManager = new PerformanceManager();
     currentUser = nameInput;
     isGuest = false;
     
+    // Persist login
     localStorage.setItem('quizUsername', currentUser);
+    localStorage.setItem('quizLoggedIn', 'true');
     sessionStorage.removeItem('isGuest');
     sessionStorage.removeItem('quizGuestName');
     
