@@ -4575,9 +4575,8 @@ window.performanceManager = new PerformanceManager();
   let deferredPrompt = null;
 
   // ============ AUTHENTICATION SYSTEM ============
-  var currentUser = localStorage.getItem('quizUsername') || sessionStorage.getItem('quizGuestName');
+  var currentUser = localStorage.getItem('quizUsername') || sessionStorage.getItem('quizGuestName') || null;
   var isGuest = sessionStorage.getItem('isGuest') === 'true';
-
   function checkAuth() {
     const loginModal = document.getElementById('loginModal');
     // ===== FIREBASE AUTH START: Check Firebase user first =====
@@ -7636,13 +7635,12 @@ window.performanceManager = new PerformanceManager();
         scheduleAutoAdvance(1500);
       }
     }
-  };
+  }
 
   window.nextStudyQuestion = function() {
     audioManager.playClick();
     goToNextQuestion();
   };
-
   // ============ MODAL ============
   function showModal(isCorrect, title, text) {
     const modal = document.getElementById('explainModal');
