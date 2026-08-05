@@ -64,7 +64,7 @@
     let playerScores = {};
     let questionTimer = null;
     let questionTimeLeft = 15;
-
+    let gameQuestionTime = 15;
     // ============ AUTH ============
     async function initAuth() {
       return new Promise((resolve) => {
@@ -103,44 +103,177 @@
       `);
     }
 
-    function renderWaitingRoom(data) {
-      const players = data.players || {};
-      const playerList = Object.entries(players).map(([uid, p]) => `
-        <div class="mp-player">
-          <div class="mp-player-avatar" style="background:${getAvatarColor(uid)}">${(p.name||'?')[0].toUpperCase()}</div>
-          <div class="mp-player-info">
-            <div class="mp-player-name">${escapeHtml(p.name)} ${uid === data.hostId ? '<span class="mp-badge mp-badge-host">Host</span>' : ''}</div>
-            <div class="mp-player-status">${p.online ? (p.ready ? '✅ Ready' : '⏳ Waiting') : '🔴 Offline'}</div>
-          </div>
-          ${p.online ? `<span class="mp-badge ${p.ready ? 'mp-badge-ready' : 'mp-badge-waiting'}">${p.ready ? 'Ready' : 'Not Ready'}</span>` : '<span class="mp-badge mp-badge-offline">Offline</span>'}
-        </div>
-      `).join('');
-
-      const playerCount = Object.values(players).filter(p => p.online).length;
-      const allReady = playerCount >= 2 && Object.values(players).filter(p => p.online).every(p => p.ready);
-
+     function renderLobby() {
       render(`
         <div class="mp-card">
-          <div class="mp-title">⏳ Waiting Room</div>
-          <div class="mp-room-code">${roomCode}</div>
-          <div style="text-align:center;margin-bottom:12px;">
-            <button class="mp-btn mp-btn-outline" onclick="copyRoomCode()" style="width:auto;padding:6px 14px;font-size:0.75rem;">
-              <i class="fas fa-copy"></i> Copy
-            </button>
-          </div>
-          <p style="text-align:center;font-size:0.85rem;color:var(--text2);">Players: ${playerCount}/10</p>
-          <div class="mp-player-list">${playerList}</div>
-          <div style="display:flex;gap:8px;">
-            <button class="mp-btn mp-btn-success" onclick="toggleReady()" ${!players[currentUser.uid]?.online ? 'disabled' : ''}>
-              ${players[currentUser.uid]?.ready ? '✅ Ready' : 'Click to Ready'}
-            </button>
-            ${isHost ? `<button class="mp-btn mp-btn-primary" onclick="startGame()" ${!allReady ? 'disabled' : ''}>⚡ Start Game</button>` : ''}
-          </div>
-          <button class="mp-btn mp-btn-danger" onclick="leaveRoom()" style="margin-top:8px;">Leave Room</button>
+          <div class="mp-title">⚡ Quiz Hub Multiplayer</div>
+          
+          <input type="text" class="mp-input" id="playerName" placeholder="ඔබේ නම..." maxlength="20" value="${playerName}">
+          
+          <button class="mp-btn mp-btn-primary" onclick="createRoom()">🏠 Create Room</button>
+          
+          <div class="mp-divider">OR</div>
+          
+          <input type="text" class="mp-input" id="roomCodeInput" placeholder="Room Code" maxlength="6" style="text-align:center;letter-spacing:4px;text-transform:uppercase;font-size:1.2rem;">
+          <button class="mp-btn mp-btn-outline" onclick="joinRoom()">🚪 Join Room</button>
+          
+          <div class="mp-error" id="errorMsg"></div>
         </div>
       `);
     }
 
+    function renderCreateSettings() {
+      render(`
+        <div class="mp-card">
+          <div class="mp-title">⚙️ Game Settings</div>
+          
+          <label style="font-size:0.8rem;color:var(--text2);">Subject</label>
+          <select class="mp-select" id="setSubject" onchange="updateSettingsGrades()">
+            <option value="science">🔬 විද්‍යාව</option>
+            <option value="maths">📐 ගණිතය</option>
+          </select>
+          
+          <label style="font-size:0.8rem;color:var(--text2);">Grade</label>
+          <select class="mp-select" id="setGrade" onchange="updateSettingsLessons()">
+            <option value="8">8 ශ්‍රේණිය</option>
+            <option value="9">9 ශ්‍රේණිය</option>
+            <option value="10">10 ශ්‍රේණිය</option>
+            <option value="11">11 ශ්‍රේණිය</option>
+          </select>
+          
+          <label style="font-size:0.8rem;color:var(--text2);">Lesson</label>
+          <select class="mp-select" id="setLesson">
+            <option value="">Loading...</option>
+          </select>
+          
+          <label style="font-size:0.8rem;color:var(--text2);">Questions (10-30)</label>
+          <input type="number" class="mp-input" id="setQCount" value="10" min="10" max="30">
+          
+          <label style="font-size:0.8rem;color:var(--text2);">Time per Question (seconds)</label>
+          <select class="mp-select" id="setQTime">
+            <option value="10">10s - Fast ⚡</option>
+            <option value="15" selected>15s - Normal</option>
+            <option value="20">20s - Easy</option>
+            <option value="30">30s - Relaxed</option>
+          </select>
+          
+          <button class="mp-btn mp-btn-primary" onclick="confirmCreateRoom()">✅ Create Room</button>
+          <button class="mp-btn mp-btn-outline" onclick="renderLobby()">Back</button>
+        </div>
+      `);
+      
+      updateSettingsLessons();
+    }
+    
+    async function updateSettingsGrades() {
+      document.getElementById('setLesson').innerHTML = '<option value="">Loading...</option>';
+      await updateSettingsLessons();
+    }
+    
+    async function updateSettingsLessons() {
+      const subject = document.getElementById('setSubject')?.value || 'science';
+      const grade = document.getElementById('setGrade')?.value || '8';
+      const select = document.getElementById('setLesson');
+      if (!select) return;
+      
+      try {
+        const resp = await fetch(`data/${subject}.json`);
+        if (!resp.ok) throw new Error('Failed');
+        const data = await resp.json();
+        
+        let lessons = [];
+        if (data.grades?.[grade]?.lessons) {
+          lessons = data.grades[grade].lessons;
+        } else if (data[subject]?.grades?.[grade]?.lessons) {
+          lessons = data[subject].grades[grade].lessons;
+        }
+        
+        if (lessons.length === 0) {
+          select.innerHTML = '<option value="">No lessons found</option>';
+          return;
+        }
+        
+        select.innerHTML = lessons.map(l => 
+          `<option value="${l.id}">${escapeHtml(l.title)} (${l.questions?.length || 0} Q)</option>`
+        ).join('');
+      } catch(e) {
+        select.innerHTML = '<option value="">Error loading</option>';
+      }
+    }
+
+    window.createRoom = function() {
+      renderCreateSettings();
+    };
+    
+    window.confirmCreateRoom = async function() {
+      const name = document.getElementById('playerName')?.value.trim() || 'Player';
+      const subject = document.getElementById('setSubject')?.value || 'science';
+      const grade = document.getElementById('setGrade')?.value || '10';
+      const lessonId = document.getElementById('setLesson')?.value;
+      const qCount = parseInt(document.getElementById('setQCount')?.value || 10);
+      const qTime = parseInt(document.getElementById('setQTime')?.value || 15);
+      
+      if (!lessonId) return showError('Lesson තෝරන්න!');
+      if (qCount < 10 || qCount > 30) return showError('Questions 10-30 විය යුතුයි!');
+      
+      playerName = name;
+      gameQuestionTime = qTime;
+      
+      roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+      roomId = `room_${Date.now()}`;
+      isHost = true;
+
+      // Load questions
+      let questions = [];
+      try {
+        const resp = await fetch(`data/${subject}.json`);
+        const data = await resp.json();
+        let lessons = [];
+        if (data.grades?.[grade]?.lessons) {
+          lessons = data.grades[grade].lessons;
+        } else if (data[subject]?.grades?.[grade]?.lessons) {
+          lessons = data[subject].grades[grade].lessons;
+        }
+        const lesson = lessons.find(l => l.id === lessonId);
+        if (lesson?.questions) {
+          const shuffled = [...lesson.questions].sort(() => Math.random() - 0.5);
+          questions = shuffled.slice(0, qCount);
+        }
+      } catch(e) {
+        console.warn('Load failed, using samples');
+      }
+      
+      if (questions.length === 0) {
+        questions = [
+          {q:"Sample Q1?", options:["A","B","C","D"], correct:0},
+          {q:"Sample Q2?", options:["A","B","C","D"], correct:1}
+        ];
+      }
+
+      await setDoc(doc(db, 'liveMatches', roomId), {
+        roomCode,
+        hostId: currentUser.uid,
+        hostName: playerName,
+        subject, grade, lessonId,
+        questionTime: qTime,
+        questionCount: qCount,
+        status: 'waiting',
+        currentQuestion: -1,
+        createdAt: serverTimestamp(),
+        questions,
+        players: {
+          [currentUser.uid]: {
+            name: playerName,
+            score: 0, correct: 0, wrong: 0,
+            answered: false, ready: false,
+            online: true,
+            joinedAt: new Date().toISOString()
+          }
+        }
+      });
+
+      listenToRoom();
+    };
     function renderQuestion(data) {
       const q = data.questions[currentQuestionIndex];
       if (!q) return;
@@ -510,7 +643,7 @@
 
     function startQuestionTimer(data) {
       if (questionTimer) clearInterval(questionTimer);
-      questionTimeLeft = 15;
+      questionTimeLeft = data.questionTime || gameQuestionTime || 15;
       
       questionTimer = setInterval(async () => {
         questionTimeLeft--;
