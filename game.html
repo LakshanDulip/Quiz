@@ -63,7 +63,7 @@
     let isHost = false;
     let playerName = '';
     let unsubscribe = null;
-    let gameState = 'lobby'; // lobby | countdown | playing | leaderboard | finished
+    let gameState = 'lobby'; 
     let currentQuestionIndex = 0;
     let selectedAnswer = -1;
     let questionTimer = null;
@@ -84,7 +84,7 @@
       });
     }
 
-    // ============ RENDER ============
+    // ============ UI RENDER ============
     function render(html) {
       document.getElementById('app').innerHTML = html;
     }
@@ -96,12 +96,12 @@
           
           <input type="text" class="mp-input" id="playerName" placeholder="ඔබේ නම..." maxlength="20" value="${playerName}">
           
-          <button class="mp-btn mp-btn-primary" onclick="createRoom()">🏠 Create Room</button>
+          <button class="mp-btn mp-btn-primary" onclick="window.createRoom()">🏠 Create Room</button>
           
           <div class="mp-divider">OR</div>
           
           <input type="text" class="mp-input" id="roomCodeInput" placeholder="Room Code" maxlength="6" style="text-align:center;letter-spacing:4px;text-transform:uppercase;font-size:1.2rem;">
-          <button class="mp-btn mp-btn-outline" onclick="joinRoom()">🚪 Join Room</button>
+          <button class="mp-btn mp-btn-outline" onclick="window.joinRoom()">🚪 Join Room</button>
           
           <div class="mp-error" id="errorMsg"></div>
         </div>
@@ -114,13 +114,13 @@
           <div class="mp-title">⚙️ Game Settings</div>
           
           <label style="font-size:0.8rem;color:var(--text2);">Subject</label>
-          <select class="mp-select" id="setSubject" onchange="updateSettingsGrades()">
+          <select class="mp-select" id="setSubject" onchange="window.updateSettingsGrades()">
             <option value="science">🔬 විද්‍යාව</option>
             <option value="maths">📐 ගණිතය</option>
           </select>
           
           <label style="font-size:0.8rem;color:var(--text2);">Grade</label>
-          <select class="mp-select" id="setGrade" onchange="updateSettingsLessons()">
+          <select class="mp-select" id="setGrade" onchange="window.updateSettingsLessons()">
             <option value="8">8 ශ්‍රේණිය</option>
             <option value="9">9 ශ්‍රේණිය</option>
             <option value="10">10 ශ්‍රේණිය</option>
@@ -143,20 +143,25 @@
             <option value="30">30s - Relaxed</option>
           </select>
           
-          <button class="mp-btn mp-btn-primary" onclick="confirmCreateRoom()">✅ Create Room</button>
-          <button class="mp-btn mp-btn-outline" onclick="renderLobby()">Back</button>
+          <button class="mp-btn mp-btn-primary" onclick="window.confirmCreateRoom()">✅ Create Room</button>
+          <button class="mp-btn mp-btn-outline" onclick="window.leaveRoom()">Back</button>
         </div>
       `);
-      
-      updateSettingsLessons();
+      updateSettingsLessons(); // Initialize lessons immediately
     }
     
-    window.updateSettingsGrades = async function() {
-      document.getElementById('setLesson').innerHTML = '<option value="">Loading...</option>';
-      await window.updateSettingsLessons();
-    };
+    // ============ GAME FUNCTIONS ============
     
-    window.updateSettingsLessons = async function() {
+    function createRoom() {
+      renderCreateSettings();
+    }
+
+    async function updateSettingsGrades() {
+      document.getElementById('setLesson').innerHTML = '<option value="">Loading...</option>';
+      await updateSettingsLessons();
+    }
+    
+    async function updateSettingsLessons() {
       const subject = document.getElementById('setSubject')?.value || 'science';
       const grade = document.getElementById('setGrade')?.value || '8';
       const select = document.getElementById('setLesson');
@@ -172,8 +177,8 @@
           lessons = data.grades[grade].lessons;
         } else if (data[subject]?.grades?.[grade]?.lessons) {
           lessons = data[subject].grades[grade].lessons;
-        } else if (data.maths?.grades?.[grade]?.lessons) {
-          lessons = data.maths.grades[grade].lessons;
+        } else if (data.subjects?.[subject]?.grades?.[grade]?.lessons) {
+          lessons = data.subjects[subject].grades[grade].lessons;
         }
         
         if (lessons.length === 0) {
@@ -187,16 +192,9 @@
       } catch(e) {
         select.innerHTML = '<option value="">Error loading</option>';
       }
-    };
+    }
 
-    // ============ ROOM FUNCTIONS ============
-    // 1. Settings Menu එක පෙන්වීම
-    window.createRoom = function() {
-      renderCreateSettings();
-    };
-    
-    // 2. Settings තෝරා අවසන් වූ පසු Room එක සෑදීම
-    window.confirmCreateRoom = async function() {
+    async function confirmCreateRoom() {
       const name = document.getElementById('playerName')?.value.trim() || 'Player';
       const subject = document.getElementById('setSubject')?.value || 'science';
       const grade = document.getElementById('setGrade')?.value || '10';
@@ -214,7 +212,6 @@
       roomId = `room_${Date.now()}`;
       isHost = true;
 
-      // ප්‍රශ්න Load කිරීම
       let questions = [];
       try {
         const resp = await fetch(`data/${subject}.json`);
@@ -234,11 +231,8 @@
           const shuffled = [...lesson.questions].sort(() => Math.random() - 0.5);
           questions = shuffled.slice(0, qCount);
         }
-      } catch(e) {
-        console.warn('Load failed, using samples');
-      }
+      } catch(e) {}
       
-      // ප්‍රශ්න නොමැති නම් පමණක් Sample Q ලබා දීම
       if (questions.length === 0) {
         questions = [
           {q:"Sample Q1?", options:["A","B","C","D"], correct:0},
@@ -246,7 +240,6 @@
         ];
       }
 
-      // Room Data Database එකට දැමීම
       await setDoc(doc(db, 'liveMatches', roomId), {
         roomCode,
         hostId: currentUser.uid,
@@ -270,18 +263,155 @@
       });
 
       listenToRoom();
-    };
+    }
 
+    async function joinRoom() {
+      const code = document.getElementById('roomCodeInput')?.value.trim().toUpperCase();
+      const name = document.getElementById('playerName')?.value.trim() || 'Player';
+      if (!code) return showError('Room code enter කරන්න!');
+      
+      playerName = name;
+      roomCode = code;
+
+      const q = query(collection(db, 'liveMatches'), where('roomCode', '==', code), where('status', 'in', ['waiting', 'countdown']));
+      const snapshot = await getDocs(q);
+      
+      if (snapshot.empty) return showError('Room not found!');
+      
+      const docData = snapshot.docs[0];
+      roomId = docData.id;
+      isHost = false;
+
+      const players = docData.data().players || {};
+      if (Object.keys(players).length >= 10) return showError('Room is full (max 10)!');
+      if (players[currentUser.uid]) return showError('You are already in this room!');
+
+      await updateDoc(doc(db, 'liveMatches', roomId), {
+        [`players.${currentUser.uid}`]: {
+          name: playerName,
+          score: 0, correct: 0, wrong: 0,
+          answered: false, ready: false, online: true,
+          joinedAt: new Date().toISOString()
+        }
+      });
+
+      listenToRoom();
+    }
+
+    async function toggleReady() {
+      if (!roomId) return;
+      const roomRef = doc(db, 'liveMatches', roomId);
+      const snap = await getDoc(roomRef);
+      const currentReady = snap.data().players[currentUser.uid]?.ready || false;
+      await updateDoc(roomRef, { [`players.${currentUser.uid}.ready`]: !currentReady });
+    }
+
+    async function startGame() {
+      if (!isHost || !roomId) return;
+      await updateDoc(doc(db, 'liveMatches', roomId), { status: 'countdown' });
+      setTimeout(async () => {
+        await updateDoc(doc(db, 'liveMatches', roomId), {
+          status: 'playing', currentQuestion: 0, questionStartTime: Date.now()
+        });
+      }, 3000);
+    }
+
+    async function selectAnswer(index) {
+      if (selectedAnswer >= 0 || !roomId) return;
+      selectedAnswer = index;
+      await updateDoc(doc(db, 'liveMatches', roomId), {
+        [`players.${currentUser.uid}.answered`]: true,
+        [`players.${currentUser.uid}.answer`]: index,
+        [`players.${currentUser.uid}.answerTime`]: Date.now()
+      });
+    }
+
+    function copyRoomCode() {
+      navigator.clipboard?.writeText(roomCode);
+      alert('📋 Code copied!');
+    }
+
+    async function leaveRoom() {
+      if (roomId) {
+        try {
+          await updateDoc(doc(db, 'liveMatches', roomId), {
+            [`players.${currentUser.uid}.online`]: false
+          });
+        } catch(e) {}
+      }
+      if (unsubscribe) unsubscribe();
+      roomId = null; roomCode = null; isHost = false; selectedAnswer = -1;
+      renderLobby();
+    }
+
+    async function rematch() {
+      if (!isHost || !roomId) return;
+      await updateDoc(doc(db, 'liveMatches', roomId), {
+        status: 'waiting', currentQuestion: -1,
+        'players': Object.fromEntries(
+          Object.entries((await getDoc(doc(db, 'liveMatches', roomId))).data().players || {}).map(([uid, p]) => [uid, {...p, score:0, correct:0, wrong:0, answered:false, ready:false}])
+        )
+      });
+    }
+
+    // ============ LISTENER ============
+    function listenToRoom() {
+      if (unsubscribe) unsubscribe();
+      unsubscribe = onSnapshot(doc(db, 'liveMatches', roomId), (snapshot) => {
+        if (!snapshot.exists()) { leaveRoom(); return; }
+        
+        const data = snapshot.data();
+        const players = data.players || {};
+        if (players[currentUser.uid]) players[currentUser.uid].online = true;
+
+        switch(data.status) {
+          case 'waiting':
+            renderWaitingRoom(data);
+            selectedAnswer = -1;
+            break;
+
+          case 'countdown':
+            gameState = 'countdown';
+            render(`
+              <div class="mp-card" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height: 300px;">
+                <div class="mp-title" style="font-size: 2rem;">Game is starting...</div>
+                <div style="font-size: 4rem; margin-top: 20px; animation: pulse 1s infinite;">⏳</div>
+              </div>
+            `);
+            selectedAnswer = -1;
+            break;
+            
+          case 'playing':
+            const isNewQuestion = currentQuestionIndex !== (data.currentQuestion || 0);
+            currentQuestionIndex = data.currentQuestion || 0;
+            if (gameState !== 'playing' || isNewQuestion) {
+              gameState = 'playing'; selectedAnswer = -1; startQuestionTimer(data);
+            }
+            renderQuestion(data);
+            break;
+            
+          case 'leaderboard':
+            gameState = 'leaderboard';
+            renderLeaderboard(players, getScores(players));
+            break;
+            
+          case 'finished':
+            gameState = 'finished';
+            renderWinner(players, getScores(players), data);
+            break;
+        }
+      });
+    }
+
+    // ============ UI HELPERS (Game Screens) ============
     function renderQuestion(data) {
       const q = data.questions[currentQuestionIndex];
       if (!q) return;
-      
       const options = q.options.map((opt, i) => `
-        <button class="mp-option ${selectedAnswer === i ? 'selected' : ''}" onclick="selectAnswer(${i})" ${selectedAnswer >= 0 ? 'disabled' : ''}>
+        <button class="mp-option ${selectedAnswer === i ? 'selected' : ''}" onclick="window.selectAnswer(${i})" ${selectedAnswer >= 0 ? 'disabled' : ''}>
           ${String.fromCharCode(65+i)}) ${escapeHtml(opt)}
         </button>
       `).join('');
-
       render(`
         <div class="mp-card">
           <div class="mp-question-num">Question ${currentQuestionIndex + 1}/${data.questions.length}</div>
@@ -313,305 +443,79 @@
           <div class="mp-room-code">${roomCode}</div>
           <p style="text-align:center;">Players: ${playerCount}/10</p>
           <div class="mp-player-list">${playerList}</div>
-          <button class="mp-btn mp-btn-success" onclick="toggleReady()">${players[currentUser.uid]?.ready ? '✅ Ready' : 'Click to Ready'}</button>
-          ${isHost ? `<button class="mp-btn mp-btn-primary" onclick="startGame()" ${!allReady?'disabled':''}>⚡ Start</button>` : ''}
-          <button class="mp-btn mp-btn-danger" onclick="leaveRoom()">Leave</button>
+          <button class="mp-btn mp-btn-success" onclick="window.toggleReady()">${players[currentUser.uid]?.ready ? '✅ Ready' : 'Click to Ready'}</button>
+          ${isHost ? `<button class="mp-btn mp-btn-primary" onclick="window.startGame()" ${!allReady?'disabled':''}>⚡ Start</button>` : ''}
+          <button class="mp-btn mp-btn-danger" onclick="window.leaveRoom()">Leave</button>
         </div>
       `);
     }
     
     function renderLeaderboard(players, scores) {
-      const sorted = Object.entries(players)
-        .map(([uid, p]) => ({ ...p, uid, score: scores[uid]?.score || 0 }))
-        .sort((a, b) => b.score - a.score);
-
+      const sorted = Object.entries(players).map(([uid, p]) => ({ ...p, uid, score: scores[uid]?.score || 0 })).sort((a, b) => b.score - a.score);
       const list = sorted.map((p, i) => `
         <div class="mp-leaderboard-item">
           <div class="mp-rank ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${i+1}</div>
           <div class="mp-player-avatar" style="background:${getAvatarColor(p.uid)}">${(p.name||'?')[0].toUpperCase()}</div>
-          <div class="mp-player-info">
-            <div class="mp-player-name">${escapeHtml(p.name)}</div>
-            <div class="mp-player-status">✅ ${p.correct || 0} / ❌ ${p.wrong || 0}</div>
-          </div>
+          <div class="mp-player-info"><div class="mp-player-name">${escapeHtml(p.name)}</div><div class="mp-player-status">✅ ${p.correct || 0} / ❌ ${p.wrong || 0}</div></div>
           <div class="mp-player-score">${p.score}</div>
         </div>
       `).join('');
-
-      render(`
-        <div class="mp-card">
-          <div class="mp-title">📊 Leaderboard</div>
-          <div>${list}</div>
-          <p style="text-align:center;font-size:0.7rem;color:var(--text2);margin-top:8px;">Next question coming...</p>
-        </div>
-      `);
+      render(`<div class="mp-card"><div class="mp-title">📊 Leaderboard</div><div>${list}</div><p style="text-align:center;font-size:0.7rem;color:var(--text2);margin-top:8px;">Next question coming...</p></div>`);
     }
 
     function renderWinner(players, scores, data) {
-      const sorted = Object.entries(players)
-        .map(([uid, p]) => ({ ...p, uid, score: scores[uid]?.score || 0 }))
-        .sort((a, b) => b.score - a.score);
+      const sorted = Object.entries(players).map(([uid, p]) => ({ ...p, uid, score: scores[uid]?.score || 0 })).sort((a, b) => b.score - a.score);
       const winner = sorted[0];
-
       const list = sorted.map((p, i) => `
         <div class="mp-leaderboard-item">
           <div class="mp-rank ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${i+1}</div>
           <div class="mp-player-avatar" style="background:${getAvatarColor(p.uid)}">${(p.name||'?')[0].toUpperCase()}</div>
-          <div class="mp-player-info">
-            <div class="mp-player-name">${escapeHtml(p.name)}</div>
-          </div>
+          <div class="mp-player-info"><div class="mp-player-name">${escapeHtml(p.name)}</div></div>
           <div class="mp-player-score">${p.score}</div>
         </div>
       `).join('');
-
       render(`
         <div class="mp-card">
-          <div class="mp-winner">
-            <div class="mp-winner-icon">🏆</div>
-            <div class="mp-winner-name">${escapeHtml(winner.name)}</div>
-            <p style="color:var(--text2);">${winner.score} points</p>
-          </div>
+          <div class="mp-winner"><div class="mp-winner-icon">🏆</div><div class="mp-winner-name">${escapeHtml(winner.name)}</div><p style="color:var(--text2);">${winner.score} points</p></div>
           <div>${list}</div>
           <div style="display:flex;gap:8px;margin-top:12px;">
-            ${isHost ? '<button class="mp-btn mp-btn-primary" onclick="rematch()">🔄 Rematch</button>' : ''}
-            <button class="mp-btn mp-btn-outline" onclick="leaveRoom()">Leave</button>
+            ${isHost ? '<button class="mp-btn mp-btn-primary" onclick="window.rematch()">🔄 Rematch</button>' : ''}
+            <button class="mp-btn mp-btn-outline" onclick="window.leaveRoom()">Leave</button>
           </div>
         </div>
       `);
-      
-      if (isHost && data && !data.historySaved) {
-        saveMatchHistory(data);
-      }
+      if (isHost && data && !data.historySaved) saveMatchHistory(data);
     }
 
     async function saveMatchHistory(data) {
       try {
-        const players = data.players || {};
-        const playerArray = Object.entries(players).map(([uid, p]) => ({
-          name: p.name,
-          score: p.score || 0,
-          correct: p.correct || 0,
-          wrong: p.wrong || 0
-        }));
-        playerArray.sort((a, b) => b.score - a.score);
+        const playerArray = Object.entries(data.players || {}).map(([uid, p]) => ({ name: p.name, score: p.score || 0, correct: p.correct || 0, wrong: p.wrong || 0 })).sort((a, b) => b.score - a.score);
         playerArray.forEach((p, i) => p.rank = i + 1);
-
         await addDoc(collection(db, 'matchHistory'), {
-          roomCode: data.roomCode,
-          date: serverTimestamp(),
-          hostName: data.hostName,
-          winner: playerArray[0]?.name || 'N/A',
-          players: playerArray,
-          totalQuestions: data.questions?.length || 0,
-          duration: Math.floor((Date.now() - (data.createdAt?.seconds * 1000 || Date.now())) / 1000)
+          roomCode: data.roomCode, date: serverTimestamp(), hostName: data.hostName,
+          winner: playerArray[0]?.name || 'N/A', players: playerArray, totalQuestions: data.questions?.length || 0
         });
-
         await updateDoc(doc(db, 'liveMatches', roomId), { historySaved: true });
-      } catch(e) {
-        console.warn('History save failed:', e);
-      }
+      } catch(e) {}
     }
 
     // ============ HELPERS ============
-    function escapeHtml(s) { return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-    function getAvatarColor(uid) { const colors = ['#38bdf8','#818cf8','#34d399','#fbbf24','#f87171','#a78bfa','#fb923c']; return colors[uid.charCodeAt(0) % colors.length]; }
-    function showError(msg) { const el = document.getElementById('errorMsg'); if (el) el.textContent = msg; }
-
-    // ============ ROOM JOIN FUNCTIONS ============
-    window.joinRoom = async function() {
-      const code = document.getElementById('roomCodeInput')?.value.trim().toUpperCase();
-      const name = document.getElementById('playerName')?.value.trim() || 'Player';
-      if (!code) return showError('Room code enter කරන්න!');
-      
-      playerName = name;
-      roomCode = code;
-
-      const q = query(collection(db, 'liveMatches'), where('roomCode', '==', code), where('status', 'in', ['waiting', 'countdown']));
-      const snapshot = await getDocs(q);
-      
-      if (snapshot.empty) return showError('Room not found!');
-      
-      const docData = snapshot.docs[0];
-      roomId = docData.id;
-      isHost = false;
-
-      const players = docData.data().players || {};
-      if (Object.keys(players).length >= 10) return showError('Room is full (max 10)!');
-      if (players[currentUser.uid]) return showError('You are already in this room!');
-
-      await updateDoc(doc(db, 'liveMatches', roomId), {
-        [`players.${currentUser.uid}`]: {
-          name: playerName,
-          score: 0,
-          correct: 0,
-          wrong: 0,
-          answered: false,
-          ready: false,
-          online: true,
-          joinedAt: new Date().toISOString()
-        }
-      });
-
-      listenToRoom();
-    };
-
-    window.toggleReady = async function() {
-      if (!roomId) return;
-      const roomRef = doc(db, 'liveMatches', roomId);
-      const snap = await getDoc(roomRef);
-      const data = snap.data();
-      const currentReady = data.players[currentUser.uid]?.ready || false;
-      
-      await updateDoc(roomRef, {
-        [`players.${currentUser.uid}.ready`]: !currentReady
-      });
-    };
-
-    window.startGame = async function() {
-      if (!isHost || !roomId) return;
-      
-      // Status එක countdown වලට මාරු කිරීම
-      await updateDoc(doc(db, 'liveMatches', roomId), {
-        status: 'countdown'
-      });
-
-      // තත්පර 3කට පසු ප්‍රශ්න ආරම්භ කිරීම
-      setTimeout(async () => {
-        await updateDoc(doc(db, 'liveMatches', roomId), {
-          status: 'playing',
-          currentQuestion: 0,
-          questionStartTime: Date.now()
-        });
-      }, 3000);
-    };
-
-    window.selectAnswer = async function(index) {
-      if (selectedAnswer >= 0 || !roomId) return;
-      selectedAnswer = index;
-      const qRef = doc(db, 'liveMatches', roomId);
-      await updateDoc(qRef, {
-        [`players.${currentUser.uid}.answered`]: true,
-        [`players.${currentUser.uid}.answer`]: index,
-        [`players.${currentUser.uid}.answerTime`]: Date.now()
-      });
-    };
-
-    window.copyRoomCode = function() {
-      navigator.clipboard?.writeText(roomCode);
-      alert('📋 Code copied!');
-    };
-
-    window.leaveRoom = async function() {
-      if (!roomId) return;
-      try {
-        const roomRef = doc(db, 'liveMatches', roomId);
-        await updateDoc(roomRef, {
-          [`players.${currentUser.uid}.online`]: false
-        });
-      } catch(e) {}
-      if (unsubscribe) unsubscribe();
-      roomId = null;
-      roomCode = null;
-      isHost = false;
-      selectedAnswer = -1;
-      renderLobby();
-    };
-
-    window.rematch = async function() {
-      if (!isHost || !roomId) return;
-      await updateDoc(doc(db, 'liveMatches', roomId), {
-        status: 'waiting',
-        currentQuestion: -1,
-        'players': Object.fromEntries(
-          Object.entries((await getDoc(doc(db, 'liveMatches', roomId))).data().players || {}).map(([uid, p]) => [uid, {...p, score:0, correct:0, wrong:0, answered:false, ready:false}])
-        )
-      });
-    };
-
-    // ============ REAL-TIME LISTENER ============
-    function listenToRoom() {
-      if (unsubscribe) unsubscribe();
-      
-      unsubscribe = onSnapshot(doc(db, 'liveMatches', roomId), (snapshot) => {
-        if (!snapshot.exists()) { leaveRoom(); return; }
-        
-        const data = snapshot.data();
-        const players = data.players || {};
-        
-        // Update online status locally
-        const currentPlayer = players[currentUser.uid];
-        if (currentPlayer) {
-          currentPlayer.online = true;
-        }
-
-        // Render based on status
-        switch(data.status) {
-          case 'waiting':
-            renderWaitingRoom(data);
-            selectedAnswer = -1;
-            break;
-
-          case 'countdown':
-            gameState = 'countdown';
-            render(`
-              <div class="mp-card" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height: 300px;">
-                <div class="mp-title" style="font-size: 2rem;">Game is starting...</div>
-                <div style="font-size: 4rem; margin-top: 20px; animation: pulse 1s infinite;">⏳</div>
-              </div>
-            `);
-            selectedAnswer = -1;
-            break;
-            
-          case 'playing':
-            const isNewQuestion = currentQuestionIndex !== (data.currentQuestion || 0);
-            currentQuestionIndex = data.currentQuestion || 0;
-            
-            // Only start timer and reset answer if it's a new question
-            if (gameState !== 'playing' || isNewQuestion) {
-              gameState = 'playing';
-              selectedAnswer = -1;
-              startQuestionTimer(data);
-            }
-            renderQuestion(data);
-            break;
-            
-          case 'leaderboard':
-            gameState = 'leaderboard';
-            renderLeaderboard(players, getScores(players, data));
-            break;
-            
-          case 'finished':
-            gameState = 'finished';
-            renderWinner(players, getScores(players, data), data);
-            break;
-        }
-      });
-    }
-
-    function getScores(players, data) {
+    function getScores(players) {
       const scores = {};
-      Object.entries(players).forEach(([uid, p]) => {
-        scores[uid] = { score: p.score || 0, correct: p.correct || 0, wrong: p.wrong || 0 };
-      });
+      Object.entries(players).forEach(([uid, p]) => { scores[uid] = { score: p.score || 0, correct: p.correct || 0, wrong: p.wrong || 0 }; });
       return scores;
     }
 
     function startQuestionTimer(data) {
       if (questionTimer) clearInterval(questionTimer);
       questionTimeLeft = data.questionTime || gameQuestionTime || 15;
-      
       questionTimer = setInterval(async () => {
         questionTimeLeft--;
         const timerEl = document.getElementById('timerDisplay');
-        if (timerEl) {
-          timerEl.textContent = questionTimeLeft + 's';
-          if (questionTimeLeft <= 5) timerEl.classList.add('urgent');
-        }
+        if (timerEl) { timerEl.textContent = questionTimeLeft + 's'; if (questionTimeLeft <= 5) timerEl.classList.add('urgent'); }
         
         if (questionTimeLeft <= 0) {
-          clearInterval(questionTimer);
-          questionTimer = null;
-          
-          // Lock answers and calculate score - Host only executes this to prevent DB collision
+          clearInterval(questionTimer); questionTimer = null;
           if (isHost && roomId) {
             const qRef = doc(db, 'liveMatches', roomId);
             const snap = await getDoc(qRef);
@@ -620,50 +524,54 @@
             const qIndex = qData.currentQuestion || 0;
             const correctAnswer = questions[qIndex]?.correct || 0;
             
-            const players = qData.players || {};
-            let updatePayload = { status: 'leaderboard' }; // Single payload for all updates
-            
-            Object.entries(players).forEach(([uid, p]) => {
+            let updatePayload = { status: 'leaderboard' };
+            Object.entries(qData.players || {}).forEach(([uid, p]) => {
               if (p.online && p.answered) {
                 const isCorrect = p.answer === correctAnswer;
                 updatePayload[`players.${uid}.score`] = (p.score || 0) + (isCorrect ? 10 : 0);
                 updatePayload[`players.${uid}.correct`] = (p.correct || 0) + (isCorrect ? 1 : 0);
                 updatePayload[`players.${uid}.wrong`] = (p.wrong || 0) + (isCorrect ? 0 : 1);
               }
-              // Reset answered status for everyone for the next round
               updatePayload[`players.${uid}.answered`] = false;
             });
             
-            // Execute a single Database Write
             await updateDoc(qRef, updatePayload);
             
-            // Wait 4 seconds on leaderboard, then go to next question or finish
             setTimeout(async () => {
               const nextQ = qIndex + 1;
-              if (nextQ >= questions.length) {
-                await updateDoc(qRef, { status: 'finished' });
-              } else {
-                await updateDoc(qRef, { status: 'playing', currentQuestion: nextQ, questionStartTime: Date.now() });
-              }
+              if (nextQ >= questions.length) await updateDoc(qRef, { status: 'finished' });
+              else await updateDoc(qRef, { status: 'playing', currentQuestion: nextQ, questionStartTime: Date.now() });
             }, 4000);
           }
         }
       }, 1000);
     }
 
+    function escapeHtml(s) { return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function getAvatarColor(uid) { const colors = ['#38bdf8','#818cf8','#34d399','#fbbf24','#f87171','#a78bfa','#fb923c']; return colors[uid.charCodeAt(0) % colors.length]; }
+    function showError(msg) { const el = document.getElementById('errorMsg'); if (el) el.textContent = msg; }
+
+    // ============ MODULE EXPORTS TO WINDOW ============
+    // HTML onclick වලට වැඩ කිරීම සඳහා අනිවාර්යයෙන්ම Window එකට Attach කළ යුතුය.
+    window.createRoom = createRoom;
+    window.confirmCreateRoom = confirmCreateRoom;
+    window.updateSettingsGrades = updateSettingsGrades;
+    window.updateSettingsLessons = updateSettingsLessons;
+    window.joinRoom = joinRoom;
+    window.toggleReady = toggleReady;
+    window.startGame = startGame;
+    window.selectAnswer = selectAnswer;
+    window.copyRoomCode = copyRoomCode;
+    window.leaveRoom = leaveRoom;
+    window.rematch = rematch;
+
     // ============ INIT ============
     async function init() {
       await initAuth();
       renderLobby();
-      
-      // Auto-join if URL has room code
       const params = new URLSearchParams(window.location.search);
-      const code = params.get('room');
-      if (code) {
-        setTimeout(() => {
-          document.getElementById('roomCodeInput').value = code;
-          window.joinRoom();
-        }, 500);
+      if (params.get('room')) {
+        setTimeout(() => { document.getElementById('roomCodeInput').value = params.get('room'); window.joinRoom(); }, 500);
       }
     }
 
