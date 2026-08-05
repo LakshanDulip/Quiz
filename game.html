@@ -118,6 +118,9 @@
       animation: cardEnter 0.5s var(--ease-game);
       position: relative;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      max-height: 88vh; /* Fix mobile breaking */
     }
     @keyframes cardEnter {
       from { opacity: 0; transform: translateY(14px) scale(0.98); }
@@ -135,6 +138,7 @@
       -webkit-text-fill-color: transparent;
       background-clip: text;
       letter-spacing: 0.3px;
+      flex-shrink: 0;
     }
 
     /* =========================================================
@@ -184,6 +188,7 @@
       position: relative;
       overflow: hidden;
       min-height: 48px;
+      flex-shrink: 0;
     }
     .mp-btn:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.06); }
     .mp-btn:active:not(:disabled) { transform: scale(0.96); }
@@ -214,21 +219,22 @@
       font-size: 2.1rem;
       font-weight: 800;
       letter-spacing: 7px;
-      margin: 8px 0 2px;
+      margin: 4px 0 2px;
       color: var(--primary);
       text-shadow: 0 0 18px rgba(56,189,248,0.5);
       cursor: pointer;
       animation: codeGlow 2.4s ease-in-out infinite;
       user-select: all;
+      flex-shrink: 0;
     }
     @keyframes codeGlow {
       0%,100% { text-shadow: 0 0 14px rgba(56,189,248,0.4); }
       50% { text-shadow: 0 0 26px rgba(56,189,248,0.75); }
     }
-    .mp-copy-hint { text-align: center; font-size: 0.7rem; color: var(--text2); margin-bottom: 14px; }
+    .mp-copy-hint { text-align: center; font-size: 0.7rem; color: var(--text2); margin-bottom: 8px; flex-shrink: 0; }
     .mp-copy-hint i { margin-right: 4px; }
 
-    .invite-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+    .invite-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 10px; flex-shrink: 0; }
     .icon-btn {
       background: rgba(255,255,255,0.04);
       border: 1px solid var(--glass-border);
@@ -253,12 +259,18 @@
       background: #f1f5f9;
       border-radius: 14px;
       margin-bottom: 14px;
+      flex-shrink: 0;
     }
 
     /* =========================================================
        MODULE: PLAYER LIST
        ========================================================= */
-    .mp-player-list { max-height: 300px; overflow-y: auto; margin: 12px 0; }
+    .mp-player-list { 
+      max-height: 120px; /* Reduced to make room for chat on mobile */
+      overflow-y: auto; 
+      margin: 8px 0; 
+      flex-shrink: 0;
+    }
     .mp-player-list::-webkit-scrollbar { width: 6px; }
     .mp-player-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 6px; }
 
@@ -266,7 +278,7 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 10px;
+      padding: 8px 10px;
       border-radius: 12px;
       margin-bottom: 6px;
       background: rgba(15,23,42,0.5);
@@ -279,16 +291,16 @@
     }
 
     .mp-player-avatar {
-      width: 38px; height: 38px; border-radius: 50%;
+      width: 32px; height: 32px; border-radius: 50%;
       background: var(--primary);
       display: flex; align-items: center; justify-content: center;
-      font-weight: 700; font-size: 0.9rem; flex-shrink: 0;
+      font-weight: 700; font-size: 0.8rem; flex-shrink: 0;
       position: relative;
       box-shadow: 0 0 0 2px rgba(255,255,255,0.08);
     }
     .status-dot {
       position: absolute; bottom: -1px; right: -1px;
-      width: 11px; height: 11px; border-radius: 50%;
+      width: 10px; height: 10px; border-radius: 50%;
       border: 2px solid var(--bg);
     }
     .status-dot.online { background: var(--green); animation: dotPulse 1.6s ease-in-out infinite; }
@@ -296,30 +308,91 @@
     @keyframes dotPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(52,211,153,0.6); } 50% { box-shadow: 0 0 0 4px rgba(52,211,153,0); } }
 
     .mp-player-info { flex: 1; min-width: 0; }
-    .mp-player-name { font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-    .mp-player-status { font-size: 0.7rem; color: var(--text2); }
+    .mp-player-name { font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .mp-player-status { font-size: 0.65rem; color: var(--text2); }
     .mp-player-score { font-weight: 700; color: var(--primary); font-family: 'Space Grotesk', sans-serif; }
 
-    .mp-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.65rem; font-weight: 700; }
+    .mp-badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 0.6rem; font-weight: 700; }
     .mp-badge-host { background: rgba(251,191,36,0.18); color: var(--yellow); }
     .mp-badge-ready { background: rgba(52,211,153,0.18); color: var(--green); animation: readyPop 0.4s var(--ease-game); }
     .mp-badge-waiting { background: rgba(148,163,184,0.15); color: var(--text2); }
     @keyframes readyPop { 0% { transform: scale(0.5); } 60% { transform: scale(1.15); } 100% { transform: scale(1); } }
 
     /* =========================================================
+       MODULE: WAITING ROOM CHAT
+       ========================================================= */
+    .mp-chat-container { 
+      display: flex; 
+      flex-direction: column; 
+      flex: 1; /* Let chat expand to fill space */
+      min-height: 120px;
+      background: rgba(15,23,42,0.6); 
+      border: 1px solid var(--border); 
+      border-radius: 12px; 
+      margin: 8px 0; 
+      overflow: hidden; 
+    }
+    .mp-chat-messages { 
+      flex: 1; 
+      overflow-y: auto; 
+      padding: 8px; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 6px; 
+      font-size: 0.85rem; 
+    }
+    .mp-chat-messages::-webkit-scrollbar { width: 4px; }
+    .mp-chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    .mp-chat-message { 
+      display: flex; flex-direction: column; 
+      background: rgba(255,255,255,0.05); 
+      padding: 6px 10px; 
+      border-radius: 10px; border-top-left-radius: 2px; 
+      width: fit-content; max-width: 85%; 
+      word-break: break-word; 
+      animation: leaderEnter 0.2s ease-out; 
+    }
+    .mp-chat-message.self { 
+      align-self: flex-end; 
+      border-top-left-radius: 10px; border-top-right-radius: 2px; 
+      background: rgba(56,189,248,0.15); 
+      border: 1px solid rgba(56,189,248,0.3); 
+    }
+    .mp-chat-message.system { 
+      align-self: center; 
+      background: transparent; 
+      color: var(--text2); font-size: 0.75rem; 
+      font-style: italic; text-align: center; border: none; padding: 2px; 
+    }
+    .mp-chat-sender { font-size: 0.65rem; color: var(--primary); font-weight: 700; margin-bottom: 2px; }
+    .mp-chat-time { font-size: 0.55rem; color: var(--text2); align-self: flex-end; margin-top: 3px; }
+    .mp-chat-input-wrap { 
+      display: flex; gap: 6px; padding: 6px; 
+      background: rgba(10,14,26,0.5); 
+      border-top: 1px solid var(--border); 
+      flex-shrink: 0;
+    }
+    .mp-chat-input-wrap .mp-input { 
+      margin-bottom: 0; padding: 6px 12px; font-size: 0.85rem; height: 38px; border-radius: 10px;
+    }
+    .mp-chat-input-wrap .mp-btn { 
+      min-height: 38px; width: 46px; margin-bottom: 0; padding: 0; border-radius: 10px; 
+    }
+
+    /* =========================================================
        MODULE: QUESTION SCREEN
        ========================================================= */
-    .mp-progress-bar { height: 5px; border-radius: 4px; background: rgba(255,255,255,0.08); overflow: hidden; margin-bottom: 14px; }
+    .mp-progress-bar { height: 5px; border-radius: 4px; background: rgba(255,255,255,0.08); overflow: hidden; margin-bottom: 14px; flex-shrink: 0; }
     .mp-progress-fill { height: 100%; background: linear-gradient(90deg, #38bdf8, #818cf8); border-radius: 4px; transition: width 0.5s var(--ease-game); }
 
-    .mp-question-num { text-align: center; font-size: 0.78rem; color: var(--text2); margin-bottom: 10px; font-weight: 600; letter-spacing: 0.5px; }
+    .mp-question-num { text-align: center; font-size: 0.78rem; color: var(--text2); margin-bottom: 10px; font-weight: 600; letter-spacing: 0.5px; flex-shrink: 0;}
 
-    .timer-ring-wrap { display: flex; justify-content: center; margin-bottom: 16px; position: relative; }
+    .timer-ring-wrap { display: flex; justify-content: center; margin-bottom: 16px; position: relative; flex-shrink: 0;}
     .timer-ring { width: 108px; height: 108px; transform: rotate(-90deg); }
     .timer-ring-bg { fill: none; stroke: rgba(255,255,255,0.08); stroke-width: 8; }
     .timer-ring-progress {
       fill: none; stroke-width: 8; stroke-linecap: round;
-      transition: stroke-dashoffset 1s linear, stroke 0.4s ease;
+      transition: stroke-dashoffset 0.1s linear, stroke 0.4s ease;
     }
     .timer-green { stroke: var(--green); }
     .timer-yellow { stroke: var(--yellow); }
@@ -339,8 +412,15 @@
       margin-bottom: 18px;
       line-height: 1.6;
       font-family: 'Space Grotesk', sans-serif;
+      overflow-y: auto;
+      flex-shrink: 0;
     }
 
+    .mp-options-container {
+      overflow-y: auto;
+      flex: 1;
+    }
+    
     .mp-option {
       width: 100%;
       text-align: left;
@@ -370,11 +450,12 @@
     @keyframes correctPop { 0% { transform: scale(1); } 40% { transform: scale(1.03); } 100% { transform: scale(1); } }
     @keyframes shake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-8px); } 40% { transform: translateX(8px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(5px); } }
     
-    .answer-locked-msg { text-align: center; font-size: 0.72rem; color: var(--text2); margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 5px; }
+    .answer-locked-msg { text-align: center; font-size: 0.72rem; color: var(--text2); margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 5px; flex-shrink: 0; }
 
     /* =========================================================
        MODULE: LEADERBOARD
        ========================================================= */
+    .mp-leaderboard-container { flex: 1; overflow-y: auto; }
     .mp-leaderboard-item {
       display: flex; align-items: center; gap: 10px;
       padding: 11px; border-radius: 12px; margin-bottom: 7px;
@@ -391,10 +472,10 @@
     /* =========================================================
        MODULE: WINNER SCREEN
        ========================================================= */
-    .mp-winner { text-align: center; padding: 10px 0 20px; }
-    .mp-winner-icon { font-size: 4.5rem; animation: trophyBounce 1.4s ease-in-out infinite; filter: drop-shadow(0 0 20px rgba(251,191,36,0.6)); }
+    .mp-winner { text-align: center; padding: 0 0 10px; flex-shrink: 0;}
+    .mp-winner-icon { font-size: 3.5rem; animation: trophyBounce 1.4s ease-in-out infinite; filter: drop-shadow(0 0 20px rgba(251,191,36,0.6)); }
     @keyframes trophyBounce { 0%,100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-10px) rotate(4deg); } }
-    .mp-winner-name { font-family: 'Space Grotesk', sans-serif; font-size: 1.6rem; font-weight: 800; margin: 10px 0 2px; color: var(--yellow); text-shadow: var(--glow-gold); }
+    .mp-winner-name { font-family: 'Space Grotesk', sans-serif; font-size: 1.6rem; font-weight: 800; margin: 4px 0 2px; color: var(--yellow); text-shadow: var(--glow-gold); }
     .champion-badge {
       display: inline-flex; align-items: center; gap: 5px;
       background: linear-gradient(135deg, rgba(251,191,36,0.2), rgba(251,191,36,0.05));
@@ -403,7 +484,7 @@
       margin-top: 6px;
     }
 
-    .winner-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 16px 0; }
+    .winner-stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 10px 0; flex-shrink: 0;}
     .stat-box { background: rgba(15,23,42,0.55); border: 1px solid var(--glass-border); border-radius: 12px; padding: 10px 6px; text-align: center; }
     .stat-box .stat-val { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; font-weight: 800; color: var(--primary); }
     .stat-box .stat-lbl { font-size: 0.62rem; color: var(--text2); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.4px; }
@@ -443,7 +524,7 @@
     @keyframes countPop { 0% { transform: scale(0.5); opacity: 0; } 50% { transform: scale(1.2); } 100% { transform: scale(1); opacity: 1; } }
 
     .mp-error { color: var(--red); font-size: 0.8rem; text-align: center; margin-top: 8px; min-height: 1em; }
-    .mp-divider { text-align: center; color: var(--text2); margin: 14px 0; font-size: 0.8rem; position: relative; }
+    .mp-divider { text-align: center; color: var(--text2); margin: 14px 0; font-size: 0.8rem; position: relative; flex-shrink:0; }
     .mp-divider::before, .mp-divider::after { content: ''; position: absolute; top: 50%; width: 40%; height: 1px; background: var(--border); }
     .mp-divider::before { left: 0; } .mp-divider::after { right: 0; }
 
@@ -485,8 +566,8 @@
        MODULE: RESPONSIVE
        ========================================================= */
     @media (max-width: 480px) {
-      .mp-card { padding: 20px 16px; }
-      .mp-title { font-size: 1.25rem; }
+      .mp-card { padding: 16px 14px; }
+      .mp-title { font-size: 1.25rem; margin-bottom: 12px; }
       .mp-room-code { font-size: 1.6rem; letter-spacing: 5px; }
       .timer-ring { width: 92px; height: 92px; }
       .timer-ring-text { font-size: 1.7rem; }
@@ -495,8 +576,9 @@
     }
     @media (max-height: 560px) and (orientation: landscape) {
       body { align-items: flex-start; padding-top: 50px; }
-      .mp-winner-icon { font-size: 3rem; }
+      .mp-winner-icon { font-size: 2.5rem; }
       .timer-ring { width: 72px; height: 72px; }
+      .mp-card { max-height: unset; }
     }
 
     /* =========================================================
@@ -548,7 +630,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signInAnonymously, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, collection, query, where, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, collection, query, where, getDocs, addDoc, serverTimestamp, deleteDoc, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAhfgx0t-E6wrz6zEFIU_tpKTIbELp00ss",
@@ -580,6 +662,7 @@
     let questionTimeLeft = 15;
     let gameQuestionTime = 15;
     let previousPlayers = null;
+    let isJoining = false;
 
     // --- additive UI-only state (does not touch game/scoring flow) ---
     let revealActive = false;         // local-only "show correct answer" flourish
@@ -588,21 +671,27 @@
     let achievementQueue = [];
     let achievementShowing = false;
 
+    // --- Chat State ---
+    let chatUnsubscribe = null;
+    let chatMessagesData = [];
+    let systemMessages = [];
+    let lastChatTime = 0;
+
     // ============ AUTH (unchanged) ============
     async function initAuth() {
       await new Promise(r => setTimeout(r, 500));
       
       return new Promise((resolve) => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
           if (user) {
             currentUser = user;
-            unsubscribe();
+            unsubscribeAuth();
             resolve(user);
           } else {
             try {
               const cred = await signInAnonymously(auth);
               currentUser = cred.user;
-              unsubscribe();
+              unsubscribeAuth();
               resolve(cred.user);
             } catch(e) {
               console.error('Guest auth failed, retrying...');
@@ -610,11 +699,11 @@
                 await new Promise(r => setTimeout(r, 1000));
                 const cred2 = await signInAnonymously(auth);
                 currentUser = cred2.user;
-                unsubscribe();
+                unsubscribeAuth();
                 resolve(cred2.user);
               } catch(e2) {
                 console.error('Guest auth failed:', e2);
-                unsubscribe();
+                unsubscribeAuth();
                 resolve(null);
               }
             }
@@ -623,9 +712,16 @@
       });
     }
 
+    // Bug Fix 9 & Bug 6: Cleanup on navigating away
+    window.addEventListener('popstate', () => {
+      if (roomId) leaveRoom();
+    });
+
     window.addEventListener('beforeunload', () => {
       if (roomId && currentUser) {
-        updateDoc(doc(db, 'liveMatches', roomId), {
+        // Attempt to clean up before closing tab
+        const roomRef = doc(db, 'liveMatches', roomId);
+        updateDoc(roomRef, {
           [`players.${currentUser.uid}.online`]: false
         }).catch(()=>{});
       }
@@ -839,6 +935,89 @@
     }
 
     // =========================================================
+    // MODULE: CHAT
+    // =========================================================
+    function initChat() {
+      if (!roomId) return;
+      if (chatUnsubscribe) chatUnsubscribe();
+      systemMessages = []; // Reset local system messages
+      const chatRef = collection(db, 'liveMatches', roomId, 'chat');
+      const qChat = query(chatRef, orderBy('timestamp', 'desc'), limit(50));
+      
+      chatUnsubscribe = onSnapshot(qChat, (snap) => {
+        const msgs = [];
+        snap.forEach(doc => {
+          const data = doc.data();
+          msgs.push({ 
+            id: doc.id, 
+            ...data, 
+            type: 'user', 
+            time: data.timestamp ? data.timestamp.toMillis() : Date.now() 
+          });
+        });
+        chatMessagesData = msgs.reverse();
+        renderChatUI();
+      });
+    }
+
+    function renderChatUI() {
+      const container = document.getElementById('chatMessages');
+      if (!container) return;
+      
+      const allMsgs = [...chatMessagesData, ...systemMessages].sort((a,b) => a.time - b.time);
+      
+      container.innerHTML = allMsgs.map(m => {
+        if (m.type === 'system') {
+          return `<div class="mp-chat-message system">${escapeHtml(m.message)}</div>`;
+        }
+        const isSelf = m.playerId === currentUser.uid;
+        const date = new Date(m.time);
+        const timeStr = `${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+        return `
+        <div class="mp-chat-message ${isSelf ? 'self' : ''}">
+          ${!isSelf ? `<div class="mp-chat-sender">${escapeHtml(m.playerName)}</div>` : ''}
+          <div>${escapeHtml(m.message)}</div>
+          <div class="mp-chat-time">${timeStr}</div>
+        </div>
+        `;
+      }).join('');
+      container.scrollTop = container.scrollHeight;
+    }
+
+    window.sendChatMessage = async function() {
+      const input = document.getElementById('chatInput');
+      if (!input || !roomId) return;
+      const text = input.value.trim().substring(0, 150);
+      if (!text) return;
+
+      const now = Date.now();
+      if (now - lastChatTime < 1000) {
+        showToast("Please wait before sending again.");
+        return;
+      }
+      lastChatTime = now;
+      input.value = '';
+
+      try {
+        await addDoc(collection(db, 'liveMatches', roomId, 'chat'), {
+          playerId: currentUser.uid,
+          playerName: playerName,
+          message: text,
+          timestamp: serverTimestamp()
+        });
+      } catch (e) {
+        console.error("Chat error:", e);
+        showToast("Failed to send message.");
+      }
+    };
+
+    function addSystemMessage(text) {
+      systemMessages.push({ type: 'system', message: text, time: Date.now() });
+      renderChatUI();
+    }
+
+
+    // =========================================================
     // MODULE: SHARE / INVITE / QR
     // =========================================================
     function getInviteLink() {
@@ -911,7 +1090,7 @@
           <div class="mp-divider">OR</div>
 
           <input type="text" class="mp-input" id="roomCodeInput" placeholder="Room Code" maxlength="6" style="text-align:center;letter-spacing:4px;text-transform:uppercase;font-size:1.2rem;">
-          <button class="mp-btn mp-btn-outline" onclick="window.joinRoom()"><i class="fa-solid fa-door-open"></i>&nbsp; Join Room</button>
+          <button id="joinRoomBtn" class="mp-btn mp-btn-outline" onclick="window.joinRoom()"><i class="fa-solid fa-door-open"></i>&nbsp; Join Room</button>
 
           <div class="mp-error" id="errorMsg"></div>
         </div>
@@ -920,7 +1099,7 @@
 
     function renderCreateSettings() {
       render(`
-        <div class="mp-card">
+        <div class="mp-card" style="overflow-y:auto;">
           <div class="mp-title">⚙️ Game Settings</div>
 
           <label style="font-size:0.8rem;color:var(--text2);">Subject</label>
@@ -962,6 +1141,7 @@
 
     function createRoom() {
       playerName = document.getElementById('playerName')?.value.trim() || 'Player';
+      localStorage.setItem('quizhub_playerName', playerName);
       renderCreateSettings();
     }
 
@@ -1071,40 +1251,62 @@
           }
         }
       });
+      
+      sessionStorage.setItem('currentRoomId', roomId);
+      window.history.pushState({room: roomId}, '', `?room=${roomCode}`);
       listenToRoom();
     }
 
     async function joinRoom() {
-      const code = document.getElementById('roomCodeInput')?.value.trim().toUpperCase();
-      playerName = document.getElementById('playerName')?.value.trim() || 'Player';
-      if (!code) return showError('Room code enter කරන්න!');
+      if (isJoining) return;
+      isJoining = true;
+      const btn = document.getElementById('joinRoomBtn');
+      if (btn) btn.disabled = true;
 
-      roomCode = code;
-      previousPlayers = null;
-      previousScores = {};
-      qrRendered = false;
+      try {
+        const code = document.getElementById('roomCodeInput')?.value.trim().toUpperCase();
+        playerName = document.getElementById('playerName')?.value.trim() || 'Player';
+        localStorage.setItem('quizhub_playerName', playerName);
 
-      const q = query(collection(db, 'liveMatches'), where('roomCode', '==', code), where('status', 'in', ['waiting', 'countdown']));
-      const snapshot = await getDocs(q);
+        if (!code) throw new Error('Room code enter කරන්න!');
 
-      if (snapshot.empty) return showError('Room not found!');
+        roomCode = code;
+        previousPlayers = null;
+        previousScores = {};
+        qrRendered = false;
 
-      const docData = snapshot.docs[0];
-      roomId = docData.id;
-      isHost = false;
+        const q = query(collection(db, 'liveMatches'), where('roomCode', '==', code), where('status', 'in', ['waiting', 'countdown']));
+        const snapshot = await getDocs(q);
 
-      const players = docData.data().players || {};
-      if (Object.keys(players).length >= 10) return showError('Room is full (max 10)!');
+        if (snapshot.empty) throw new Error('Room not found!');
 
-      await updateDoc(doc(db, 'liveMatches', roomId), {
-        [`players.${currentUser.uid}`]: {
-          name: playerName, score: 0, correct: 0, wrong: 0,
-          answered: false, ready: false, online: true, joinedAt: new Date().toISOString(),
-          streak: 0, longestStreak: 0, totalTime: 0, fastestTime: null
+        const docData = snapshot.docs[0];
+        roomId = docData.id;
+        isHost = false;
+
+        const players = docData.data().players || {};
+        if (Object.keys(players).length >= 10 && !players[currentUser.uid]) {
+          throw new Error('Room is full (max 10)!');
         }
-      });
 
-      listenToRoom();
+        await updateDoc(doc(db, 'liveMatches', roomId), {
+          [`players.${currentUser.uid}`]: {
+            name: playerName, score: 0, correct: 0, wrong: 0,
+            answered: false, ready: false, online: true, joinedAt: new Date().toISOString(),
+            streak: 0, longestStreak: 0, totalTime: 0, fastestTime: null
+          }
+        });
+
+        sessionStorage.setItem('currentRoomId', roomId);
+        window.history.pushState({room: roomId}, '', `?room=${roomCode}`);
+        listenToRoom();
+
+      } catch (err) {
+        showError(err.message);
+      } finally {
+        isJoining = false;
+        if (btn) btn.disabled = false;
+      }
     }
 
     function listenToRoom() {
@@ -1117,21 +1319,48 @@
 
         if (players[currentUser.uid]) players[currentUser.uid].online = true;
 
-        if (previousPlayers && data.status !== 'waiting') {
+        // --- Bug 5 Fix: Host Migration ---
+        if (data.status !== 'finished') {
+          const onlinePlayers = Object.entries(players).filter(([u,p]) => p.online).sort((a,b) => new Date(a[1].joinedAt) - new Date(b[1].joinedAt));
+          if (onlinePlayers.length > 0) {
+            const currentHostOnline = players[data.hostId]?.online;
+            if (!currentHostOnline && onlinePlayers[0][0] === currentUser.uid) {
+               updateDoc(doc(db, 'liveMatches', roomId), { hostId: currentUser.uid, hostName: players[currentUser.uid].name }).catch(()=>{});
+               isHost = true;
+            } else {
+               isHost = data.hostId === currentUser.uid;
+            }
+          }
+        }
+
+        if (previousPlayers && data.status === 'waiting') {
           Object.keys(previousPlayers).forEach(uid => {
             const wasOnline = previousPlayers[uid].online;
             const isOnline = players[uid]?.online;
 
             if (wasOnline && !isOnline) {
+              addSystemMessage(`${previousPlayers[uid].name} left`);
               showToast(`🔴 ${previousPlayers[uid].name} left the game!`);
               playSound('leave');
             } else if (!wasOnline && isOnline) {
+              addSystemMessage(`${players[uid].name} rejoined`);
               showToast(`🟢 ${players[uid].name} rejoined!`, true);
               playSound('join');
             }
           });
+          Object.keys(players).forEach(uid => {
+             if (!previousPlayers[uid] && players[uid].online && uid !== data.hostId) {
+                addSystemMessage(`${players[uid].name} joined`);
+             }
+          });
         }
         previousPlayers = JSON.parse(JSON.stringify(players));
+
+        // Disable chat completely if game is not in 'waiting'
+        if (data.status !== 'waiting' && chatUnsubscribe) {
+          chatUnsubscribe();
+          chatUnsubscribe = null;
+        }
 
         switch(data.status) {
           case 'waiting':
@@ -1196,7 +1425,7 @@
 
       render(`
         <div class="mp-card">
-          <div class="mp-title">⏳ Waiting Room</div>
+          <div class="mp-title" style="margin-bottom:8px;">⏳ Waiting Room</div>
           <div class="mp-room-code" onclick="window.copyRoomCode()" title="Tap to copy">${roomCode}</div>
           <div class="mp-copy-hint"><i class="fa-regular fa-copy"></i>Tap the code to copy</div>
 
@@ -1207,19 +1436,34 @@
             <button class="icon-btn" onclick="window.toggleQRCode()"><i class="fa-solid fa-qrcode"></i>QR Code</button>
           </div>
           <div class="qr-wrap" id="qrWrap"></div>
-          <p style="text-align:center;font-size:0.65rem;color:var(--text2);word-break:break-all;margin-bottom:10px;">${escapeHtml(link)}</p>
-
-          <p style="text-align:center;">Players: ${playerCount}/10</p>
+          
+          <div class="mp-divider" style="margin: 6px 0;">Players (${playerCount}/10)</div>
           <div class="mp-player-list">${playerList}</div>
-          <button class="mp-btn mp-btn-success" onclick="window.toggleReady()">${players[currentUser.uid]?.ready ? '✅ Ready' : 'Click to Ready'}</button>
-          ${isHost ? `<button class="mp-btn mp-btn-primary" onclick="window.startGame()" ${!allReady?'disabled':''}>⚡ Start</button>` : ''}
-          <button class="mp-btn mp-btn-danger" onclick="window.leaveRoom()">Leave</button>
+
+          <!-- Feature 1: Waiting Room Chat UI -->
+          <div class="mp-chat-container">
+            <div class="mp-chat-messages" id="chatMessages"></div>
+            <div class="mp-chat-input-wrap">
+              <input type="text" id="chatInput" class="mp-input" placeholder="Type a message..." maxlength="150" onkeypress="if(event.key==='Enter') window.sendChatMessage()">
+              <button class="mp-btn mp-btn-primary" onclick="window.sendChatMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:8px; margin-top:10px; flex-shrink:0;">
+             <button style="margin-bottom:0;" class="mp-btn mp-btn-success" onclick="window.toggleReady()">${players[currentUser.uid]?.ready ? '✅ Ready' : 'Click to Ready'}</button>
+             ${isHost ? `<button style="margin-bottom:0;" class="mp-btn mp-btn-primary" onclick="window.startGame()" ${!allReady?'disabled':''}>⚡ Start</button>` : ''}
+          </div>
+          <button class="mp-btn mp-btn-danger" style="margin-top:8px; flex-shrink:0;" onclick="window.leaveRoom()">Leave</button>
         </div>
       `);
 
-            // Update online count
+      // Update online count
       const countEl = document.getElementById('onlineCount');
-      if (countEl) countEl.textContent = Object.values(data.players || {}).filter(p => p.online).length;
+      if (countEl) countEl.textContent = playerCount;
+
+      if (!chatUnsubscribe) {
+        initChat();
+      }
     }
 
     function renderQuestion(data) {
@@ -1262,7 +1506,7 @@
             <div class="timer-ring-text" id="timerDisplay">${questionTimeLeft}</div>
           </div>
           <div class="mp-question-text">${escapeHtml(q.q)}</div>
-          <div>${options}</div>
+          <div class="mp-options-container">${options}</div>
           <p class="answer-locked-msg">${revealActive ? '<i class="fa-solid fa-eye"></i> Answer revealed' : (selectedAnswer >= 0 ? '<i class="fa-solid fa-lock"></i> Answer locked!' : 'Select your answer...')}</p>
         </div>
       `);
@@ -1291,7 +1535,7 @@
           <div class="mp-player-score" id="score-${p.uid}">${previousScores[p.uid] !== undefined ? previousScores[p.uid] : p.score}</div>
         </div>
       `).join('');
-      render(`<div class="mp-card"><div class="mp-title">📊 Leaderboard</div><div>${list}</div><p style="text-align:center;font-size:0.7rem;color:var(--text2);margin-top:8px;">Next question coming...</p></div>`);
+      render(`<div class="mp-card"><div class="mp-title">📊 Leaderboard</div><div class="mp-leaderboard-container">${list}</div><p style="text-align:center;font-size:0.7rem;color:var(--text2);margin-top:8px;flex-shrink:0;">Next question coming...</p></div>`);
 
       const finalScores = {};
       sorted.forEach(p => finalScores[p.uid] = p.score);
@@ -1362,8 +1606,8 @@
             <div class="stat-box"><div class="stat-val">#${myRank || '-'}</div><div class="stat-lbl">Your Rank</div></div>
           </div>
 
-          <div>${list}</div>
-          <div style="display:flex;gap:8px;margin-top:12px;">
+          <div class="mp-leaderboard-container">${list}</div>
+          <div style="display:flex;gap:8px;margin-top:12px;flex-shrink:0;">
             ${isHost ? '<button class="mp-btn mp-btn-primary" onclick="window.rematch()">🔄 Rematch</button>' : ''}
             <button class="mp-btn mp-btn-outline" onclick="window.leaveRoom()">Leave</button>
           </div>
@@ -1386,6 +1630,7 @@
       if (!roomId) return;
       const roomRef = doc(db, 'liveMatches', roomId);
       const snap = await getDoc(roomRef);
+      if (!snap.exists()) return;
       const currentReady = snap.data().players[currentUser.uid]?.ready || false;
       await updateDoc(roomRef, { [`players.${currentUser.uid}.ready`]: !currentReady });
       if (!currentReady) playSound('ready');
@@ -1403,22 +1648,50 @@
 
     async function selectAnswer(index) {
       if (selectedAnswer >= 0 || !roomId) return;
-      selectedAnswer = index;
-      await updateDoc(doc(db, 'liveMatches', roomId), {
-        [`players.${currentUser.uid}.answered`]: true,
-        [`players.${currentUser.uid}.answer`]: index,
-        [`players.${currentUser.uid}.answerTime`]: Date.now()
-      });
+      selectedAnswer = index; // Bug 8: Instant local lock
+      
+      // Update DOM instantly to prevent race condition clicks visually
+      document.querySelectorAll('.mp-option').forEach(el => el.setAttribute('disabled', 'true'));
+      
+      try {
+        await updateDoc(doc(db, 'liveMatches', roomId), {
+          [`players.${currentUser.uid}.answered`]: true,
+          [`players.${currentUser.uid}.answer`]: index,
+          [`players.${currentUser.uid}.answerTime`]: Date.now()
+        });
+      } catch (e) {
+        selectedAnswer = -1; // Revert if failed
+        document.querySelectorAll('.mp-option').forEach(el => el.removeAttribute('disabled'));
+      }
     }
 
     async function leaveRoom() {
-      if (roomId) {
+      if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe = null; }
+      systemMessages = [];
+
+      if (roomId && currentUser) {
         try {
-          await updateDoc(doc(db, 'liveMatches', roomId), { [`players.${currentUser.uid}.online`]: false });
+          // Bug 6 Fix: Room Cleanup
+          const roomRef = doc(db, 'liveMatches', roomId);
+          const snap = await getDoc(roomRef);
+          if (snap.exists()) {
+             const players = snap.data().players || {};
+             const onlineCount = Object.values(players).filter(p => p.online).length;
+             
+             if (onlineCount <= 1) { // Only I am online, delete doc to avoid orphans
+                await deleteDoc(roomRef);
+             } else {
+                await updateDoc(roomRef, { [`players.${currentUser.uid}.online`]: false });
+             }
+          }
         } catch(e) {}
       }
       if (unsubscribe) unsubscribe();
       if (questionTimer) { clearInterval(questionTimer); questionTimer = null; }
+      
+      sessionStorage.removeItem('currentRoomId');
+      window.history.pushState({}, '', window.location.pathname);
+      
       roomId = null; roomCode = null; isHost = false; selectedAnswer = -1; previousPlayers = null;
       revealActive = false; previousScores = {}; qrRendered = false; achievementQueue = [];
       renderLobby();
@@ -1444,11 +1717,14 @@
     // =========================================================
     function startQuestionTimer(data) {
       if (questionTimer) clearInterval(questionTimer);
-      questionTimeLeft = data.questionTime || gameQuestionTime || 15;
-      const totalTime = questionTimeLeft;
+      const totalTime = data.questionTime || gameQuestionTime || 15;
 
       questionTimer = setInterval(async () => {
-        questionTimeLeft--;
+        // Bug 7 Fix: Timer Synchronization based on actual elapsed time
+        const now = Date.now();
+        const startTime = data.questionStartTime || now;
+        const elapsed = Math.floor((now - startTime) / 1000);
+        questionTimeLeft = Math.max(0, totalTime - elapsed);
 
         // --- visual updates (all clients) ---
         const timerEl = document.getElementById('timerDisplay');
@@ -1461,6 +1737,7 @@
           ringEl.style.strokeDashoffset = circumference * (1 - frac);
           ringEl.setAttribute('class', 'timer-ring-progress ' + getTimerColorClass(frac));
         }
+        
         if (questionTimeLeft <= 5 && questionTimeLeft > 0) {
           wrapEl?.classList.add('urgent');
           playSound('urgentTick');
@@ -1557,10 +1834,38 @@
       updateMuteBtn();
       initParticles();
       await initAuth();
-      renderLobby();
+      
+      // Load saved name
+      playerName = localStorage.getItem('quizhub_playerName') || '';
+      
       const params = new URLSearchParams(window.location.search);
+      const savedRoomId = sessionStorage.getItem('currentRoomId');
+      
+      // Bug Fix 3 & 4: Reconnect logic if page refreshed
+      if (savedRoomId && !params.get('room')) { 
+        roomId = savedRoomId;
+        try {
+          const docSnap = await getDoc(doc(db, 'liveMatches', roomId));
+          if (docSnap.exists() && docSnap.data().players[currentUser.uid]) {
+            roomCode = docSnap.data().roomCode;
+            isHost = docSnap.data().hostId === currentUser.uid;
+            playerName = docSnap.data().players[currentUser.uid].name;
+            listenToRoom();
+            return;
+          }
+        } catch(e) { }
+        sessionStorage.removeItem('currentRoomId');
+        roomId = null;
+      }
+
+      renderLobby();
+
+      // Bug Fix 1: Invite Link Identity Bug - Don't auto join!
       if (params.get('room')) {
-        setTimeout(() => { document.getElementById('roomCodeInput').value = params.get('room'); joinRoom(); }, 500);
+        setTimeout(() => { 
+          const codeInput = document.getElementById('roomCodeInput');
+          if (codeInput) codeInput.value = params.get('room').toUpperCase(); 
+        }, 500);
       }
     }
 
@@ -1570,7 +1875,5 @@
   <footer style="position:fixed;bottom:0;left:0;right:0;text-align:center;padding:12px;color:var(--text2);font-size:0.7rem;opacity:0.6;z-index:10;background:rgba(10,14,26,0.7);backdrop-filter:blur(6px);border-top:1px solid var(--glass-border);">    <p>Learning Quiz Hub</p>
     <p style="font-weight:600;color:var(--primary);margin-top:2px;">🦊 Developed by Lakshan Dulip</p>
   </footer>
-</body>
-  
 </body>
 </html>
