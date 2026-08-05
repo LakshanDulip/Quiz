@@ -1657,7 +1657,7 @@
             }
         }
 function shareWhatsApp() {
-    const subject = window.sharedSubject || 'N/A';
+    const grade = window.sharedGrade || 'N/A';
     const lesson = window.sharedLesson || 'N/A';
     const hostName = window.hostName || 'Host';
     const inviteLink = getInviteLink();
@@ -1666,7 +1666,7 @@ function shareWhatsApp() {
 `🎮 *Quiz Hub Multiplayer Game* එකට එකතු වෙන්න!
 
 👑 *Created By:* ${hostName}
-📚 *Grade:* ${window.sharedGrade}
+📚 *Grade:* ${grade}
 📖 *Lesson:* ${lesson}
 🔑 *Room Code:* *${roomCode}*
 
@@ -1694,7 +1694,6 @@ ${inviteLink}
 
     window.open(`https://wa.me/?text=${text}`, '_blank');
 }
-
         function toggleQRCode() {
             const wrap = document.getElementById('qrWrap');
             if (!wrap) return;
