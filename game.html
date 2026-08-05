@@ -563,6 +563,10 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+        // iOS Safari persistence fix
+    import { setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    setPersistence(auth, browserLocalPersistence).catch(() => {});
+
     // ============ STATE (unchanged core + additive UI state) ============
     let currentUser = null;
     let roomId = null;
