@@ -1656,27 +1656,12 @@
                 copyInviteLink();
             }
         }
-function shareWhatsApp() {
-    const text = encodeURIComponent(
-        `🎮 Quiz Hub Multiplayer Game එකට එකතු වෙන්න!
 
-🔑 Room Code: ${roomCode}
-
-📌 Join කරන ආකාරය:
-1️⃣ පහත link එක open කරන්න.
-2️⃣ ඔබගේ නම ඇතුළත් කරන්න.
-3️⃣ Room Code එක දාලා Game එකට Join වෙන්න.
-4️⃣ Friends එක්ක Quiz Battle එක පටන් ගන්න! 🚀
-
-🔗 Join Link:
-${getInviteLink()}
-
-━━━━━━━━━━━━━━
-🦊 ᴅᴇᴠᴇʟᴏᴘᴇᴅ ʙʏ ʟᴀᴋꜱʜᴀɴ ᴅᴜʟɪᴘ`
-    );
-
-    window.open(`https://wa.me/?text=${text}`, '_blank');
-}
+        function shareWhatsApp() {
+            const text = encodeURIComponent(
+                `🎮 Join my Quiz Hub game! Room code: ${roomCode}\n${getInviteLink()}`);
+            window.open(`https://wa.me/?text=${text}`, '_blank');
+        }
 
         function toggleQRCode() {
             const wrap = document.getElementById('qrWrap');
