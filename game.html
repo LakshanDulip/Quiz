@@ -1657,17 +1657,14 @@
             }
         }
 function shareWhatsApp() {
-    const grade = window.sharedGrade || 'N/A';
-    const lesson = window.sharedLesson || 'N/A';
-    const hostName = window.hostName || 'Host';
     const inviteLink = getInviteLink();
-
-    const text = encodeURIComponent(
+    
+    const text = 
 `🎮 *Quiz Hub Multiplayer Game* එකට එකතු වෙන්න!
 
-👑 *Created By:* ${hostName}
-📚 *Grade:* ${grade}
-📖 *Lesson:* ${lesson}
+👑 *Created By:* ${window.hostName || 'Host'}
+📚 *Grade:* ${window.sharedGrade || 'N/A'}
+📖 *Lesson:* ${window.sharedLesson || 'N/A'}
 🔑 *Room Code:* *${roomCode}*
 
 ━━━━━━━━━━━━━━━━━━━━
@@ -1689,10 +1686,9 @@ ${inviteLink}
 🎯 *Challenge Your Friends*
 
 ━━━━━━━━━━━━━━━━━━━━
-🦊 *ᴅᴇᴠᴇʟᴏᴘᴇᴅ ʙʏ ʟᴀᴋꜱʜᴀɴ ᴅᴜʟɪᴘ*`
-    );
+🦊 *ᴅᴇᴠᴇʟᴏᴘᴇᴅ ʙʏ ʟᴀᴋꜱʜᴀɴ ᴅᴜʟɪᴘ*`;
 
-    window.open(`https://wa.me/?text=${text}`, '_blank');
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
 }
         function toggleQRCode() {
             const wrap = document.getElementById('qrWrap');
