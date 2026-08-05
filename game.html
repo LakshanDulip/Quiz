@@ -209,12 +209,13 @@
       roomId = `room_${Date.now()}`;
       isHost = true;
 
-      // Load questions
+            // Load questions
       let questions = [];
       try {
         const resp = await fetch(`data/${subject}.json`);
         const data = await resp.json();
         let lessons = [];
+        
         if (data.subjects?.[subject]?.grades?.[grade]?.lessons) {
           lessons = data.subjects[subject].grades[grade].lessons;
         } else if (data.grades?.[grade]?.lessons) {
@@ -222,6 +223,7 @@
         } else if (data[subject]?.grades?.[grade]?.lessons) {
           lessons = data[subject].grades[grade].lessons;
         }
+        
         const lesson = lessons.find(l => l.id === lessonId);
         if (lesson?.questions) {
           const shuffled = [...lesson.questions].sort(() => Math.random() - 0.5);
