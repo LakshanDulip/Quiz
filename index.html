@@ -954,26 +954,126 @@
   /* Flat colors - no CSS variables calculation */
   /* Dark Lite Mode - Battery friendly */
   body.lite-mode {
-    --bg-main: #1a1a2e !important;
-    --bg-card: #16213e !important;
-    --text-primary: #e8e8e8 !important;
-    --text-secondary: #a0a0b8 !important;
-    --border-color: #2a2a4a !important;
-    --primary-color: #f0a500 !important;
-    --primary-gradient: #f0a500 !important;
+    --bg-main: #fff !important;
+    --bg-card: #fff !important;
+    --text-primary: #000 !important;
+    --text-secondary: #555 !important;
+    --border-color: #ddd !important;
+    --primary-color: #000 !important;
+    --primary-gradient: #000 !important;
     --glow-color: transparent !important;
-    --shadow-sm: 0 1px 2px rgba(0,0,0,0.2) !important;
-    --shadow-md: 0 2px 4px rgba(0,0,0,0.2) !important;
-    --shadow-lg: 0 4px 8px rgba(0,0,0,0.2) !important;
-    --science-color: #4ecca3 !important;
-    --correct-color: #4ecca3 !important;
-    --wrong-color: #ff6b6b !important;
-    --accent: #f0a500 !important;
-    --heart-color: #ff6b6b !important;
-    --timer-color: #f0a500 !important;
-    --gold: #f0a500 !important;
-    --silver: #94a3b8 !important;
-    --bronze: #d97706 !important;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04) !important;
+    --shadow-md: 0 1px 3px rgba(0,0,0,0.06) !important;
+    --shadow-lg: 0 1px 4px rgba(0,0,0,0.08) !important;
+    --science-color: #000 !important;
+    --correct-color: #000 !important;
+    --wrong-color: #dc2626 !important;
+    --accent: #000 !important;
+    --heart-color: #dc2626 !important;
+    --timer-color: #000 !important;
+    --gold: #000 !important;
+    --silver: #999 !important;
+    --bronze: #999 !important;
+  }
+  
+  /* Lite mode - remove all animations instantly */
+  body.lite-mode *,
+  body.lite-mode *::before,
+  body.lite-mode *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  /* Lite mode - flat design */
+  body.lite-mode .btn-primary,
+  body.lite-mode .mode-btn.active {
+    background: #000 !important;
+    color: #fff !important;
+    box-shadow: none !important;
+  }
+  body.lite-mode .card {
+    border: 1px solid #eee !important;
+    box-shadow: none !important;
+  }
+  body.lite-mode .card:hover {
+    transform: none !important;
+  }
+  body.lite-mode .btn:hover {
+    transform: none !important;
+  }
+  body.lite-mode .option-btn:hover {
+    transform: none !important;
+  }
+  
+  /* Lite mode - hide heavy elements */
+  body.lite-mode .mascot-container,
+  body.lite-mode .mascot-toggle-btn,
+  body.lite-mode .info-floating-btn,
+  body.lite-mode .screen-glow,
+  body.lite-mode .celebration-glow,
+  body.lite-mode .celebration-overlay,
+  body.lite-mode .confetti-container,
+  body.lite-mode .subject-icon,
+  body.lite-mode .ring-wrap,
+  body.lite-mode .perfect-badge,
+  body.lite-mode .dev-credit,
+  body.lite-mode .flashcard-badge,
+  body.lite-mode .question-image-wrap::after,
+  body.lite-mode .card::before,
+  body.lite-mode .card::after,
+  body.lite-mode .quiz-container::before,
+  body.lite-mode .subject-card::before {
+    display: none !important;
+  }
+  
+  /* Lite mode - clean header */
+  body.lite-mode header {
+    position: relative !important;
+    box-shadow: 0 1px 0 #eee !important;
+    backdrop-filter: none !important;
+  }
+  
+  /* Lite mode - no blur */
+  body.lite-mode .modal-overlay {
+    backdrop-filter: none !important;
+    background: rgba(0,0,0,0.6) !important;
+  }
+  
+  /* Lite mode - system font */
+  body.lite-mode * {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif !important;
+  }
+  
+  /* Lite mode - compact */
+  body.lite-mode main {
+    padding: 15px 10px !important;
+  }
+  body.lite-mode .card {
+    padding: 12px !important;
+  }
+  body.lite-mode .quiz-container {
+    padding: 15px !important;
+  }
+  
+  /* Lite mode - no rounded corners */
+  body.lite-mode .card,
+  body.lite-mode .btn,
+  body.lite-mode .quiz-container,
+  body.lite-mode .modal-content,
+  body.lite-mode .option-btn,
+  body.lite-mode .mode-btn,
+  body.lite-mode .icon-btn {
+    border-radius: 2px !important;
+  }
+  
+  /* Lite mode - no grid dots */
+  body.lite-mode::before {
+    display: none !important;
+  }
+  
+  /* Lite mode - logo static */
+  body.lite-mode .logo-mark {
+    animation: none !important;
   }
   /* Disable fonts - use system */
   body.lite-mode * {
