@@ -7619,20 +7619,18 @@ window.performanceManager = new PerformanceManager();
 
     renderMain();
 
-
-
     if (isGame) {
-      // Live match = faster advance, no popup
+      // Auto advance in game mode
       if (liveRoomCode) {
         scheduleAutoAdvance(600);
       } else {
         scheduleAutoAdvance(1500);
       }
-    } else {
-      // Study mode - show modal
+    }
+    
+    if (!isGame) {
       showModal(isCorrect, isCorrect ? "✅ නිවැරදියි!" : "❌ වැරදියි!", explanation);
     }
-  }
 
   window.nextStudyQuestion = function() {
     audioManager.playClick();
