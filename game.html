@@ -30,6 +30,32 @@
       50% { transform: scale(1.1); opacity: 0.7; }
       100% { transform: scale(1); opacity: 1; }
     }
+    /* Toast Notification Styles */
+    .mp-toast {
+      position: fixed;
+      top: 60px;
+      right: 20px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-left: 4px solid #f87171;
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      color: var(--text);
+      z-index: 1000;
+      font-size: 0.9rem;
+      font-weight: 600;
+      animation: slideIn 0.3s ease-out, fadeOut 0.3s ease-in 2.7s forwards;
+    }
+    .mp-toast.joined { border-left-color: #34d399; }
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
   </style>
 </head>
 <body>
@@ -69,6 +95,7 @@
     let questionTimer = null;
     let questionTimeLeft = 15;
     let gameQuestionTime = 15;
+    let previousPlayers = null; // Players ලා අයින් වෙනවද බලන්න පාවිච්චි කරනවා
 
     // ============ AUTH ============
     async function initAuth() {
@@ -84,9 +111,26 @@
       });
     }
 
+    // Tab එක Close කරද්දී Offline කරන්න (User Experience Fix)
+    window.addEventListener('beforeunload', () => {
+      if (roomId && currentUser) {
+        updateDoc(doc(db, 'liveMatches', roomId), {
+          [`players.${currentUser.uid}.online`]: false
+        }).catch(()=>{}); // Network Error ආවොත් ignore කරන්න
+      }
+    });
+
     // ============ UI RENDER ============
     function render(html) {
       document.getElementById('app').innerHTML = html;
+    }
+
+    function showToast(msg, isJoin = false) {
+      const toast = document.createElement('div');
+      toast.className = `mp-toast ${isJoin ? 'joined' : ''}`;
+      toast.textContent = msg;
+      document.body.appendChild(toast);
+      setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3000);
     }
 
     function renderLobby() {
@@ -145,7 +189,7 @@
           <button class="mp-btn mp-btn-outline" onclick="window.leaveRoom()">Back</button>
         </div>
       `);
-      updateSettingsLessons(); // මුලින්ම පාඩම් Load කිරීම
+      updateSettingsLessons(); 
     }
     
     // ============ DATA LOADING FUNCTIONS ============
@@ -163,7 +207,6 @@
       select.innerHTML = '<option value="">Loading...</option>';
       
       try {
-        // Cache-Buster යොදා ඇත
         const resp = await fetch(`data/${subject}.json?t=${Date.now()}`);
         if (!resp.ok) throw new Error('Failed to load JSON');
         const data = await resp.json();
@@ -213,6 +256,7 @@
       roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
       roomId = `room_${Date.now()}`;
       isHost = true;
+      previousPlayers = null;
 
       let questions = [];
       try {
@@ -235,43 +279,28 @@
           }
         }
         
-        // තෝරාගත් පාඩම පමණක් වෙන්කර ගැනීම
         const lesson = lessons.find(l => l.id === lessonId);
         if (lesson && lesson.questions) {
           const shuffled = [...lesson.questions].sort(() => Math.random() - 0.5);
           questions = shuffled.slice(0, qCount);
         }
-      } catch(e) {
-        console.error(e);
-      }
+      } catch(e) { console.error(e); }
       
       if (questions.length === 0) {
-        questions = [
-          {q:"No questions found for this lesson! Check your JSON.", options:["OK","B","C","D"], correct:0}
-        ];
+        questions = [{q:"No questions found for this lesson! Check your JSON.", options:["OK","B","C","D"], correct:0}];
       }
 
       await setDoc(doc(db, 'liveMatches', roomId), {
-        roomCode,
-        hostId: currentUser.uid,
-        hostName: playerName,
-        subject, grade, lessonId,
-        questionTime: qTime,
-        questionCount: questions.length,
-        status: 'waiting',
-        currentQuestion: -1,
-        createdAt: serverTimestamp(),
-        questions,
+        roomCode, hostId: currentUser.uid, hostName: playerName,
+        subject, grade, lessonId, questionTime: qTime, questionCount: questions.length,
+        status: 'waiting', currentQuestion: -1, createdAt: serverTimestamp(), questions,
         players: {
           [currentUser.uid]: {
-            name: playerName,
-            score: 0, correct: 0, wrong: 0,
-            answered: false, ready: false, online: true,
-            joinedAt: new Date().toISOString()
+            name: playerName, score: 0, correct: 0, wrong: 0,
+            answered: false, ready: false, online: true, joinedAt: new Date().toISOString()
           }
         }
       });
-
       listenToRoom();
     }
 
@@ -281,6 +310,7 @@
       if (!code) return showError('Room code enter කරන්න!');
       
       roomCode = code;
+      previousPlayers = null;
 
       const q = query(collection(db, 'liveMatches'), where('roomCode', '==', code), where('status', 'in', ['waiting', 'countdown']));
       const snapshot = await getDocs(q);
@@ -293,14 +323,11 @@
 
       const players = docData.data().players || {};
       if (Object.keys(players).length >= 10) return showError('Room is full (max 10)!');
-      if (players[currentUser.uid]) return showError('You are already in this room!');
 
       await updateDoc(doc(db, 'liveMatches', roomId), {
         [`players.${currentUser.uid}`]: {
-          name: playerName,
-          score: 0, correct: 0, wrong: 0,
-          answered: false, ready: false, online: true,
-          joinedAt: new Date().toISOString()
+          name: playerName, score: 0, correct: 0, wrong: 0,
+          answered: false, ready: false, online: true, joinedAt: new Date().toISOString()
         }
       });
 
@@ -315,7 +342,24 @@
         
         const data = snapshot.data();
         const players = data.players || {};
+        
+        // Update online status locally
         if (players[currentUser.uid]) players[currentUser.uid].online = true;
+
+        // Player Drop/Join Detection (Toast Alerts)
+        if (previousPlayers && data.status !== 'waiting') {
+          Object.keys(previousPlayers).forEach(uid => {
+            const wasOnline = previousPlayers[uid].online;
+            const isOnline = players[uid]?.online;
+            
+            if (wasOnline && !isOnline) {
+              showToast(`🔴 ${previousPlayers[uid].name} left the game!`);
+            } else if (!wasOnline && isOnline) {
+              showToast(`🟢 ${players[uid].name} rejoined!`, true);
+            }
+          });
+        }
+        previousPlayers = JSON.parse(JSON.stringify(players)); // Save state for next check
 
         switch(data.status) {
           case 'waiting':
@@ -406,10 +450,16 @@
     function renderLeaderboard(players, scores) {
       const sorted = Object.entries(players).map(([uid, p]) => ({ ...p, uid, score: scores[uid]?.score || 0 })).sort((a, b) => b.score - a.score);
       const list = sorted.map((p, i) => `
-        <div class="mp-leaderboard-item">
+        <div class="mp-leaderboard-item" style="${!p.online ? 'opacity:0.6;' : ''}">
           <div class="mp-rank ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${i+1}</div>
           <div class="mp-player-avatar" style="background:${getAvatarColor(p.uid)}">${(p.name||'?')[0].toUpperCase()}</div>
-          <div class="mp-player-info"><div class="mp-player-name">${escapeHtml(p.name)}</div><div class="mp-player-status">✅ ${p.correct || 0} / ❌ ${p.wrong || 0}</div></div>
+          <div class="mp-player-info">
+            <div class="mp-player-name">
+              ${escapeHtml(p.name)} 
+              ${!p.online ? '<span style="font-size:0.6rem; color:#f87171; border:1px solid #f87171; padding:2px 4px; border-radius:4px; margin-left:4px;">Offline</span>' : ''}
+            </div>
+            <div class="mp-player-status">✅ ${p.correct || 0} / ❌ ${p.wrong || 0}</div>
+          </div>
           <div class="mp-player-score">${p.score}</div>
         </div>
       `).join('');
@@ -418,12 +468,17 @@
 
     function renderWinner(players, scores, data) {
       const sorted = Object.entries(players).map(([uid, p]) => ({ ...p, uid, score: scores[uid]?.score || 0 })).sort((a, b) => b.score - a.score);
-      const winner = sorted[0];
+      const winner = sorted[0] || { name: 'No one', score: 0 };
       const list = sorted.map((p, i) => `
-        <div class="mp-leaderboard-item">
+        <div class="mp-leaderboard-item" style="${!p.online ? 'opacity:0.6;' : ''}">
           <div class="mp-rank ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${i+1}</div>
           <div class="mp-player-avatar" style="background:${getAvatarColor(p.uid)}">${(p.name||'?')[0].toUpperCase()}</div>
-          <div class="mp-player-info"><div class="mp-player-name">${escapeHtml(p.name)}</div></div>
+          <div class="mp-player-info">
+            <div class="mp-player-name">
+              ${escapeHtml(p.name)}
+              ${!p.online ? '<span style="font-size:0.6rem; color:#f87171; border:1px solid #f87171; padding:2px 4px; border-radius:4px; margin-left:4px;">Offline</span>' : ''}
+            </div>
+          </div>
           <div class="mp-player-score">${p.score}</div>
         </div>
       `).join('');
@@ -476,7 +531,7 @@
         } catch(e) {}
       }
       if (unsubscribe) unsubscribe();
-      roomId = null; roomCode = null; isHost = false; selectedAnswer = -1;
+      roomId = null; roomCode = null; isHost = false; selectedAnswer = -1; previousPlayers = null;
       renderLobby();
     }
 
@@ -556,7 +611,6 @@
     }
 
     // ============ MODULE EXPORTS ============
-    // HTML වලදී onclick වැඩ කිරීම සඳහා මේවා අනිවාර්යයෙන්ම අවශ්‍යයි.
     window.createRoom = createRoom;
     window.updateSettingsLessons = updateSettingsLessons;
     window.confirmCreateRoom = confirmCreateRoom;
