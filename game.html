@@ -25,6 +25,11 @@
       transition: all 0.3s;
     }
     .home-link:hover { border-color: var(--primary); color: var(--primary); }
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.7; }
+      100% { transform: scale(1); opacity: 1; }
+    }
   </style>
 </head>
 <body>
@@ -36,7 +41,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, collection, query, where, getDocs, addDoc, serverTimestamp, arrayUnion, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, collection, query, where, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAhfgx0t-E6wrz6zEFIU_tpKTIbELp00ss",
@@ -61,10 +66,10 @@
     let gameState = 'lobby'; // lobby | countdown | playing | leaderboard | finished
     let currentQuestionIndex = 0;
     let selectedAnswer = -1;
-    let playerScores = {};
     let questionTimer = null;
     let questionTimeLeft = 15;
     let gameQuestionTime = 15;
+
     // ============ AUTH ============
     async function initAuth() {
       return new Promise((resolve) => {
@@ -102,8 +107,6 @@
         </div>
       `);
     }
-
-
 
     function renderCreateSettings() {
       render(`
@@ -148,12 +151,12 @@
       updateSettingsLessons();
     }
     
-    async function updateSettingsGrades() {
+    window.updateSettingsGrades = async function() {
       document.getElementById('setLesson').innerHTML = '<option value="">Loading...</option>';
-      await updateSettingsLessons();
-    }
+      await window.updateSettingsLessons();
+    };
     
-    async function updateSettingsLessons() {
+    window.updateSettingsLessons = async function() {
       const subject = document.getElementById('setSubject')?.value || 'science';
       const grade = document.getElementById('setGrade')?.value || '8';
       const select = document.getElementById('setLesson');
@@ -173,7 +176,6 @@
           lessons = data.maths.grades[grade].lessons;
         }
         
-        
         if (lessons.length === 0) {
           select.innerHTML = '<option value="">No lessons found</option>';
           return;
@@ -185,7 +187,7 @@
       } catch(e) {
         select.innerHTML = '<option value="">Error loading</option>';
       }
-    }
+    };
 
     window.createRoom = function() {
       renderCreateSettings();
@@ -209,7 +211,7 @@
       roomId = `room_${Date.now()}`;
       isHost = true;
 
-            // Load questions
+      // Load and Select Questions
       let questions = [];
       try {
         const resp = await fetch(`data/${subject}.json`);
@@ -223,9 +225,10 @@
         } else if (data[subject]?.grades?.[grade]?.lessons) {
           lessons = data[subject].grades[grade].lessons;
         }
-                console.log('DEBUG - lessonId:', lessonId, 'lessons count:', lessons.length, 'first lesson id:', lessons[0]?.id);
+        
         const lesson = lessons.find(l => l.id === lessonId);
         if (lesson?.questions) {
+          // Shuffle and slice
           const shuffled = [...lesson.questions].sort(() => Math.random() - 0.5);
           questions = shuffled.slice(0, qCount);
         }
@@ -246,7 +249,7 @@
         hostName: playerName,
         subject, grade, lessonId,
         questionTime: qTime,
-        questionCount: qCount,
+        questionCount: questions.length,
         status: 'waiting',
         currentQuestion: -1,
         createdAt: serverTimestamp(),
@@ -264,6 +267,7 @@
 
       listenToRoom();
     };
+
     function renderQuestion(data) {
       const q = data.questions[currentQuestionIndex];
       if (!q) return;
@@ -285,7 +289,7 @@
       `);
     }
 
-        function renderWaitingRoom(data) {
+    function renderWaitingRoom(data) {
       const players = data.players || {};
       const playerList = Object.entries(players).map(([uid, p]) => `
         <div class="mp-player">
@@ -370,7 +374,6 @@
         </div>
       `);
       
-      // Save match history (host only, once)
       if (isHost && data && !data.historySaved) {
         saveMatchHistory(data);
       }
@@ -409,39 +412,7 @@
     function getAvatarColor(uid) { const colors = ['#38bdf8','#818cf8','#34d399','#fbbf24','#f87171','#a78bfa','#fb923c']; return colors[uid.charCodeAt(0) % colors.length]; }
     function showError(msg) { const el = document.getElementById('errorMsg'); if (el) el.textContent = msg; }
 
-    // ============ ROOM FUNCTIONS ============
-    window.createRoom = async function() {
-      const name = document.getElementById('playerName')?.value.trim() || 'Player';
-      playerName = name;
-      
-      roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-      roomId = `room_${Date.now()}`;
-      isHost = true;
-
-      await setDoc(doc(db, 'liveMatches', roomId), {
-        roomCode,
-        hostId: currentUser.uid,
-        hostName: playerName,
-        status: 'waiting',
-        currentQuestion: -1,
-        createdAt: serverTimestamp(),
-        players: {
-          [currentUser.uid]: {
-            name: playerName,
-            score: 0,
-            correct: 0,
-            wrong: 0,
-            answered: false,
-            ready: false,
-            online: true,
-            joinedAt: new Date().toISOString()
-          }
-        }
-      });
-
-      listenToRoom();
-    };
-
+    // ============ ROOM JOIN FUNCTIONS ============
     window.joinRoom = async function() {
       const code = document.getElementById('roomCodeInput')?.value.trim().toUpperCase();
       const name = document.getElementById('playerName')?.value.trim() || 'Player';
@@ -494,70 +465,19 @@
     window.startGame = async function() {
       if (!isHost || !roomId) return;
       
-      // Load questions from main site data
-      let questions = [];
-      try {
-        const resp = await fetch('data/science.json');
-        if (!resp.ok) throw new Error('Failed');
-        const data = await resp.json();
-        
-        // Try all possible data structures
-        if (data.grades) {
-          const gradeData = data.grades['10'] || data.grades['8'] || Object.values(data.grades)[0];
-          if (gradeData?.lessons?.[0]?.questions) {
-            questions = gradeData.lessons[0].questions.slice(0, 10);
-          }
-        } else if (data.science?.grades) {
-          const gradeData = data.science.grades['10'] || Object.values(data.science.grades)[0];
-          if (gradeData?.lessons?.[0]?.questions) {
-            questions = gradeData.lessons[0].questions.slice(0, 10);
-          }
-        }
-        
-        if (questions.length === 0) {
-          // Try direct lessons
-          for (const key of Object.keys(data)) {
-            if (data[key]?.grades) {
-              const gd = Object.values(data[key].grades)[0];
-              if (gd?.lessons?.[0]?.questions) {
-                questions = gd.lessons[0].questions.slice(0, 10);
-                break;
-              }
-            }
-          }
-        }
-      } catch(e) {
-        console.warn('Quiz load failed, using sample:', e);
-      }
-      
-      // Fallback sample questions
-      if (questions.length === 0) {
-        questions = [
-          {q:"සූර්යයාගේ ශක්තිය ලැබෙන්නේ?", options:["න්‍යෂ්ටික විලයනය","රසායනික ප්‍රතික්‍රියා","ගුරුත්වය","චුම්බකත්වය"], correct:0},
-          {q:"ජලයේ රසායනික සූත්‍රය?", options:["H2O","CO2","NaCl","O2"], correct:0},
-          {q:"ශාක සෛලයක බිත්තිය සෑදී ඇත්තේ?", options:["සෙලියුලෝස්","ප්‍රෝටීන්","මේද","DNA"], correct:0},
-          {q:"ආලෝකයේ වේගය?", options:["3×10⁸ m/s","3×10⁶ m/s","3×10⁴ m/s","3×10¹⁰ m/s"], correct:0},
-          {q:"මිනිස් සිරුරේ විශාලතම ඉන්ද්‍රිය?", options:["සම","අක්මාව","හදවත","මොළය"], correct:0}
-        ];
-      }
-
+      // Update status to countdown (everyone will see the 3s UI)
       await updateDoc(doc(db, 'liveMatches', roomId), {
-        status: 'countdown',
-        questions,
-        currentQuestion: -1
+        status: 'countdown'
       });
 
-      // Countdown
-      for (let i = 3; i > 0; i--) {
-        render(`<div class="mp-countdown">${i}</div>`);
-        await new Promise(r => setTimeout(r, 1000));
-      }
-
-      await updateDoc(doc(db, 'liveMatches', roomId), {
-        status: 'playing',
-        currentQuestion: 0,
-        questionStartTime: Date.now()
-      });
+      // After 3 seconds, jump to playing state
+      setTimeout(async () => {
+        await updateDoc(doc(db, 'liveMatches', roomId), {
+          status: 'playing',
+          currentQuestion: 0,
+          questionStartTime: Date.now()
+        });
+      }, 3000);
     };
 
     window.selectAnswer = async function(index) {
@@ -613,7 +533,7 @@
         const data = snapshot.data();
         const players = data.players || {};
         
-        // Update online status
+        // Update online status locally
         const currentPlayer = players[currentUser.uid];
         if (currentPlayer) {
           currentPlayer.online = true;
@@ -622,19 +542,32 @@
         // Render based on status
         switch(data.status) {
           case 'waiting':
-          case 'countdown':
             renderWaitingRoom(data);
+            selectedAnswer = -1;
+            break;
+
+          case 'countdown':
+            gameState = 'countdown';
+            render(`
+              <div class="mp-card" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height: 300px;">
+                <div class="mp-title" style="font-size: 2rem;">Game is starting...</div>
+                <div style="font-size: 4rem; margin-top: 20px; animation: pulse 1s infinite;">⏳</div>
+              </div>
+            `);
             selectedAnswer = -1;
             break;
             
           case 'playing':
+            const isNewQuestion = currentQuestionIndex !== (data.currentQuestion || 0);
             currentQuestionIndex = data.currentQuestion || 0;
-            if (gameState !== 'playing') {
+            
+            // Only start timer and reset answer if it's a new question or just entered playing state
+            if (gameState !== 'playing' || isNewQuestion) {
               gameState = 'playing';
               selectedAnswer = -1;
+              startQuestionTimer(data);
             }
             renderQuestion(data);
-            startQuestionTimer(data);
             break;
             
           case 'leaderboard':
@@ -674,7 +607,7 @@
           clearInterval(questionTimer);
           questionTimer = null;
           
-          // Lock answers - host only
+          // Lock answers - host only executes this to prevent DB collision
           if (isHost && roomId) {
             const qRef = doc(db, 'liveMatches', roomId);
             const snap = await getDoc(qRef);
@@ -683,24 +616,24 @@
             const qIndex = qData.currentQuestion || 0;
             const correctAnswer = questions[qIndex]?.correct || 0;
             
-            // Calculate scores
             const players = qData.players || {};
-            Object.entries(players).forEach(async ([uid, p]) => {
+            let updatePayload = { status: 'leaderboard' }; // Single payload for all updates
+            
+            Object.entries(players).forEach(([uid, p]) => {
               if (p.online && p.answered) {
                 const isCorrect = p.answer === correctAnswer;
-                await updateDoc(qRef, {
-                  [`players.${uid}.score`]: (p.score || 0) + (isCorrect ? 10 : 0),
-                  [`players.${uid}.correct`]: (p.correct || 0) + (isCorrect ? 1 : 0),
-                  [`players.${uid}.wrong`]: (p.wrong || 0) + (isCorrect ? 0 : 1),
-                  [`players.${uid}.answered`]: false
-                });
+                updatePayload[`players.${uid}.score`] = (p.score || 0) + (isCorrect ? 10 : 0);
+                updatePayload[`players.${uid}.correct`] = (p.correct || 0) + (isCorrect ? 1 : 0);
+                updatePayload[`players.${uid}.wrong`] = (p.wrong || 0) + (isCorrect ? 0 : 1);
               }
+              // Reset answered status for everyone for the next round
+              updatePayload[`players.${uid}.answered`] = false;
             });
             
-            // Show leaderboard
-            await updateDoc(qRef, { status: 'leaderboard' });
+            // Execute a single Database Write!
+            await updateDoc(qRef, updatePayload);
             
-            // Next question or finish
+            // Wait 4 seconds on leaderboard, then go to next question or finish
             setTimeout(async () => {
               const nextQ = qIndex + 1;
               if (nextQ >= questions.length) {
@@ -708,7 +641,6 @@
               } else {
                 await updateDoc(qRef, { status: 'playing', currentQuestion: nextQ, questionStartTime: Date.now() });
               }
-              selectedAnswer = -1;
             }, 4000);
           }
         }
