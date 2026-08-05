@@ -5506,8 +5506,14 @@ window.performanceManager = new PerformanceManager();
   }
   
   async function createLiveRoom() {
+    if (!window.firebaseDB) {
+      alert('Firebase not ready. Please wait...');
+      return;
+    }
+    
     const db = window.firebaseDB;
-    const { collection, addDoc, doc, onSnapshot, updateDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    const firestoreModule = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    const { collection, addDoc, serverTimestamp } = firestoreModule;
     
     liveRoomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
     isRoomCreator = true;
@@ -5536,8 +5542,14 @@ window.performanceManager = new PerformanceManager();
     const code = document.getElementById('roomCodeInput').value.trim().toUpperCase();
     if (!code) return alert('Room code එකක් enter කරන්න!');
     
+    if (!window.firebaseDB) {
+      alert('Firebase not ready. Please wait...');
+      return;
+    }
+    
     const db = window.firebaseDB;
-    const { collection, query, where, getDocs, updateDoc, arrayUnion, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    const firestoreModule = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    const { collection, query, where, getDocs, updateDoc, arrayUnion, serverTimestamp } = firestoreModule;
     
     const q = query(collection(db, 'liveMatches'), where('roomCode', '==', code), where('status', '==', 'waiting'));
     const snapshot = await getDocs(q);
@@ -5573,22 +5585,22 @@ window.performanceManager = new PerformanceManager();
     document.getElementById('roomCodeDisplay').textContent = liveRoomCode;
   }
   
-  function listenToRoom() {
+  async function listenToRoom() {
     const db = window.firebaseDB;
-    const { collection, query, where, onSnapshot } = window.firebaseAuthModule;
+    const firestoreModule = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    const { collection, query, where, onSnapshot } = firestoreModule;
     
-    import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js').then(({ collection, query, where, onSnapshot }) => {
-      const q = query(collection(db, 'liveMatches'), where('roomCode', '==', liveRoomCode));
+    const q = query(collection(db, 'liveMatches'), where('roomCode', '==', liveRoomCode));
+    
+    liveMatchUnsubscribe = onSnapshot(q, (snapshot) => {
+      if (snapshot.empty) {
+        alert('Room closed!');
+        leaveLiveMatch();
+        return;
+      }
       
-      liveMatchUnsubscribe = onSnapshot(q, (snapshot) => {
-        if (snapshot.empty) {
-          alert('Room closed!');
-          leaveLiveMatch();
-          return;
-        }
-        
-        const data = snapshot.docs[0].data();
-        document.getElementById('playerCount').textContent = data.players.length;
+      const data = snapshot.docs[0].data();
+      document.getElementById('playerCount').textContent = data.players.length;
         
         // Player list
         const listEl = document.getElementById('playerList');
@@ -5611,7 +5623,6 @@ window.performanceManager = new PerformanceManager();
           startQuizForMatch();
         }
       });
-    });
   }
   
   async function startLiveMatch() {
