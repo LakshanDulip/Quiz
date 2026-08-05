@@ -105,7 +105,6 @@
         </div>
       `);
 
-      // Event Listeners සම්බන්ධ කිරීම
       document.getElementById('btnCreateRoom').addEventListener('click', () => {
         playerName = document.getElementById('playerName').value.trim() || 'Player';
         renderCreateSettings();
@@ -157,7 +156,6 @@
         </div>
       `);
 
-      // Event Listeners
       document.getElementById('setSubject').addEventListener('change', async () => {
         document.getElementById('setLesson').innerHTML = '<option value="">Loading...</option>';
         await updateSettingsLessons();
@@ -168,10 +166,8 @@
       });
 
       document.getElementById('btnConfirmCreate').addEventListener('click', confirmCreateRoom);
-      
       document.getElementById('btnBackLobby').addEventListener('click', renderLobby);
 
-      // මුලින්ම පාඩම් Load කිරීම
       updateSettingsLessons(); 
     }
 
@@ -184,19 +180,28 @@
       
       try {
         const resp = await fetch(`data/${subject}.json`);
-        if (!resp.ok) throw new Error('Failed');
+        if (!resp.ok) throw new Error('Failed to load JSON');
         const data = await resp.json();
         
         let lessons = [];
+        
+        // Auto-search for lessons
         if (data.grades?.[grade]?.lessons) {
           lessons = data.grades[grade].lessons;
         } else if (data[subject]?.grades?.[grade]?.lessons) {
           lessons = data[subject].grades[grade].lessons;
         } else if (data.subjects?.[subject]?.grades?.[grade]?.lessons) {
           lessons = data.subjects[subject].grades[grade].lessons;
+        } else {
+          for (let key in data) {
+            if (data[key]?.grades?.[grade]?.lessons) {
+              lessons = data[key].grades[grade].lessons;
+              break;
+            }
+          }
         }
         
-        if (lessons.length === 0) {
+        if (!lessons || lessons.length === 0) {
           select.innerHTML = '<option value="">No lessons found</option>';
           return;
         }
@@ -205,6 +210,7 @@
           `<option value="${l.id}">${escapeHtml(l.title)} (${l.questions?.length || 0} Q)</option>`
         ).join('');
       } catch(e) {
+        console.error(e);
         select.innerHTML = '<option value="">Error loading</option>';
       }
     }
@@ -231,12 +237,19 @@
         const data = await resp.json();
         let lessons = [];
         
-        if (data.subjects?.[subject]?.grades?.[grade]?.lessons) {
-          lessons = data.subjects[subject].grades[grade].lessons;
-        } else if (data.grades?.[grade]?.lessons) {
+        if (data.grades?.[grade]?.lessons) {
           lessons = data.grades[grade].lessons;
         } else if (data[subject]?.grades?.[grade]?.lessons) {
           lessons = data[subject].grades[grade].lessons;
+        } else if (data.subjects?.[subject]?.grades?.[grade]?.lessons) {
+          lessons = data.subjects[subject].grades[grade].lessons;
+        } else {
+          for (let key in data) {
+            if (data[key]?.grades?.[grade]?.lessons) {
+              lessons = data[key].grades[grade].lessons;
+              break;
+            }
+          }
         }
         
         const lesson = lessons.find(l => l.id === lessonId);
@@ -248,7 +261,7 @@
       
       if (questions.length === 0) {
         questions = [
-          {q:"Sample Q1?", options:["A","B","C","D"], correct:0},
+          {q:"Sample Q1? (No questions found in JSON)", options:["A","B","C","D"], correct:0},
           {q:"Sample Q2?", options:["A","B","C","D"], correct:1}
         ];
       }
