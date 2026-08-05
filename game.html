@@ -189,10 +189,13 @@
       }
     };
 
+    // ============ ROOM FUNCTIONS ============
+    // 1. Settings Menu එක පෙන්වීම
     window.createRoom = function() {
       renderCreateSettings();
     };
     
+    // 2. Settings තෝරා අවසන් වූ පසු Room එක සෑදීම
     window.confirmCreateRoom = async function() {
       const name = document.getElementById('playerName')?.value.trim() || 'Player';
       const subject = document.getElementById('setSubject')?.value || 'science';
@@ -211,7 +214,7 @@
       roomId = `room_${Date.now()}`;
       isHost = true;
 
-      // Load and Select Questions
+      // ප්‍රශ්න Load කිරීම
       let questions = [];
       try {
         const resp = await fetch(`data/${subject}.json`);
@@ -228,7 +231,6 @@
         
         const lesson = lessons.find(l => l.id === lessonId);
         if (lesson?.questions) {
-          // Shuffle and slice
           const shuffled = [...lesson.questions].sort(() => Math.random() - 0.5);
           questions = shuffled.slice(0, qCount);
         }
@@ -236,6 +238,7 @@
         console.warn('Load failed, using samples');
       }
       
+      // ප්‍රශ්න නොමැති නම් පමණක් Sample Q ලබා දීම
       if (questions.length === 0) {
         questions = [
           {q:"Sample Q1?", options:["A","B","C","D"], correct:0},
@@ -243,6 +246,7 @@
         ];
       }
 
+      // Room Data Database එකට දැමීම
       await setDoc(doc(db, 'liveMatches', roomId), {
         roomCode,
         hostId: currentUser.uid,
@@ -465,12 +469,12 @@
     window.startGame = async function() {
       if (!isHost || !roomId) return;
       
-      // Update status to countdown (everyone will see the 3s UI)
+      // Status එක countdown වලට මාරු කිරීම
       await updateDoc(doc(db, 'liveMatches', roomId), {
         status: 'countdown'
       });
 
-      // After 3 seconds, jump to playing state
+      // තත්පර 3කට පසු ප්‍රශ්න ආරම්භ කිරීම
       setTimeout(async () => {
         await updateDoc(doc(db, 'liveMatches', roomId), {
           status: 'playing',
@@ -561,7 +565,7 @@
             const isNewQuestion = currentQuestionIndex !== (data.currentQuestion || 0);
             currentQuestionIndex = data.currentQuestion || 0;
             
-            // Only start timer and reset answer if it's a new question or just entered playing state
+            // Only start timer and reset answer if it's a new question
             if (gameState !== 'playing' || isNewQuestion) {
               gameState = 'playing';
               selectedAnswer = -1;
@@ -607,7 +611,7 @@
           clearInterval(questionTimer);
           questionTimer = null;
           
-          // Lock answers - host only executes this to prevent DB collision
+          // Lock answers and calculate score - Host only executes this to prevent DB collision
           if (isHost && roomId) {
             const qRef = doc(db, 'liveMatches', roomId);
             const snap = await getDoc(qRef);
@@ -630,7 +634,7 @@
               updatePayload[`players.${uid}.answered`] = false;
             });
             
-            // Execute a single Database Write!
+            // Execute a single Database Write
             await updateDoc(qRef, updatePayload);
             
             // Wait 4 seconds on leaderboard, then go to next question or finish
