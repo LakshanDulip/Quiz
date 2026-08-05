@@ -1656,12 +1656,44 @@
                 copyInviteLink();
             }
         }
+function shareWhatsApp() {
+    const subject = window.sharedSubject || 'N/A';
+    const lesson = window.sharedLesson || 'N/A';
+    const hostName = window.hostName || 'Host';
+    const inviteLink = getInviteLink();
 
-        function shareWhatsApp() {
-            const text = encodeURIComponent(
-                `🎮 Join my Quiz Hub game! Room code: ${roomCode}\n${getInviteLink()}`);
-            window.open(`https://wa.me/?text=${text}`, '_blank');
-        }
+    const text = encodeURIComponent(
+`🎮 *Quiz Hub Multiplayer Game* එකට එකතු වෙන්න!
+
+👑 *Created By:* ${hostName}
+📚 *Grade:* ${grade}
+📖 *Lesson:* ${lesson}
+🔑 *Room Code:* *${roomCode}*
+
+━━━━━━━━━━━━━━━━━━━━
+
+📌 *Join කරන ආකාරය*
+
+1️⃣ පහත *Join Link* එක Open කරන්න.
+2️⃣ ඔබගේ *Username* එක ඇතුළත් කරන්න.
+3️⃣ ඉහත *Room Code* එක ලබා දෙන්න.
+4️⃣ 🚀 Game එකට Join වෙලා Quiz Battle එක ආරම්භ කරන්න!
+
+🔗 *Join Link*
+${inviteLink}
+
+━━━━━━━━━━━━━━━━━━━━
+
+🏆 *Fastest Player Wins*
+⚡ *Real-time Multiplayer*
+🎯 *Challenge Your Friends*
+
+━━━━━━━━━━━━━━━━━━━━
+🦊 *ᴅᴇᴠᴇʟᴏᴘᴇᴅ ʙʏ ʟᴀᴋꜱʜᴀɴ ᴅᴜʟɪᴘ*`
+    );
+
+    window.open(`https://wa.me/?text=${text}`, '_blank');
+}
 
         function toggleQRCode() {
             const wrap = document.getElementById('qrWrap');
@@ -2111,6 +2143,11 @@
 
         function renderWaitingRoomFull(data) {
             const players = data.players || {};
+
+             window.hostName = data.hostName || 'Host';
+             window.sharedSubject = getSubjectName(data.subject || 'science');
+             window.sharedLesson = data.lessonName || data.lessonId || 'N/A';
+             window.sharedGrade = data.grade ? `${data.grade} ශ්‍රේණිය` : 'N/A';
             const playerListHTML = buildPlayerListHTML(players, data.hostId);
             const playerCount = Object.values(players).filter(p => p.online).length;
             const allReady = playerCount >= 2 && Object.values(players).filter(p => p.online).every(p => p.ready);
