@@ -5683,9 +5683,15 @@ window.performanceManager = new PerformanceManager();
   
   function startLiveQuiz() {
     if (liveMatchLesson) {
+      // Force new quiz - reset appState.quiz
+      appState.quiz = null;
+      // Navigate to quiz (triggers fresh start)
       navigate(`#/subject/${liveMatchLesson.subject}/grade/${liveMatchLesson.grade}/quiz/${liveMatchLesson.lessonId}`);
-      setMode(MODES.GAME);
-      showMascotSpeech('⚡ Live Match!', 3000);
+      // Delay mode set to ensure quiz is loaded
+      setTimeout(() => {
+        setMode(MODES.GAME);
+        showMascotSpeech('⚡ Live Match!', 3000);
+      }, 300);
       startLiveScoreSync();
     }
   }
@@ -7057,6 +7063,8 @@ window.performanceManager = new PerformanceManager();
         cancelAnimationFrame(timerInterval);
         timerInterval = null;
       }
+      // Live match: force fresh quiz
+      const isLiveMatch = !!liveRoomCode;
       appState.quiz = {
         subject, grade, lessonId,
         order: shuffleIdx(lesson.questions.length),
@@ -7071,15 +7079,14 @@ window.performanceManager = new PerformanceManager();
         gameOver: false,
         lives: MAX_LIVES,
         timer: MAX_TIMER,
-        powerups: { fiftyFifty: 1, skip: 1 },
+        powerups: { fiftyFifty: isLiveMatch ? 0 : 1, skip: isLiveMatch ? 0 : 1 },
         studyAnswers: {},
         isFlipped: false,
         hiddenOptions: [],
         autoAdvanceTimer: null,
-        startTime: Date.now()
+        startTime: Date.now(),
+        isLiveMatch: isLiveMatch
       };
-    }
-
     const qz = appState.quiz;
     const total = qz.order.length;
 
