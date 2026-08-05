@@ -1660,10 +1660,9 @@ function shareWhatsApp() {
     const hostName = window.hostName || 'Host';
     const grade = window.sharedGrade || 'N/A';
     const lesson = window.sharedLesson || 'N/A';
-    const code = window.roomCode || roomCode || 'N/A';
     const inviteLink = getInviteLink();
 
-    const text = `🎮 *Quiz Hub Multiplayer Game* එකට එකතු වෙන්න!\n\n👑 *Created By:* ${hostName}\n📚 *Grade:* ${grade}\n📖 *Lesson:* ${lesson}\n🔑 *Room Code:* *${code}*\n\n━━━━━━━━━━━━━━━━━━━━\n\n📌 *Join කරන ආකාරය*\n\n1️⃣ පහත *Join Link* එක Open කරන්න.\n2️⃣ ඔබගේ *Username* එක ඇතුළත් කරන්න.\n3️⃣ ඉහත *Room Code* එක ලබා දෙන්න.\n4️⃣ 🚀 Game එකට Join වෙලා Quiz Battle එක ආරම්භ කරන්න!\n\n🔗 *Join Link*\n${inviteLink}\n\n━━━━━━━━━━━━━━━━━━━━\n\n🏆 *Fastest Player Wins*\n⚡ *Real-time Multiplayer*\n🎯 *Challenge Your Friends*\n\n━━━━━━━━━━━━━━━━━━━━\n🦊 *ᴅᴇᴠᴇʟᴏᴘᴇᴅ ʙʏ ʟᴀᴋꜱʜᴀɴ ᴅᴜʟɪᴘ*`;
+    const text = `🎮 *Quiz Hub Multiplayer Game* එකට එකතු වෙන්න!\n\n👑 *Created By:* ${hostName}\n📚 *Grade:* ${grade}\n📖 *Lesson:* ${lesson}\n🔑 *Room Code:* *${roomCode}*\n\n━━━━━━━━━━━━━━━━━━━━\n\n📌 *Join කරන ආකාරය*\n\n1️⃣ පහත *Join Link* එක Open කරන්න.\n2️⃣ ඔබගේ *Username* එක ඇතුළත් කරන්න.\n3️⃣ ඉහත *Room Code* එක ලබා දෙන්න.\n4️⃣ 🚀 Game එකට Join වෙලා Quiz Battle එක ආරම්භ කරන්න!\n\n🔗 *Join Link*\n${inviteLink}\n\n━━━━━━━━━━━━━━━━━━━━\n\n🏆 *Fastest Player Wins*\n⚡ *Real-time Multiplayer*\n🎯 *Challenge Your Friends*\n\n━━━━━━━━━━━━━━━━━━━━\n🦊 *ᴅᴇᴠᴇʟᴏᴘᴇᴅ ʙʏ ʟᴀᴋꜱʜᴀɴ ᴅᴜʟɪᴘ*`;
 
     window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
 }
@@ -1870,8 +1869,7 @@ function shareWhatsApp() {
             if (createBtn) createBtn.disabled = true;
             try {
                 gameQuestionTime = qTime;
-                roomCode = Math.random().toString(36).substring(2, 8).toUpperCase
-                window.roomCode = roomCode;  // 👈 මේ line එක add කරන්න
+                roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
                 roomId = `room_${Date.now()}`;
                 isHost = true;
                 previousPlayers = null;
