@@ -5602,17 +5602,17 @@ window.performanceManager = new PerformanceManager();
     
     // Emotion messages
     const emotionMessages = {
-      sleepy: ['😴 නිදිමතයි...', '💤 zzz...', '🥱 ඇඟ බරයි...'],
-      angry: ['😡 අමාරු ප්‍රශ්න!', '🤬 දිගටම කරන්න!', '😤 මට බෑ!'],
-      singing: ['🎤 ලලලා...', '🎵 සිංදු කියමු!', '🎶 ලාලාලා...'],
+      sleepy: ['😴 නිදිමතයි...', '💤 zzz...', '🥱 නිදාගන්න ඕන...'],
+      angry: ['😡 ප්‍රශ්න ප්‍රශ්න!', '🤬 දිගටම කරන්න!', '😤 මට බෑ!'],
+      singing: ['🎤 ලාලාලා...', '🎵 සිංදුවක් කියමු!', '🎶 ලාලාලා...'],
       crying: ['😢 අඬන්න හිතෙනවා...', '💧 වැරදුනා!', '😭 දුකයි!'],
       smile: ['😊 සතුටුයි!', '😄 හරිම හොඳයි!', '☺️ ලස්සනයි!'],
-      dance: ['💃 නටමු!', '🕺 ඩාන්ස්!', '🎉 පාටියක්!'],
-      happy: ['😊 හෙලෝ!', '😄 සතුටුයි!', '🎉 යාළුවා!'],
-      love: ['💕 ආදරෙයි!', '💖 ඔබ නියමයි!', '💝 මගේ යාළුවා!'],
-      surprised: ['😲 වාව්!', '😮 ආශ්චර්යයි!', '🤩 අපූරුයි!'],
-      cool: ['😎 Cool!', '🦊 සුපිරි!', '💪 ශක්තිමත්!'],
-      wink: ['😉 හරි!', '😜 දඟයා!', '🦊 බොරුවට නෙමෙයි!']
+      dance: ['💃 අපි නටමු!', '🕺 ඩාන්ස්!', '🎉 Dance!'],
+      happy: ['😊 හෙලෝ!', '😄 සතුටුයි!', '🎉 හැපි!'],
+      love: ['💕 ආදරෙයි!', '💖 ඔයා නියමයි!', '💝 ඔයා මගේ හොඳම යාළුවා!'],
+      surprised: ['😲 වාව්!', '😮 නියමයිනෙ!', '🤩 අපූරුයි!'],
+      cool: ['😎 Cool!', '🦊 සුපිරි!', '💪 වැඩ්ඩෙක්!'],
+      wink: ['😉 හරි!', '😜 දඟයා!', '🦊 හි හි!']
     };
     
     const messages = emotionMessages[randomEmotion] || emotionMessages.smile;
@@ -5797,7 +5797,7 @@ window.performanceManager = new PerformanceManager();
     const container = document.getElementById('mascotContainer');
     if (!container) return;
     
-    const hearts = ['💕', '💖', '💗', '💝', '✨', '💫', '🌟', '🦊'];
+    const hearts = ['💕', '💖', '💗', '🏵️', '✨', '❄️', '🌟', '🦊'];
     const rect = container.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
@@ -5840,7 +5840,7 @@ window.performanceManager = new PerformanceManager();
     if (mascot) {
       if (!mascotVisible) {
         // Smooth hide
-        showMascotSpeech('👋 මම යනවා... ආයෙත් එන්නම්! 💕', 2000);
+        showMascotSpeech('👋 මම යනවා.😔', 2000);
         mascot.classList.add('hiding');
         setTimeout(() => {
           mascot.style.display = 'none';
@@ -5902,7 +5902,7 @@ window.performanceManager = new PerformanceManager();
         container.classList.add('happy');
         setTimeout(() => container.classList.remove('happy'), 1500);
       }
-      showMascotSpeech('🥱 ඇහැරුනා!', 2000);
+      showMascotSpeech('🥱 ප්‍රශ්නයක් කරමුද!', 2000);
       mascotIsSleeping = false;
     }
     
