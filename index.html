@@ -4339,33 +4339,17 @@ window.performanceManager = new PerformanceManager();
     </div>
   </div>
 </div>
+
 <!-- Live Match Modal -->
 <div class="modal-overlay" id="liveMatchModal">
-  <div class="modal-content" style="max-width:500px; text-align:center;">
+  <div class="modal-content" style="max-width:450px; text-align:center;">
     <button class="modal-close-btn" onclick="leaveLiveMatch()">✕</button>
-    <span style="font-size:2.5rem;">⚡</span>
+    <span style="font-size:3rem;">⚡</span>
     <h2 class="modal-title">Live Match</h2>
     
-    <!-- Create/Join -->
+    <!-- Create Room -->
     <div id="createRoomSection">
-      <p style="color:var(--text-secondary); font-size:0.85rem; margin-bottom:12px;">Lesson එක select කර room එකක් හදන්න!</p>
-      
-      <!-- Subject Select -->
-      <select id="matchSubject" onchange="updateMatchGrades()" style="width:100%; padding:10px; margin-bottom:8px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-main); color:var(--text-primary);">
-        <option value="science">🔬 විද්‍යාව</option>
-        <option value="maths">📐 ගණිතය</option>
-      </select>
-      
-      <!-- Grade Select -->
-      <select id="matchGrade" onchange="updateMatchLessons()" style="width:100%; padding:10px; margin-bottom:8px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-main); color:var(--text-primary);">
-        <option value="">Grade තෝරන්න</option>
-      </select>
-      
-      <!-- Lesson Select -->
-      <select id="matchLesson" style="width:100%; padding:10px; margin-bottom:12px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-main); color:var(--text-primary);">
-        <option value="">Lesson තෝරන්න</option>
-      </select>
-      
+      <p style="color:var(--text-secondary); font-size:0.85rem; margin-bottom:12px;">Create a room and invite friends!</p>
       <button class="btn btn-primary" onclick="createLiveRoom()" style="width:100%; justify-content:center; margin-bottom:8px;">
         🏠 Create Room
       </button>
@@ -4379,31 +4363,29 @@ window.performanceManager = new PerformanceManager();
     
     <!-- Waiting Room -->
     <div id="waitingRoomSection" style="display:none;">
-      <p style="font-size:1.8rem; font-weight:700; letter-spacing:5px; margin-bottom:4px;" id="roomCodeDisplay">------</p>
-      <p style="color:var(--text-secondary); font-size:0.8rem;">📋 Share this code!</p>
-      <button class="btn btn-outline" onclick="copyRoomCode()" style="width:100%; justify-content:center; margin:8px 0;">
+      <p style="font-size:1.5rem; font-weight:700; letter-spacing:4px; margin-bottom:8px;" id="roomCodeDisplay">------</p>
+      <p style="color:var(--text-secondary); font-size:0.8rem;">Share this code with friends!</p>
+      <button class="btn btn-outline" onclick="copyRoomCode()" style="width:100%; justify-content:center; margin:10px 0;">
         <i class="fas fa-copy"></i> Copy Code
       </button>
-      <p style="color:var(--text-secondary); font-size:0.8rem;">📚 <strong id="matchInfo">-</strong></p>
-      <p style="color:var(--text-secondary);">Players: <strong id="playerCount">1</strong>/10</p>
-      <div id="playerList" style="text-align:left; font-size:0.8rem; margin:10px 0; max-height:150px; overflow-y:auto;"></div>
-      <button class="btn btn-primary" onclick="startLiveMatch()" style="width:100%; justify-content:center;" id="startMatchBtn">
+      <p style="color:var(--text-secondary); font-size:0.85rem;">Players ready: <strong id="playerCount">1</strong></p>
+      <div id="playerList" style="text-align:left; font-size:0.8rem; margin:10px 0;"></div>
+      <button class="btn btn-primary" onclick="startLiveMatch()" style="width:100%; justify-content:center;">
         ⚡ Start Match
       </button>
     </div>
     
-    <!-- Live Scores -->
-    <div id="liveScoresSection" style="display:none;">
-      <p style="font-weight:700; font-size:1.1rem;">🏁 Live Scores</p>
-      <p style="color:var(--text-secondary); font-size:0.75rem; margin-bottom:8px;">Game Mode - Lives: ❤️❤️❤️</p>
-      <div id="liveScoresList" style="text-align:left; font-size:0.8rem; margin:10px 0; max-height:200px; overflow-y:auto;"></div>
-      <p style="color:var(--text-secondary); font-size:0.7rem;">Players finish when lives = 0 or complete quiz</p>
-      <button class="btn btn-outline" onclick="leaveLiveMatch()" style="width:100%; justify-content:center; margin-top:10px;">
-        Leave Match
+    <!-- Live Results -->
+    <div id="liveResultsSection" style="display:none;">
+      <p style="font-weight:700; font-size:1.1rem;">🏁 Match Results</p>
+      <div id="liveResultsList" style="text-align:left; font-size:0.85rem; margin:10px 0;"></div>
+      <button class="btn btn-primary" onclick="leaveLiveMatch()" style="width:100%; justify-content:center;">
+        Done
       </button>
     </div>
   </div>
 </div>
+    
     <!-- Leaderboard for this quiz -->
     <div style="margin-top:16px; text-align:left;">
       <p style="font-weight:600; font-size:0.85rem;">🏆 Challenge Leaderboard</p>
@@ -4575,8 +4557,9 @@ window.performanceManager = new PerformanceManager();
   let deferredPrompt = null;
 
   // ============ AUTHENTICATION SYSTEM ============
-  var currentUser = localStorage.getItem('quizUsername') || sessionStorage.getItem('quizGuestName') || null;
+  var currentUser = localStorage.getItem('quizUsername') || sessionStorage.getItem('quizGuestName');
   var isGuest = sessionStorage.getItem('isGuest') === 'true';
+
   function checkAuth() {
     const loginModal = document.getElementById('loginModal');
     // ===== FIREBASE AUTH START: Check Firebase user first =====
@@ -5505,12 +5488,10 @@ window.performanceManager = new PerformanceManager();
     modal.classList.add('active');
   }
 
-  // ============ LIVE MATCH ============
+    // ============ LIVE MATCH ============
   let liveRoomCode = null;
   let liveMatchUnsubscribe = null;
   let isRoomCreator = false;
-  let liveMatchLesson = null;
-  let liveMatchScoreInterval = null;
   
   function showLiveMatch() {
     if (!window.isFirebaseUser || !window.isFirebaseUser()) {
@@ -5521,58 +5502,36 @@ window.performanceManager = new PerformanceManager();
     document.getElementById('liveMatchModal').classList.add('active');
     document.getElementById('createRoomSection').style.display = 'block';
     document.getElementById('waitingRoomSection').style.display = 'none';
-    document.getElementById('liveScoresSection').style.display = 'none';
-    updateMatchGrades();
-  }
-  
-  function updateMatchGrades() {
-    const gradeSelect = document.getElementById('matchGrade');
-    if (!gradeSelect) return;
-    gradeSelect.innerHTML = '<option value="">Grade තෝරන්න</option>' +
-      GRADES.map(g => `<option value="${g}">${g} ශ්‍රේණිය</option>`).join('');
-    const lessonSelect = document.getElementById('matchLesson');
-    if (lessonSelect) lessonSelect.innerHTML = '<option value="">Lesson තෝරන්න</option>';
-  }
-  
-  async function updateMatchLessons() {
-    const subject = document.getElementById('matchSubject')?.value;
-    const grade = document.getElementById('matchGrade')?.value;
-    const lessonSelect = document.getElementById('matchLesson');
-    if (!grade || !lessonSelect) { lessonSelect.innerHTML = '<option value="">Lesson තෝරන්න</option>'; return; }
-    const lessons = await getLessons(subject, grade);
-    lessonSelect.innerHTML = '<option value="">Lesson තෝරන්න</option>' +
-      lessons.map(l => `<option value="${l.id}">${escapeHtml(l.title)} (${l.questions?.length||0} Q)</option>`).join('');
+    document.getElementById('liveResultsSection').style.display = 'none';
   }
   
   async function createLiveRoom() {
-    const subject = document.getElementById('matchSubject')?.value;
-    const grade = document.getElementById('matchGrade')?.value;
-    const lessonId = document.getElementById('matchLesson')?.value;
-    if (!grade || !lessonId) return alert('Subject, Grade, Lesson තෝරන්න!');
-    if (!window.firebaseDB) { alert('Firebase not ready.'); return; }
+    if (!window.firebaseDB) {
+      alert('Firebase not ready. Please wait...');
+      return;
+    }
     
     const db = window.firebaseDB;
-    const m = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    const firestoreModule = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    const { collection, addDoc, serverTimestamp } = firestoreModule;
+    
     liveRoomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
     isRoomCreator = true;
-    liveMatchLesson = { subject, grade, lessonId };
     
     const user = window.getFirebaseUser();
-    await m.addDoc(m.collection(db, 'liveMatches'), {
+    await addDoc(collection(db, 'liveMatches'), {
       roomCode: liveRoomCode,
       creator: user.displayName || user.email,
       creatorId: user.uid,
-      subject, grade, lessonId,
       players: [{
         name: user.displayName || user.email,
         uid: user.uid,
         score: 0,
-        lives: 3,
-        status: 'waiting',
+        done: false,
         joinedAt: new Date().toISOString()
       }],
-      matchStatus: 'waiting',
-      createdAt: m.serverTimestamp()
+      status: 'waiting',
+      createdAt: serverTimestamp()
     });
     
     showWaitingRoom();
@@ -5580,30 +5539,37 @@ window.performanceManager = new PerformanceManager();
   }
   
   async function joinLiveRoom() {
-    const code = document.getElementById('roomCodeInput')?.value.trim().toUpperCase();
+    const code = document.getElementById('roomCodeInput').value.trim().toUpperCase();
     if (!code) return alert('Room code එකක් enter කරන්න!');
-    if (!window.firebaseDB) { alert('Firebase not ready.'); return; }
+    
+    if (!window.firebaseDB) {
+      alert('Firebase not ready. Please wait...');
+      return;
+    }
     
     const db = window.firebaseDB;
-    const m = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
-    const q = m.query(m.collection(db, 'liveMatches'), m.where('roomCode', '==', code), m.where('matchStatus', '==', 'waiting'));
-    const snapshot = await m.getDocs(q);
-    if (snapshot.empty) { alert('Room not found!'); return; }
+    const firestoreModule = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    const { collection, query, where, getDocs, updateDoc, arrayUnion, serverTimestamp } = firestoreModule;
+    
+    const q = query(collection(db, 'liveMatches'), where('roomCode', '==', code), where('status', '==', 'waiting'));
+    const snapshot = await getDocs(q);
+    
+    if (snapshot.empty) {
+      alert('Room not found or match already started!');
+      return;
+    }
     
     const roomDoc = snapshot.docs[0];
-    const data = roomDoc.data();
     liveRoomCode = code;
     isRoomCreator = false;
-    liveMatchLesson = { subject: data.subject, grade: data.grade, lessonId: data.lessonId };
     
     const user = window.getFirebaseUser();
-    await m.updateDoc(roomDoc.ref, {
-      players: m.arrayUnion({
+    await updateDoc(roomDoc.ref, {
+      players: arrayUnion({
         name: user.displayName || user.email,
         uid: user.uid,
         score: 0,
-        lives: 3,
-        status: 'waiting',
+        done: false,
         joinedAt: new Date().toISOString()
       })
     });
@@ -5615,126 +5581,110 @@ window.performanceManager = new PerformanceManager();
   function showWaitingRoom() {
     document.getElementById('createRoomSection').style.display = 'none';
     document.getElementById('waitingRoomSection').style.display = 'block';
-    document.getElementById('liveScoresSection').style.display = 'none';
+    document.getElementById('liveResultsSection').style.display = 'none';
     document.getElementById('roomCodeDisplay').textContent = liveRoomCode;
-    const startBtn = document.getElementById('startMatchBtn');
-    if (startBtn) startBtn.style.display = isRoomCreator ? 'block' : 'none';
-    if (liveMatchLesson) {
-      const meta = subjectMeta(liveMatchLesson.subject);
-      const infoEl = document.getElementById('matchInfo');
-      if (infoEl) infoEl.textContent = `${meta.sinhala} - ${liveMatchLesson.grade} ශ්‍රේණිය`;
-    }
   }
   
   async function listenToRoom() {
     const db = window.firebaseDB;
-    const m = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
-    const q = m.query(m.collection(db, 'liveMatches'), m.where('roomCode', '==', liveRoomCode));
+    const firestoreModule = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    const { collection, query, where, onSnapshot } = firestoreModule;
     
-    liveMatchUnsubscribe = m.onSnapshot(q, (snapshot) => {
-      if (snapshot.empty) { alert('Room closed!'); leaveLiveMatch(); return; }
-      const data = snapshot.docs[0].data();
+    const q = query(collection(db, 'liveMatches'), where('roomCode', '==', liveRoomCode));
+    
+    liveMatchUnsubscribe = onSnapshot(q, (snapshot) => {
+      if (snapshot.empty) {
+        alert('Room closed!');
+        leaveLiveMatch();
+        return;
+      }
       
-      const countEl = document.getElementById('playerCount');
-      const listEl = document.getElementById('playerList');
-      if (countEl) countEl.textContent = data.players.length;
-      if (listEl) {
+      const data = snapshot.docs[0].data();
+      document.getElementById('playerCount').textContent = data.players.length;
+        
+        // Player list
+        const listEl = document.getElementById('playerList');
         listEl.innerHTML = data.players.map(p => `
           <div style="padding:4px 0; display:flex; justify-content:space-between;">
             <span>👤 ${escapeHtml(p.name)}</span>
-            <span style="color:${p.status==='playing'?'var(--accent)':p.status==='done'?'var(--correct-color)':p.status==='dead'?'var(--wrong-color)':'var(--text-secondary)'};">
-              ${p.status==='done'?'✅ '+p.score:p.status==='dead'?'💀 Out':'⏳ Waiting'}
+            <span style="color:${p.done ? 'var(--correct-color)' : 'var(--text-secondary)'};">
+              ${p.done ? '✅ Done ('+p.score+')' : '⏳ Playing...'}
             </span>
           </div>
         `).join('');
-      }
-      
-      if (data.matchStatus === 'playing') {
-        document.getElementById('waitingRoomSection').style.display = 'none';
-        document.getElementById('liveScoresSection').style.display = 'block';
-        document.getElementById('liveMatchModal').classList.remove('active');
-        startLiveQuiz();
-        updateLiveScores(data.players);
-      }
-    });
-  }
-  
-  function updateLiveScores(players) {
-    const sorted = [...players].sort((a, b) => b.score - a.score);
-    const el = document.getElementById('liveScoresList');
-    if (!el) return;
-    el.innerHTML = sorted.map((p, i) => `
-      <div style="padding:6px; margin:2px 0; background:${i===0?'rgba(250,204,21,0.1)':'var(--bg-main)'}; border-radius:6px; display:flex; justify-content:space-between; align-items:center;">
-        <span>${i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1)} ${escapeHtml(p.name)}</span>
-        <span>❤️${p.lives||0} | <strong style="color:var(--primary-color);">${p.score||0}</strong></span>
-      </div>
-    `).join('');
+        
+        // Check if all done
+        if (data.players.every(p => p.done) && data.players.length >= 2) {
+          showLiveResults(data.players);
+        }
+        
+        // Match started by creator
+        if (data.status === 'playing' && !isRoomCreator) {
+          startQuizForMatch();
+        }
+      });
   }
   
   async function startLiveMatch() {
     if (!isRoomCreator) return;
+    
     const db = window.firebaseDB;
-    const m = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
-    const q = m.query(m.collection(db, 'liveMatches'), m.where('roomCode', '==', liveRoomCode));
-    const snapshot = await m.getDocs(q);
-    if (!snapshot.empty) await m.updateDoc(snapshot.docs[0].ref, { matchStatus: 'playing' });
-  }
-  
-  function startLiveQuiz() {
-    if (liveMatchLesson) {
-      // Force new quiz - reset appState.quiz
-      appState.quiz = null;
-      // Navigate to quiz (triggers fresh start)
-      navigate(`#/subject/${liveMatchLesson.subject}/grade/${liveMatchLesson.grade}/quiz/${liveMatchLesson.lessonId}`);
-      // Delay mode set to ensure quiz is loaded
-      setTimeout(() => {
-        setMode(MODES.GAME);
-        showMascotSpeech('⚡ Live Match!', 3000);
-      }, 300);
-      startLiveScoreSync();
+    const { collection, query, where, getDocs, updateDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    
+    const q = query(collection(db, 'liveMatches'), where('roomCode', '==', liveRoomCode));
+    const snapshot = await getDocs(q);
+    if (!snapshot.empty) {
+      await updateDoc(snapshot.docs[0].ref, { status: 'playing' });
+      startQuizForMatch();
     }
   }
   
-  async function startLiveScoreSync() {
-    liveMatchScoreInterval = setInterval(async () => {
-      if (!liveRoomCode || !appState.quiz || !window.getFirebaseUser()) return;
+  function startQuizForMatch() {
+    document.getElementById('liveMatchModal').classList.remove('active');
+    navigate('#/subject/science/grade/10');
+    showMascotSpeech('⚡ Live Match Started!', 3000);
+  }
+  
+  function showLiveResults(players) {
+    document.getElementById('waitingRoomSection').style.display = 'none';
+    document.getElementById('liveResultsSection').style.display = 'block';
+    
+    const sorted = [...players].sort((a, b) => b.score - a.score);
+    const listEl = document.getElementById('liveResultsList');
+    listEl.innerHTML = sorted.map((p, i) => `
+      <div style="padding:8px; margin:4px 0; background:${i===0?'rgba(250,204,21,0.1)':'var(--bg-main)'}; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+        <span>${i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1)} ${escapeHtml(p.name)}</span>
+        <span style="font-weight:700; color:var(--primary-color);">${p.score} pts</span>
+      </div>
+    `).join('');
+  }
+  
+  async function leaveLiveMatch() {
+    if (liveMatchUnsubscribe) {
+      liveMatchUnsubscribe();
+      liveMatchUnsubscribe = null;
+    }
+    
+    // Update player as done if playing
+    if (liveRoomCode && window.getFirebaseUser()) {
       const db = window.firebaseDB;
-      const m = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
-      const q = m.query(m.collection(db, 'liveMatches'), m.where('roomCode', '==', liveRoomCode));
-      const snapshot = await m.getDocs(q);
+      const { collection, query, where, getDocs, updateDoc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+      
+      const q = query(collection(db, 'liveMatches'), where('roomCode', '==', liveRoomCode));
+      const snapshot = await getDocs(q);
       if (!snapshot.empty) {
         const docRef = snapshot.docs[0].ref;
         const data = snapshot.docs[0].data();
         const uid = window.getFirebaseUser().uid;
-        const qz = appState.quiz;
         const updatedPlayers = data.players.map(p => 
-          p.uid === uid ? { ...p, score: qz.score||0, lives: qz.lives||0, status: qz.gameOver?'dead':qz.showResult?'done':'playing' } : p
+          p.uid === uid ? { ...p, done: true, score: appState.totalScore || 0 } : p
         );
-        await m.updateDoc(docRef, { players: updatedPlayers });
+        await updateDoc(docRef, { players: updatedPlayers });
       }
-    }, 2000);
-  }
-  
-  async function leaveLiveMatch() {
-    if (liveMatchScoreInterval) { clearInterval(liveMatchScoreInterval); liveMatchScoreInterval = null; }
-    if (liveMatchUnsubscribe) { liveMatchUnsubscribe(); liveMatchUnsubscribe = null; }
-    if (liveRoomCode && window.getFirebaseUser()) {
-      try {
-        const db = window.firebaseDB;
-        const m = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
-        const q = m.query(m.collection(db, 'liveMatches'), m.where('roomCode', '==', liveRoomCode));
-        const snapshot = await m.getDocs(q);
-        if (!snapshot.empty) {
-          const docRef = snapshot.docs[0].ref;
-          const data = snapshot.docs[0].data();
-          const uid = window.getFirebaseUser().uid;
-          const updatedPlayers = data.players.map(p => p.uid === uid ? { ...p, status: 'left' } : p);
-          await m.updateDoc(docRef, { players: updatedPlayers });
-        }
-      } catch(e) {}
     }
+    
     liveRoomCode = null;
-    document.getElementById('liveMatchModal')?.classList.remove('active');
+    document.getElementById('liveMatchModal').classList.remove('active');
   }
   
   function copyRoomCode() {
@@ -7062,8 +7012,6 @@ window.performanceManager = new PerformanceManager();
         cancelAnimationFrame(timerInterval);
         timerInterval = null;
       }
-      // Live match: force fresh quiz
-      const isLiveMatch = !!liveRoomCode;
       appState.quiz = {
         subject, grade, lessonId,
         order: shuffleIdx(lesson.questions.length),
@@ -7078,14 +7026,15 @@ window.performanceManager = new PerformanceManager();
         gameOver: false,
         lives: MAX_LIVES,
         timer: MAX_TIMER,
-        powerups: { fiftyFifty: isLiveMatch ? 0 : 1, skip: isLiveMatch ? 0 : 1 },
+        powerups: { fiftyFifty: 1, skip: 1 },
         studyAnswers: {},
         isFlipped: false,
         hiddenOptions: [],
         autoAdvanceTimer: null,
-        startTime: Date.now(),
-        isLiveMatch: isLiveMatch
+        startTime: Date.now()
       };
+    }
+
     const qz = appState.quiz;
     const total = qz.order.length;
 
@@ -7355,7 +7304,7 @@ window.performanceManager = new PerformanceManager();
       </div>
     `;
   }
-  }
+
   // ============ LIGHTWEIGHT RE-RENDER ============
   async function renderMain() {
     const mainEl = document.getElementById('mainContent');
@@ -7619,23 +7568,20 @@ window.performanceManager = new PerformanceManager();
 
     renderMain();
 
-    if (isGame) {
-      // Auto advance in game mode
-      if (liveRoomCode) {
-        scheduleAutoAdvance(600);
-      } else {
-        scheduleAutoAdvance(1500);
-      }
-    }
-    
-    if (!isGame) {
+    if (!isGame || !isCorrect) {
       showModal(isCorrect, isCorrect ? "✅ නිවැරදියි!" : "❌ වැරදියි!", explanation);
     }
+
+    if (isGame) {
+      scheduleAutoAdvance(1500);
+    }
+  };
 
   window.nextStudyQuestion = function() {
     audioManager.playClick();
     goToNextQuestion();
   };
+
   // ============ MODAL ============
   function showModal(isCorrect, title, text) {
     const modal = document.getElementById('explainModal');
