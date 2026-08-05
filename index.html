@@ -1127,7 +1127,22 @@
     box-shadow: none !important;
     transition: none !important;
   }
+
+  /* CSS containment - reduce paint */
+  body.lite-mode .card,
+  body.lite-mode .quiz-container,
+  body.lite-mode .modal-content,
+  body.lite-mode .option-btn,
+  body.lite-mode header,
+  body.lite-mode footer {
+    contain: layout style paint;
+  }
   
+  /* Hardware acceleration for scroll */
+  body.lite-mode main {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }  
   /* Reduce padding */
   body.lite-mode .card { padding: 15px !important; }
   body.lite-mode .quiz-container { padding: 20px !important; }
@@ -4283,6 +4298,48 @@ window.performanceManager = new PerformanceManager();
     </div>
   </div>
 </div>
+
+ <!-- Challenge Friend Modal -->
+<div class="modal-overlay" id="challengeModal">
+  <div class="modal-content" style="max-width:420px; text-align:center;">
+    <button class="modal-close-btn" onclick="closeChallengeModal()">✕</button>
+    <span style="font-size:2.5rem;">👥</span>
+    <h2 class="modal-title">Friend Challenge</h2>
+    <p style="color:var(--text-secondary); font-size:0.85rem; margin-bottom:16px;">
+      ඔබේ score එක share කර friend කෙනෙක්ට challenge කරන්න!
+    </p>
+    
+    <div style="background:var(--bg-main); border-radius:12px; padding:15px; margin-bottom:15px; text-align:left; font-size:0.85rem;">
+      <p>🎯 Subject: <strong id="challengeSubject">-</strong></p>
+      <p>📚 Lesson: <strong id="challengeLesson">-</strong></p>
+      <p>⭐ Score: <strong id="challengeScore">-</strong></p>
+      <p>🔥 Streak: <strong id="challengeStreak">-</strong></p>
+    </div>
+    
+    <input type="text" id="challengeLink" readonly 
+           style="width:100%; padding:10px; margin-bottom:12px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-main); color:var(--text-primary); font-size:0.8rem; text-align:center;"
+           onclick="this.select();document.execCommand('copy')" value="Complete a quiz first!">
+    
+    <div style="display:flex; gap:10px; justify-content:center;">
+      <button class="btn btn-primary" onclick="copyChallengeLink()" style="flex:1; justify-content:center;">
+        <i class="fas fa-copy"></i> Copy Link
+      </button>
+      <button class="btn btn-outline" onclick="shareWhatsApp()" style="flex:1; justify-content:center;">
+        <i class="fab fa-whatsapp"></i> Share
+      </button>
+    </div>
+    
+    <p style="font-size:0.7rem; color:var(--text-secondary); margin-top:10px;" id="copyMsg"></p>
+    
+    <!-- Leaderboard for this quiz -->
+    <div style="margin-top:16px; text-align:left;">
+      <p style="font-weight:600; font-size:0.85rem;">🏆 Challenge Leaderboard</p>
+      <div id="challengeLeaderboard" style="max-height:150px; overflow-y:auto;">
+        <p style="font-size:0.75rem; color:var(--text-secondary);">No challenges yet!</p>
+      </div>
+    </div>
+  </div>
+</div>
   
 <!-- Info Modal -->
 <div class="modal-overlay" id="infoModal">
@@ -5347,6 +5404,104 @@ window.performanceManager = new PerformanceManager();
     document.getElementById('progressModal').classList.add('active');
   }
 
+    // ============ FRIEND CHALLENGE ============
+  function showChallengeModal() {
+    const modal = document.getElementById('challengeModal');
+    
+    // Get current quiz stats if available
+    if (appState.quiz && appState.route.name === 'quiz') {
+      const qz = appState.quiz;
+      const lesson = findLesson(qz.subject, qz.grade, qz.lessonId);
+      
+      document.getElementById('challengeSubject').textContent = subjectMeta(qz.subject).sinhala;
+      document.getElementById('challengeLesson').textContent = lesson?.title || 'Quiz';
+      document.getElementById('challengeScore').textContent = `${qz.score}/${qz.order.length} (${Math.round((qz.score/qz.order.length)*100)}%)`;
+      document.getElementById('challengeStreak').textContent = appState.streak;
+      
+      // Generate challenge link
+      const link = `${location.origin}${location.pathname}#/subject/${qz.subject}/grade/${qz.grade}/quiz/${qz.lessonId}?challenge=${appState.totalScore}`;
+      document.getElementById('challengeLink').value = link;
+    } else {
+      document.getElementById('challengeSubject').textContent = 'Complete a quiz first!';
+      document.getElementById('challengeLesson').textContent = '-';
+      document.getElementById('challengeScore').textContent = '-';
+      document.getElementById('challengeStreak').textContent = '-';
+      document.getElementById('challengeLink').value = 'Complete a quiz first to generate link!';
+    }
+    
+    loadChallengeLeaderboard();
+    modal.classList.add('active');
+  }
+  
+  function closeChallengeModal() {
+    document.getElementById('challengeModal').classList.remove('active');
+  }
+  
+  function copyChallengeLink() {
+    const input = document.getElementById('challengeLink');
+    input.select();
+    navigator.clipboard?.writeText(input.value);
+    document.getElementById('copyMsg').textContent = '✅ Link copied! Share with friends!';
+    setTimeout(() => document.getElementById('copyMsg').textContent = '', 3000);
+  }
+  
+  function shareWhatsApp() {
+    const link = document.getElementById('challengeLink').value;
+    const msg = encodeURIComponent(`🎯 Quiz Hub Challenge!\n\nCan you beat my score?\n${link}`);
+    window.open(`https://wa.me/?text=${msg}`, '_blank');
+  }
+  
+  function saveChallengeScore() {
+    if (!appState.quiz || appState.route.name !== 'quiz') return;
+    
+    const qz = appState.quiz;
+    const lessonId = qz.lessonId;
+    const challenges = JSON.parse(localStorage.getItem('quizChallenges') || '{}');
+    
+    if (!challenges[lessonId]) challenges[lessonId] = [];
+    
+    challenges[lessonId].push({
+      name: currentUser || 'Anonymous',
+      score: qz.score,
+      total: qz.order.length,
+      pct: Math.round((qz.score/qz.order.length)*100),
+      date: new Date().toISOString()
+    });
+    
+    // Keep top 20
+    challenges[lessonId].sort((a,b) => b.pct - a.pct);
+    if (challenges[lessonId].length > 20) challenges[lessonId].length = 20;
+    
+    localStorage.setItem('quizChallenges', JSON.stringify(challenges));
+  }
+  
+  function loadChallengeLeaderboard() {
+    const container = document.getElementById('challengeLeaderboard');
+    if (!container) return;
+    
+    if (!appState.quiz) {
+      container.innerHTML = '<p style="font-size:0.75rem; color:var(--text-secondary);">Complete a quiz first!</p>';
+      return;
+    }
+    
+    const lessonId = appState.quiz.lessonId;
+    const challenges = JSON.parse(localStorage.getItem('quizChallenges') || '{}');
+    const scores = challenges[lessonId] || [];
+    
+    if (scores.length === 0) {
+      container.innerHTML = '<p style="font-size:0.75rem; color:var(--text-secondary);">No challenges yet! Be the first! 🥇</p>';
+      return;
+    }
+    
+    container.innerHTML = scores.map((s, i) => `
+      <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid var(--border-color); font-size:0.75rem;">
+        <span>${i+1}. ${escapeHtml(s.name)}</span>
+        <span style="font-weight:600; color:var(--primary-color);">${s.pct}%</span>
+      </div>
+    `).join('');
+  }
+
+  
   function closeProgress() {
     document.getElementById('progressModal').classList.remove('active');
   }
@@ -6395,6 +6550,7 @@ window.performanceManager = new PerformanceManager();
               <button class="icon-btn" onclick="showLeaderboard()" title="Leaderboard">🏆</button>
               <button class="icon-btn" onclick="showAchievements()" title="Achievements">🏅</button>
               <button class="icon-btn" onclick="showProgress()" title="Progress">📊</button>
+              <button class="icon-btn" onclick="showChallengeModal()" title="Challenge Friend">👥</button>
             </div>
 
             <div class="control-group">
@@ -6733,12 +6889,15 @@ window.performanceManager = new PerformanceManager();
         if (appState.streak > appState.bestStreak) appState.bestStreak = appState.streak;
         if (pct === 100) appState.perfectCount++;
         updateBestStreak(appState.bestStreak);
-
+        
         const stats = getProgress();
         stats.perfectCount = appState.perfectCount;
         stats.bestStreak = appState.bestStreak;
         stats.totalQuestions = appState.totalQuestions;
         checkAchievements(stats);
+        
+        // Save challenge score
+        saveChallengeScore();
       }
 
       const r = 54, c = 2 * Math.PI * r;
