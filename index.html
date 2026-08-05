@@ -97,6 +97,10 @@
   const auth = getAuth(app);
   const db = getFirestore(app);
 
+      // iOS Safari persistence fix
+    import { setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    setPersistence(auth, browserLocalPersistence).catch(() => {});
+
   // Enable offline persistence
   enableIndexedDbPersistence(db).catch((err) => {
     if (err.code === 'failed-precondition') {
