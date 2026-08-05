@@ -103,24 +103,7 @@
       `);
     }
 
-     function renderLobby() {
-      render(`
-        <div class="mp-card">
-          <div class="mp-title">⚡ Quiz Hub Multiplayer</div>
-          
-          <input type="text" class="mp-input" id="playerName" placeholder="ඔබේ නම..." maxlength="20" value="${playerName}">
-          
-          <button class="mp-btn mp-btn-primary" onclick="createRoom()">🏠 Create Room</button>
-          
-          <div class="mp-divider">OR</div>
-          
-          <input type="text" class="mp-input" id="roomCodeInput" placeholder="Room Code" maxlength="6" style="text-align:center;letter-spacing:4px;text-transform:uppercase;font-size:1.2rem;">
-          <button class="mp-btn mp-btn-outline" onclick="joinRoom()">🚪 Join Room</button>
-          
-          <div class="mp-error" id="errorMsg"></div>
-        </div>
-      `);
-    }
+
 
     function renderCreateSettings() {
       render(`
@@ -300,6 +283,33 @@
       `);
     }
 
+        function renderWaitingRoom(data) {
+      const players = data.players || {};
+      const playerList = Object.entries(players).map(([uid, p]) => `
+        <div class="mp-player">
+          <div class="mp-player-avatar" style="background:${getAvatarColor(uid)}">${(p.name||'?')[0].toUpperCase()}</div>
+          <div class="mp-player-info">
+            <div class="mp-player-name">${escapeHtml(p.name)} ${uid === data.hostId ? '<span class="mp-badge mp-badge-host">Host</span>' : ''}</div>
+            <div class="mp-player-status">${p.online ? (p.ready ? '✅ Ready' : '⏳ Waiting') : '🔴 Offline'}</div>
+          </div>
+        </div>
+      `).join('');
+      const playerCount = Object.values(players).filter(p => p.online).length;
+      const allReady = playerCount >= 2 && Object.values(players).filter(p => p.online).every(p => p.ready);
+
+      render(`
+        <div class="mp-card">
+          <div class="mp-title">⏳ Waiting Room</div>
+          <div class="mp-room-code">${roomCode}</div>
+          <p style="text-align:center;">Players: ${playerCount}/10</p>
+          <div class="mp-player-list">${playerList}</div>
+          <button class="mp-btn mp-btn-success" onclick="toggleReady()">${players[currentUser.uid]?.ready ? '✅ Ready' : 'Click to Ready'}</button>
+          ${isHost ? `<button class="mp-btn mp-btn-primary" onclick="startGame()" ${!allReady?'disabled':''}>⚡ Start</button>` : ''}
+          <button class="mp-btn mp-btn-danger" onclick="leaveRoom()">Leave</button>
+        </div>
+      `);
+    }
+    
     function renderLeaderboard(players, scores) {
       const sorted = Object.entries(players)
         .map(([uid, p]) => ({ ...p, uid, score: scores[uid]?.score || 0 }))
