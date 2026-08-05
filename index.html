@@ -5528,7 +5528,7 @@ window.performanceManager = new PerformanceManager();
         uid: user.uid,
         score: 0,
         done: false,
-        joinedAt: serverTimestamp()
+        joinedAt: new Date().toISOString()
       }],
       status: 'waiting',
       createdAt: serverTimestamp()
@@ -5570,7 +5570,7 @@ window.performanceManager = new PerformanceManager();
         uid: user.uid,
         score: 0,
         done: false,
-        joinedAt: serverTimestamp()
+        joinedAt: new Date().toISOString()
       })
     });
     
