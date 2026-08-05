@@ -348,15 +348,46 @@
       let questions = [];
       try {
         const resp = await fetch('data/science.json');
+        if (!resp.ok) throw new Error('Failed');
         const data = await resp.json();
-        const lessons = data?.grades?.['10']?.lessons || data?.science?.grades?.['10']?.lessons || [];
-        if (lessons[0]?.questions) {
-          questions = lessons[0].questions.slice(0, 10);
+        
+        // Try all possible data structures
+        if (data.grades) {
+          const gradeData = data.grades['10'] || data.grades['8'] || Object.values(data.grades)[0];
+          if (gradeData?.lessons?.[0]?.questions) {
+            questions = gradeData.lessons[0].questions.slice(0, 10);
+          }
+        } else if (data.science?.grades) {
+          const gradeData = data.science.grades['10'] || Object.values(data.science.grades)[0];
+          if (gradeData?.lessons?.[0]?.questions) {
+            questions = gradeData.lessons[0].questions.slice(0, 10);
+          }
+        }
+        
+        if (questions.length === 0) {
+          // Try direct lessons
+          for (const key of Object.keys(data)) {
+            if (data[key]?.grades) {
+              const gd = Object.values(data[key].grades)[0];
+              if (gd?.lessons?.[0]?.questions) {
+                questions = gd.lessons[0].questions.slice(0, 10);
+                break;
+              }
+            }
+          }
         }
       } catch(e) {
+        console.warn('Quiz load failed, using sample:', e);
+      }
+      
+      // Fallback sample questions
+      if (questions.length === 0) {
         questions = [
-          {q:"Sample Question 1?", options:["A","B","C","D"], correct:0},
-          {q:"Sample Question 2?", options:["A","B","C","D"], correct:1}
+          {q:"සූර්යයාගේ ශක්තිය ලැබෙන්නේ?", options:["න්‍යෂ්ටික විලයනය","රසායනික ප්‍රතික්‍රියා","ගුරුත්වය","චුම්බකත්වය"], correct:0},
+          {q:"ජලයේ රසායනික සූත්‍රය?", options:["H2O","CO2","NaCl","O2"], correct:0},
+          {q:"ශාක සෛලයක බිත්තිය සෑදී ඇත්තේ?", options:["සෙලියුලෝස්","ප්‍රෝටීන්","මේද","DNA"], correct:0},
+          {q:"ආලෝකයේ වේගය?", options:["3×10⁸ m/s","3×10⁶ m/s","3×10⁴ m/s","3×10¹⁰ m/s"], correct:0},
+          {q:"මිනිස් සිරුරේ විශාලතම ඉන්ද්‍රිය?", options:["සම","අක්මාව","හදවත","මොළය"], correct:0}
         ];
       }
 
