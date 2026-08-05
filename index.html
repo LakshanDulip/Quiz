@@ -4407,15 +4407,18 @@ window.performanceManager = new PerformanceManager();
       return;
     }
     
-    // Check guest
-    if (sessionStorage.getItem('isGuest') === 'true') {
-      currentUser = sessionStorage.getItem('quizGuestName') || 'Guest';
-      if (loginModal) loginModal.classList.remove('active');
-      return;
-    }
-    
-    // Show login only for new users
-    if (loginModal) loginModal.classList.add('active');
+    // Auto guest login - skip modal
+    autoGuestLogin();
+    if (loginModal) loginModal.classList.remove('active');
+  }
+  
+  function autoGuestLogin() {
+    const guestId = 'Guest_' + Math.random().toString(36).substring(2, 8);
+    currentUser = guestId;
+    isGuest = true;
+    sessionStorage.setItem('isGuest', 'true');
+    sessionStorage.setItem('quizGuestName', guestId);
+    localStorage.setItem('quizUsername', guestId);
   }
 
   function handleLogin() {
@@ -4454,15 +4457,35 @@ window.performanceManager = new PerformanceManager();
   }
 
   function handleLogout() {
+    if (isGuest) {
+      // Guest user - offer Firebase login
+      if (confirm("Firebase ගිණුමක් සාදා ප්‍රගතිය සුරකින්නද?")) {
+        showFirebaseAuthModal();
+      } else {
+        // Stay as guest
+        return;
+      }
+      return;
+    }
+    
     if (confirm("ඔබට නිසැකවම ඉවත් වීමට අවශ්‍යද?")) {
       audioManager.playClick();
       
-      // ===== FIREBASE AUTH START: Sign out from Firebase =====
       if (window.firebaseLogout && window.isFirebaseUser && window.isFirebaseUser()) {
-        window.firebaseLogout().then(() => {
-          console.log('[Firebase] Logged out');
-        }).catch(err => console.warn('[Firebase] Logout error:', err));
+        window.firebaseLogout().catch(() => {});
       }
+      
+      localStorage.removeItem('quizUsername');
+      sessionStorage.removeItem('isGuest');
+      sessionStorage.removeItem('quizGuestName');
+      
+      currentUser = null;
+      isGuest = false;
+      appState.route = { name: 'home' };
+      checkAuth();
+      render();
+    }
+  }
       // ===== FIREBASE AUTH END =====
       
       localStorage.removeItem('quizUsername');
