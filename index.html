@@ -4253,6 +4253,36 @@ window.performanceManager = new PerformanceManager();
     <img id="fullscreenImage" src="" alt="Fullscreen" style="max-width:95vw; max-height:90vh; object-fit:contain; border-radius:12px;">
   </div>
 </div>
+
+  <!-- Lite Mode Confirm Modal -->
+<div class="modal-overlay" id="liteConfirmModal">
+  <div class="modal-content" style="max-width:400px; text-align:center;">
+    <span style="font-size:2.5rem; display:block; margin-bottom:8px;">⚡</span>
+    <h2 class="modal-title" style="margin-bottom:4px;">Lite Mode</h2>
+    <p style="color:var(--text-secondary); font-size:0.85rem; margin-bottom:12px;">
+      Low-end devices සඳහා performance boost කරන්න
+    </p>
+    
+    <div style="text-align:left; font-size:0.75rem; color:var(--text-secondary); margin-bottom:16px; line-height:1.6;">
+      <p>✅ Animations off</p>
+      <p>✅ Effects remove</p>
+      <p>✅ Mascot hide</p>
+      <p>✅ Shadows remove</p>
+      <p>✅ System font</p>
+      <p>⚠️ Theme change වෙනවා</p>
+      <p>⚠️ සමහර features hide වෙනවා</p>
+    </div>
+    
+    <div style="display:flex; gap:10px; justify-content:center;">
+      <button class="btn btn-primary" onclick="confirmLiteMode()" style="flex:1; justify-content:center;">
+        <i class="fas fa-bolt"></i> Turn ON
+      </button>
+      <button class="btn btn-outline" onclick="cancelLiteMode()" style="flex:1; justify-content:center;">
+        Cancel
+      </button>
+    </div>
+  </div>
+</div>
   
 <!-- Info Modal -->
 <div class="modal-overlay" id="infoModal">
@@ -4786,46 +4816,63 @@ window.performanceManager = new PerformanceManager();
     audioManager.playClick();
   };
 
-  // ============ PERFORMANCE MODE ============
+   // ============ PERFORMANCE MODE ============
   let liteMode = localStorage.getItem('liteMode') === 'true';
   
   window.togglePerformanceMode = function() {
-    liteMode = !liteMode;
-    localStorage.setItem('liteMode', liteMode);
-    
-    const btn = document.getElementById('perfBtn');
-    const icon = btn?.querySelector('i');
-    const banner = document.getElementById('liteBanner');
-    
-    if (liteMode) {
-      document.body.classList.add('lite-mode');
-      if (banner) banner.style.display = 'flex';
-      if (icon) { icon.className = 'fas fa-bolt'; }
-      btn.style.background = 'var(--correct-color)';
-      btn.style.color = '#fff';
-      showMascotSpeech('⚡ Lite Mode ON', 2000);
+    if (!liteMode) {
+      // Show confirm popup when turning ON
+      document.getElementById('liteConfirmModal').classList.add('active');
     } else {
-      document.body.classList.remove('lite-mode');
-      if (banner) banner.style.display = 'none';
-      if (icon) { icon.className = 'fas fa-bolt'; }
-      btn.style.background = '';
-      btn.style.color = '';
-      showMascotSpeech('✨ Full Mode ON', 2000);
+      // Turn OFF directly
+      turnOffLiteMode();
     }
     audioManager.playClick();
   };
   
+  function confirmLiteMode() {
+    liteMode = true;
+    localStorage.setItem('liteMode', liteMode);
+    document.getElementById('liteConfirmModal').classList.remove('active');
+    applyLiteMode();
+    audioManager.playClick();
+  }
+  
+  function cancelLiteMode() {
+    document.getElementById('liteConfirmModal').classList.remove('active');
+    audioManager.playClick();
+  }
+  
+  function applyLiteMode() {
+    document.body.classList.add('lite-mode');
+    const banner = document.getElementById('liteBanner');
+    const btn = document.getElementById('perfBtn');
+    if (banner) banner.style.display = 'flex';
+    if (btn) {
+      btn.style.background = 'var(--correct-color)';
+      btn.style.color = '#fff';
+    }
+    showMascotSpeech('⚡ Lite Mode ON', 2000);
+  }
+  
+  function turnOffLiteMode() {
+    liteMode = false;
+    localStorage.setItem('liteMode', liteMode);
+    document.body.classList.remove('lite-mode');
+    const banner = document.getElementById('liteBanner');
+    const btn = document.getElementById('perfBtn');
+    if (banner) banner.style.display = 'none';
+    if (btn) {
+      btn.style.background = '';
+      btn.style.color = '';
+    }
+    showMascotSpeech('✨ Full Mode ON', 2000);
+  }
+  
   // Apply on load
   if (liteMode) {
     setTimeout(() => {
-      document.body.classList.add('lite-mode');
-      const banner = document.getElementById('liteBanner');
-      if (banner) banner.style.display = 'flex';
-      const btn = document.getElementById('perfBtn');
-      if (btn) {
-        btn.style.background = 'var(--correct-color)';
-        btn.style.color = '#fff';
-      }
+      applyLiteMode();
     }, 100);
   }
   
