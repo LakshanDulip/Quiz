@@ -4806,7 +4806,7 @@ window.performanceManager = new PerformanceManager();
       showMascotSpeech('⚡ Lite Mode ON', 2000);
     } else {
       document.body.classList.remove('lite-mode');
-      // Banner stays until user clicks OFF button
+      if (banner) banner.style.display = 'none';
       if (icon) { icon.className = 'fas fa-bolt'; }
       btn.style.background = '';
       btn.style.color = '';
