@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Hub - Multiplayer</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Sinhala:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/multiplayer.css">
+  <style>
+    .home-link {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      z-index: 100;
+      padding: 8px 14px;
+      border-radius: 20px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .home-link:hover { border-color: var(--primary); color: var(--primary); }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="home-link">← Home</a>
+  
+  <div class="mp-container" id="app"></div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, collection, query, where, getDocs, addDoc, serverTimestamp, arrayUnion, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAhfgx0t-E6wrz6zEFIU_tpKTIbELp00ss",
+      authDomain: "quiz-hub-225eb.firebaseapp.com",
+      projectId: "quiz-hub-225eb",
+      storageBucket: "quiz-hub-225eb.firebasestorage.app",
+      messagingSenderId: "387012755680",
+      appId: "1:387012755680:web:36108ab447a8a2f2ab9085"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // ============ STATE ============
+    let currentUser = null;
+    let roomId = null;
+    let roomCode = null;
+    let isHost = false;
+    let playerName = '';
+    let unsubscribe = null;
+    let gameState = 'lobby'; // lobby | countdown | playing | leaderboard | finished
+    let currentQuestionIndex = 0;
+    let selectedAnswer = -1;
+    let playerScores = {};
+    let questionTimer = null;
+    let questionTimeLeft = 15;
+
+    // ============ AUTH ============
+    async function initAuth() {
+      return new Promise((resolve) => {
+        onAuthStateChanged(auth, async (user) => {
+          if (user) {
+            currentUser = user;
+            resolve(user);
+          } else {
+            await signInAnonymously(auth);
+          }
+        });
+      });
+    }
+
+    // ============ RENDER ============
+    function render(html) {
+      document.getElementById('app').innerHTML = html;
+    }
+
+    function renderLobby() {
+      render(`
+        <div class="mp-card">
+          <div class="mp-title">⚡ Quiz Hub Multiplayer</div>
+          
+          <input type="text" class="mp-input" id="playerName" placeholder="ඔබේ නම..." maxlength="20" value="${playerName}">
+          
+          <button class="mp-btn mp-btn-primary" onclick="createRoom()">🏠 Create Room</button>
+          
+          <div class="mp-divider">OR</div>
+          
+          <input type="text" class="mp-input" id="roomCodeInput" placeholder="Room Code" maxlength="6" style="text-align:center;letter-spacing:4px;text-transform:uppercase;font-size:1.2rem;">
+          <button class="mp-btn mp-btn-outline" onclick="joinRoom()">🚪 Join Room</button>
+          
+          <div class="mp-error" id="errorMsg"></div>
+        </div>
+      `);
+    }
+
+    function renderWaitingRoom(data) {
+      const players = data.players || {};
+      const playerList = Object.entries(players).map(([uid, p]) => `
+        <div class="mp-player">
+          <div class="mp-player-avatar" style="background:${getAvatarColor(uid)}">${(p.name||'?')[0].toUpperCase()}</div>
+          <div class="mp-player-info">
+            <div class="mp-player-name">${escapeHtml(p.name)} ${uid === data.hostId ? '<span class="mp-badge mp-badge-host">Host</span>' : ''}</div>
+            <div class="mp-player-status">${p.online ? (p.ready ? '✅ Ready' : '⏳ Waiting') : '🔴 Offline'}</div>
+          </div>
+          ${p.online ? `<span class="mp-badge ${p.ready ? 'mp-badge-ready' : 'mp-badge-waiting'}">${p.ready ? 'Ready' : 'Not Ready'}</span>` : '<span class="mp-badge mp-badge-offline">Offline</span>'}
+        </div>
+      `).join('');
+
+      const playerCount = Object.values(players).filter(p => p.online).length;
+      const allReady = playerCount >= 2 && Object.values(players).filter(p => p.online).every(p => p.ready);
+
+      render(`
+        <div class="mp-card">
+          <div class="mp-title">⏳ Waiting Room</div>
+          <div class="mp-room-code">${roomCode}</div>
+          <div style="text-align:center;margin-bottom:12px;">
+            <button class="mp-btn mp-btn-outline" onclick="copyRoomCode()" style="width:auto;padding:6px 14px;font-size:0.75rem;">
+              <i class="fas fa-copy"></i> Copy
+            </button>
+          </div>
+          <p style="text-align:center;font-size:0.85rem;color:var(--text2);">Players: ${playerCount}/10</p>
+          <div class="mp-player-list">${playerList}</div>
+          <div style="display:flex;gap:8px;">
+            <button class="mp-btn mp-btn-success" onclick="toggleReady()" ${!players[currentUser.uid]?.online ? 'disabled' : ''}>
+              ${players[currentUser.uid]?.ready ? '✅ Ready' : 'Click to Ready'}
+            </button>
+            ${isHost ? `<button class="mp-btn mp-btn-primary" onclick="startGame()" ${!allReady ? 'disabled' : ''}>⚡ Start Game</button>` : ''}
+          </div>
+          <button class="mp-btn mp-btn-danger" onclick="leaveRoom()" style="margin-top:8px;">Leave Room</button>
+        </div>
+      `);
+    }
+
+    function renderQuestion(data) {
+      const q = data.questions[currentQuestionIndex];
+      if (!q) return;
+      
+      const options = q.options.map((opt, i) => `
+        <button class="mp-option ${selectedAnswer === i ? 'selected' : ''}" onclick="selectAnswer(${i})" ${selectedAnswer >= 0 ? 'disabled' : ''}>
+          ${String.fromCharCode(65+i)}) ${escapeHtml(opt)}
+        </button>
+      `).join('');
+
+      render(`
+        <div class="mp-card">
+          <div class="mp-question-num">Question ${currentQuestionIndex + 1}/${data.questions.length}</div>
+          <div class="mp-timer ${questionTimeLeft <= 5 ? 'urgent' : ''}" id="timerDisplay">${questionTimeLeft}s</div>
+          <div class="mp-question-text">${escapeHtml(q.q)}</div>
+          <div>${options}</div>
+          <p style="text-align:center;font-size:0.7rem;color:var(--text2);margin-top:8px;">${selectedAnswer >= 0 ? 'Answer locked! 🔒' : 'Select your answer...'}</p>
+        </div>
+      `);
+    }
+
+    function renderLeaderboard(players, scores) {
+      const sorted = Object.entries(players)
+        .map(([uid, p]) => ({ ...p, uid, score: scores[uid]?.score || 0 }))
+        .sort((a, b) => b.score - a.score);
+
+      const list = sorted.map((p, i) => `
+        <div class="mp-leaderboard-item">
+          <div class="mp-rank ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${i+1}</div>
+          <div class="mp-player-avatar" style="background:${getAvatarColor(p.uid)}">${(p.name||'?')[0].toUpperCase()}</div>
+          <div class="mp-player-info">
+            <div class="mp-player-name">${escapeHtml(p.name)}</div>
+            <div class="mp-player-status">✅ ${p.correct || 0} / ❌ ${p.wrong || 0}</div>
+          </div>
+          <div class="mp-player-score">${p.score}</div>
+        </div>
+      `).join('');
+
+      render(`
+        <div class="mp-card">
+          <div class="mp-title">📊 Leaderboard</div>
+          <div>${list}</div>
+          <p style="text-align:center;font-size:0.7rem;color:var(--text2);margin-top:8px;">Next question coming...</p>
+        </div>
+      `);
+    }
+
+    function renderWinner(players, scores) {
+      const sorted = Object.entries(players)
+        .map(([uid, p]) => ({ ...p, uid, score: scores[uid]?.score || 0 }))
+        .sort((a, b) => b.score - a.score);
+      const winner = sorted[0];
+
+      const list = sorted.map((p, i) => `
+        <div class="mp-leaderboard-item">
+          <div class="mp-rank ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${i+1}</div>
+          <div class="mp-player-avatar" style="background:${getAvatarColor(p.uid)}">${(p.name||'?')[0].toUpperCase()}</div>
+          <div class="mp-player-info">
+            <div class="mp-player-name">${escapeHtml(p.name)}</div>
+          </div>
+          <div class="mp-player-score">${p.score}</div>
+        </div>
+      `).join('');
+
+      render(`
+        <div class="mp-card">
+          <div class="mp-winner">
+            <div class="mp-winner-icon">🏆</div>
+            <div class="mp-winner-name">${escapeHtml(winner.name)}</div>
+            <p style="color:var(--text2);">${winner.score} points</p>
+          </div>
+          <div>${list}</div>
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            ${isHost ? '<button class="mp-btn mp-btn-primary" onclick="rematch()">🔄 Rematch</button>' : ''}
+            <button class="mp-btn mp-btn-outline" onclick="leaveRoom()">Leave</button>
+          </div>
+        </div>
+      `);
+    }
+
+    // ============ HELPERS ============
+    function escapeHtml(s) { return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function getAvatarColor(uid) { const colors = ['#38bdf8','#818cf8','#34d399','#fbbf24','#f87171','#a78bfa','#fb923c']; return colors[uid.charCodeAt(0) % colors.length]; }
+    function showError(msg) { const el = document.getElementById('errorMsg'); if (el) el.textContent = msg; }
+
+    // ============ ROOM FUNCTIONS ============
+    window.createRoom = async function() {
+      const name = document.getElementById('playerName')?.value.trim() || 'Player';
+      playerName = name;
+      
+      roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+      roomId = `room_${Date.now()}`;
+      isHost = true;
+
+      await setDoc(doc(db, 'liveMatches', roomId), {
+        roomCode,
+        hostId: currentUser.uid,
+        hostName: playerName,
+        status: 'waiting',
+        currentQuestion: -1,
+        createdAt: serverTimestamp(),
+        players: {
+          [currentUser.uid]: {
+            name: playerName,
+            score: 0,
+            correct: 0,
+            wrong: 0,
+            answered: false,
+            ready: false,
+            online: true,
+            joinedAt: new Date().toISOString()
+          }
+        }
+      });
+
+      listenToRoom();
+    };
+
+    window.joinRoom = async function() {
+      const code = document.getElementById('roomCodeInput')?.value.trim().toUpperCase();
+      const name = document.getElementById('playerName')?.value.trim() || 'Player';
+      if (!code) return showError('Room code enter කරන්න!');
+      
+      playerName = name;
+      roomCode = code;
+
+      const q = query(collection(db, 'liveMatches'), where('roomCode', '==', code), where('status', 'in', ['waiting', 'countdown']));
+      const snapshot = await getDocs(q);
+      
+      if (snapshot.empty) return showError('Room not found!');
+      
+      const docData = snapshot.docs[0];
+      roomId = docData.id;
+      isHost = false;
+
+      const players = docData.data().players || {};
+      if (Object.keys(players).length >= 10) return showError('Room is full (max 10)!');
+      if (players[currentUser.uid]) return showError('You are already in this room!');
+
+      await updateDoc(doc(db, 'liveMatches', roomId), {
+        [`players.${currentUser.uid}`]: {
+          name: playerName,
+          score: 0,
+          correct: 0,
+          wrong: 0,
+          answered: false,
+          ready: false,
+          online: true,
+          joinedAt: new Date().toISOString()
+        }
+      });
+
+      listenToRoom();
+    };
+
+    window.toggleReady = async function() {
+      if (!roomId) return;
+      const roomRef = doc(db, 'liveMatches', roomId);
+      const snap = await getDoc(roomRef);
+      const data = snap.data();
+      const currentReady = data.players[currentUser.uid]?.ready || false;
+      
+      await updateDoc(roomRef, {
+        [`players.${currentUser.uid}.ready`]: !currentReady
+      });
+    };
+
+    window.startGame = async function() {
+      if (!isHost || !roomId) return;
+      
+      // Load questions from main site data
+      let questions = [];
+      try {
+        const resp = await fetch('data/science.json');
+        const data = await resp.json();
+        const lessons = data?.grades?.['10']?.lessons || data?.science?.grades?.['10']?.lessons || [];
+        if (lessons[0]?.questions) {
+          questions = lessons[0].questions.slice(0, 10);
+        }
+      } catch(e) {
+        questions = [
+          {q:"Sample Question 1?", options:["A","B","C","D"], correct:0},
+          {q:"Sample Question 2?", options:["A","B","C","D"], correct:1}
+        ];
+      }
+
+      await updateDoc(doc(db, 'liveMatches', roomId), {
+        status: 'countdown',
+        questions,
+        currentQuestion: -1
+      });
+
+      // Countdown
+      for (let i = 3; i > 0; i--) {
+        render(`<div class="mp-countdown">${i}</div>`);
+        await new Promise(r => setTimeout(r, 1000));
+      }
+
+      await updateDoc(doc(db, 'liveMatches', roomId), {
+        status: 'playing',
+        currentQuestion: 0,
+        questionStartTime: Date.now()
+      });
+    };
+
+    window.selectAnswer = async function(index) {
+      if (selectedAnswer >= 0 || !roomId) return;
+      selectedAnswer = index;
+      const qRef = doc(db, 'liveMatches', roomId);
+      await updateDoc(qRef, {
+        [`players.${currentUser.uid}.answered`]: true,
+        [`players.${currentUser.uid}.answer`]: index,
+        [`players.${currentUser.uid}.answerTime`]: Date.now()
+      });
+    };
+
+    window.copyRoomCode = function() {
+      navigator.clipboard?.writeText(roomCode);
+      alert('📋 Code copied!');
+    };
+
+    window.leaveRoom = async function() {
+      if (!roomId) return;
+      try {
+        const roomRef = doc(db, 'liveMatches', roomId);
+        await updateDoc(roomRef, {
+          [`players.${currentUser.uid}.online`]: false
+        });
+      } catch(e) {}
+      if (unsubscribe) unsubscribe();
+      roomId = null;
+      roomCode = null;
+      isHost = false;
+      selectedAnswer = -1;
+      renderLobby();
+    };
+
+    window.rematch = async function() {
+      if (!isHost || !roomId) return;
+      await updateDoc(doc(db, 'liveMatches', roomId), {
+        status: 'waiting',
+        currentQuestion: -1,
+        'players': Object.fromEntries(
+          Object.entries((await getDoc(doc(db, 'liveMatches', roomId))).data().players || {}).map(([uid, p]) => [uid, {...p, score:0, correct:0, wrong:0, answered:false, ready:false}])
+        )
+      });
+    };
+
+    // ============ REAL-TIME LISTENER ============
+    function listenToRoom() {
+      if (unsubscribe) unsubscribe();
+      
+      unsubscribe = onSnapshot(doc(db, 'liveMatches', roomId), (snapshot) => {
+        if (!snapshot.exists()) { leaveRoom(); return; }
+        
+        const data = snapshot.data();
+        const players = data.players || {};
+        
+        // Update online status
+        const currentPlayer = players[currentUser.uid];
+        if (currentPlayer) {
+          currentPlayer.online = true;
+        }
+
+        // Render based on status
+        switch(data.status) {
+          case 'waiting':
+          case 'countdown':
+            renderWaitingRoom(data);
+            selectedAnswer = -1;
+            break;
+            
+          case 'playing':
+            currentQuestionIndex = data.currentQuestion || 0;
+            if (gameState !== 'playing') {
+              gameState = 'playing';
+              selectedAnswer = -1;
+            }
+            renderQuestion(data);
+            startQuestionTimer(data);
+            break;
+            
+          case 'leaderboard':
+            gameState = 'leaderboard';
+            renderLeaderboard(players, getScores(players, data));
+            break;
+            
+          case 'finished':
+            gameState = 'finished';
+            renderWinner(players, getScores(players, data));
+            break;
+        }
+      });
+    }
+
+    function getScores(players, data) {
+      const scores = {};
+      Object.entries(players).forEach(([uid, p]) => {
+        scores[uid] = { score: p.score || 0, correct: p.correct || 0, wrong: p.wrong || 0 };
+      });
+      return scores;
+    }
+
+    function startQuestionTimer(data) {
+      if (questionTimer) clearInterval(questionTimer);
+      questionTimeLeft = 15;
+      
+      questionTimer = setInterval(async () => {
+        questionTimeLeft--;
+        const timerEl = document.getElementById('timerDisplay');
+        if (timerEl) {
+          timerEl.textContent = questionTimeLeft + 's';
+          if (questionTimeLeft <= 5) timerEl.classList.add('urgent');
+        }
+        
+        if (questionTimeLeft <= 0) {
+          clearInterval(questionTimer);
+          questionTimer = null;
+          
+          // Lock answers - host only
+          if (isHost && roomId) {
+            const qRef = doc(db, 'liveMatches', roomId);
+            const snap = await getDoc(qRef);
+            const qData = snap.data();
+            const questions = qData.questions || [];
+            const qIndex = qData.currentQuestion || 0;
+            const correctAnswer = questions[qIndex]?.correct || 0;
+            
+            // Calculate scores
+            const players = qData.players || {};
+            Object.entries(players).forEach(async ([uid, p]) => {
+              if (p.online && p.answered) {
+                const isCorrect = p.answer === correctAnswer;
+                await updateDoc(qRef, {
+                  [`players.${uid}.score`]: (p.score || 0) + (isCorrect ? 10 : 0),
+                  [`players.${uid}.correct`]: (p.correct || 0) + (isCorrect ? 1 : 0),
+                  [`players.${uid}.wrong`]: (p.wrong || 0) + (isCorrect ? 0 : 1),
+                  [`players.${uid}.answered`]: false
+                });
+              }
+            });
+            
+            // Show leaderboard
+            await updateDoc(qRef, { status: 'leaderboard' });
+            
+            // Next question or finish
+            setTimeout(async () => {
+              const nextQ = qIndex + 1;
+              if (nextQ >= questions.length) {
+                await updateDoc(qRef, { status: 'finished' });
+              } else {
+                await updateDoc(qRef, { status: 'playing', currentQuestion: nextQ, questionStartTime: Date.now() });
+              }
+              selectedAnswer = -1;
+            }, 4000);
+          }
+        }
+      }, 1000);
+    }
+
+    // ============ INIT ============
+    async function init() {
+      await initAuth();
+      renderLobby();
+      
+      // Auto-join if URL has room code
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('room');
+      if (code) {
+        setTimeout(() => {
+          document.getElementById('roomCodeInput').value = code;
+          window.joinRoom();
+        }, 500);
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
