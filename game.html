@@ -223,7 +223,7 @@
         } else if (data[subject]?.grades?.[grade]?.lessons) {
           lessons = data[subject].grades[grade].lessons;
         }
-        
+                console.log('DEBUG - lessonId:', lessonId, 'lessons count:', lessons.length, 'first lesson id:', lessons[0]?.id);
         const lesson = lessons.find(l => l.id === lessonId);
         if (lesson?.questions) {
           const shuffled = [...lesson.questions].sort(() => Math.random() - 0.5);
