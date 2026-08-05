@@ -7,6 +7,7 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Sinhala:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js">
     </script>
     <style>
@@ -1271,7 +1272,8 @@
         setPersistence(auth, browserLocalPersistence).then(() => console.log('[Auth] Persistence set')).catch(() => {});
 
         // ============ STATE ============
-        let currentUser = null;
+        let currentUser = null
+        let deviceId = null;
         let roomId = null;
         let roomCode = null;
         let isHost = false;
@@ -1881,6 +1883,16 @@ function shareWhatsApp() {
 
         async function confirmCreateRoom() {
             if (creatingRoom) return;
+
+               try {
+             const fp = await FingerprintJS.load();
+             const result = await fp.get();
+             deviceId = result.visitorId;
+             } catch (e) {
+            deviceId = localStorage.getItem('quizhub_device_id') || 'device_' + Date.now();
+           localStorage.setItem('quizhub_device_id', deviceId);
+            }
+            
             const subject = document.getElementById('setSubject')?.value || 'science';
             const grade = document.getElementById('setGrade')?.value || '10';
             const lessonId = document.getElementById('setLesson')?.value;
@@ -1946,6 +1958,7 @@ function shareWhatsApp() {
                     players: {
                         [currentUser.uid]: {
                             name: playerName,
+                            deviceId: deviceId,
                             score: 0,
                             correct: 0,
                             wrong: 0,
@@ -1969,68 +1982,115 @@ function shareWhatsApp() {
             }
         }
 
-        async function joinRoom() {
-            if (joining) return;
-            const code = document.getElementById('roomCodeInput')?.value.trim().toUpperCase();
-            playerName = document.getElementById('playerName')?.value.trim() || 'Player';
-            if (!code) return showError('Room code enter කරන්න!');
-            joining = true;
-            const joinBtn = document.querySelector('#app .mp-btn-outline');
-            if (joinBtn) joinBtn.disabled = true;
-            try {
-                roomCode = code;
-                previousPlayers = null;
-                previousScores = {};
-                qrRendered = false;
-                waitingRoomFullyRendered = false;
-                prevSnapshotStatus = null;
-                prevSnapshotQuestionIndex = -1;
-                prevSnapshotPlayersJSON = '';
-                const q = query(collection(db, 'liveMatches'), where('roomCode', '==', code), where('status', 'in', [
-                    'waiting', 'countdown'
-                ]));
-                const snapshot = await getDocs(q);
-                if (snapshot.empty) return showError('Room not found!');
-                const docData = snapshot.docs[0];
-                roomId = docData.id;
-                const roomData = docData.data();
-                const existingPlayers = roomData.players || {};
-                if (existingPlayers[currentUser.uid]) {
-                    isHost = roomData.hostId === currentUser.uid;
-                    playerName = existingPlayers[currentUser.uid].name || playerName;
-                    await updateDoc(doc(db, 'liveMatches', roomId), {
-                        [`players.${currentUser.uid}.online`]: true,
-                        [`players.${currentUser.uid}.lastSeen`]: serverTimestamp()
-                    });
-                } else {
-                    if (Object.keys(existingPlayers).length >= 10) return showError('Room is full (max 10)!');
-                    isHost = false;
-                    await updateDoc(doc(db, 'liveMatches', roomId), {
-                        [`players.${currentUser.uid}`]: {
-                            name: playerName,
-                            score: 0,
-                            correct: 0,
-                            wrong: 0,
-                            answered: false,
-                            ready: false,
-                            online: true,
-                            joinedAt: new Date().toISOString(),
-                            streak: 0,
-                            longestStreak: 0,
-                            totalTime: 0,
-                            fastestTime: null,
-                            lastSeen: serverTimestamp()
-                        }
-                    });
-                    addSystemChatMessage(roomId, `${playerName} joined the game`);
-                }
-                saveActiveRoom();
-                listenToRoom();
-            } finally {
-                joining = false;
-                if (joinBtn) joinBtn.disabled = false;
+async function joinRoom() {
+    if (joining) return;
+    
+    // Get device fingerprint
+    try {
+        const fp = await FingerprintJS.load();
+        const result = await fp.get();
+        deviceId = result.visitorId;
+    } catch (e) {
+        deviceId = localStorage.getItem('quizhub_device_id') || 'device_' + Date.now();
+        localStorage.setItem('quizhub_device_id', deviceId);
+    }
+    
+    const code = document.getElementById('roomCodeInput')?.value.trim().toUpperCase();
+    playerName = document.getElementById('playerName')?.value.trim() || 'Player';
+    if (!code) return showError('Room code enter කරන්න!');
+    joining = true;
+    const joinBtn = document.querySelector('#app .mp-btn-outline');
+    if (joinBtn) joinBtn.disabled = true;
+    try {
+        roomCode = code;
+        previousPlayers = null;
+        previousScores = {};
+        qrRendered = false;
+        waitingRoomFullyRendered = false;
+        prevSnapshotStatus = null;
+        prevSnapshotQuestionIndex = -1;
+        prevSnapshotPlayersJSON = '';
+        const q = query(collection(db, 'liveMatches'), where('roomCode', '==', code), where('status', 'in', [
+            'waiting', 'countdown'
+        ]));
+        const snapshot = await getDocs(q);
+        if (snapshot.empty) return showError('Room not found!');
+        const docData = snapshot.docs[0];
+        roomId = docData.id;
+        const roomData = docData.data();
+        const existingPlayers = roomData.players || {};
+        
+        // Check by device ID first
+        const existingEntry = Object.entries(existingPlayers).find(([uid, p]) => p.deviceId === deviceId);
+        const matchedUid = existingEntry ? existingEntry[0] : null;
+        
+        if (matchedUid || existingPlayers[currentUser.uid]) {
+            const uid = matchedUid || currentUser.uid;
+            isHost = roomData.hostId === uid;
+            playerName = existingPlayers[uid].name || playerName;
+            
+            // If reconnecting with different auth UID
+            if (matchedUid && matchedUid !== currentUser.uid) {
+                await updateDoc(doc(db, 'liveMatches', roomId), {
+                    [`players.${currentUser.uid}`]: {
+                        name: playerName,
+                        deviceId: deviceId,
+                        score: existingPlayers[matchedUid].score || 0,
+                        correct: existingPlayers[matchedUid].correct || 0,
+                        wrong: existingPlayers[matchedUid].wrong || 0,
+                        answered: false,
+                        ready: existingPlayers[matchedUid].ready || false,
+                        online: true,
+                        joinedAt: existingPlayers[matchedUid].joinedAt || new Date().toISOString(),
+                        streak: existingPlayers[matchedUid].streak || 0,
+                        longestStreak: existingPlayers[matchedUid].longestStreak || 0,
+                        totalTime: existingPlayers[matchedUid].totalTime || 0,
+                        fastestTime: existingPlayers[matchedUid].fastestTime || null,
+                        lastSeen: serverTimestamp()
+                    }
+                });
+                // Remove old entry
+                await updateDoc(doc(db, 'liveMatches', roomId), {
+                    [`players.${matchedUid}`]: null
+                });
+            } else {
+                await updateDoc(doc(db, 'liveMatches', roomId), {
+                    [`players.${uid}.online`]: true,
+                    [`players.${uid}.lastSeen`]: serverTimestamp(),
+                    [`players.${uid}.ready`]: existingPlayers[uid].ready || false
+                });
             }
+            addSystemChatMessage(roomId, `${playerName} rejoined the game`);
+        } else {
+            if (Object.keys(existingPlayers).length >= 10) return showError('Room is full (max 10)!');
+            isHost = false;
+            await updateDoc(doc(db, 'liveMatches', roomId), {
+                [`players.${currentUser.uid}`]: {
+                    name: playerName,
+                    deviceId: deviceId,
+                    score: 0,
+                    correct: 0,
+                    wrong: 0,
+                    answered: false,
+                    ready: false,
+                    online: true,
+                    joinedAt: new Date().toISOString(),
+                    streak: 0,
+                    longestStreak: 0,
+                    totalTime: 0,
+                    fastestTime: null,
+                    lastSeen: serverTimestamp()
+                }
+            });
+            addSystemChatMessage(roomId, `${playerName} joined the game`);
         }
+        saveActiveRoom();
+        listenToRoom();
+    } finally {
+        joining = false;
+        if (joinBtn) joinBtn.disabled = false;
+    }
+}
 
         function listenToRoom() {
             if (unsubscribe) unsubscribe();
