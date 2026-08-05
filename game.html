@@ -1147,6 +1147,58 @@
                 height: 72px;
             }
         }
+        .confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(5, 8, 16, 0.75);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            z-index: 1300;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: achievementIn 0.25s var(--ease-game);
+        }
+        .confirm-modal {
+            background: var(--glass-bg-strong);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            padding: 24px 20px;
+            max-width: 360px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+        .confirm-modal h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+        .confirm-modal p {
+            color: var(--text2);
+            font-size: 0.85rem;
+            margin-bottom: 18px;
+            line-height: 1.5;
+        }
+        .confirm-modal-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .confirm-modal-actions .mp-btn {
+            margin-bottom: 0;
+        }
+        .reaction-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+        .reaction-btn {
+            flex: 1;
+            font-size: 1.15rem;
+            padding: 8px 4px;
+            min-height: 40px;
+        }
         @media (prefers-reduced-motion: reduce) {
             *,
             *::before,
@@ -1648,6 +1700,63 @@
             setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3000);
         }
 
+        // =========================================================
+        // CONFIRM MODAL (used by Leave Game)
+        // =========================================================
+        function showConfirmModal(title, msg, onConfirm) {
+            const existing = document.getElementById('confirmOverlay');
+            if (existing) existing.remove();
+            const overlay = document.createElement('div');
+            overlay.className = 'confirm-overlay';
+            overlay.id = 'confirmOverlay';
+            overlay.innerHTML = `
+              <div class="confirm-modal">
+                <h3>${escapeHtml(title)}</h3>
+                <p>${escapeHtml(msg)}</p>
+                <div class="confirm-modal-actions">
+                  <button class="mp-btn mp-btn-outline" id="confirmCancelBtn">Cancel</button>
+                  <button class="mp-btn mp-btn-danger" id="confirmOkBtn">Leave</button>
+                </div>
+              </div>
+            `;
+            document.body.appendChild(overlay);
+            const cleanup = () => { if (overlay.parentNode) overlay.remove(); };
+            document.getElementById('confirmCancelBtn').onclick = cleanup;
+            document.getElementById('confirmOkBtn').onclick = () => { cleanup(); onConfirm(); };
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) cleanup(); });
+        }
+
+        function confirmLeaveGame() {
+            showConfirmModal(
+                'Leave Game?',
+                'Are you sure you want to leave the match? Your progress in this game will be lost.',
+                () => { leaveRoom(); }
+            );
+        }
+        window.confirmLeaveGame = confirmLeaveGame;
+
+        // =========================================================
+        // REACTIONS (waiting room quick chat reactions)
+        // =========================================================
+        async function sendReaction(emoji) {
+            if (!roomId || chatSending) return;
+            const now = Date.now();
+            if (now - lastChatSendAt < 900) return;
+            chatSending = true;
+            try {
+                await addDoc(collection(db, 'liveMatches', roomId, 'chat'), {
+                    type: 'user',
+                    playerId: currentUser.uid,
+                    playerName: playerName || 'Player',
+                    message: emoji,
+                    timestamp: serverTimestamp()
+                });
+                lastChatSendAt = now;
+            } catch (e) {}
+            chatSending = false;
+        }
+        window.sendReaction = sendReaction;
+
         function renderLobby() {
             currentScreenMode = 'lobby';
             waitingRoomFullyRendered = false;
@@ -2061,6 +2170,13 @@
             <div class="mp-card chat-card" id="chatCard">
               <div class="mp-title" style="font-size:1rem;">💬 Room Chat</div>
               <div class="chat-messages" id="chatMessages"></div>
+              <div class="reaction-row">
+                <button class="icon-btn reaction-btn" onclick="window.sendReaction('🔥')">🔥</button>
+                <button class="icon-btn reaction-btn" onclick="window.sendReaction('😂')">😂</button>
+                <button class="icon-btn reaction-btn" onclick="window.sendReaction('👍')">👍</button>
+                <button class="icon-btn reaction-btn" onclick="window.sendReaction('❤️')">❤️</button>
+                <button class="icon-btn reaction-btn" onclick="window.sendReaction('🎉')">🎉</button>
+              </div>
               <div class="chat-input-row">
                 <input type="text" id="chatInput" class="mp-input chat-input" placeholder="Type a message..." maxlength="150" onkeydown="window.handleChatKeydown(event)">
                 <button class="chat-send-btn" id="chatSendBtn" onclick="window.sendChatMessage()" aria-label="Send message"><i class="fa-solid fa-paper-plane"></i></button>
@@ -2160,6 +2276,7 @@
               <div class="mp-question-text">${escapeHtml(q.q)}</div>
               <div id="optionsContainer">${options}</div>
               <p class="answer-locked-msg" id="answerLockedMsg">${revealActive ? '<i class="fa-solid fa-eye"></i> Answer revealed' : (selectedAnswer >= 0 ? '<i class="fa-solid fa-lock"></i> Answer locked!' : 'Select your answer...')}</p>
+              <button class="mp-btn mp-btn-outline" style="margin-top:12px;font-size:0.78rem;padding:10px;" onclick="window.confirmLeaveGame()"><i class="fa-solid fa-door-open"></i>&nbsp; Leave Game</button>
             </div>
           `);
         }
@@ -2217,7 +2334,7 @@
             </div>
           `).join('');
             render(
-                `<div class="mp-card"><div class="mp-title">📊 Leaderboard</div><div>${list}</div><p style="text-align:center;font-size:0.7rem;color:var(--text2);margin-top:8px;">Next question coming...</p></div>`
+                `<div class="mp-card"><div class="mp-title">📊 Leaderboard</div><div>${list}</div><p style="text-align:center;font-size:0.7rem;color:var(--text2);margin-top:8px;">Next question coming...</p><button class="mp-btn mp-btn-outline" style="margin-top:10px;font-size:0.78rem;padding:10px;" onclick="window.confirmLeaveGame()"><i class="fa-solid fa-door-open"></i>&nbsp; Leave Game</button></div>`
                 );
             const finalScores = {};
             sorted.forEach(p => finalScores[p.uid] = p.score);
@@ -2248,9 +2365,13 @@
         function renderWinner(players, scores, data) {
             const sorted = Object.entries(players).map(([uid, p]) => ({ ...p, uid, score: scores[uid]?.score || 0 }))
                 .sort((a, b) => b.score - a.score);
-            const winner = sorted[0] || { name: 'No one', score: 0 };
+            const forcedWinnerUid = data && data.forcedWinner;
+            const winner = (forcedWinnerUid && players[forcedWinnerUid]) ?
+                { ...players[forcedWinnerUid], uid: forcedWinnerUid, score: scores[forcedWinnerUid]?.score || 0 } :
+                (sorted[0] || { name: 'No one', score: 0 });
             const me = players[currentUser.uid];
-            const myRank = sorted.findIndex(p => p.uid === currentUser.uid) + 1;
+            const myRank = (forcedWinnerUid && currentUser.uid === forcedWinnerUid) ? 1 :
+                (sorted.findIndex(p => p.uid === currentUser.uid) + 1);
             const list = sorted.map((p, i) => `
             <div class="mp-leaderboard-item" style="${!p.online ? 'opacity:0.6;' : ''}animation-delay:${i*0.06}s">
               <div class="mp-rank ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${i===0?'<i class="fa-solid fa-crown"></i>':i+1}</div>
@@ -2278,6 +2399,7 @@
                 <div class="mp-winner-name">${escapeHtml(winner.name)}</div>
                 <p style="color:var(--text2);">${winner.score} points</p>
                 ${myRank === 1 ? '<div class="champion-badge"><i class="fa-solid fa-crown"></i> You are the Champion!</div>' : ''}
+                ${forcedWinnerUid ? '<p style="font-size:0.72rem;color:var(--text2);margin-top:8px;"><i class="fa-solid fa-circle-info"></i> Match ended early — other players left</p>' : ''}
               </div>
               <div class="winner-stats-grid">
                 <div class="stat-box"><div class="stat-val">${accuracy}%</div><div class="stat-lbl">Accuracy</div></div>
@@ -2366,6 +2488,14 @@
                         }
                         if (otherOnline.length === 0) {
                             await deleteRoomCompletely(roomId);
+                        } else if (data.status !== 'waiting' && data.status !== 'finished' && otherOnline.length === 1) {
+                            // Only one player left mid-match: end the game and declare them the winner
+                            await updateDoc(roomRef, {
+                                status: 'finished',
+                                forcedWinner: otherOnline[0],
+                                hostId: otherOnline[0],
+                                [`players.${currentUser.uid}.online`]: false
+                            });
                         } else if (isHost) {
                             await updateDoc(roomRef, {
                                 hostId: otherOnline.sort()[0],
@@ -2409,6 +2539,7 @@
                 status: 'waiting',
                 currentQuestion: -1,
                 historySaved: false,
+                forcedWinner: null,
                 'players': Object.fromEntries(
                     Object.entries((await getDoc(doc(db, 'liveMatches', roomId))).data().players || {}).map(([
                         uid, p
@@ -2553,11 +2684,13 @@
                 const playerArray = Object.entries(data.players || {}).map(([uid, p]) => ({ name: p.name, score: p.score ||
                         0, correct: p.correct || 0, wrong: p.wrong || 0 })).sort((a, b) => b.score - a.score);
                 playerArray.forEach((p, i) => p.rank = i + 1);
+                const winnerName = (data.forcedWinner && data.players && data.players[data.forcedWinner]) ?
+                    data.players[data.forcedWinner].name : (playerArray[0]?.name || 'N/A');
                 await addDoc(collection(db, 'matchHistory'), {
                     roomCode: data.roomCode,
                     date: serverTimestamp(),
                     hostName: data.hostName,
-                    winner: playerArray[0]?.name || 'N/A',
+                    winner: winnerName,
                     players: playerArray,
                     totalQuestions: data.questions?.length || 0
                 });
@@ -2698,6 +2831,13 @@
                 if (nextHost === currentUser.uid && data.hostId !== currentUser.uid) {
                     updates.hostId = currentUser.uid;
                 }
+            }
+            // If everyone else silently dropped mid-match (closed tab, lost connection),
+            // don't leave the last remaining player stuck — end the match and give them the win.
+            if (data.status !== 'waiting' && data.status !== 'finished' && onlineUids.length === 1 && !updates.status) {
+                updates.status = 'finished';
+                updates.forcedWinner = onlineUids[0];
+                updates.hostId = onlineUids[0];
             }
             if (Object.keys(updates).length > 0) {
                 try { await updateDoc(doc(db, 'liveMatches', roomId), updates); } catch (e) {}
