@@ -6309,13 +6309,13 @@ window.performanceManager = new PerformanceManager();
     else if (r.name === 'lessons') body = await renderLessons(r.subject, r.grade);
     else if (r.name === 'quiz') body = await renderQuiz(r.subject, r.grade, r.lessonId);
     else body = renderHome();
-
+    
     app.innerHTML = renderShell(body);
     window.scrollTo(0, 0);
     updateFullscreenBtn();
     updateInstallButton();
     
-    // Immediately restore panel state (no glitch)
+    // Immediately restore panel state
     if (panelHidden) {
       const controls = document.querySelector('.controls');
       const arrow = document.getElementById('panelToggleArrow');
@@ -6323,6 +6323,12 @@ window.performanceManager = new PerformanceManager();
       if (controls) controls.classList.add('hidden-panel');
       if (headerInner) headerInner.classList.add('hidden-panel');
       if (arrow) arrow.classList.add('showing');
+    }
+    
+    // Restore lite mode banner after navigation
+    if (liteMode) {
+      const banner = document.getElementById('liteBanner');
+      if (banner) banner.style.display = 'flex';
     }
 
     window.performanceManager?.scheduleUpdate(() => {
