@@ -3260,9 +3260,22 @@
     .celebration-sub { font-size: 1rem; }
   }
 
-  @keyframes multiplayerGlow {
-  0%, 100% { box-shadow: 0 0 10px rgba(56,189,248,0.4); transform: scale(1); }
-  50% { box-shadow: 0 0 25px rgba(129,140,248,0.7), 0 0 40px rgba(56,189,248,0.3); transform: scale(1.08); }
+#multiplayerBtn {
+  position: relative;
+  overflow: visible;
+}
+#multiplayerBtn::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: #38bdf8;
+  border-right-color: #818cf8;
+  animation: ringSpin 2s linear infinite;
+}
+@keyframes ringSpin {
+  to { transform: rotate(360deg); }
 }
   
   
@@ -6547,7 +6560,8 @@ window.performanceManager = new PerformanceManager();
 
             <!-- 3. Stats Buttons -->
             <div class="control-group">
-<button class="icon-btn multiplayer-special" onclick="openMultiplayer()" title="Multiplayer" id="multiplayerBtn" style="background:linear-gradient(135deg,#38bdf8,#818cf8);color:#fff;animation:multiplayerGlow 2s ease-in-out infinite;box-shadow:0 0 15px rgba(56,189,248,0.5);">🎮</button>              <button class="icon-btn" onclick="showLeaderboard()" title="Leaderboard">🏆</button>
+              <button class="icon-btn" onclick="openMultiplayer()" title="Multiplayer" id="multiplayerBtn">🎮</button>        
+              <button class="icon-btn" onclick="showLeaderboard()" title="Leaderboard">🏆</button>
               <button class="icon-btn" onclick="location.href='history.html'" title="History">📊</button>
               <button class="icon-btn" onclick="showAchievements()" title="Achievements">🏅</button>
               <button class="icon-btn" onclick="showProgress()" title="Progress">📈</button>
