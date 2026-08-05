@@ -6468,6 +6468,7 @@ window.performanceManager = new PerformanceManager();
           </div>
 
           <div class="controls">
+            <!-- 1. Mode Selector -->
             <div class="mode-selector">
               <button class="mode-btn ${currentMode === MODES.STUDY ? 'active' : ''}" onclick="setMode('${MODES.STUDY}')">
                 <i class="fas fa-book"></i> Study
@@ -6480,39 +6481,46 @@ window.performanceManager = new PerformanceManager();
               </button>
             </div>
 
+            <!-- 2. Stars & Streak -->
             <div class="game-stats">
               <div class="stat-item"><i class="fas fa-star"></i><span class="value" id="statScoreValue">${appState.totalScore}</span></div>
               <div class="stat-item"><i class="fas fa-fire"></i><span class="value" id="statStreakValue">${appState.streak}</span></div>
             </div>
 
+            <!-- 3. Stats Buttons -->
             <div class="control-group">
               <button class="icon-btn" onclick="showLeaderboard()" title="Leaderboard">🏆</button>
               <button class="icon-btn" onclick="showAchievements()" title="Achievements">🏅</button>
               <button class="icon-btn" onclick="showProgress()" title="Progress">📊</button>
             </div>
 
+            <!-- 4. User -->
+            <div class="control-group user-chip">
+              <span style="font-size: 0.85rem; font-weight: 600; color: var(--primary-color); white-space: nowrap;">
+                <i class="fas ${isFbUser ? 'fa-fire' : 'fa-user'}"></i> ${escapeHtml(displayName) || 'Guest'}
+              </span>
+              <button class="icon-btn" onclick="handleLogout()" title="Logout" style="width: 28px; height: 28px; font-size: 0.8rem;">
+                <i class="fas fa-sign-out-alt"></i>
+              </button>
+            </div>
+
+            <!-- 5. Control Buttons -->
             <div class="control-group">
               <button id="fullscreenBtn" class="icon-btn ${isFull ? 'is-fullscreen' : ''}" onclick="toggleFullscreen()" title="Fullscreen (F)">
                 <i class="fas ${isFull ? 'fa-compress' : 'fa-expand'}"></i>
               </button>
-
-              <button id="perfBtn" class="icon-btn" onclick="togglePerformanceMode()" title="Performance Mode (P)">
+              <button id="perfBtn" class="icon-btn" onclick="togglePerformanceMode()" title="Performance (P)">
                 <i class="fas fa-bolt"></i>
               </button>
-
-              <button class="icon-btn" onclick="toggleMascot()" title="Mascot On/Off" id="mascotToggleBtn">
+              <button class="icon-btn" onclick="toggleMascot()" title="Mascot" id="mascotToggleBtn">
                 <i class="fas fa-paw"></i>
               </button>
-              
               <button class="icon-btn" onclick="showInfoModal()" title="Info">
                 <i class="fas fa-info-circle"></i>
               </button>
-              
               <button id="muteBtn" class="icon-btn ${muteClass}" onclick="toggleMute()" title="Mute (M)">
                 <i class="fas ${muteIcon}"></i>
               </button>
-
-
               <div class="theme-wrap">
                 <button class="icon-btn" onclick="toggleThemePopover(event)" title="Theme (T)">🎨</button>
                 <div class="theme-popover" id="themePopover">
@@ -6528,20 +6536,12 @@ window.performanceManager = new PerformanceManager();
               </div>
             </div>
 
-            <div class="control-group user-chip">
-              <span style="font-size: 0.85rem; font-weight: 600; color: var(--primary-color); white-space: nowrap;">
-                <i class="fas ${isFbUser ? 'fa-fire' : 'fa-user'}"></i> ${escapeHtml(displayName) || 'Guest'}
-              </span>
-              <button class="icon-btn" onclick="handleLogout()" title="Logout" style="width: 28px; height: 28px; font-size: 0.8rem;">
-                <i class="fas fa-sign-out-alt"></i>
-              </button>
-            </div>
-
             <button class="install-btn" id="installBtn" onclick="installApp()">
               <i class="fas fa-download"></i> Install
             </button>
           </div>
-        </div>
+
+          
           <!-- Panel Toggle Arrow -->
   <button class="panel-toggle-arrow" id="panelToggleArrow" onclick="toggleControlPanel()" title="Show/Hide Panel (H)">
     <i class="fas fa-chevron-up"></i>
