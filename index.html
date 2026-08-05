@@ -4488,22 +4488,7 @@ window.performanceManager = new PerformanceManager();
   }
       // ===== FIREBASE AUTH END =====
       
-      localStorage.removeItem('quizUsername');
-      sessionStorage.removeItem('isGuest');
-      sessionStorage.removeItem('quizGuestName');
-      
-      if (isGuest) {
-        sessionStorage.removeItem('guest_quizProgress');
-      }
-      
-      currentUser = null;
-      isGuest = false;
-      appState.route = { name: 'home' };
-      checkAuth();
-      render();
-    }
   
-
   function syncAppState() {
     const p = getProgress();
     appState.totalScore = p.correctAnswers || 0;
