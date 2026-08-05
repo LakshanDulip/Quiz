@@ -1,35 +1,39 @@
 {
   "appInfo": {
-    "title": "🎯 Quiz Hub",
-    "description": "Quiz Hub යනු 8, 9, 10, 11 ශ්‍රේණිවල සිසුන් සඳහාම නිර්මාණය කළ නොමිලේ ලැබෙන ප්‍රශ්නෝත්තර වේදිකාවකි. විෂය කරුණු පහසුවෙන් මතක තබා ගැනීමට Study Mode, Game Mode, සහ Flashcards යන ක්‍රම තුනම මෙහි අන්තර්ගත වේ. ඔබේ ඉගෙනීම විනෝදාත්මක කරගන්න! 🚀",
+    "title": "🎯 Quiz Hub - ඔබේ දැනුම් සගයා",
+    "description": "Quiz Hub යනු 8, 9, 10, 11 ශ්‍රේණිවල සිසුන් සඳහාම නිර්මාණය කළ නොමිලේ ලැබෙන ප්‍රශ්නෝත්තර වේදිකාවකි. විෂය කරුණු පහසුවෙන් මතක තබා ගැනීමට Study Mode, Game Mode, Flashcards, සහ Multiplayer යන සියලු ක්‍රම මෙහි අන්තර්ගත වේ. ඔබේ ඉගෙනීම විනෝදාත්මක කරගන්න! 🚀",
     "features": [
       "📚 Study Mode - සැහැල්ලුවෙන් පාඩම් කරන්න",
       "🎮 Game Mode - සෙල්ලම් කරමින් ඉගෙන ගන්න",
       "🃏 Flashcards - ඉක්මනින් මතක තබා ගන්න",
+      "⚡ Multiplayer - යහළුවන් සමඟ Live Match",
+      "🦊 Fox Mascot - ඔබව දිරිමත් කරන සුහද සගයා",
+      "🏆 Achievements - ජයග්‍රහණ අගුළු හරින්න",
       "📊 Progress Tracking - ඔබේ ප්‍රගතිය නිරීක්ෂණය කරන්න",
-      "🎨 Themes 12ක් -  පෙනුම වෙනස් කරන්න",
+      "🎨 Themes 13ක් - ඔබේ අභිමතය පරිදි පෙනුම වෙනස් කරන්න",
       "🔥 Streaks - දිගටම ක්‍රීඩා කර ජයග්‍රහණ ලබන්න",
       "☁️ Cloud Save - ඔබේ දත්ත සුරක්ෂිතව තබා ගන්න",
+      "⚡ Lite Mode - Low-end devices සඳහා",
       "📱 PWA Support - App එකක් ලෙස Install කරන්න"
     ],
-    "howToUse": "1️⃣ ඔබ කැමති විෂය තෝරන්න\n2️⃣ ශ්‍රේණිය තෝරන්න (8, 9, 10, 11)\n3️⃣ අදාළ පාඩම තෝරාගන්න\n4️⃣ Study, Game, හෝ Flashcard Mode එකක් තෝරන්න\n5️⃣ ප්‍රශ්නවලට පිළිතුරු දෙන්න\n6️⃣ අවසානයේ ඔබේ ලකුණු බලන්න!",
+    "howToUse": "1️⃣ ඔබ කැමති විෂය තෝරන්න\n2️⃣ ශ්‍රේණිය තෝරන්න (8, 9, 10, 11)\n3️⃣ අදාළ පාඩම තෝරාගන්න\n4️⃣ Study, Game, Flashcard හෝ Multiplayer Mode එකක් තෝරන්න\n5️⃣ ප්‍රශ්නවලට පිළිතුරු දෙන්න\n6️⃣ අවසානයේ ඔබේ ලකුණු බලන්න!\n\n⚡ Multiplayer:\n• Create Room → Settings → Share Code\n• Join Room → Enter Code → Play Live!",
     "developer": "Lakshan Dulip",
-    "version": "2.0.0",
+    "version": "3.0.0",
     "contact": "lakshandulip720@gmail.com",
     "telegram": "@MrLAXAN",
     "whatsapp": "https://whatsapp.com/channel/0029Vb9BrqtJf05hxMpyNm1d",
     "whatsappLabel": "WhatsApp Channel"
   },
   "tips": [
-    "⏱️ Game Mode වලදී Timer එක ගැන සැලකිලිමත් වන්න! කාලය ඉවර වීමට පෙර පිළිතුරු දෙන්න.",
+    "⏱️ Game Mode වලදී Timer එක ගැන සැලකිලිමත් වන්න!",
     "🃏 Flashcards Flip කරමින් ඉක්මනින් කරුණු මතක තබා ගන්න.",
     "💯 100% ලකුණු ලබාගැනීමට සියලු ප්‍රශ්න නිවැරදි විය යුතුයි.",
     "🎨 Theme එක වෙනස් කරන්න ඉහළින් ඇති 🎨 Button එක Click කරන්න.",
     "📊 ඔබගේ ප්‍රගතිය නිතරම බලන්න 📊 Button එකෙන්.",
     "🔐 Google Account එකෙන් Login වී ඔබේ Progress Cloud එකේ Save කරගන්න.",
-    "❤️ Game Mode වලදී ඔබට ලැබෙන්නේ lives 3ක් පමණි. පරිස්සමෙන්!",
-    "🍃 පහත ඇති WhatsApp Channel සබැඳිය (Link) මත ක්ලික් කර අපගේ WhatsApp Channel සමඟ එක්වන්න."
-
-    
+    "❤️ Game Mode වලදී ඔබට ලැබෙන්නේ lives 3ක් පමණි.",
+    "⚡ Multiplayer සඳහා ⚡ Button එක Click කරන්න.",
+    "🦊 Mascot ට Click කරන්න - එයා ඔබව දිරිමත් කරයි!",
+    "📱 WhatsApp Channel එකට Join වෙන්න පහත Link එක Click කරන්න."
   ]
 }
