@@ -5603,7 +5603,7 @@ window.performanceManager = new PerformanceManager();
     // Emotion messages
     const emotionMessages = {
       sleepy: ['😴 නිදිමතයි...', '💤 zzz...', '🥱 නිදාගන්න ඕන...'],
-      angry: ['😡 ප්‍රශ්න ප්‍රශ්න!', '🤬 දිගටම කරන්න!', '😤 මට බෑ!'],
+      angry: ['😡 ඇයි මේ!', '🤬 තරහායි මන්!', '😤 මට බෑ!'],
       singing: ['🎤 ලාලාලා...', '🎵 සිංදුවක් කියමු!', '🎶 ලාලාලා...'],
       crying: ['😢 අඬන්න හිතෙනවා...', '💧 වැරදුනා!', '😭 දුකයි!'],
       smile: ['😊 සතුටුයි!', '😄 හරිම හොඳයි!', '☺️ ලස්සනයි!'],
@@ -5643,7 +5643,7 @@ window.performanceManager = new PerformanceManager();
     const container = document.getElementById('mascotContainer');
     if (!container) return;
     
-    const hearts = ['💕', '💖', '💗', '💝', '✨', '💫', '🌟', '🦊'];
+    const hearts = ['💕', '💖', '💗', '❄️', '✨', '🏵️', '🌟', '🦊'];
     const rect = container.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
@@ -5902,7 +5902,7 @@ window.performanceManager = new PerformanceManager();
         container.classList.add('happy');
         setTimeout(() => container.classList.remove('happy'), 1500);
       }
-      showMascotSpeech('🥱 ප්‍රශ්නයක් කරමුද!', 2000);
+      showMascotSpeech('😉 ප්‍රශ්නයක් කරමුද!', 2000);
       mascotIsSleeping = false;
     }
     
