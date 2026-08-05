@@ -1,15 +1,277 @@
 <!DOCTYPE html>
-
 <html lang="si">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quiz Hub - Multiplayer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>⚡ Quiz Hub - Multiplayer</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Sinhala:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="css/multiplayer.css">
   <style>
+    /* ===== MULTIPLAYER STYLES ===== */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --text: #f1f5f9;
+      --text2: #94a3b8;
+      --border: #334155;
+      --primary: #38bdf8;
+      --green: #34d399;
+      --red: #f87171;
+      --yellow: #fbbf24;
+      --radius: 16px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .mp-container {
+      max-width: 500px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .mp-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    .mp-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 16px;
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .mp-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 1rem;
+      font-family: inherit;
+      margin-bottom: 12px;
+      transition: border-color 0.3s;
+    }
+    .mp-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .mp-select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 0.9rem;
+      font-family: inherit;
+      margin-bottom: 12px;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 16px 12px;
+    }
+
+    .mp-btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: inherit;
+      margin-bottom: 8px;
+    }
+    .mp-btn:hover { transform: translateY(-2px); }
+    .mp-btn:active { transform: scale(0.97); }
+    .mp-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .mp-btn-primary { background: linear-gradient(135deg, #38bdf8, #818cf8); color: #fff; }
+    .mp-btn-success { background: var(--green); color: #000; }
+    .mp-btn-danger { background: var(--red); color: #fff; }
+    .mp-btn-outline { background: transparent; border: 2px solid var(--border); color: var(--text); }
+    .mp-btn-outline:hover { border-color: var(--primary); }
+
+    .mp-room-code {
+      text-align: center;
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: 6px;
+      margin: 10px 0;
+      color: var(--primary);
+    }
+
+    .mp-player-list {
+      max-height: 300px;
+      overflow-y: auto;
+      margin: 12px 0;
+    }
+
+    .mp-player {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 6px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+    }
+
+    .mp-player-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .mp-player-info { flex: 1; }
+    .mp-player-name { font-weight: 600; font-size: 0.9rem; }
+    .mp-player-status { font-size: 0.7rem; color: var(--text2); }
+    .mp-player-score { font-weight: 700; color: var(--primary); }
+
+    .mp-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+    .mp-badge-host { background: rgba(251,191,36,0.2); color: var(--yellow); }
+    .mp-badge-ready { background: rgba(52,211,153,0.2); color: var(--green); }
+    .mp-badge-waiting { background: rgba(148,163,184,0.2); color: var(--text2); }
+    .mp-badge-offline { background: rgba(248,113,113,0.2); color: var(--red); }
+
+    /* Question Screen */
+    .mp-question-num {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text2);
+      margin-bottom: 4px;
+    }
+    .mp-question-text {
+      text-align: center;
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      line-height: 1.6;
+    }
+    .mp-timer {
+      text-align: center;
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+      transition: color 0.5s;
+    }
+    .mp-timer.urgent { color: var(--red); animation: pulse 0.5s infinite; }
+    @keyframes pulse { 50% { opacity: 0.5; } }
+
+    .mp-option {
+      width: 100%;
+      text-align: left;
+      padding: 14px 16px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 8px;
+      font-family: inherit;
+    }
+    .mp-option:hover:not(:disabled) { border-color: var(--primary); transform: translateX(4px); }
+    .mp-option:disabled { cursor: default; }
+    .mp-option.selected { border-color: var(--primary); background: rgba(56,189,248,0.1); }
+    .mp-option.correct { border-color: var(--green); background: rgba(52,211,153,0.1); }
+    .mp-option.wrong { border-color: var(--red); background: rgba(248,113,113,0.1); }
+
+    /* Leaderboard */
+    .mp-leaderboard-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 6px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+    }
+    .mp-rank { font-size: 1.2rem; font-weight: 800; min-width: 30px; }
+    .mp-rank.gold { color: #fbbf24; }
+    .mp-rank.silver { color: #94a3b8; }
+    .mp-rank.bronze { color: #d97706; }
+
+    /* Winner */
+    .mp-winner {
+      text-align: center;
+      padding: 20px;
+    }
+    .mp-winner-icon { font-size: 4rem; }
+    .mp-winner-name { font-size: 1.5rem; font-weight: 800; margin: 8px 0; color: var(--yellow); }
+
+    /* Countdown */
+    .mp-countdown {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.8);
+      z-index: 1000;
+      font-size: 6rem;
+      font-weight: 900;
+      color: var(--primary);
+      animation: countPop 0.5s ease;
+    }
+    @keyframes countPop {
+      0% { transform: scale(0.5); opacity: 0; }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .mp-error { color: var(--red); font-size: 0.8rem; text-align: center; margin-top: 8px; }
+    .mp-divider { text-align: center; color: var(--text2); margin: 12px 0; font-size: 0.8rem; }
+
+    @media (max-width: 480px) {
+      .mp-card { padding: 16px; }
+      .mp-title { font-size: 1.2rem; }
+      .mp-room-code { font-size: 1.5rem; }
+    }
+
+    /* Additional styles for home link & toast */
     .home-link {
       position: fixed;
       top: 12px;
@@ -24,14 +286,10 @@
       font-size: 0.8rem;
       font-weight: 600;
       transition: all 0.3s;
+      font-family: 'Inter', sans-serif;
     }
     .home-link:hover { border-color: var(--primary); color: var(--primary); }
-    @keyframes pulse {
-      0% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.1); opacity: 0.7; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-    /* Toast Notification Styles */
+
     .mp-toast {
       position: fixed;
       top: 60px;
@@ -65,7 +323,6 @@
   <div class="mp-container" id="app"></div>
 
   <!-- Firebase SDK -->
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -97,7 +354,7 @@
     let questionTimer = null;
     let questionTimeLeft = 15;
     let gameQuestionTime = 15;
-    let previousPlayers = null; // Players ලා අයින් වෙනවද බලන්න පාවිච්චි කරනවා
+    let previousPlayers = null;
 
     // ============ AUTH ============
     async function initAuth() {
@@ -113,12 +370,11 @@
       });
     }
 
-    // Tab එක Close කරද්දී Offline කරන්න (User Experience Fix)
     window.addEventListener('beforeunload', () => {
       if (roomId && currentUser) {
         updateDoc(doc(db, 'liveMatches', roomId), {
           [`players.${currentUser.uid}.online`]: false
-        }).catch(()=>{}); // Network Error ආවොත් ignore කරන්න
+        }).catch(()=>{});
       }
     });
 
@@ -139,7 +395,7 @@
       render(`
         <div class="mp-card">
           <div class="mp-title">⚡ Quiz Hub Multiplayer</div>
-          <input type="text" class="mp-input" id="playerName" placeholder="ඔබේ නම..." maxlength="20" value="${playerName}">
+          <input type="text" class="mp-input" id="playerName" placeholder="ඔබේ නම..." maxlength="20" value="${escapeHtml(playerName)}">
           <button class="mp-btn mp-btn-primary" onclick="window.createRoom()">🏠 Create Room</button>
           
           <div class="mp-divider">OR</div>
@@ -194,7 +450,6 @@
       updateSettingsLessons(); 
     }
     
-    // ============ DATA LOADING FUNCTIONS ============
     function createRoom() {
       playerName = document.getElementById('playerName')?.value.trim() || 'Player';
       renderCreateSettings();
@@ -336,7 +591,6 @@
       listenToRoom();
     }
 
-    // ============ LISTENER ============
     function listenToRoom() {
       if (unsubscribe) unsubscribe();
       unsubscribe = onSnapshot(doc(db, 'liveMatches', roomId), (snapshot) => {
@@ -345,10 +599,8 @@
         const data = snapshot.data();
         const players = data.players || {};
         
-        // Update online status locally
         if (players[currentUser.uid]) players[currentUser.uid].online = true;
 
-        // Player Drop/Join Detection (Toast Alerts)
         if (previousPlayers && data.status !== 'waiting') {
           Object.keys(previousPlayers).forEach(uid => {
             const wasOnline = previousPlayers[uid].online;
@@ -361,7 +613,7 @@
             }
           });
         }
-        previousPlayers = JSON.parse(JSON.stringify(players)); // Save state for next check
+        previousPlayers = JSON.parse(JSON.stringify(players));
 
         switch(data.status) {
           case 'waiting':
@@ -402,7 +654,6 @@
       });
     }
 
-    // ============ GAME SCREENS ============
     function renderWaitingRoom(data) {
       const players = data.players || {};
       const playerList = Object.entries(players).map(([uid, p]) => `
@@ -497,7 +748,6 @@
       if (isHost && data && !data.historySaved) saveMatchHistory(data);
     }
 
-    // ============ ACTIONS ============
     async function toggleReady() {
       if (!roomId) return;
       const roomRef = doc(db, 'liveMatches', roomId);
@@ -547,7 +797,6 @@
       });
     }
 
-    // ============ TIMERS & SCORES ============
     function startQuestionTimer(data) {
       if (questionTimer) clearInterval(questionTimer);
       questionTimeLeft = data.questionTime || gameQuestionTime || 15;
@@ -595,7 +844,6 @@
       return scores;
     }
 
-    // ============ UTILS ============
     function escapeHtml(s) { return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
     function getAvatarColor(uid) { const colors = ['#38bdf8','#818cf8','#34d399','#fbbf24','#f87171','#a78bfa','#fb923c']; return colors[uid.charCodeAt(0) % colors.length]; }
     function showError(msg) { const el = document.getElementById('errorMsg'); if (el) el.textContent = msg; }
@@ -612,7 +860,6 @@
       } catch(e) {}
     }
 
-    // ============ MODULE EXPORTS ============
     window.createRoom = createRoom;
     window.updateSettingsLessons = updateSettingsLessons;
     window.confirmCreateRoom = confirmCreateRoom;
@@ -623,7 +870,6 @@
     window.leaveRoom = leaveRoom;
     window.rematch = rematch;
 
-    // ============ INIT ============
     async function init() {
       await initAuth();
       renderLobby();
