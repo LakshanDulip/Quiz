@@ -6629,7 +6629,7 @@ window.performanceManager = new PerformanceManager();
       <div style="text-align:center;padding:10px 10px 30px;">
         
         <!-- Hero -->
-        <div style="margin-bottom:35px; position:relative;">
+        <div style="margin-bottom:25px; position:relative;">
           <div style="position:absolute;top:-40px;left:50%;transform:translateX(-50%);width:200px;height:200px;background:var(--primary-gradient);filter:blur(80px);opacity:0.15;border-radius:50%;"></div>
           <h1 style="font-family:'Space Grotesk',sans-serif; font-size:2rem; font-weight:800; margin-bottom:4px; position:relative;">
             <span style="background:var(--primary-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Quiz Hub</span>
@@ -6639,58 +6639,54 @@ window.performanceManager = new PerformanceManager();
         
         <!-- Stats -->
         <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:30px;">
-          <div class="stat-card" style="background:var(--bg-card);padding:14px 18px;border-radius:16px;border:1px solid var(--border-color);text-align:center;min-width:75px;transition:all 0.3s;">
-            <div style="font-size:1.6rem;font-weight:700;color:var(--accent);">${appState.totalScore}</div>
-            <div style="font-size:0.6rem;color:var(--text-secondary);letter-spacing:1px;">STARS</div>
+          <div style="background:var(--bg-card);padding:12px 16px;border-radius:14px;border:1px solid var(--border-color);text-align:center;min-width:70px;">
+            <div style="font-size:1.4rem;font-weight:700;color:var(--accent);">${appState.totalScore}</div>
+            <div style="font-size:0.6rem;color:var(--text-secondary);">⭐ Stars</div>
           </div>
-          <div class="stat-card" style="background:var(--bg-card);padding:14px 18px;border-radius:16px;border:1px solid var(--border-color);text-align:center;min-width:75px;">
-            <div style="font-size:1.6rem;font-weight:700;color:#ef4444;">${progress.bestStreak || 0}</div>
-            <div style="font-size:0.6rem;color:var(--text-secondary);letter-spacing:1px;">STREAK</div>
+          <div style="background:var(--bg-card);padding:12px 16px;border-radius:14px;border:1px solid var(--border-color);text-align:center;min-width:70px;">
+            <div style="font-size:1.4rem;font-weight:700;color:#ef4444;">${progress.bestStreak || 0}</div>
+            <div style="font-size:0.6rem;color:var(--text-secondary);">🔥 Streak</div>
           </div>
-          <div class="stat-card" style="background:var(--bg-card);padding:14px 18px;border-radius:16px;border:1px solid var(--border-color);text-align:center;min-width:75px;">
-            <div style="font-size:1.6rem;font-weight:700;color:#f59e0b;">${progress.perfectCount || 0}</div>
-            <div style="font-size:0.6rem;color:var(--text-secondary);letter-spacing:1px;">PERFECT</div>
-          </div>
-        </div>
-        
-        <!-- Modes -->
-        <p style="font-size:0.7rem;color:var(--text-secondary);letter-spacing:2px;margin-bottom:12px;">CHOOSE MODE</p>
-        <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-bottom:35px;">
-          <div onclick="setMode('study')" style="background:var(--bg-card);padding:16px 20px;border-radius:20px;border:2px solid transparent;cursor:pointer;text-align:center;width:130px;transition:all 0.3s;"
-               onmouseover="this.style.borderColor='var(--science-color)';this.style.transform='translateY(-4px)'" 
-               onmouseout="this.style.borderColor='transparent';this.style.transform=''">
-            <div style="font-size:2.2rem;">📚</div>
-            <div style="font-weight:700;font-size:0.85rem;">Study</div>
-            <div style="font-size:0.6rem;color:var(--text-secondary);">Learn</div>
-          </div>
-          <div onclick="setMode('flashcard')" style="background:var(--bg-card);padding:16px 20px;border-radius:20px;border:2px solid transparent;cursor:pointer;text-align:center;width:130px;transition:all 0.3s;"
-               onmouseover="this.style.borderColor='var(--primary-color)';this.style.transform='translateY(-4px)'" 
-               onmouseout="this.style.borderColor='transparent';this.style.transform=''">
-            <div style="font-size:2.2rem;">🃏</div>
-            <div style="font-weight:700;font-size:0.85rem;">Flashcard</div>
-            <div style="font-size:0.6rem;color:var(--text-secondary);">Memorize</div>
-          </div>
-          <div onclick="setMode('game')" style="background:var(--bg-card);padding:16px 20px;border-radius:20px;border:2px solid transparent;cursor:pointer;text-align:center;width:130px;transition:all 0.3s;"
-               onmouseover="this.style.borderColor='#ef4444';this.style.transform='translateY(-4px)'" 
-               onmouseout="this.style.borderColor='transparent';this.style.transform=''">
-            <div style="font-size:2.2rem;">🎮</div>
-            <div style="font-weight:700;font-size:0.85rem;">Game</div>
-            <div style="font-size:0.6rem;color:var(--text-secondary);">Play</div>
+          <div style="background:var(--bg-card);padding:12px 16px;border-radius:14px;border:1px solid var(--border-color);text-align:center;min-width:70px;">
+            <div style="font-size:1.4rem;font-weight:700;color:#f59e0b;">${progress.perfectCount || 0}</div>
+            <div style="font-size:0.6rem;color:var(--text-secondary);">🏆 Perfect</div>
           </div>
         </div>
         
-        <!-- Subjects -->
-        <p style="font-size:0.7rem;color:var(--text-secondary);letter-spacing:2px;margin-bottom:12px;">SUBJECTS</p>
-        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; max-width:500px; margin:0 auto;">
+        <!-- SUBJECTS FIRST - Click to select then mode -->
+        <p style="font-size:0.65rem;color:var(--text-secondary);letter-spacing:2px;margin-bottom:10px;">1️⃣ විෂය තෝරන්න</p>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; max-width:450px; margin:0 auto 25px;">
           ${Object.values(SUBJECTS).map(s => `
-            <div onclick="navigate('#/subject/${s.key}')" style="background:var(--bg-card);padding:20px 14px;border-radius:16px;border:1px solid var(--border-color);cursor:pointer;text-align:center;transition:all 0.3s;"
+            <div onclick="navigate('#/subject/${s.key}')" style="background:var(--bg-card);padding:16px 10px;border-radius:14px;border:1px solid var(--border-color);cursor:pointer;text-align:center;transition:all 0.3s;"
                  onmouseover="this.style.transform='translateY(-3px)';this.style.borderColor='var(--primary-color)'" 
                  onmouseout="this.style.transform='';this.style.borderColor='var(--border-color)'">
-              <div style="font-size:2rem;margin-bottom:6px;">${s.emoji}</div>
-              <div style="font-weight:700;font-size:0.85rem;">${escapeHtml(s.sinhala)}</div>
-              <div style="font-size:0.6rem;color:var(--text-secondary);">${escapeHtml(s.name)}</div>
+              <div style="font-size:1.8rem;margin-bottom:4px;">${s.emoji}</div>
+              <div style="font-weight:700;font-size:0.8rem;">${escapeHtml(s.sinhala)}</div>
             </div>
           `).join('')}
+        </div>
+        
+        <!-- MODES - After subject select -->
+        <p style="font-size:0.65rem;color:var(--text-secondary);letter-spacing:2px;margin-bottom:10px;">2️⃣ Mode තෝරන්න</p>
+        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+          <div onclick="setMode('study')" style="background:var(--bg-card);padding:14px 18px;border-radius:16px;border:2px solid var(--border-color);cursor:pointer;text-align:center;width:110px;transition:all 0.3s;"
+               onmouseover="this.style.borderColor='var(--science-color)';this.style.transform='translateY(-3px)'" 
+               onmouseout="this.style.borderColor='var(--border-color)';this.style.transform=''">
+            <div style="font-size:1.8rem;">📚</div>
+            <div style="font-weight:700;font-size:0.75rem;">Study</div>
+          </div>
+          <div onclick="setMode('flashcard')" style="background:var(--bg-card);padding:14px 18px;border-radius:16px;border:2px solid var(--border-color);cursor:pointer;text-align:center;width:110px;transition:all 0.3s;"
+               onmouseover="this.style.borderColor='var(--primary-color)';this.style.transform='translateY(-3px)'" 
+               onmouseout="this.style.borderColor='var(--border-color)';this.style.transform=''">
+            <div style="font-size:1.8rem;">🃏</div>
+            <div style="font-weight:700;font-size:0.75rem;">Flashcard</div>
+          </div>
+          <div onclick="setMode('game')" style="background:var(--bg-card);padding:14px 18px;border-radius:16px;border:2px solid var(--border-color);cursor:pointer;text-align:center;width:110px;transition:all 0.3s;"
+               onmouseover="this.style.borderColor='#ef4444';this.style.transform='translateY(-3px)'" 
+               onmouseout="this.style.borderColor='var(--border-color)';this.style.transform=''">
+            <div style="font-size:1.8rem;">🎮</div>
+            <div style="font-weight:700;font-size:0.75rem;">Game</div>
+          </div>
         </div>
         
       </div>
