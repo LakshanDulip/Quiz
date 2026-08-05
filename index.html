@@ -4886,8 +4886,9 @@ window.performanceManager = new PerformanceManager();
     btn.style.transform = 'scale(1.5)';
     btn.style.background = 'var(--primary-gradient)';
     btn.style.color = '#fff';
-    btn.style.boxShadow = '0 0 30px var(--glow-color)';
-    
+      btn.style.boxShadow = '0 0 30px var(--glow-color)';
+      btn.style.position = 'relative';
+      btn.style.zIndex = '9999';    
     // Sparkles burst
     const emojis = ['⚡', '✨', '💫', '🌟', '🔥'];
     for (let i = 0; i < 10; i++) {
