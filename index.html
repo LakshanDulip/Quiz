@@ -2122,63 +2122,7 @@
   .animate-pop { animation: popIn 0.25s ease forwards; }
   @keyframes popIn { 0% { opacity: 0; transform: scale(0.97); } 100% { opacity: 1; transform: scale(1); } }
 
-  /* ===== MASCOT TOGGLE BUTTON ===== */
-  .mascot-toggle-btn {
-    position: fixed;
-    bottom: 20px;
-    right: 68px;
-    z-index: 500;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background: var(--bg-card);
-    color: var(--text-secondary);
-    font-size: 0.7rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: var(--shadow-sm);
-    cursor: pointer;
-    border: 1px solid var(--border-color);
-    transition: all 0.3s ease;
-    opacity: 0.5;
-  }
-  .mascot-toggle-btn:hover {
-    color: #ff5722;
-    border-color: #ff5722;
-    opacity: 0.9;
-  }
-  .mascot-toggle-btn.hidden-mascot {
-    color: var(--text-secondary);
-    opacity: 0.3;
-  }
-  
-  /* ===== FLOATING INFO BUTTON ===== */
-  .info-floating-btn {
-    position: fixed;
-    top: 80px;
-    right: 16px;
-    z-index: 500;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background: var(--bg-card);
-    color: var(--text-secondary);
-    font-size: 0.75rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-    cursor: pointer;
-    border: 1px solid var(--border-color);
-    transition: all 0.2s ease;
-    opacity: 0.5;
-  }
-  .info-floating-btn:hover {
-    opacity: 0.9;
-    color: var(--primary-color);
-    border-color: var(--primary-color);
-  }
+
 
   /* Info Modal Styles */
   .info-section {
@@ -4226,10 +4170,7 @@ window.performanceManager = new PerformanceManager();
   </div>
 </div>
 <!-- ===== FIREBASE AUTH END ===== -->
-  <!-- Mascot Toggle Button -->
-<button class="mascot-toggle-btn" id="mascotToggleBtn" onclick="toggleMascot()" title="Mascot On/Off">
-  <i class="fas fa-paw"></i>
-</button>
+
 <!-- ===== ANIMATED FOX MASCOT ===== -->
 <div class="mascot-container" id="mascotContainer" onclick="handleMascotClick()">
   <div class="mascot-body" style="width:60px; height:60px;">
@@ -4257,9 +4198,7 @@ window.performanceManager = new PerformanceManager();
   </div>
 </div>
   <!-- ===== INFO BUTTON (floating) ===== -->
-<button class="info-floating-btn" onclick="showInfoModal()" title="තොරතුරු">
-  <i class="fas fa-info"></i>
-</button>
+
 
 <!-- Fullscreen Image Modal -->
 <div class="modal-overlay" id="imageModal" onclick="closeImageModal()" style="z-index:10001;">
@@ -6559,6 +6498,14 @@ window.performanceManager = new PerformanceManager();
 
               <button id="perfBtn" class="icon-btn" onclick="togglePerformanceMode()" title="Performance Mode (P)">
                 <i class="fas fa-bolt"></i>
+              </button>
+
+              <button class="icon-btn" onclick="toggleMascot()" title="Mascot On/Off" id="mascotToggleBtn">
+                <i class="fas fa-paw"></i>
+              </button>
+              
+              <button class="icon-btn" onclick="showInfoModal()" title="Info">
+                <i class="fas fa-info-circle"></i>
               </button>
               
               <button id="muteBtn" class="icon-btn ${muteClass}" onclick="toggleMute()" title="Mute (M)">
