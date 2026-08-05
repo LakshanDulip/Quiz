@@ -523,7 +523,11 @@
   </div>
   <canvas id="bgParticles" aria-hidden="true"></canvas>
   <canvas id="confettiCanvas" aria-hidden="true"></canvas>
-
+<!-- Online Players Counter -->
+<div id="onlineCounter" style="position:fixed;top:calc(12px + var(--safe-top));right:60px;z-index:100;display:flex;align-items:center;gap:6px;background:var(--glass-bg);backdrop-filter:blur(10px);border:1px solid var(--glass-border);border-radius:20px;padding:6px 12px;font-size:0.7rem;font-weight:600;color:var(--text);">
+  <span style="width:8px;height:8px;border-radius:50%;background:var(--green);animation:dotPulse 1.6s ease-in-out infinite;"></span>
+  <span id="onlineCount">0</span> online
+</div>
 <a href="index.html" class="home-link" style="display:flex;align-items:center;gap:8px;padding:6px 14px;text-decoration:none;">
   <svg viewBox="0 0 40 40" width="22" height="22" style="flex-shrink:0;animation:spin 16s linear infinite;">
     <circle cx="20" cy="20" r="3.4" fill="#38bdf8"/>
@@ -1188,6 +1192,10 @@
           <button class="mp-btn mp-btn-danger" onclick="window.leaveRoom()">Leave</button>
         </div>
       `);
+
+            // Update online count
+      const countEl = document.getElementById('onlineCount');
+      if (countEl) countEl.textContent = Object.values(data.players || {}).filter(p => p.online).length;
     }
 
     function renderQuestion(data) {
