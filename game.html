@@ -84,51 +84,41 @@
       });
     }
 
-    // ============ UI RENDER & EVENT BINDING ============
+    // ============ UI RENDER ============
     function render(html) {
       document.getElementById('app').innerHTML = html;
     }
 
-    // 1. LOBBY
     function renderLobby() {
       render(`
         <div class="mp-card">
           <div class="mp-title">⚡ Quiz Hub Multiplayer</div>
           <input type="text" class="mp-input" id="playerName" placeholder="ඔබේ නම..." maxlength="20" value="${playerName}">
-          <button class="mp-btn mp-btn-primary" id="btnCreateRoom">🏠 Create Room</button>
+          <button class="mp-btn mp-btn-primary" onclick="window.createRoom()">🏠 Create Room</button>
           
           <div class="mp-divider">OR</div>
           
           <input type="text" class="mp-input" id="roomCodeInput" placeholder="Room Code" maxlength="6" style="text-align:center;letter-spacing:4px;text-transform:uppercase;font-size:1.2rem;">
-          <button class="mp-btn mp-btn-outline" id="btnJoinRoom">🚪 Join Room</button>
+          <button class="mp-btn mp-btn-outline" onclick="window.joinRoom()">🚪 Join Room</button>
+          
           <div class="mp-error" id="errorMsg"></div>
         </div>
       `);
-
-      document.getElementById('btnCreateRoom').addEventListener('click', () => {
-        playerName = document.getElementById('playerName').value.trim() || 'Player';
-        renderCreateSettings();
-      });
-
-      document.getElementById('btnJoinRoom').addEventListener('click', () => {
-        joinRoom();
-      });
     }
 
-    // 2. SETTINGS
     function renderCreateSettings() {
       render(`
         <div class="mp-card">
           <div class="mp-title">⚙️ Game Settings</div>
           
           <label style="font-size:0.8rem;color:var(--text2);">Subject</label>
-          <select class="mp-select" id="setSubject">
+          <select class="mp-select" id="setSubject" onchange="window.updateSettingsLessons()">
             <option value="science">🔬 විද්‍යාව</option>
             <option value="maths">📐 ගණිතය</option>
           </select>
           
           <label style="font-size:0.8rem;color:var(--text2);">Grade</label>
-          <select class="mp-select" id="setGrade">
+          <select class="mp-select" id="setGrade" onchange="window.updateSettingsLessons()">
             <option value="8">8 ශ්‍රේණිය</option>
             <option value="9">9 ශ්‍රේණිය</option>
             <option value="10">10 ශ්‍රේණිය</option>
@@ -151,41 +141,35 @@
             <option value="30">30s - Relaxed</option>
           </select>
           
-          <button class="mp-btn mp-btn-primary" id="btnConfirmCreate">✅ Create Room</button>
-          <button class="mp-btn mp-btn-outline" id="btnBackLobby">Back</button>
+          <button class="mp-btn mp-btn-primary" onclick="window.confirmCreateRoom()">✅ Create Room</button>
+          <button class="mp-btn mp-btn-outline" onclick="window.leaveRoom()">Back</button>
         </div>
       `);
-
-      document.getElementById('setSubject').addEventListener('change', async () => {
-        document.getElementById('setLesson').innerHTML = '<option value="">Loading...</option>';
-        await updateSettingsLessons();
-      });
-
-      document.getElementById('setGrade').addEventListener('change', async () => {
-        await updateSettingsLessons();
-      });
-
-      document.getElementById('btnConfirmCreate').addEventListener('click', confirmCreateRoom);
-      document.getElementById('btnBackLobby').addEventListener('click', renderLobby);
-
-      updateSettingsLessons(); 
+      updateSettingsLessons(); // මුලින්ම පාඩම් Load කිරීම
     }
-
+    
     // ============ DATA LOADING FUNCTIONS ============
+    function createRoom() {
+      playerName = document.getElementById('playerName')?.value.trim() || 'Player';
+      renderCreateSettings();
+    }
+    
     async function updateSettingsLessons() {
       const subject = document.getElementById('setSubject')?.value || 'science';
       const grade = document.getElementById('setGrade')?.value || '8';
       const select = document.getElementById('setLesson');
       if (!select) return;
       
+      select.innerHTML = '<option value="">Loading...</option>';
+      
       try {
-        const resp = await fetch(`data/${subject}.json`);
+        // Cache-Buster යොදා ඇත
+        const resp = await fetch(`data/${subject}.json?t=${Date.now()}`);
         if (!resp.ok) throw new Error('Failed to load JSON');
         const data = await resp.json();
         
         let lessons = [];
         
-        // Auto-search for lessons
         if (data.grades?.[grade]?.lessons) {
           lessons = data.grades[grade].lessons;
         } else if (data[subject]?.grades?.[grade]?.lessons) {
@@ -215,7 +199,6 @@
       }
     }
 
-    // ============ ROOM LOGIC ============
     async function confirmCreateRoom() {
       const subject = document.getElementById('setSubject')?.value || 'science';
       const grade = document.getElementById('setGrade')?.value || '10';
@@ -233,7 +216,7 @@
 
       let questions = [];
       try {
-        const resp = await fetch(`data/${subject}.json`);
+        const resp = await fetch(`data/${subject}.json?t=${Date.now()}`);
         const data = await resp.json();
         let lessons = [];
         
@@ -252,17 +235,19 @@
           }
         }
         
+        // තෝරාගත් පාඩම පමණක් වෙන්කර ගැනීම
         const lesson = lessons.find(l => l.id === lessonId);
-        if (lesson?.questions) {
+        if (lesson && lesson.questions) {
           const shuffled = [...lesson.questions].sort(() => Math.random() - 0.5);
           questions = shuffled.slice(0, qCount);
         }
-      } catch(e) {}
+      } catch(e) {
+        console.error(e);
+      }
       
       if (questions.length === 0) {
         questions = [
-          {q:"Sample Q1? (No questions found in JSON)", options:["A","B","C","D"], correct:0},
-          {q:"Sample Q2?", options:["A","B","C","D"], correct:1}
+          {q:"No questions found for this lesson! Check your JSON.", options:["OK","B","C","D"], correct:0}
         ];
       }
 
@@ -392,24 +377,18 @@
           <div class="mp-room-code">${roomCode}</div>
           <p style="text-align:center;">Players: ${playerCount}/10</p>
           <div class="mp-player-list">${playerList}</div>
-          <button class="mp-btn mp-btn-success" id="btnReady">${players[currentUser.uid]?.ready ? '✅ Ready' : 'Click to Ready'}</button>
-          ${isHost ? `<button class="mp-btn mp-btn-primary" id="btnStart" ${!allReady?'disabled':''}>⚡ Start</button>` : ''}
-          <button class="mp-btn mp-btn-danger" id="btnLeave">Leave</button>
+          <button class="mp-btn mp-btn-success" onclick="window.toggleReady()">${players[currentUser.uid]?.ready ? '✅ Ready' : 'Click to Ready'}</button>
+          ${isHost ? `<button class="mp-btn mp-btn-primary" onclick="window.startGame()" ${!allReady?'disabled':''}>⚡ Start</button>` : ''}
+          <button class="mp-btn mp-btn-danger" onclick="window.leaveRoom()">Leave</button>
         </div>
       `);
-
-      document.getElementById('btnReady').addEventListener('click', toggleReady);
-      if(isHost && document.getElementById('btnStart')) {
-          document.getElementById('btnStart').addEventListener('click', startGame);
-      }
-      document.getElementById('btnLeave').addEventListener('click', leaveRoom);
     }
 
     function renderQuestion(data) {
       const q = data.questions[currentQuestionIndex];
       if (!q) return;
       const options = q.options.map((opt, i) => `
-        <button class="mp-option ans-btn ${selectedAnswer === i ? 'selected' : ''}" data-index="${i}" ${selectedAnswer >= 0 ? 'disabled' : ''}>
+        <button class="mp-option ${selectedAnswer === i ? 'selected' : ''}" onclick="window.selectAnswer(${i})" ${selectedAnswer >= 0 ? 'disabled' : ''}>
           ${String.fromCharCode(65+i)}) ${escapeHtml(opt)}
         </button>
       `).join('');
@@ -422,10 +401,6 @@
           <p style="text-align:center;font-size:0.7rem;color:var(--text2);margin-top:8px;">${selectedAnswer >= 0 ? 'Answer locked! 🔒' : 'Select your answer...'}</p>
         </div>
       `);
-
-      document.querySelectorAll('.ans-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => selectAnswer(parseInt(e.currentTarget.dataset.index)));
-      });
     }
 
     function renderLeaderboard(players, scores) {
@@ -457,14 +432,11 @@
           <div class="mp-winner"><div class="mp-winner-icon">🏆</div><div class="mp-winner-name">${escapeHtml(winner.name)}</div><p style="color:var(--text2);">${winner.score} points</p></div>
           <div>${list}</div>
           <div style="display:flex;gap:8px;margin-top:12px;">
-            ${isHost ? '<button class="mp-btn mp-btn-primary" id="btnRematch">🔄 Rematch</button>' : ''}
-            <button class="mp-btn mp-btn-outline" id="btnLeaveEnd">Leave</button>
+            ${isHost ? '<button class="mp-btn mp-btn-primary" onclick="window.rematch()">🔄 Rematch</button>' : ''}
+            <button class="mp-btn mp-btn-outline" onclick="window.leaveRoom()">Leave</button>
           </div>
         </div>
       `);
-      
-      if(isHost) document.getElementById('btnRematch').addEventListener('click', rematch);
-      document.getElementById('btnLeaveEnd').addEventListener('click', leaveRoom);
       if (isHost && data && !data.historySaved) saveMatchHistory(data);
     }
 
@@ -582,6 +554,18 @@
         await updateDoc(doc(db, 'liveMatches', roomId), { historySaved: true });
       } catch(e) {}
     }
+
+    // ============ MODULE EXPORTS ============
+    // HTML වලදී onclick වැඩ කිරීම සඳහා මේවා අනිවාර්යයෙන්ම අවශ්‍යයි.
+    window.createRoom = createRoom;
+    window.updateSettingsLessons = updateSettingsLessons;
+    window.confirmCreateRoom = confirmCreateRoom;
+    window.joinRoom = joinRoom;
+    window.toggleReady = toggleReady;
+    window.startGame = startGame;
+    window.selectAnswer = selectAnswer;
+    window.leaveRoom = leaveRoom;
+    window.rematch = rematch;
 
     // ============ INIT ============
     async function init() {
