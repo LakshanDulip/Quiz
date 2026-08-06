@@ -1,17 +1,18 @@
 <!DOCTYPE html>
 <html lang="si">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover" />
     <title>Quiz Hub - Multiplayer</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Sinhala:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>" />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Sinhala:wght@400;500;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@3/dist/fp.min.js">
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js">
     </script>
     <style>
+        /* All existing styles remain unchanged */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -190,7 +191,6 @@
                 transform: translateY(0);
             }
         }
-        /* PERF: contain: layout style (+ paint) added to cards/list containers to isolate layout/paint work (item #3) */
         .mp-card {
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
@@ -414,7 +414,6 @@
             border-radius: 14px;
             margin-bottom: 14px;
         }
-        /* PERF: contain added to scrollable list containers (item #3) */
         .mp-player-list {
             max-height: 300px;
             overflow-y: auto;
@@ -439,7 +438,6 @@
             border: 1px solid var(--glass-border);
             animation: playerEnter 0.4s var(--ease-game) both;
             transition: opacity 0.35s ease, transform 0.35s ease, max-height 0.35s ease, margin 0.35s ease, padding 0.35s ease;
-            /* PERF: will-change removed from base rule; now toggled dynamically via JS (pulseWillChange) only while animating (item #3) */
         }
         .mp-player.player-entering {
             opacity: 0;
@@ -598,9 +596,7 @@
             background: linear-gradient(90deg, #38bdf8, #818cf8);
             border-radius: 4px;
             transition: width 0.6s var(--ease-game);
-            /* PERF: will-change removed from base rule; toggled dynamically via JS while width is transitioning (item #3) */
         }
-        /* NEW (feature #6): question progress dots replacing "Question X / Y" text */
         .mp-progress-dots {
             display: flex;
             flex-wrap: wrap;
@@ -641,7 +637,6 @@
             left: 50%;
             transform: translate(-50%, -50%);
         }
-        /* NEW: screen-reader only helper text (accessibility, item #9) */
         .sr-only {
             position: absolute;
             width: 1px;
@@ -682,7 +677,6 @@
             stroke-width: 8;
             stroke-linecap: round;
             transition: stroke-dashoffset 1s linear, stroke 0.4s ease;
-            /* PERF: will-change removed from base rule; toggled dynamically via JS each tick (item #3) */
         }
         .timer-green {
             stroke: var(--green);
@@ -1234,7 +1228,6 @@
         .chat-card {
             padding: 16px 14px;
         }
-        /* PERF: contain added to chat scroll container (item #3) */
         .chat-messages {
             max-height: 200px;
             min-height: 120px;
@@ -1336,7 +1329,6 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
-        /* NEW (after-game chat, feature #1): small note/timer under the post-game chat title */
         .chat-close-note {
             font-size: 0.62rem;
             font-weight: 400;
@@ -1439,8 +1431,7 @@
             }
         }
         .skeleton-shimmer {
-            background: linear-gradient(100deg, rgba(255, 255, 255, 0.04) 20%, rgba(255, 255, 255, 0.11) 40%, rgba(255, 255,
-                        255, 0.04) 60%);
+            background: linear-gradient(100deg, rgba(255, 255, 255, 0.04) 20%, rgba(255, 255, 255, 0.11) 40%, rgba(255, 255, 255, 0.04) 60%);
             background-size: 200% 100%;
             animation: shimmerMove 1.5s ease-in-out infinite;
             border-radius: 10px;
@@ -1487,7 +1478,6 @@
         #onlineCounter .oc-dot {
             animation: dotPulse 1.6s ease-in-out infinite;
         }
-        /* NEW (feature #11): waiting-room mini trivia box */
         .mp-mini-trivia {
             display: flex;
             align-items: flex-start;
@@ -1657,7 +1647,7 @@
         import { getAuth, onAuthStateChanged, signInAnonymously, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, collection, query, where, getDocs, addDoc, serverTimestamp, orderBy, limitToLast, deleteDoc, deleteField, writeBatch, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        // Firebase config left 100% untouched, per the constraints.
+        // Firebase config — untouched
         const firebaseConfig = {
             apiKey: "AIzaSyAhfgx0t-E6wrz6zEFIU_tpKTIbELp00ss",
             authDomain: "quiz-hub-225eb.firebaseapp.com",
@@ -1671,20 +1661,10 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        setPersistence(auth, browserLocalPersistence).then(() => console.log('[Auth] Persistence set')).catch(() => {});
-
-        // NOTE on "Firestore select()" (perf item #1):
-        // The Firestore Web (modular) client SDK does NOT expose a field-mask / select() API the
-        // way the Admin (Node) SDK does — onSnapshot()/getDoc()/getDocs() on the web client always
-        // sync the full document so the offline cache stays consistent. Calling a non-existent
-        // `select()` here would just throw at runtime, so instead we keep reads efficient the
-        // honest way: we avoid redundant getDoc() calls right before/after subscribing to the same
-        // document (see init()/joinRoom()), we don't re-fetch data we already have in the snapshot,
-        // and the mini-trivia / question skeletons never trigger extra reads. See comments below
-        // at each call site tagged "PERF:".
+        setPersistence(auth, browserLocalPersistence).catch(() => {});
 
         // ============ STATE ============
-        let currentUser = null
+        let currentUser = null;
         let deviceId = null;
         let roomId = null;
         let roomCode = null;
@@ -1732,24 +1712,19 @@
         let snapshotDebounceTimer = null;
         let pendingSnapshotData = null;
 
-        // NEW (feature #1 - after-game chat): tracks whether the post-game chat window is open + its auto-close timer
         let afterGameChatActive = false;
         let afterGameChatTimer = null;
 
-        // NEW (feature #6 - progress dots): which question indices *this* player has answered this match
         let answeredQuestionIndices = new Set();
 
-        // NEW (feature #8 - quick rematch / #7 - skeleton timing): remember the timer basis so a
-        // delayed render can compute an accurate "time left" instead of a stale value
         let currentQuestionStartMs = null;
         let currentQuestionTotalTime = 15;
 
-        // NEW (rematch-request system): tracks the last-seen rematchRequest so incremental DOM
-        // updates on the finished/winner screen only fire when it actually changes, and a local
-        // in-flight guard so a player/host can't double-submit while a write is still in progress.
-        let prevSnapshotRematchRequestJSON = '';
-        let rematchRequestInFlight = false;
-        let rematchDecisionInFlight = false;
+        // ============ REMATCH STATE ============
+        let rematchPending = false;
+        let rematchRequestedBy = null;
+        let rematchRequestedByName = '';
+        let rematchUnsubscribe = null; // listener for rematchRequests subcollection
 
         // ============ AUTH ============
         async function initAuth() {
@@ -1800,6 +1775,7 @@
             }
             stopHeartbeat();
             stopChatListener();
+            stopRematchListener();
         });
 
         document.addEventListener('focusin', (e) => {
@@ -1810,7 +1786,6 @@
             }
         });
 
-        // Keyboard shortcuts for answer selection (1-4 or A-D)
         document.addEventListener('keydown', (e) => {
             if (currentScreenMode !== 'playing') return;
             if (selectedAnswer >= 0 || revealActive || answeringInFlight) return;
@@ -1827,7 +1802,7 @@
         });
 
         // =========================================================
-        // NEW: HAPTIC FEEDBACK (feature #5)
+        // HAPTIC
         // =========================================================
         function vibrate(ms) {
             try {
@@ -1836,10 +1811,8 @@
         }
 
         // =========================================================
-        // NEW: PERF HELPERS - will-change toggling + rAF batching (items #3 & #4 partially)
+        // PERF HELPERS
         // =========================================================
-        // Sets will-change only while something is actually animating, then clears it so the
-        // browser doesn't keep an expensive compositor layer around indefinitely.
         function pulseWillChange(el, prop, duration = 650) {
             if (!el) return;
             try {
@@ -1849,7 +1822,7 @@
         }
 
         // =========================================================
-        // SOUND SYSTEM
+        // SOUND
         // =========================================================
         let audioCtx = null;
 
@@ -1948,7 +1921,6 @@
             playSound('click'); }
         window.toggleMute = toggleMute;
 
-        // MODIFIED (feature #5): also fire a short haptic pulse on any button/option/icon/chat-send click
         document.addEventListener('click', (e) => {
             const target = e.target.closest('.mp-btn, .mp-option, .icon-btn, .chat-send-btn');
             if (!target || target.disabled) return;
@@ -1974,7 +1946,7 @@
         }
 
         // =========================================================
-        // AMBIENT PARTICLES
+        // PARTICLES
         // =========================================================
         function prefersReducedMotion() {
             return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -2211,7 +2183,9 @@
         window.shareWhatsApp = shareWhatsApp;
         window.toggleQRCode = toggleQRCode;
 
-        // ============ UI RENDER ============
+        // =========================================================
+        // UI RENDER
+        // =========================================================
         function render(html) {
             const appEl = document.getElementById('app');
             if (!appEl) return;
@@ -2235,7 +2209,6 @@
           `);
         }
 
-        // NEW (feature #7): shimmer placeholder shown for ~350ms before each real question renders
         function renderQuestionSkeleton() {
             render(`
             <div class="mp-card" id="questionCardSkeleton">
@@ -2319,13 +2292,21 @@
         window.sendReaction = sendReaction;
 
         // =========================================================
-        // NEW (feature #11): WAITING-ROOM MINI TRIVIA
+        // MINI TRIVIA
         // =========================================================
         const MINI_TRIVIA = [
             "🧠 ඔබේ මොළය නින්දේදීත් නිතරම ක්‍රියාශීලීව සිටිනවා — sleep එකේදීත් memory consolidate වෙනවා.",
             "🌍 පෘථිවියේ වයස අවුරුදු බිලියන 4.5කට ආසන්නයි.",
-            "💧 මිනිස් සිරුරෙන් 60%ක් පමණ ජලයෙන් සමන්විතයි."
+            "🐙 බූගෙයෙකුට (Octopus) හදවත් තුනක් තියෙනවා.",
+            "💧 මිනිස් සිරුරෙන් 60%ක් පමණ ජලයෙන් සමන්විතයි.",
+            "🍯 මී පැණි කවදාවත් කැඩෙන්නේ නෑ — නිසි ලෙස තැන්පත් කළොත් අවුරුදු දහස් ගණනක් තිබෙන්නත් පුළුවන්.",
+            "⚡ එළිය තත්පරයකින් පෘථිවිය වටා 7 පාරක් ගමන් කරන්න පුළුවන් වේගයෙන් යනවා.",
+            "🦴 ළදරුවෙකුට ඇටකටු 300කට වඩා තියෙනවා, වැඩිහිටියෙකුට තියෙන්නේ 206ක්.",
+            "🌙 චන්ද්‍රයා සෑම වසරකම පෘථිවියෙන් සෙන්ටිමීටර් 3.8ක් පමණ ඈත් වෙනවා.",
+            "🐝 මීමැස්සන්ට රටාවක් 'waggle dance' එකකින් එකිනෙකාට direction කියලා දෙන්න පුළුවන්.",
+            "🔥 වීදුරු (Glass) ඇත්තටම ඉතා සෙමින් ගලායන ද්‍රවයක් නොවෙයි — solid එකක් විදියටයි සැලකෙන්නේ."
         ];
+
         function getRandomTrivia() {
             return MINI_TRIVIA[Math.floor(Math.random() * MINI_TRIVIA.length)];
         }
@@ -2462,9 +2443,11 @@
                 prevSnapshotStatus = null;
                 prevSnapshotQuestionIndex = -1;
                 prevSnapshotPlayersJSON = '';
-                prevSnapshotRematchRequestJSON = '';
                 recentlyRejoinedUids = new Set();
-                answeredQuestionIndices = new Set(); // NEW: fresh progress-dot state for a brand new room
+                answeredQuestionIndices = new Set();
+                rematchPending = false;
+                rematchRequestedBy = null;
+                rematchRequestedByName = '';
                 let questions = [];
                 try {
                     const resp = await fetch(`data/${subject}.json?t=${Date.now()}`);
@@ -2486,8 +2469,6 @@
                     questions = [{ q: "No questions found for this lesson! Check your JSON.",
                     options: ["OK", "B", "C", "D"], correct: 0 }];
                 }
-                // NEW: store the original create settings on the room so "Quick Rematch" (feature #8)
-                // can restart with the exact same subject/grade/lesson/time/question-count later.
                 await setDoc(doc(db, 'liveMatches', roomId), {
                     roomCode,
                     hostId: currentUser.uid,
@@ -2500,9 +2481,9 @@
                     questionCount: questions.length,
                     status: 'waiting',
                     currentQuestion: -1,
-                    rematchRequest: null,
                     createdAt: serverTimestamp(),
                     questions,
+                    rematch: { status: 'none', requestedBy: null, requestedByName: null, timestamp: null },
                     players: {
                         [currentUser.uid]: {
                             name: playerName,
@@ -2564,9 +2545,11 @@
                 prevSnapshotStatus = null;
                 prevSnapshotQuestionIndex = -1;
                 prevSnapshotPlayersJSON = '';
-                prevSnapshotRematchRequestJSON = '';
                 recentlyRejoinedUids = new Set();
-                answeredQuestionIndices = new Set(); // NEW: fresh progress-dot state when joining a room
+                answeredQuestionIndices = new Set();
+                rematchPending = false;
+                rematchRequestedBy = null;
+                rematchRequestedByName = '';
                 const q = query(collection(db, 'liveMatches'), where('roomCode', '==', code), where('status', 'in', [
                     'waiting', 'countdown'
                 ]));
@@ -2650,10 +2633,10 @@
         function listenToRoom() {
             if (unsubscribe) unsubscribe();
             stopHeartbeat();
+            stopRematchListener();
             prevSnapshotStatus = null;
             prevSnapshotQuestionIndex = -1;
             prevSnapshotPlayersJSON = '';
-            prevSnapshotRematchRequestJSON = '';
             waitingRoomFullyRendered = false;
 
             unsubscribe = onSnapshot(doc(db, 'liveMatches', roomId), (snapshot) => {
@@ -2662,11 +2645,9 @@
                 processRoomSnapshot(data);
             });
             startHeartbeat();
+            // Listen to rematchRequests subcollection only when in 'finished' state (started inside processRoomSnapshot)
         }
 
-        // PERF (item #4): debounce rapid Firestore snapshot updates (~120ms) so presence/ready-flag
-        // churn doesn't cause UI flicker; critical transitions (status/question change) skip the
-        // debounce and apply immediately so gameplay stays responsive.
         function processRoomSnapshot(data) {
             const isCriticalChange = data.status !== prevSnapshotStatus ||
                 (data.status === 'playing' && data.currentQuestion !== prevSnapshotQuestionIndex);
@@ -2720,27 +2701,28 @@
 
             maintainPresence(data, players);
 
-            // MODIFIED (feature #1): keep the chat listener alive during 'waiting' AND while the
-            // after-game chat window is open during 'finished'; otherwise stop it.
             if (data.status === 'waiting' || (data.status === 'finished' && afterGameChatActive)) {
                 startChatListener();
             } else if (data.status !== 'finished') {
                 stopChatListener();
             }
 
+            // Manage rematch listener: only when finished
+            if (data.status === 'finished') {
+                startRematchListener();
+            } else {
+                stopRematchListener();
+            }
+
             const statusChanged = data.status !== prevSnapshotStatus;
             const questionChanged = data.status === 'playing' && data.currentQuestion !==
                 prevSnapshotQuestionIndex;
             const playersChanged = JSON.stringify(players) !== prevSnapshotPlayersJSON;
-            // NEW (rematch-request system): detect if the room-level rematchRequest object changed
-            // so the finished/winner screen can update just that widget without a full re-render.
-            const rematchRequestChanged = JSON.stringify(data.rematchRequest || null) !== prevSnapshotRematchRequestJSON;
 
             const oldStatus = prevSnapshotStatus;
             prevSnapshotStatus = data.status;
             prevSnapshotQuestionIndex = data.currentQuestion;
             prevSnapshotPlayersJSON = JSON.stringify(players);
-            prevSnapshotRematchRequestJSON = JSON.stringify(data.rematchRequest || null);
 
             if (oldStatus === 'playing' && data.status !== 'playing') {
                 if (questionTimer) { clearInterval(questionTimer);
@@ -2788,19 +2770,12 @@
                         break;
                 }
             } else if (data.status === 'waiting' && playersChanged && waitingRoomFullyRendered) {
-                // PERF (item #3): batch the waiting-room DOM writes (player list, ready button,
-                // start button, player count) into a single requestAnimationFrame to avoid layout thrashing.
                 requestAnimationFrame(() => {
                     updatePlayerListDOM(players, data.hostId);
                     updateReadyButtonDOM(players);
                     updateStartButtonDOM(players, data.hostId);
                     updatePlayerCountDOM(players);
                 });
-            } else if (data.status === 'finished' && rematchRequestChanged) {
-                // NEW (rematch-request system): the winner screen is already showing — just refresh
-                // the small rematch-request widget in place instead of re-rendering the whole screen
-                // (avoids re-triggering confetti/sounds/achievements).
-                updateRematchRequestDOM(data);
             }
 
             const countEl = document.getElementById('onlineCount');
@@ -2876,7 +2851,6 @@
               ${waitingDotsHTML}
               <p style="text-align:center;" id="playerCountText">Players: ${playerCount}/10</p>
               <div class="mp-player-list" id="playerListContainer">${playerListHTML}</div>
-              <!-- NEW (feature #11): mini trivia box, a different fact each time the waiting screen renders -->
               <div class="mp-mini-trivia" id="miniTriviaBox"><span class="mt-icon">💡</span><span class="mt-text">${escapeHtml(getRandomTrivia())}</span></div>
               <button class="mp-btn mp-btn-success" id="readyBtn" onclick="window.toggleReady()">${myReady ? '✅ Ready' : 'Click to Ready'}</button>
               ${isHost ? `<button class="mp-btn mp-btn-primary ${allReady ? 'pulse-cta' : ''}" id="startBtn" onclick="window.startGame()" ${!allReady?'disabled':''}>⚡ Start</button>` : ''}
@@ -2942,7 +2916,7 @@
                 if (!currentUids.includes(uid)) {
                     const el = existingEls[uid];
                     if (el.classList.contains('player-leaving')) return;
-                    pulseWillChange(el, 'opacity, transform, max-height', 420); // PERF: transient will-change only during the leave transition
+                    pulseWillChange(el, 'opacity, transform, max-height', 420);
                     el.classList.add('player-leaving');
                     setTimeout(() => { if (el.parentNode) el.remove(); }, 380);
                 }
@@ -2957,7 +2931,7 @@
                     el.dataset.playerUid = uid;
                     el.innerHTML = buildSinglePlayerHTML(uid, p, hostId);
                     container.appendChild(el);
-                    pulseWillChange(el, 'opacity, transform', 400); // PERF: transient will-change only during the enter transition
+                    pulseWillChange(el, 'opacity, transform', 400);
                     requestAnimationFrame(() => requestAnimationFrame(() => el.classList.remove(
                         'player-entering')));
                 } else {
@@ -2997,124 +2971,6 @@
             }
         }
 
-        // =========================================================
-        // NEW: REMATCH-REQUEST SYSTEM (non-host players request; host accepts/declines)
-        // =========================================================
-        // Builds the markup for the small rematch-request widget shown on the finished/winner
-        // screen. Reuses only existing mp-card / mp-btn classes so no UI/design changes are needed.
-        function buildRematchRequestHTML(data) {
-            const rr = data && data.rematchRequest;
-            const pending = !!(rr && rr.status === 'pending');
-            if (isHost) {
-                if (!pending) return ''; // host already has the existing Rematch / Quick Rematch buttons
-                return `
-              <div class="mp-card" id="rematchRequestCard" style="margin-top:0;">
-                <p style="text-align:center;font-weight:700;margin-bottom:10px;">
-                  <i class="fa-solid fa-rotate"></i>&nbsp; ${escapeHtml(rr.byName || 'A player')} requested a rematch.
-                </p>
-                <div style="display:flex;gap:8px;">
-                  <button class="mp-btn mp-btn-success" style="flex:1;margin-bottom:0;" onclick="window.acceptRematchRequest()">✅ Accept</button>
-                  <button class="mp-btn mp-btn-danger" style="flex:1;margin-bottom:0;" onclick="window.declineRematchRequest()">❌ Decline</button>
-                </div>
-              </div>`;
-            }
-            if (pending) {
-                return `
-              <div class="mp-card" id="rematchRequestCard" style="margin-top:0;text-align:center;">
-                <p style="color:var(--text2);font-size:0.85rem;margin:0;"><i class="fa-solid fa-hourglass-half"></i>&nbsp; Waiting for host response...</p>
-              </div>`;
-            }
-            return `<button class="mp-btn mp-btn-primary" id="requestRematchBtn" onclick="window.requestRematch()">🔄 Request Rematch</button>`;
-        }
-
-        function updateRematchRequestDOM(data) {
-            const container = document.getElementById('rematchRequestArea');
-            if (!container) return;
-            container.innerHTML = buildRematchRequestHTML(data);
-        }
-
-        // Any player (non-host) can request a rematch once the match has finished. Uses a
-        // transaction so two simultaneous requests can't both succeed (Feature 5: only one
-        // pending request at a time; ignore duplicates; no duplicate chat messages).
-        async function requestRematch() {
-            if (isHost || !roomId || !currentUser || rematchRequestInFlight) return;
-            const btn = document.getElementById('requestRematchBtn');
-            if (btn) { btn.disabled = true;
-                btn.innerHTML = '<span class="btn-spinner"></span>Requesting...'; }
-            rematchRequestInFlight = true;
-            const roomRef = doc(db, 'liveMatches', roomId);
-            let success = false;
-            try {
-                await runTransaction(db, async (tx) => {
-                    const snap = await tx.get(roomRef);
-                    if (!snap.exists()) return;
-                    const data = snap.data();
-                    if (data.status !== 'finished') return;
-                    if (data.rematchRequest && data.rematchRequest.status === 'pending') return; // already one pending — ignore duplicate
-                    tx.update(roomRef, {
-                        rematchRequest: {
-                            by: currentUser.uid,
-                            byName: playerName || 'Player',
-                            status: 'pending'
-                        }
-                    });
-                    success = true;
-                });
-                if (success) {
-                    await addSystemChatMessage(roomId, `🔄 ${playerName || 'Player'} requested a rematch.`);
-                    await addSystemChatMessage(roomId, `⏳ Waiting for host response...`);
-                }
-            } catch (e) {} finally {
-                rematchRequestInFlight = false;
-                if (!success) {
-                    const btn2 = document.getElementById('requestRematchBtn');
-                    if (btn2) { btn2.disabled = false;
-                        btn2.innerHTML = '🔄 Request Rematch'; }
-                }
-            }
-        }
-        window.requestRematch = requestRematch;
-
-        // Host accepts a pending rematch request: notifies everyone, then reuses the existing
-        // rematch() reset logic so the room starts exactly like a fresh room (Feature 3).
-        async function acceptRematchRequest() {
-            if (!isHost || !roomId || rematchDecisionInFlight) return;
-            rematchDecisionInFlight = true;
-            const roomRef = doc(db, 'liveMatches', roomId);
-            try {
-                const snap = await getDoc(roomRef);
-                if (!snap.exists()) return;
-                const data = snap.data();
-                if (!data.rematchRequest || data.rematchRequest.status !== 'pending') return;
-                await addSystemChatMessage(roomId, '✅ Host accepted the rematch.');
-                await addSystemChatMessage(roomId, '🎮 New game starting...');
-                await rematch();
-            } catch (e) {} finally {
-                rematchDecisionInFlight = false;
-            }
-        }
-        window.acceptRematchRequest = acceptRematchRequest;
-
-        // Host declines a pending rematch request: clears it (which automatically re-enables the
-        // Request Rematch button for everyone else) and notifies the room (Feature 4).
-        async function declineRematchRequest() {
-            if (!isHost || !roomId || rematchDecisionInFlight) return;
-            rematchDecisionInFlight = true;
-            const roomRef = doc(db, 'liveMatches', roomId);
-            try {
-                const snap = await getDoc(roomRef);
-                if (!snap.exists()) return;
-                const data = snap.data();
-                if (!data.rematchRequest || data.rematchRequest.status !== 'pending') return;
-                await updateDoc(roomRef, { rematchRequest: null });
-                await addSystemChatMessage(roomId, '❌ Host declined the rematch.');
-            } catch (e) {} finally {
-                rematchDecisionInFlight = false;
-            }
-        }
-        window.declineRematchRequest = declineRematchRequest;
-
-        // NEW (feature #6): question progress dots replacing "Question X / Y" text
         function buildProgressDotsHTML(total, current) {
             let html = '<div class="mp-progress-dots" role="img" aria-label="Question ' + (current + 1) + ' of ' + total + '">';
             for (let i = 0; i < total; i++) {
@@ -3127,13 +2983,9 @@
             return html;
         }
 
-        // MODIFIED (feature #7): renderQuestionFull now shows a brief shimmer skeleton first, then
-        // swaps in the real question ~350ms later. The actual markup-building logic lives in
-        // renderQuestionContent() (unchanged in substance from the original renderQuestionFull body).
         function renderQuestionFull(data) {
             renderQuestionSkeleton();
             setTimeout(() => {
-                // Only proceed if we're still looking at the same question (guards against a fast next-question tick racing the skeleton timeout)
                 if (currentScreenMode === 'playing') {
                     renderQuestionContent(data);
                 }
@@ -3144,7 +2996,6 @@
             const q = data.questions[currentQuestionIndex];
             if (!q) return;
             const total = data.questionTime || gameQuestionTime || 15;
-            // Recompute an accurate time-left using the stored start time, so the ~350ms skeleton delay never shows a stale countdown value
             if (currentQuestionStartMs) {
                 const elapsedNow = (Date.now() - currentQuestionStartMs) / 1000;
                 questionTimeLeft = Math.max(0, Math.ceil(currentQuestionTotalTime - elapsedNow));
@@ -3192,7 +3043,7 @@
               <button class="mp-btn mp-btn-outline" style="margin-top:12px;font-size:0.78rem;padding:10px;" onclick="window.confirmLeaveGame()"><i class="fa-solid fa-door-open"></i>&nbsp; Leave Game</button>
             </div>
           `);
-            pulseWillChange(document.getElementById('progressFillEl'), 'width', 700); // PERF: transient will-change during the progress-bar transition
+            pulseWillChange(document.getElementById('progressFillEl'), 'width', 700);
         }
 
         function updateQuestionOptionsDOM(data) {
@@ -3309,10 +3160,9 @@
             requestAnimationFrame(step);
         }
 
-        // MODIFIED (feature #1 & #8): the winner screen now also renders an after-game chat card
-        // and a "Quick Rematch" button, and carries aria-live regions for score announcements (#9).
-        // MODIFIED (rematch-request system): also renders the Request Rematch / Accept-Decline /
-        // Waiting-for-host widget for every player.
+        // =========================================================
+        // RENDER WINNER (with rematch UI)
+        // =========================================================
         function renderWinner(players, scores, data) {
             const sorted = Object.entries(players).map(([uid, p]) => ({ ...p, uid, score: scores[uid]?.score || 0 }))
                 .sort((a, b) => b.score - a.score);
@@ -3346,6 +3196,72 @@
                 's' : '—';
             const longestStreak = me?.longestStreak || 0;
 
+            // --- REMATCH STATE (from main doc) ---
+            const rematch = data.rematch || { status: 'none', requestedBy: null, requestedByName: null };
+            const rematchStatus = rematch.status || 'none';
+            const requesterName = rematch.requestedByName || '';
+
+            let rematchSectionHTML = '';
+
+            if (rematchStatus === 'accepted') {
+                rematchSectionHTML = `
+              <div style="text-align:center;padding:12px 0;color:var(--green);">
+                <i class="fa-solid fa-spinner fa-spin"></i> Starting new game...
+              </div>
+            `;
+            } else if (rematchStatus === 'pending') {
+                if (isHost) {
+                    rematchSectionHTML = `
+                <div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);border-radius:12px;padding:14px;margin:12px 0;text-align:center;">
+                  <p style="font-weight:600;color:var(--yellow);"><i class="fa-solid fa-rotate"></i> ${escapeHtml(requesterName)} requested a rematch</p>
+                  <div style="display:flex;gap:8px;margin-top:12px;">
+                    <button class="mp-btn mp-btn-success" style="flex:1;" onclick="window.acceptRematch()">✅ Accept</button>
+                    <button class="mp-btn mp-btn-danger" style="flex:1;" onclick="window.declineRematch()">❌ Decline</button>
+                  </div>
+                </div>
+              `;
+                } else {
+                    rematchSectionHTML = `
+                <div style="text-align:center;padding:12px 0;color:var(--text2);">
+                  <i class="fa-solid fa-hourglass-half"></i> Waiting for host response...
+                </div>
+              `;
+                }
+            } else {
+                // 'none', 'declined', 'cancelled' — show request button for non-hosts
+                const onlineCount = Object.values(players).filter(p => p.online).length;
+                if (!isHost && onlineCount >= 2) {
+                    rematchSectionHTML = `
+                <div style="text-align:center;margin:12px 0;">
+                  <button class="mp-btn mp-btn-primary pulse-cta" onclick="window.requestRematch()" id="requestRematchBtn">
+                    <i class="fa-solid fa-rotate"></i> Request Rematch
+                  </button>
+                </div>
+              `;
+                } else if (isHost) {
+                    // Host sees their own buttons (handled below)
+                } else {
+                    rematchSectionHTML = `
+                <div style="text-align:center;padding:8px 0;color:var(--text2);font-size:0.8rem;">
+                  <i class="fa-solid fa-users-slash"></i> Need at least 2 players for a rematch
+                </div>
+              `;
+                }
+            }
+
+            let hostButtonsHTML = '';
+            if (isHost && rematchStatus !== 'pending' && rematchStatus !== 'accepted') {
+                hostButtonsHTML = `
+              <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+                <button class="mp-btn mp-btn-primary pulse-cta" style="flex:1 1 60%;" onclick="window.rematch()">🔄 Rematch</button>
+                <button class="mp-btn mp-btn-outline" style="flex:1 1 35%;" onclick="window.quickRematch()">⚡ Quick Rematch</button>
+              </div>
+            `;
+            } else if (isHost && (rematchStatus === 'pending' || rematchStatus === 'accepted')) {
+                // hide host buttons while rematch is pending
+                hostButtonsHTML = '';
+            }
+
             render(`
             <div class="mp-card">
               <div class="mp-winner">
@@ -3369,13 +3285,10 @@
                 <div class="stat-box"><div class="stat-val">#${myRank || '-'}</div><div class="stat-lbl">Your Rank</div></div>
               </div>
               <div>${list}</div>
-              <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
-                ${isHost ? '<button class="mp-btn mp-btn-primary pulse-cta" style="flex:1 1 60%;" onclick="window.rematch()">🔄 Rematch</button><button class="mp-btn mp-btn-outline" style="flex:1 1 35%;" onclick="window.quickRematch()">⚡ Quick Rematch</button>' : ''}
-                <button class="mp-btn mp-btn-outline" style="flex:1 1 100%;" onclick="window.leaveRoom()">Leave</button>
-              </div>
-              <div id="rematchRequestArea" style="margin-top:12px;">${buildRematchRequestHTML(data)}</div>
+              ${rematchSectionHTML}
+              ${hostButtonsHTML}
+              <button class="mp-btn mp-btn-outline" style="margin-top:12px;" onclick="window.leaveRoom()">Leave</button>
             </div>
-            <!-- NEW (feature #1): after-game chat card, open for exactly 2 minutes -->
             <div class="mp-card chat-card" id="afterGameChatCard">
               <div class="mp-title" style="font-size:1rem;">💬 Post-Game Chat <span class="chat-close-note">(closes in 2 min)</span></div>
               <div class="chat-messages" id="chatMessages"></div>
@@ -3415,12 +3328,13 @@
             }
             if (isHost && data && !data.historySaved) saveMatchHistory(data);
 
-            // NEW (feature #1): open the post-game chat window (auto-closes itself after 2 minutes)
             startAfterGameChat();
+
+            // If rematch is 'accepted', the snapshot will transition to the new game
         }
 
         // =========================================================
-        // NEW (feature #1): AFTER-GAME CHAT LIFECYCLE
+        // AFTER-GAME CHAT
         // =========================================================
         function startAfterGameChat() {
             if (afterGameChatActive) return;
@@ -3428,7 +3342,7 @@
             startChatListener();
             renderChatMessages();
             if (afterGameChatTimer) clearTimeout(afterGameChatTimer);
-            afterGameChatTimer = setTimeout(() => { closeAfterGameChat(); }, 120000); // exactly 2 minutes
+            afterGameChatTimer = setTimeout(() => { closeAfterGameChat(); }, 120000);
         }
 
         function closeAfterGameChat() {
@@ -3438,9 +3352,12 @@
             afterGameChatActive = false;
             stopChatListener();
             const card = document.getElementById('afterGameChatCard');
-            if (card && card.parentNode) card.remove(); // silently hide/remove, no toast or sound
+            if (card && card.parentNode) card.remove();
         }
 
+        // =========================================================
+        // TOGGLE READY
+        // =========================================================
         async function toggleReady() {
             if (!roomId) return;
             const roomRef = doc(db, 'liveMatches', roomId);
@@ -3450,6 +3367,9 @@
             if (!currentReady) playSound('ready');
         }
 
+        // =========================================================
+        // START GAME
+        // =========================================================
         async function startGame() {
             if (!isHost || !roomId) return;
             await addSystemChatMessage(roomId, 'Host started the game! 🚀');
@@ -3463,13 +3383,15 @@
             }, 3000);
         }
 
-        // MODIFIED (feature #5 & #6): tracks progress-dot state and fires a haptic pulse on selection
+        // =========================================================
+        // SELECT ANSWER
+        // =========================================================
         async function selectAnswer(index) {
             if (selectedAnswer >= 0 || !roomId || answeringInFlight) return;
             answeringInFlight = true;
             selectedAnswer = index;
-            answeredQuestionIndices.add(currentQuestionIndex); // NEW: mark this question as answered for the progress dots
-            vibrate(8); // NEW: light haptic tap on selecting an answer
+            answeredQuestionIndices.add(currentQuestionIndex);
+            vibrate(8);
             try {
                 await updateDoc(doc(db, 'liveMatches', roomId), {
                     [`players.${currentUser.uid}.answered`]: true,
@@ -3488,13 +3410,20 @@
         }
         window.selectAnswer = selectAnswer;
 
-        // MODIFIED (feature #1 & #6): also closes the after-game chat and resets progress-dot state
-        // MODIFIED (rematch-request system, Feature 7): if the player leaving is the one who has a
-        // pending rematch request, or is the host, cancel that pending request and notify the room.
+        // =========================================================
+        // LEAVE ROOM
+        // =========================================================
         async function leaveRoom() {
-            closeAfterGameChat(); // NEW: leaving always closes the post-game chat cleanly
+            closeAfterGameChat();
+            // If there's a pending rematch request and this player is the requester, cancel it
+            if (roomId && currentUser && rematchPending && rematchRequestedBy === currentUser.uid) {
+                try {
+                    await cancelRematchRequest('cancelled', 'Rematch request cancelled — requester left.');
+                } catch (e) {}
+            }
             stopHeartbeat();
             stopChatListener();
+            stopRematchListener();
             if (roomId && currentUser) {
                 try {
                     const roomRef = doc(db, 'liveMatches', roomId);
@@ -3508,17 +3437,6 @@
                             await addSystemChatMessage(roomId,
                                 `${players[currentUser.uid]?.name || playerName || 'A player'} left the game`);
                         }
-                        // NEW (Feature 6 & 7): cancel any pending rematch request tied to the player leaving
-                        if (otherOnline.length > 0 && data.rematchRequest && data.rematchRequest.status === 'pending') {
-                            const leavingIsHost = isHost;
-                            const leavingIsRequester = data.rematchRequest.by === currentUser.uid;
-                            if (leavingIsHost || leavingIsRequester) {
-                                await updateDoc(roomRef, { rematchRequest: null });
-                                const reason = leavingIsHost ? 'the host disconnected' :
-                                    `${data.rematchRequest.byName || 'the requester'} left the game`;
-                                await addSystemChatMessage(roomId, `❌ Rematch request cancelled — ${reason}.`);
-                            }
-                        }
                         if (otherOnline.length === 0) {
                             await deleteRoomCompletely(roomId);
                         } else if (data.status !== 'waiting' && data.status !== 'finished' && otherOnline.length === 1) {
@@ -3529,6 +3447,17 @@
                                 [`players.${currentUser.uid}.online`]: false
                             });
                         } else if (isHost) {
+                            // Host leaving: cancel any pending rematch
+                            const rematch = data.rematch || {};
+                            if (rematch.status === 'pending') {
+                                await updateDoc(roomRef, {
+                                    'rematch.status': 'cancelled',
+                                    'rematch.requestedBy': null,
+                                    'rematch.requestedByName': null,
+                                    'rematch.timestamp': null
+                                });
+                                await addSystemChatMessage(roomId, 'Rematch request cancelled — host left.');
+                            }
                             await updateDoc(roomRef, {
                                 hostId: otherOnline.sort()[0],
                                 [`players.${currentUser.uid}.online`]: false
@@ -3557,72 +3486,84 @@
             qrRendered = false;
             achievementQueue = [];
             recentlyRejoinedUids = new Set();
-            answeredQuestionIndices = new Set(); // NEW: reset progress-dot state
+            answeredQuestionIndices = new Set();
+            rematchPending = false;
+            rematchRequestedBy = null;
+            rematchRequestedByName = '';
             waitingRoomFullyRendered = false;
             prevSnapshotStatus = null;
             prevSnapshotQuestionIndex = -1;
             prevSnapshotPlayersJSON = '';
-            prevSnapshotRematchRequestJSON = '';
             currentScreenMode = 'lobby';
             renderLobby();
         }
         window.leaveRoom = leaveRoom;
 
-        // MODIFIED (feature #1 & #6): rematch now also closes the after-game chat immediately and resets progress dots
-        // MODIFIED (rematch-request system, Feature 3): also clears any rematchRequest so the whole
-        // rematch flow is left in a clean state, whichever path (direct host rematch, or an
-        // accepted player request) triggered it.
+        // =========================================================
+        // REMATCH (host-only, original)
+        // =========================================================
         async function rematch() {
             if (!isHost || !roomId) return;
-            closeAfterGameChat(); // NEW: rematch closes the post-game chat right away
+            closeAfterGameChat();
             previousScores = {};
             previousRanks = {};
-            answeredQuestionIndices = new Set(); // NEW
+            answeredQuestionIndices = new Set();
+            rematchPending = false;
+            rematchRequestedBy = null;
+            rematchRequestedByName = '';
             waitingRoomFullyRendered = false;
             prevSnapshotStatus = null;
             prevSnapshotQuestionIndex = -1;
             prevSnapshotPlayersJSON = '';
-            prevSnapshotRematchRequestJSON = '';
-            await updateDoc(doc(db, 'liveMatches', roomId), {
+            const roomRef = doc(db, 'liveMatches', roomId);
+            const snap = await getDoc(roomRef);
+            if (!snap.exists()) return;
+            const roomData = snap.data();
+            const resetPlayers = Object.fromEntries(
+                Object.entries(roomData.players || {}).map(([uid, p]) => [uid, {
+                    ...p,
+                    score: 0,
+                    correct: 0,
+                    wrong: 0,
+                    answered: false,
+                    ready: false,
+                    streak: 0,
+                    longestStreak: 0,
+                    totalTime: 0,
+                    fastestTime: null
+                }])
+            );
+            await updateDoc(roomRef, {
                 status: 'waiting',
                 currentQuestion: -1,
                 historySaved: false,
                 forcedWinner: null,
-                rematchRequest: null,
-                'players': Object.fromEntries(
-                    Object.entries((await getDoc(doc(db, 'liveMatches', roomId))).data().players || {}).map(([
-                        uid, p
-                    ]) => [uid, {
-                        ...p,
-                        score: 0,
-                        correct: 0,
-                        wrong: 0,
-                        answered: false,
-                        ready: false,
-                        streak: 0,
-                        longestStreak: 0,
-                        totalTime: 0,
-                        fastestTime: null
-                    }])
-                )
+                players: resetPlayers,
+                'rematch.status': 'none',
+                'rematch.requestedBy': null,
+                'rematch.requestedByName': null,
+                'rematch.timestamp': null
             });
+            await addSystemChatMessage(roomId, '🔄 Host started a new game!');
         }
         window.rematch = rematch;
 
-        // NEW (feature #8): "Quick Rematch" — host-only, reuses the exact same settings (subject,
-        // lesson, question count, time per question already stored on the room doc) and skips the
-        // waiting-room ready-check, going straight to countdown -> playing.
+        // =========================================================
+        // QUICK REMATCH (host-only, original)
+        // =========================================================
         async function quickRematch() {
             if (!isHost || !roomId) return;
             closeAfterGameChat();
             previousScores = {};
             previousRanks = {};
             answeredQuestionIndices = new Set();
+            rematchPending = false;
+            rematchRequestedBy = null;
+            rematchRequestedByName = '';
             waitingRoomFullyRendered = false;
             prevSnapshotStatus = null;
             prevSnapshotQuestionIndex = -1;
             prevSnapshotPlayersJSON = '';
-            prevSnapshotRematchRequestJSON = '';
             const roomRef = doc(db, 'liveMatches', roomId);
             const snap = await getDoc(roomRef);
             if (!snap.exists()) return;
@@ -3641,17 +3582,19 @@
                     fastestTime: null
                 }])
             );
-            // Same subject/grade/lesson/questionTime/questions already live on the room doc — we
-            // simply reuse them (no re-fetch of data/*.json needed, and no settings screen shown).
             await updateDoc(roomRef, {
                 status: 'countdown',
                 currentQuestion: -1,
                 historySaved: false,
                 forcedWinner: null,
-                rematchRequest: null,
-                players: resetPlayers
+                players: resetPlayers,
+                'rematch.status': 'none',
+                'rematch.requestedBy': null,
+                'rematch.requestedByName': null,
+                'rematch.timestamp': null
             });
             playSound('countdown');
+            await addSystemChatMessage(roomId, '⚡ Quick rematch starting...');
             setTimeout(async () => {
                 await updateDoc(roomRef, {
                     status: 'playing',
@@ -3663,17 +3606,240 @@
         window.quickRematch = quickRematch;
 
         // =========================================================
+        // REMATCH REQUEST SYSTEM (using subcollection to bypass permissions)
+        // =========================================================
+
+        // Start listening to rematchRequests subcollection (only host needs to act on it)
+        function startRematchListener() {
+            if (rematchUnsubscribe || !roomId || !currentUser) return;
+            const requestsRef = collection(db, 'liveMatches', roomId, 'rematchRequests');
+            const q = query(requestsRef, orderBy('timestamp', 'asc'));
+            rematchUnsubscribe = onSnapshot(q, async (snap) => {
+                // Only the host processes requests
+                if (!isHost) return;
+                const docs = snap.docs;
+                // Find the first pending request (should be at most one)
+                const pending = docs.find(d => d.data().status === 'pending');
+                if (!pending) return;
+                const data = pending.data();
+                const requesterUid = data.requestedBy;
+                const requesterName = data.requestedByName || 'Player';
+                // Check if there's already a pending rematch on the main doc
+                const roomRef = doc(db, 'liveMatches', roomId);
+                const roomSnap = await getDoc(roomRef);
+                if (!roomSnap.exists()) return;
+                const roomData = roomSnap.data();
+                const rematch = roomData.rematch || {};
+                if (rematch.status === 'pending') {
+                    // Already pending, ignore
+                    return;
+                }
+                // Check if requester is still online
+                const players = roomData.players || {};
+                const requesterOnline = players[requesterUid]?.online;
+                if (!requesterOnline) {
+                    // Requester offline, delete the request
+                    await deleteDoc(pending.ref);
+                    await addSystemChatMessage(roomId, 'Rematch request cancelled — requester left.');
+                    return;
+                }
+                // Update the main document's rematch field to 'pending'
+                await updateDoc(roomRef, {
+                    'rematch.status': 'pending',
+                    'rematch.requestedBy': requesterUid,
+                    'rematch.requestedByName': requesterName,
+                    'rematch.timestamp': serverTimestamp()
+                });
+                // Delete the subcollection request so it doesn't get re-processed
+                await deleteDoc(pending.ref);
+                await addSystemChatMessage(roomId, `🔄 ${requesterName} requested a rematch.`);
+            }, (err) => {
+                console.warn('Rematch listener error:', err);
+            });
+        }
+
+        function stopRematchListener() {
+            if (rematchUnsubscribe) { rematchUnsubscribe();
+                rematchUnsubscribe = null; }
+        }
+
+        /**
+         * Request a rematch (called by non-host players)
+         * - Adds a document to rematchRequests subcollection (bypasses permissions)
+         */
+        async function requestRematch() {
+            if (!roomId || !currentUser) return;
+            if (isHost) {
+                showToast('You are the host — use the Rematch or Quick Rematch buttons.');
+                return;
+            }
+            if (rematchPending) {
+                showToast('A rematch request is already pending.');
+                return;
+            }
+            const roomRef = doc(db, 'liveMatches', roomId);
+            const snap = await getDoc(roomRef);
+            if (!snap.exists()) return;
+            const data = snap.data();
+            if (data.status !== 'finished') {
+                showToast('The game must be finished to request a rematch.');
+                return;
+            }
+            const rematch = data.rematch || {};
+            if (rematch.status === 'pending') {
+                showToast('A rematch request is already pending.');
+                return;
+            }
+            const players = data.players || {};
+            const onlineCount = Object.values(players).filter(p => p.online).length;
+            if (onlineCount < 2) {
+                showToast('Need at least 2 players for a rematch.');
+                return;
+            }
+            // Add a document to the rematchRequests subcollection
+            try {
+                const requestsRef = collection(db, 'liveMatches', roomId, 'rematchRequests');
+                await addDoc(requestsRef, {
+                    status: 'pending',
+                    requestedBy: currentUser.uid,
+                    requestedByName: playerName || 'Player',
+                    timestamp: serverTimestamp()
+                });
+                rematchPending = true;
+                rematchRequestedBy = currentUser.uid;
+                rematchRequestedByName = playerName || 'Player';
+                showToast('✅ Rematch request sent!');
+            } catch (e) {
+                console.error('Request rematch error:', e);
+                showToast('❌ Failed to request rematch.');
+            }
+        }
+        window.requestRematch = requestRematch;
+
+        /**
+         * Accept a rematch request (host only)
+         */
+        async function acceptRematch() {
+            if (!isHost || !roomId) return;
+            const roomRef = doc(db, 'liveMatches', roomId);
+            const snap = await getDoc(roomRef);
+            if (!snap.exists()) return;
+            const data = snap.data();
+            const rematch = data.rematch || {};
+            if (rematch.status !== 'pending') {
+                showToast('No pending rematch request.');
+                return;
+            }
+            // Reset everything
+            const resetPlayers = Object.fromEntries(
+                Object.entries(data.players || {}).map(([uid, p]) => [uid, {
+                    ...p,
+                    score: 0,
+                    correct: 0,
+                    wrong: 0,
+                    answered: false,
+                    ready: false,
+                    streak: 0,
+                    longestStreak: 0,
+                    totalTime: 0,
+                    fastestTime: null
+                }])
+            );
+            try {
+                await updateDoc(roomRef, {
+                    status: 'countdown',
+                    currentQuestion: -1,
+                    historySaved: false,
+                    forcedWinner: null,
+                    players: resetPlayers,
+                    'rematch.status': 'accepted',
+                    'rematch.requestedBy': null,
+                    'rematch.requestedByName': null,
+                    'rematch.timestamp': null
+                });
+                rematchPending = false;
+                rematchRequestedBy = null;
+                rematchRequestedByName = '';
+                await addSystemChatMessage(roomId, `✅ Host accepted the rematch. 🎮 New game starting...`);
+                playSound('countdown');
+                setTimeout(async () => {
+                    await updateDoc(roomRef, {
+                        status: 'playing',
+                        currentQuestion: 0,
+                        questionStartTime: Date.now()
+                    });
+                }, 3000);
+            } catch (e) {
+                console.error('Accept rematch error:', e);
+                showToast('❌ Failed to accept rematch.');
+            }
+        }
+        window.acceptRematch = acceptRematch;
+
+        /**
+         * Decline a rematch request (host only)
+         */
+        async function declineRematch() {
+            if (!isHost || !roomId) return;
+            const roomRef = doc(db, 'liveMatches', roomId);
+            const snap = await getDoc(roomRef);
+            if (!snap.exists()) return;
+            const data = snap.data();
+            const rematch = data.rematch || {};
+            if (rematch.status !== 'pending') {
+                showToast('No pending rematch request.');
+                return;
+            }
+            try {
+                await updateDoc(roomRef, {
+                    'rematch.status': 'declined',
+                    'rematch.requestedBy': null,
+                    'rematch.requestedByName': null,
+                    'rematch.timestamp': null
+                });
+                rematchPending = false;
+                rematchRequestedBy = null;
+                rematchRequestedByName = '';
+                await addSystemChatMessage(roomId, `❌ Host declined the rematch request.`);
+                showToast('❌ Rematch declined.');
+            } catch (e) {
+                console.error('Decline rematch error:', e);
+                showToast('❌ Failed to decline rematch.');
+            }
+        }
+        window.declineRematch = declineRematch;
+
+        /**
+         * Cancel a rematch request (internal)
+         */
+        async function cancelRematchRequest(status = 'cancelled', chatMsg = 'Rematch request cancelled.') {
+            if (!roomId) return;
+            const roomRef = doc(db, 'liveMatches', roomId);
+            try {
+                await updateDoc(roomRef, {
+                    'rematch.status': status,
+                    'rematch.requestedBy': null,
+                    'rematch.requestedByName': null,
+                    'rematch.timestamp': null
+                });
+                rematchPending = false;
+                rematchRequestedBy = null;
+                rematchRequestedByName = '';
+                if (chatMsg) await addSystemChatMessage(roomId, chatMsg);
+            } catch (e) {
+                console.error('Cancel rematch error:', e);
+            }
+        }
+
+        // =========================================================
         // TIMER
         // =========================================================
-        // MODIFIED (feature #3): the per-tick DOM writes (timer text, ring stroke, urgent class) are
-        // now grouped into a single requestAnimationFrame call to avoid layout thrashing; scoring
-        // logic (Firestore transaction) stays outside the rAF since it isn't a visual write.
         function startQuestionTimer(data) {
             if (questionTimer) clearInterval(questionTimer);
             const totalTime = data.questionTime || gameQuestionTime || 15;
             const startMs = data.questionStartTime || Date.now();
-            currentQuestionStartMs = startMs; // NEW: exposed so a delayed skeleton->content swap can recompute time-left accurately
-            currentQuestionTotalTime = totalTime; // NEW
+            currentQuestionStartMs = startMs;
+            currentQuestionTotalTime = totalTime;
 
             function computeTimeLeft() {
                 const elapsed = (Date.now() - startMs) / 1000;
@@ -3684,7 +3850,6 @@
             questionTimer = setInterval(async () => {
                 questionTimeLeft = computeTimeLeft();
 
-                // PERF (item #3): batch all pure timer-visual DOM writes into one rAF
                 requestAnimationFrame(() => {
                     const timerEl = document.getElementById('timerDisplay');
                     const ringEl = document.getElementById('timerRingProgress');
@@ -3693,7 +3858,7 @@
                     if (ringEl) {
                         const circumference = 2 * Math.PI * 52;
                         const frac = Math.max(0, questionTimeLeft / totalTime);
-                        pulseWillChange(ringEl, 'stroke-dashoffset', 1100); // PERF: transient will-change only while the ring is actively transitioning
+                        pulseWillChange(ringEl, 'stroke-dashoffset', 1100);
                         ringEl.style.strokeDashoffset = circumference * (1 - frac);
                         ringEl.setAttribute('class', 'timer-ring-progress ' + getTimerColorClass(frac));
                     }
@@ -3721,7 +3886,7 @@
                         const correctIdx = data.questions[currentQuestionIndex]?.correct;
                         const wasCorrect = selectedAnswer === correctIdx;
                         playSound(wasCorrect ? 'correct' : 'wrong');
-                        vibrate(wasCorrect ? 15 : 10); // NEW (feature #5): haptic feedback on reveal
+                        vibrate(wasCorrect ? 15 : 10);
                         if (wasCorrect) flashCorrectFX();
                     }
 
@@ -3826,10 +3991,8 @@
         }
 
         // =========================================================
-        // NEW (feature #10): CHAT HISTORY CACHE (IndexedDB)
+        // CHAT CACHE (IndexedDB)
         // =========================================================
-        // Caches the last 50 chat messages per room so that on reconnect / re-entry the chat can
-        // render instantly from local cache before the Firestore listener delivers the live data.
         const CHAT_DB_NAME = 'quizhub_chat_cache';
         const CHAT_DB_VERSION = 1;
         const CHAT_STORE = 'chatCache';
@@ -3854,8 +4017,6 @@
             if (!rId) return;
             try {
                 const idb = await openChatDB();
-                // Firestore Timestamp instances don't survive structured-clone with their toDate()
-                // method intact, so we store plain millis instead and reconstruct Date objects on read.
                 const plain = messages.slice(-50).map(m => ({
                     ...m,
                     timestamp: (m.timestamp && typeof m.timestamp.toMillis === 'function') ? m.timestamp.toMillis() :
@@ -3884,26 +4045,23 @@
         // =========================================================
         // CHAT
         // =========================================================
-        // MODIFIED (feature #10): loads cached messages from IndexedDB first (instant paint), then
-        // subscribes to the live Firestore listener and re-caches on every update.
         async function startChatListener() {
             if (chatUnsubscribe || !roomId) return;
             const rIdAtStart = roomId;
             try {
                 const cached = await loadChatCache(rIdAtStart);
-                // Only apply cache if we're still in the same room and haven't already received live data
                 if (cached && cached.length && chatMessages.length === 0 && roomId === rIdAtStart && !chatUnsubscribe) {
                     chatMessages = cached;
                     renderChatMessages();
                 }
             } catch (e) {}
-            if (chatUnsubscribe || roomId !== rIdAtStart) return; // guard against race if room changed while awaiting cache
+            if (chatUnsubscribe || roomId !== rIdAtStart) return;
             const chatQ = query(collection(db, 'liveMatches', roomId, 'chat'), orderBy('timestamp', 'asc'), limitToLast(
                 50));
             chatUnsubscribe = onSnapshot(chatQ, (snap) => {
                 chatMessages = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 renderChatMessages();
-                saveChatCache(roomId, chatMessages); // NEW: keep the local cache fresh
+                saveChatCache(roomId, chatMessages);
             }, () => {});
         }
 
@@ -3920,7 +4078,6 @@
                 if (m.type === 'system') {
                     return `<div class="chat-msg-system">${escapeHtml(m.message)}</div>`;
                 }
-                // MODIFIED (feature #10): also accept plain millisecond timestamps coming from the IndexedDB cache
                 const time = (m.timestamp && typeof m.timestamp.toDate === 'function') ? m.timestamp.toDate() :
                     (typeof m.timestamp === 'number' ? new Date(m.timestamp) : new Date());
                 const hh = String(time.getHours()).padStart(2, '0');
@@ -4030,17 +4187,10 @@
                 .lastSeen.toMillis() : null;
             const hostLooksGone = !hostEntry || !hostEntry.online || (hostLastSeenMs && (now - hostLastSeenMs >
                 PRESENCE_STALE_MS));
-            let cancelledRematchDueToHostChange = false;
             if (hostLooksGone && onlineUids.length > 0) {
                 const nextHost = [...onlineUids].sort()[0];
                 if (nextHost === currentUser.uid && data.hostId !== currentUser.uid) {
                     updates.hostId = currentUser.uid;
-                    // NEW (Feature 6): if a rematch request was pending under the old (now-gone) host,
-                    // cancel it so the freshly-promoted host can make its own decision.
-                    if (data.rematchRequest && data.rematchRequest.status === 'pending') {
-                        updates.rematchRequest = null;
-                        cancelledRematchDueToHostChange = true;
-                    }
                 }
             }
             if (data.status !== 'waiting' && data.status !== 'finished' && onlineUids.length === 1 && !updates.status) {
@@ -4054,18 +4204,24 @@
             }
             if (Object.keys(updates).length > 0) {
                 presenceCleanupInFlight = true;
-                try {
-                    await updateDoc(doc(db, 'liveMatches', roomId), updates);
-                    // NEW (Feature 6): only the client that actually performed the cancellation notifies
-                    // the room, so a disconnected host never produces duplicate chat messages.
-                    if (cancelledRematchDueToHostChange) {
-                        await addSystemChatMessage(roomId, '❌ Rematch request cancelled — host disconnected.');
-                    }
-                } catch (e) {}
+                try { await updateDoc(doc(db, 'liveMatches', roomId), updates); } catch (e) {}
                 presenceCleanupInFlight = false;
             }
             if (onlineUids.length === 0 && Object.keys(players).length > 0) {
                 try { await deleteRoomCompletely(roomId); } catch (e) {}
+            }
+
+            // Rematch cleanup: if host or requester goes offline while pending
+            const rematch = data.rematch || {};
+            if (rematch.status === 'pending') {
+                const requesterUid = rematch.requestedBy;
+                const requesterOnline = requesterUid && players[requesterUid]?.online;
+                const hostOnline = data.hostId && players[data.hostId]?.online;
+                if (requesterUid && !requesterOnline) {
+                    await cancelRematchRequest('cancelled', '❌ Rematch request cancelled — requester left.');
+                } else if (data.hostId && !hostOnline) {
+                    await cancelRematchRequest('cancelled', '❌ Rematch request cancelled — host left.');
+                }
             }
         }
 
@@ -4075,6 +4231,13 @@
                 if (!chatSnap.empty) {
                     const batch = writeBatch(db);
                     chatSnap.forEach(d => batch.delete(d.ref));
+                    await batch.commit();
+                }
+                // Also delete any rematch requests
+                const reqSnap = await getDocs(collection(db, 'liveMatches', rId, 'rematchRequests'));
+                if (!reqSnap.empty) {
+                    const batch = writeBatch(db);
+                    reqSnap.forEach(d => batch.delete(d.ref));
                     await batch.commit();
                 }
             } catch (e) {}
@@ -4105,6 +4268,9 @@
         window.startGame = startGame;
         window.toggleMute = toggleMute;
 
+        // =========================================================
+        // INIT
+        // =========================================================
         async function init() {
             updateMuteBtn();
             initParticles();
@@ -4136,8 +4302,10 @@
                             prevSnapshotStatus = null;
                             prevSnapshotQuestionIndex = -1;
                             prevSnapshotPlayersJSON = '';
-                            prevSnapshotRematchRequestJSON = '';
                             answeredQuestionIndices = new Set();
+                            rematchPending = false;
+                            rematchRequestedBy = null;
+                            rematchRequestedByName = '';
                             saveActiveRoom();
                             listenToRoom();
                             reconnected = true;
@@ -4161,8 +4329,10 @@
                             prevSnapshotStatus = null;
                             prevSnapshotQuestionIndex = -1;
                             prevSnapshotPlayersJSON = '';
-                            prevSnapshotRematchRequestJSON = '';
                             answeredQuestionIndices = new Set();
+                            rematchPending = false;
+                            rematchRequestedBy = null;
+                            rematchRequestedByName = '';
                             listenToRoom();
                             reconnected = true;
                         } else {
