@@ -1724,7 +1724,6 @@
         let rematchPending = false;
         let rematchRequestedBy = null;
         let rematchRequestedByName = '';
-        let rematchUnsubscribe = null; // listener for rematchRequests subcollection
 
         // ============ AUTH ============
         async function initAuth() {
@@ -1775,7 +1774,6 @@
             }
             stopHeartbeat();
             stopChatListener();
-            stopRematchListener();
         });
 
         document.addEventListener('focusin', (e) => {
@@ -2633,7 +2631,6 @@
         function listenToRoom() {
             if (unsubscribe) unsubscribe();
             stopHeartbeat();
-            stopRematchListener();
             prevSnapshotStatus = null;
             prevSnapshotQuestionIndex = -1;
             prevSnapshotPlayersJSON = '';
@@ -2645,7 +2642,6 @@
                 processRoomSnapshot(data);
             });
             startHeartbeat();
-            // Listen to rematchRequests subcollection only when in 'finished' state (started inside processRoomSnapshot)
         }
 
         function processRoomSnapshot(data) {
@@ -2705,13 +2701,6 @@
                 startChatListener();
             } else if (data.status !== 'finished') {
                 stopChatListener();
-            }
-
-            // Manage rematch listener: only when finished
-            if (data.status === 'finished') {
-                startRematchListener();
-            } else {
-                stopRematchListener();
             }
 
             const statusChanged = data.status !== prevSnapshotStatus;
@@ -3423,7 +3412,6 @@
             }
             stopHeartbeat();
             stopChatListener();
-            stopRematchListener();
             if (roomId && currentUser) {
                 try {
                     const roomRef = doc(db, 'liveMatches', roomId);
@@ -3606,66 +3594,12 @@
         window.quickRematch = quickRematch;
 
         // =========================================================
-        // REMATCH REQUEST SYSTEM (using subcollection to bypass permissions)
+        // REMATCH REQUEST SYSTEM (direct main doc update — no subcollection)
         // =========================================================
-
-        // Start listening to rematchRequests subcollection (only host needs to act on it)
-        function startRematchListener() {
-            if (rematchUnsubscribe || !roomId || !currentUser) return;
-            const requestsRef = collection(db, 'liveMatches', roomId, 'rematchRequests');
-            const q = query(requestsRef, orderBy('timestamp', 'asc'));
-            rematchUnsubscribe = onSnapshot(q, async (snap) => {
-                // Only the host processes requests
-                if (!isHost) return;
-                const docs = snap.docs;
-                // Find the first pending request (should be at most one)
-                const pending = docs.find(d => d.data().status === 'pending');
-                if (!pending) return;
-                const data = pending.data();
-                const requesterUid = data.requestedBy;
-                const requesterName = data.requestedByName || 'Player';
-                // Check if there's already a pending rematch on the main doc
-                const roomRef = doc(db, 'liveMatches', roomId);
-                const roomSnap = await getDoc(roomRef);
-                if (!roomSnap.exists()) return;
-                const roomData = roomSnap.data();
-                const rematch = roomData.rematch || {};
-                if (rematch.status === 'pending') {
-                    // Already pending, ignore
-                    return;
-                }
-                // Check if requester is still online
-                const players = roomData.players || {};
-                const requesterOnline = players[requesterUid]?.online;
-                if (!requesterOnline) {
-                    // Requester offline, delete the request
-                    await deleteDoc(pending.ref);
-                    await addSystemChatMessage(roomId, 'Rematch request cancelled — requester left.');
-                    return;
-                }
-                // Update the main document's rematch field to 'pending'
-                await updateDoc(roomRef, {
-                    'rematch.status': 'pending',
-                    'rematch.requestedBy': requesterUid,
-                    'rematch.requestedByName': requesterName,
-                    'rematch.timestamp': serverTimestamp()
-                });
-                // Delete the subcollection request so it doesn't get re-processed
-                await deleteDoc(pending.ref);
-                await addSystemChatMessage(roomId, `🔄 ${requesterName} requested a rematch.`);
-            }, (err) => {
-                console.warn('Rematch listener error:', err);
-            });
-        }
-
-        function stopRematchListener() {
-            if (rematchUnsubscribe) { rematchUnsubscribe();
-                rematchUnsubscribe = null; }
-        }
 
         /**
          * Request a rematch (called by non-host players)
-         * - Adds a document to rematchRequests subcollection (bypasses permissions)
+         * Updates the main document's rematch field directly.
          */
         async function requestRematch() {
             if (!roomId || !currentUser) return;
@@ -3696,19 +3630,20 @@
                 showToast('Need at least 2 players for a rematch.');
                 return;
             }
-            // Add a document to the rematchRequests subcollection
             try {
-                const requestsRef = collection(db, 'liveMatches', roomId, 'rematchRequests');
-                await addDoc(requestsRef, {
-                    status: 'pending',
-                    requestedBy: currentUser.uid,
-                    requestedByName: playerName || 'Player',
-                    timestamp: serverTimestamp()
+                await updateDoc(roomRef, {
+                    'rematch.status': 'pending',
+                    'rematch.requestedBy': currentUser.uid,
+                    'rematch.requestedByName': playerName || 'Player',
+                    'rematch.timestamp': serverTimestamp()
                 });
                 rematchPending = true;
                 rematchRequestedBy = currentUser.uid;
                 rematchRequestedByName = playerName || 'Player';
                 showToast('✅ Rematch request sent!');
+                // Chat notification is sent by the snapshot listener (host will see it and add system message)
+                // Actually, we add a system message manually for all players to see.
+                await addSystemChatMessage(roomId, `🔄 ${playerName || 'A player'} requested a rematch.`);
             } catch (e) {
                 console.error('Request rematch error:', e);
                 showToast('❌ Failed to request rematch.');
@@ -4231,13 +4166,6 @@
                 if (!chatSnap.empty) {
                     const batch = writeBatch(db);
                     chatSnap.forEach(d => batch.delete(d.ref));
-                    await batch.commit();
-                }
-                // Also delete any rematch requests
-                const reqSnap = await getDocs(collection(db, 'liveMatches', rId, 'rematchRequests'));
-                if (!reqSnap.empty) {
-                    const batch = writeBatch(db);
-                    reqSnap.forEach(d => batch.delete(d.ref));
                     await batch.commit();
                 }
             } catch (e) {}
