@@ -48,6 +48,9 @@
         body {
             height: 100%;
         }
+        html {
+            scroll-behavior: smooth;
+        }
         body {
             font-family: 'Inter', 'Noto Sans Sinhala', sans-serif;
             color: var(--text);
@@ -170,6 +173,22 @@
             position: relative;
             z-index: 1;
         }
+        #app {
+            will-change: opacity, transform;
+        }
+        #app.screen-fade-in {
+            animation: screenFadeIn 0.4s var(--ease-game);
+        }
+        @keyframes screenFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
         .mp-card {
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
@@ -182,6 +201,7 @@
             animation: cardEnter 0.5s var(--ease-game);
             position: relative;
             overflow: hidden;
+            contain: layout paint;
         }
         @keyframes cardEnter {
             from {
@@ -303,6 +323,17 @@
                 opacity: 0;
             }
         }
+        .btn-spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.35);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            vertical-align: middle;
+            margin-right: 7px;
+        }
         .mp-room-code {
             text-align: center;
             font-family: 'Space Grotesk', sans-serif;
@@ -364,6 +395,11 @@
             color: var(--primary);
             transform: translateY(-2px);
         }
+        .icon-btn:active,
+        .mp-option:active,
+        .mp-btn:active {
+            -webkit-tap-highlight-color: transparent;
+        }
         .icon-btn.whatsapp:hover {
             border-color: #25D366;
             color: #25D366;
@@ -398,6 +434,21 @@
             background: rgba(15, 23, 42, 0.5);
             border: 1px solid var(--glass-border);
             animation: playerEnter 0.4s var(--ease-game) both;
+            transition: opacity 0.35s ease, transform 0.35s ease, max-height 0.35s ease, margin 0.35s ease, padding 0.35s ease;
+            will-change: transform, opacity;
+        }
+        .mp-player.player-entering {
+            opacity: 0;
+            transform: translateX(-16px);
+        }
+        .mp-player.player-leaving {
+            opacity: 0;
+            transform: translateX(18px) scale(0.96);
+            max-height: 0;
+            margin-bottom: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            overflow: hidden;
         }
         @keyframes playerEnter {
             from {
@@ -479,6 +530,7 @@
         .mp-badge-host {
             background: rgba(251, 191, 36, 0.18);
             color: var(--yellow);
+            position: relative;
         }
         .mp-badge-ready {
             background: rgba(52, 211, 153, 0.18);
@@ -488,6 +540,15 @@
         .mp-badge-waiting {
             background: rgba(148, 163, 184, 0.15);
             color: var(--text2);
+        }
+        .mp-badge-rejoined {
+            background: rgba(56, 189, 248, 0.18);
+            color: var(--primary);
+            animation: readyPop 0.4s var(--ease-game), rejoinedFade 3.5s ease-in forwards;
+        }
+        @keyframes rejoinedFade {
+            0%, 70% { opacity: 1; }
+            100% { opacity: 0.55; }
         }
         @keyframes readyPop {
             0% {
@@ -500,6 +561,15 @@
                 transform: scale(1);
             }
         }
+        .crown-sparkle {
+            display: inline-block;
+            margin-left: 2px;
+            animation: sparkleTwinkle 1.6s ease-in-out infinite;
+        }
+        @keyframes sparkleTwinkle {
+            0%, 100% { opacity: 0.35; transform: scale(0.85) rotate(0deg); }
+            50% { opacity: 1; transform: scale(1.15) rotate(12deg); }
+        }
         .mp-progress-bar {
             height: 5px;
             border-radius: 4px;
@@ -511,7 +581,8 @@
             height: 100%;
             background: linear-gradient(90deg, #38bdf8, #818cf8);
             border-radius: 4px;
-            transition: width 0.5s var(--ease-game);
+            transition: width 0.6s var(--ease-game);
+            will-change: width;
         }
         .mp-question-num {
             text-align: center;
@@ -542,6 +613,7 @@
             stroke-width: 8;
             stroke-linecap: round;
             transition: stroke-dashoffset 1s linear, stroke 0.4s ease;
+            will-change: stroke-dashoffset;
         }
         .timer-green {
             stroke: var(--green);
@@ -583,6 +655,19 @@
             line-height: 1.6;
             font-family: 'Space Grotesk', sans-serif;
         }
+        #questionCard {
+            animation: cardEnter 0.5s var(--ease-game), questionSlideIn 0.45s var(--ease-game);
+        }
+        @keyframes questionSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(24px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
         .mp-option {
             width: 100%;
             text-align: left;
@@ -617,6 +702,9 @@
         .mp-option:hover:not(:disabled) {
             border-color: var(--primary);
             transform: translateX(4px);
+        }
+        .mp-option:active:not(:disabled) {
+            transform: translateX(4px) scale(0.98);
         }
         .mp-option:disabled {
             cursor: default;
@@ -666,6 +754,18 @@
                 transform: translateX(5px);
             }
         }
+        .correct-flash {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 900;
+            background: radial-gradient(circle, rgba(52, 211, 153, 0.22), transparent 62%);
+            animation: correctFlashAnim 0.6s ease-out forwards;
+        }
+        @keyframes correctFlashAnim {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
         .answer-locked-msg {
             text-align: center;
             font-size: 0.72rem;
@@ -686,6 +786,19 @@
             background: rgba(15, 23, 42, 0.5);
             border: 1px solid var(--glass-border);
             animation: leaderEnter 0.45s var(--ease-game) both;
+            transition: box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        .mp-leaderboard-item.top-1 {
+            border-color: rgba(251, 191, 36, 0.5);
+            box-shadow: 0 0 22px rgba(251, 191, 36, 0.18);
+        }
+        .mp-leaderboard-item.top-2 {
+            border-color: rgba(203, 213, 225, 0.45);
+            box-shadow: 0 0 16px rgba(203, 213, 225, 0.12);
+        }
+        .mp-leaderboard-item.top-3 {
+            border-color: rgba(217, 119, 6, 0.45);
+            box-shadow: 0 0 16px rgba(217, 119, 6, 0.12);
         }
         @keyframes leaderEnter {
             from {
@@ -714,6 +827,20 @@
         .mp-rank.bronze {
             color: var(--bronze);
         }
+        .rank-change {
+            font-size: 0.65rem;
+            font-weight: 800;
+            margin-left: 4px;
+        }
+        .rank-change.up {
+            color: var(--green);
+        }
+        .rank-change.down {
+            color: var(--red);
+        }
+        .rank-change.same {
+            color: var(--text2);
+        }
         .mp-winner {
             text-align: center;
             padding: 10px 0 20px;
@@ -722,6 +849,8 @@
             font-size: 4.5rem;
             animation: trophyBounce 1.4s ease-in-out infinite;
             filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.6));
+            position: relative;
+            display: inline-block;
         }
         @keyframes trophyBounce {
             0%,
@@ -732,6 +861,18 @@
                 transform: translateY(-10px) rotate(4deg);
             }
         }
+        .trophy-wrap {
+            position: relative;
+            display: inline-block;
+        }
+        .trophy-sparkle {
+            position: absolute;
+            font-size: 1.1rem;
+            animation: sparkleTwinkle 1.4s ease-in-out infinite;
+        }
+        .trophy-sparkle.s1 { top: -6px; left: -14px; animation-delay: 0.1s; }
+        .trophy-sparkle.s2 { top: 4px; right: -18px; animation-delay: 0.5s; }
+        .trophy-sparkle.s3 { bottom: 2px; left: -20px; animation-delay: 0.9s; }
         .mp-winner-name {
             font-family: 'Space Grotesk', sans-serif;
             font-size: 1.6rem;
@@ -765,6 +906,7 @@
             border-radius: 12px;
             padding: 10px 6px;
             text-align: center;
+            animation: leaderEnter 0.4s var(--ease-game) both;
         }
         .stat-box .stat-val {
             font-family: 'Space Grotesk', sans-serif;
@@ -861,6 +1003,9 @@
             margin-top: 8px;
             min-height: 1em;
         }
+        .mp-error-shake {
+            animation: shake 0.4s;
+        }
         .mp-divider {
             text-align: center;
             color: var(--text2);
@@ -927,6 +1072,9 @@
         .mute-btn:hover {
             border-color: var(--primary);
             color: var(--primary);
+        }
+        .mute-btn:active {
+            transform: scale(0.9);
         }
         .mp-toast {
             position: fixed;
@@ -1105,6 +1253,109 @@
         .qi-value i {
             font-size: 0.9rem;
         }
+        /* ============ WAITING DOTS ============ */
+        .waiting-dots {
+            text-align: center;
+            font-size: 0.78rem;
+            color: var(--text2);
+            margin-bottom: 10px;
+        }
+        .waiting-dots::after {
+            content: '';
+            display: inline-block;
+            width: 1.2em;
+            text-align: left;
+            animation: dotsCycle 1.4s steps(4, end) infinite;
+        }
+        @keyframes dotsCycle {
+            0% { content: ''; }
+        }
+        .waiting-dots .dots-anim {
+            display: inline-block;
+            width: 1.3em;
+            text-align: left;
+            overflow: hidden;
+            vertical-align: bottom;
+        }
+        .waiting-dots .dots-anim::after {
+            content: '...';
+            animation: dotsType 1.3s steps(4) infinite;
+            display: inline-block;
+            width: 1.3em;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        @keyframes dotsType {
+            0% { width: 0; }
+            100% { width: 1.3em; }
+        }
+        /* ============ PULSE CTA (start button when ready) ============ */
+        .pulse-cta {
+            animation: pulseCta 1.5s ease-in-out infinite;
+        }
+        @keyframes pulseCta {
+            0%, 100% {
+                box-shadow: 0 4px 18px rgba(56, 189, 248, 0.35);
+            }
+            50% {
+                box-shadow: 0 4px 30px rgba(56, 189, 248, 0.7), 0 0 0 4px rgba(56, 189, 248, 0.12);
+            }
+        }
+        /* ============ PLAYER COUNT BUMP ============ */
+        .count-bump {
+            animation: countBump 0.35s var(--ease-game);
+        }
+        @keyframes countBump {
+            0% { transform: scale(1); }
+            40% { transform: scale(1.18); color: var(--primary); }
+            100% { transform: scale(1); }
+        }
+        /* ============ SKELETON LOADING ============ */
+        .skeleton-shimmer {
+            background: linear-gradient(100deg, rgba(255,255,255,0.04) 20%, rgba(255,255,255,0.11) 40%, rgba(255,255,255,0.04) 60%);
+            background-size: 200% 100%;
+            animation: shimmerMove 1.5s ease-in-out infinite;
+            border-radius: 10px;
+        }
+        @keyframes shimmerMove {
+            0% { background-position: 180% 0; }
+            100% { background-position: -20% 0; }
+        }
+        .skel-line {
+            height: 14px;
+            margin-bottom: 10px;
+        }
+        .skel-title {
+            height: 26px;
+            width: 60%;
+            margin: 0 auto 20px;
+        }
+        .skel-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            margin-bottom: 8px;
+        }
+        .skel-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .skel-row .skel-line {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        .skel-btn {
+            height: 48px;
+            border-radius: 14px;
+            margin-top: 16px;
+        }
+        /* ============ ONLINE COUNTER PULSE ============ */
+        #onlineCounter .oc-dot {
+            animation: dotPulse 1.6s ease-in-out infinite;
+        }
         @media (max-width: 480px) {
             .mp-card {
                 padding: 20px 16px;
@@ -1227,7 +1478,7 @@
     <canvas id="confettiCanvas" aria-hidden="true"></canvas>
 
     <div id="onlineCounter" style="position:fixed;top:calc(12px + var(--safe-top));right:60px;z-index:100;display:flex;align-items:center;gap:6px;background:var(--glass-bg);backdrop-filter:blur(10px);border:1px solid var(--glass-border);border-radius:20px;padding:6px 12px;font-size:0.7rem;font-weight:600;color:var(--text);">
-        <span style="width:8px;height:8px;border-radius:50%;background:var(--green);animation:dotPulse 1.6s ease-in-out infinite;"></span>
+        <span class="oc-dot" style="width:8px;height:8px;border-radius:50%;background:var(--green);"></span>
         <span id="onlineCount">0</span> online
     </div>
     <a href="index.html" class="home-link" style="display:flex;align-items:center;gap:8px;padding:6px 14px;text-decoration:none;">
@@ -1254,7 +1505,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInAnonymously, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, collection, query, where, getDocs, addDoc, serverTimestamp, orderBy, limitToLast, deleteDoc, writeBatch, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, collection, query, where, getDocs, addDoc, serverTimestamp, orderBy, limitToLast, deleteDoc, deleteField, writeBatch, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAhfgx0t-E6wrz6zEFIU_tpKTIbELp00ss",
@@ -1289,6 +1540,7 @@
 
         let revealActive = false;
         let previousScores = {};
+        let previousRanks = {};
         let qrRendered = false;
         let achievementQueue = [];
         let achievementShowing = false;
@@ -1303,13 +1555,22 @@
         let answeringInFlight = false;
         let scoringInProgress = false;
         let heartbeatInterval = null;
+        let presenceCleanupInFlight = false;
         const PRESENCE_STALE_MS = 30000;
+        const INACTIVE_REMOVE_MS = 120000;
 
         let prevSnapshotStatus = null;
         let prevSnapshotQuestionIndex = -1;
         let prevSnapshotPlayersJSON = '';
         let waitingRoomFullyRendered = false;
         let currentScreenMode = 'lobby';
+
+        // Local (non-Firebase) UX state
+        let recentlyRejoinedUids = new Set();
+        let lastKnownPlayers = {};
+        let lastKnownHostId = null;
+        let snapshotDebounceTimer = null;
+        let pendingSnapshotData = null;
 
         // ============ AUTH ============
         async function initAuth() {
@@ -1545,7 +1806,7 @@
         // =========================================================
         // CONFETTI
         // =========================================================
-        function launchConfetti() {
+        function launchConfetti(particleCount = 140) {
             if (prefersReducedMotion()) return;
             const canvas = document.getElementById('confettiCanvas');
             if (!canvas) return;
@@ -1553,7 +1814,7 @@
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             const colors = ['#38bdf8', '#818cf8', '#fbbf24', '#34d399', '#f87171', '#f472b6'];
-            const particles = Array.from({ length: 140 }, () => ({
+            const particles = Array.from({ length: particleCount }, () => ({
                 x: Math.random() * canvas.width,
                 y: -20 - Math.random() * canvas.height * 0.4,
                 r: 4 + Math.random() * 4,
@@ -1585,6 +1846,16 @@
                 else ctx.clearRect(0, 0, canvas.width, canvas.height);
             }
             tick();
+        }
+
+        function flashCorrectFX() {
+            if (prefersReducedMotion()) return;
+            try {
+                const el = document.createElement('div');
+                el.className = 'correct-flash';
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 650);
+            } catch (e) {}
         }
 
         // =========================================================
@@ -1723,7 +1994,27 @@ function shareWhatsApp() {
 
         // ============ UI RENDER ============
         function render(html) {
-            document.getElementById('app').innerHTML = html;
+            const appEl = document.getElementById('app');
+            if (!appEl) return;
+            appEl.classList.remove('screen-fade-in');
+            appEl.innerHTML = html;
+            // Force reflow so the animation restarts every time
+            void appEl.offsetWidth;
+            appEl.classList.add('screen-fade-in');
+        }
+
+        function renderSkeleton() {
+            render(`
+            <div class="mp-card">
+              <div class="skeleton-shimmer skel-title"></div>
+              <div class="skeleton-shimmer skel-line" style="width:100%;"></div>
+              <div class="skeleton-shimmer skel-btn"></div>
+              <div class="skeleton-shimmer skel-line" style="width:40%;margin:16px auto 10px;"></div>
+              <div class="skel-row"><div class="skeleton-shimmer skel-avatar"></div><div class="skeleton-shimmer skel-line"></div></div>
+              <div class="skel-row"><div class="skeleton-shimmer skel-avatar"></div><div class="skeleton-shimmer skel-line"></div></div>
+              <div class="skel-row"><div class="skeleton-shimmer skel-avatar"></div><div class="skeleton-shimmer skel-line"></div></div>
+            </div>
+          `);
         }
 
         function showToast(msg, isJoin = false) {
@@ -1907,7 +2198,12 @@ function shareWhatsApp() {
 
             creatingRoom = true;
             const createBtn = document.querySelector('#app .mp-btn-primary');
-            if (createBtn) createBtn.disabled = true;
+            let createBtnOriginalHTML = null;
+            if (createBtn) {
+                createBtn.disabled = true;
+                createBtnOriginalHTML = createBtn.innerHTML;
+                createBtn.innerHTML = '<span class="btn-spinner"></span>Creating room...';
+            }
             try {
                 gameQuestionTime = qTime;
                 roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -1915,11 +2211,13 @@ function shareWhatsApp() {
                 isHost = true;
                 previousPlayers = null;
                 previousScores = {};
+                previousRanks = {};
                 qrRendered = false;
                 waitingRoomFullyRendered = false;
                 prevSnapshotStatus = null;
                 prevSnapshotQuestionIndex = -1;
                 prevSnapshotPlayersJSON = '';
+                recentlyRejoinedUids = new Set();
                 let questions = [];
                 try {
                     const resp = await fetch(`data/${subject}.json?t=${Date.now()}`);
@@ -1978,13 +2276,25 @@ function shareWhatsApp() {
                 listenToRoom();
             } finally {
                 creatingRoom = false;
-                if (createBtn) createBtn.disabled = false;
+                if (createBtn) {
+                    createBtn.disabled = false;
+                    if (createBtnOriginalHTML !== null) createBtn.innerHTML = createBtnOriginalHTML;
+                }
             }
         }
 
 async function joinRoom() {
     if (joining) return;
     
+    const joinBtn = document.querySelector('#app .mp-btn-outline');
+    let joinBtnOriginalHTML = null;
+    joining = true;
+    if (joinBtn) {
+        joinBtn.disabled = true;
+        joinBtnOriginalHTML = joinBtn.innerHTML;
+        joinBtn.innerHTML = '<span class="btn-spinner"></span>Joining...';
+    }
+    try {
     // Get device fingerprint
     try {
         const fp = await FingerprintJS.load();
@@ -1998,18 +2308,16 @@ async function joinRoom() {
     const code = document.getElementById('roomCodeInput')?.value.trim().toUpperCase();
     playerName = document.getElementById('playerName')?.value.trim() || 'Player';
     if (!code) return showError('Room code enter කරන්න!');
-    joining = true;
-    const joinBtn = document.querySelector('#app .mp-btn-outline');
-    if (joinBtn) joinBtn.disabled = true;
-    try {
         roomCode = code;
         previousPlayers = null;
         previousScores = {};
+        previousRanks = {};
         qrRendered = false;
         waitingRoomFullyRendered = false;
         prevSnapshotStatus = null;
         prevSnapshotQuestionIndex = -1;
         prevSnapshotPlayersJSON = '';
+        recentlyRejoinedUids = new Set();
         const q = query(collection(db, 'liveMatches'), where('roomCode', '==', code), where('status', 'in', [
             'waiting', 'countdown'
         ]));
@@ -2028,6 +2336,7 @@ async function joinRoom() {
             const uid = matchedUid || currentUser.uid;
             isHost = roomData.hostId === uid;
             playerName = existingPlayers[uid].name || playerName;
+            recentlyRejoinedUids.add(currentUser.uid);
             
             // If reconnecting with different auth UID
             if (matchedUid && matchedUid !== currentUser.uid) {
@@ -2088,7 +2397,10 @@ async function joinRoom() {
         listenToRoom();
     } finally {
         joining = false;
-        if (joinBtn) joinBtn.disabled = false;
+        if (joinBtn) {
+            joinBtn.disabled = false;
+            if (joinBtnOriginalHTML !== null) joinBtn.innerHTML = joinBtnOriginalHTML;
+        }
     }
 }
 
@@ -2103,6 +2415,33 @@ async function joinRoom() {
             unsubscribe = onSnapshot(doc(db, 'liveMatches', roomId), (snapshot) => {
                 if (!snapshot.exists()) { leaveRoom(); return; }
                 const data = snapshot.data();
+                processRoomSnapshot(data);
+            });
+
+            startHeartbeat();
+        }
+
+        // Lightly debounce ultra-rapid consecutive snapshot bursts (e.g. several
+        // presence writes landing in the same tick) so the DOM isn't thrashed,
+        // while keeping gameplay-critical updates (status/question changes) instant.
+        function processRoomSnapshot(data) {
+            const isCriticalChange = data.status !== prevSnapshotStatus ||
+                (data.status === 'playing' && data.currentQuestion !== prevSnapshotQuestionIndex);
+            if (isCriticalChange) {
+                if (snapshotDebounceTimer) { clearTimeout(snapshotDebounceTimer); snapshotDebounceTimer = null; }
+                applyRoomSnapshot(data);
+                return;
+            }
+            pendingSnapshotData = data;
+            if (snapshotDebounceTimer) return;
+            snapshotDebounceTimer = setTimeout(() => {
+                snapshotDebounceTimer = null;
+                if (pendingSnapshotData) applyRoomSnapshot(pendingSnapshotData);
+                pendingSnapshotData = null;
+            }, 120);
+        }
+
+        function applyRoomSnapshot(data) {
                 const players = data.players || {};
 
                 isHost = data.hostId === currentUser.uid;
@@ -2121,7 +2460,19 @@ async function joinRoom() {
                         }
                     });
                 }
+                if (previousPlayers && data.status === 'waiting') {
+                    Object.keys(previousPlayers).forEach(uid => {
+                        const wasOnline = previousPlayers[uid]?.online;
+                        const isOnline = players[uid]?.online;
+                        if (!wasOnline && isOnline && uid !== currentUser.uid) {
+                            recentlyRejoinedUids.add(uid);
+                            setTimeout(() => { recentlyRejoinedUids.delete(uid); refreshWaitingRoomPlayers(); }, 4000);
+                        }
+                    });
+                }
                 previousPlayers = JSON.parse(JSON.stringify(players));
+                lastKnownPlayers = players;
+                lastKnownHostId = data.hostId;
 
                 maintainPresence(data, players);
 
@@ -2191,9 +2542,12 @@ async function joinRoom() {
 
                 const countEl = document.getElementById('onlineCount');
                 if (countEl) countEl.textContent = Object.values(players).filter(p => p.online).length;
-            });
+        }
 
-            startHeartbeat();
+        function refreshWaitingRoomPlayers() {
+            if (currentScreenMode === 'waiting' && waitingRoomFullyRendered) {
+                updatePlayerListDOM(lastKnownPlayers, lastKnownHostId);
+            }
         }
 
         function getSubjectName(subject) {
@@ -2219,6 +2573,8 @@ async function joinRoom() {
             const lessonDisplay = data.lessonName || data.lessonId || 'N/A';
             const questionCountDisplay = data.questionCount || 0;
             const timeDisplay = `${data.questionTime || gameQuestionTime}s`;
+            const waitingDotsHTML = playerCount < 2 ?
+                `<p class="waiting-dots">Waiting for more players<span class="dots-anim"></span></p>` : '';
 
             render(`
             <div class="mp-card" id="waitingRoomCard">
@@ -2258,10 +2614,11 @@ async function joinRoom() {
               </div>
               <div class="qr-wrap" id="qrWrap"></div>
               <p style="text-align:center;font-size:0.65rem;color:var(--text2);word-break:break-all;margin-bottom:10px;">${escapeHtml(link)}</p>
+              ${waitingDotsHTML}
               <p style="text-align:center;" id="playerCountText">Players: ${playerCount}/10</p>
               <div class="mp-player-list" id="playerListContainer">${playerListHTML}</div>
               <button class="mp-btn mp-btn-success" id="readyBtn" onclick="window.toggleReady()">${myReady ? '✅ Ready' : 'Click to Ready'}</button>
-              ${isHost ? `<button class="mp-btn mp-btn-primary" id="startBtn" onclick="window.startGame()" ${!allReady?'disabled':''}>⚡ Start</button>` : ''}
+              ${isHost ? `<button class="mp-btn mp-btn-primary ${allReady ? 'pulse-cta' : ''}" id="startBtn" onclick="window.startGame()" ${!allReady?'disabled':''}>⚡ Start</button>` : ''}
               <button class="mp-btn mp-btn-danger" onclick="window.leaveRoom()">Leave</button>
             </div>
             <div class="mp-card chat-card" id="chatCard">
@@ -2286,25 +2643,65 @@ async function joinRoom() {
             if (countEl) countEl.textContent = Object.values(data.players || {}).filter(p => p.online).length;
         }
 
-        function buildPlayerListHTML(players, hostId) {
-            return Object.entries(players).map(([uid, p], idx) => `
-            <div class="mp-player" style="animation-delay:${idx * 0.06}s" data-player-uid="${uid}">
+        function buildSinglePlayerHTML(uid, p, hostId) {
+            const justRejoined = recentlyRejoinedUids.has(uid) && uid !== currentUser.uid;
+            let statusBadge = '⏳ Waiting';
+            if (!p.online) statusBadge = '🔴 Offline';
+            else if (justRejoined) statusBadge = '<span class="mp-badge mp-badge-rejoined"><i class="fa-solid fa-rotate"></i> Rejoined</span>';
+            else if (p.ready) statusBadge = '<span class="mp-badge mp-badge-ready">✅ Ready</span>';
+            return `
               <div class="mp-player-avatar" style="background:${getAvatarColor(uid)}">
                 ${(p.name||'?')[0].toUpperCase()}
                 <span class="status-dot ${p.online ? 'online' : 'offline'}"></span>
               </div>
               <div class="mp-player-info">
-                <div class="mp-player-name">${escapeHtml(p.name)} ${uid === hostId ? '<span class="mp-badge mp-badge-host"><i class="fa-solid fa-crown"></i> Host</span>' : ''}</div>
-                <div class="mp-player-status">${p.online ? (p.ready ? '<span class="mp-badge mp-badge-ready">✅ Ready</span>' : '⏳ Waiting') : '🔴 Offline'}</div>
+                <div class="mp-player-name">${escapeHtml(p.name)} ${uid === hostId ? '<span class="mp-badge mp-badge-host"><i class="fa-solid fa-crown"></i> Host<span class="crown-sparkle">✨</span></span>' : ''}</div>
+                <div class="mp-player-status">${statusBadge}</div>
               </div>
+            `;
+        }
+
+        function buildPlayerListHTML(players, hostId) {
+            return Object.entries(players).map(([uid, p], idx) => `
+            <div class="mp-player" style="animation-delay:${idx * 0.06}s" data-player-uid="${uid}">
+              ${buildSinglePlayerHTML(uid, p, hostId)}
             </div>
           `).join('');
         }
 
+        // Reconciles the player list in-place: existing rows are updated without
+        // being torn down (no flicker), new players slide in, and players who
+        // leave fade out smoothly instead of the whole list snapping to a new state.
         function updatePlayerListDOM(players, hostId) {
             const container = document.getElementById('playerListContainer');
             if (!container) return;
-            container.innerHTML = buildPlayerListHTML(players, hostId);
+            const existingEls = {};
+            container.querySelectorAll('[data-player-uid]').forEach(el => { existingEls[el.dataset.playerUid] = el; });
+            const currentUids = Object.keys(players);
+
+            Object.keys(existingEls).forEach(uid => {
+                if (!currentUids.includes(uid)) {
+                    const el = existingEls[uid];
+                    if (el.classList.contains('player-leaving')) return;
+                    el.classList.add('player-leaving');
+                    setTimeout(() => { if (el.parentNode) el.remove(); }, 380);
+                }
+            });
+
+            currentUids.forEach((uid) => {
+                const p = players[uid];
+                let el = existingEls[uid];
+                if (!el) {
+                    el = document.createElement('div');
+                    el.className = 'mp-player player-entering';
+                    el.dataset.playerUid = uid;
+                    el.innerHTML = buildSinglePlayerHTML(uid, p, hostId);
+                    container.appendChild(el);
+                    requestAnimationFrame(() => requestAnimationFrame(() => el.classList.remove('player-entering')));
+                } else {
+                    el.innerHTML = buildSinglePlayerHTML(uid, p, hostId);
+                }
+            });
         }
 
         function updateReadyButtonDOM(players) {
@@ -2321,6 +2718,7 @@ async function joinRoom() {
             const allReady = playerCount >= 2 && Object.values(players).filter(p => p.online).every(p => p.ready);
             if (btn) {
                 btn.disabled = !allReady;
+                btn.classList.toggle('pulse-cta', allReady);
             }
         }
 
@@ -2328,7 +2726,13 @@ async function joinRoom() {
             const el = document.getElementById('playerCountText');
             if (!el) return;
             const playerCount = Object.values(players).filter(p => p.online).length;
-            el.textContent = `Players: ${playerCount}/10`;
+            const newText = `Players: ${playerCount}/10`;
+            if (el.textContent !== newText) {
+                el.textContent = newText;
+                el.classList.remove('count-bump');
+                void el.offsetWidth;
+                el.classList.add('count-bump');
+            }
         }
 
         function renderQuestionFull(data) {
@@ -2413,17 +2817,33 @@ async function joinRoom() {
             return 'timer-red';
         }
 
+        function computeRanks(sorted) {
+            const ranks = {};
+            sorted.forEach((p, i) => { ranks[p.uid] = i + 1; });
+            return ranks;
+        }
+
+        function rankChangeIndicatorHTML(uid, rank) {
+            const prev = previousRanks[uid];
+            if (prev === undefined) return '';
+            if (prev === rank) return '<span class="rank-change same"><i class="fa-solid fa-minus"></i></span>';
+            if (rank < prev) return `<span class="rank-change up"><i class="fa-solid fa-caret-up"></i> ${prev - rank}</span>`;
+            return `<span class="rank-change down"><i class="fa-solid fa-caret-down"></i> ${rank - prev}</span>`;
+        }
+
         function renderLeaderboard(players, scores) {
             const sorted = Object.entries(players).map(([uid, p]) => ({ ...p, uid, score: scores[uid]?.score || 0 }))
                 .sort((a, b) => b.score - a.score);
+            const currentRanks = computeRanks(sorted);
             const list = sorted.map((p, i) => `
-            <div class="mp-leaderboard-item" style="${!p.online ? 'opacity:0.6;' : ''}animation-delay:${i*0.06}s">
+            <div class="mp-leaderboard-item ${i===0?'top-1':i===1?'top-2':i===2?'top-3':''}" style="${!p.online ? 'opacity:0.6;' : ''}animation-delay:${i*0.06}s">
               <div class="mp-rank ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${i===0?'<i class="fa-solid fa-crown"></i>':i+1}</div>
               <div class="mp-player-avatar" style="background:${getAvatarColor(p.uid)}">${(p.name||'?')[0].toUpperCase()}</div>
               <div class="mp-player-info">
                 <div class="mp-player-name">
                   ${escapeHtml(p.name)}
                   ${!p.online ? '<span style="font-size:0.6rem;color:#f87171;border:1px solid #f87171;padding:2px 4px;border-radius:4px;margin-left:4px;">Offline</span>' : ''}
+                  ${rankChangeIndicatorHTML(p.uid, i + 1)}
                 </div>
                 <div class="mp-player-status">✅ ${p.correct || 0} / ❌ ${p.wrong || 0}</div>
               </div>
@@ -2436,6 +2856,7 @@ async function joinRoom() {
             const finalScores = {};
             sorted.forEach(p => finalScores[p.uid] = p.score);
             animateScoreCounts(finalScores);
+            previousRanks = currentRanks;
         }
 
         function animateScoreCounts(finalScores) {
@@ -2459,6 +2880,21 @@ async function joinRoom() {
             previousScores = { ...previousScores, ...finalScores };
         }
 
+        function animateNumberEl(el, endValue, duration = 700) {
+            if (!el) return;
+            const reduced = prefersReducedMotion();
+            if (reduced) { el.textContent = endValue; return; }
+            const t0 = performance.now();
+            function step(t) {
+                const p = Math.min(1, (t - t0) / duration);
+                const val = Math.round(endValue * p);
+                if (el.isConnected) el.textContent = val;
+                if (p < 1 && el.isConnected) requestAnimationFrame(step);
+                else if (el.isConnected) el.textContent = endValue;
+            }
+            requestAnimationFrame(step);
+        }
+
         function renderWinner(players, scores, data) {
             const sorted = Object.entries(players).map(([uid, p]) => ({ ...p, uid, score: scores[uid]?.score || 0 }))
                 .sort((a, b) => b.score - a.score);
@@ -2470,7 +2906,7 @@ async function joinRoom() {
             const myRank = (forcedWinnerUid && currentUser.uid === forcedWinnerUid) ? 1 :
                 (sorted.findIndex(p => p.uid === currentUser.uid) + 1);
             const list = sorted.map((p, i) => `
-            <div class="mp-leaderboard-item" style="${!p.online ? 'opacity:0.6;' : ''}animation-delay:${i*0.06}s">
+            <div class="mp-leaderboard-item ${i===0?'top-1':i===1?'top-2':i===2?'top-3':''}" style="${!p.online ? 'opacity:0.6;' : ''}animation-delay:${i*0.06}s">
               <div class="mp-rank ${i===0?'gold':i===1?'silver':i===2?'bronze':''}">${i===0?'<i class="fa-solid fa-crown"></i>':i+1}</div>
               <div class="mp-player-avatar" style="background:${getAvatarColor(p.uid)}">${(p.name||'?')[0].toUpperCase()}</div>
               <div class="mp-player-info">
@@ -2492,23 +2928,28 @@ async function joinRoom() {
             render(`
             <div class="mp-card">
               <div class="mp-winner">
-                <div class="mp-winner-icon">🏆</div>
+                <div class="trophy-wrap">
+                  <span class="trophy-sparkle s1">✨</span>
+                  <span class="trophy-sparkle s2">✨</span>
+                  <span class="trophy-sparkle s3">✨</span>
+                  <div class="mp-winner-icon">🏆</div>
+                </div>
                 <div class="mp-winner-name">${escapeHtml(winner.name)}</div>
                 <p style="color:var(--text2);">${winner.score} points</p>
                 ${myRank === 1 ? '<div class="champion-badge"><i class="fa-solid fa-crown"></i> You are the Champion!</div>' : ''}
                 ${forcedWinnerUid ? '<p style="font-size:0.72rem;color:var(--text2);margin-top:8px;"><i class="fa-solid fa-circle-info"></i> Match ended early — other players left</p>' : ''}
               </div>
               <div class="winner-stats-grid">
-                <div class="stat-box"><div class="stat-val">${accuracy}%</div><div class="stat-lbl">Accuracy</div></div>
+                <div class="stat-box"><div class="stat-val" id="statAccuracy">0%</div><div class="stat-lbl">Accuracy</div></div>
                 <div class="stat-box"><div class="stat-val">${me?.correct || 0}/${me?.wrong || 0}</div><div class="stat-lbl">Correct/Wrong</div></div>
                 <div class="stat-box"><div class="stat-val">${avgTime}</div><div class="stat-lbl">Avg Time</div></div>
                 <div class="stat-box"><div class="stat-val">${fastest}</div><div class="stat-lbl">Fastest</div></div>
-                <div class="stat-box"><div class="stat-val">${longestStreak}</div><div class="stat-lbl">Best Streak</div></div>
+                <div class="stat-box"><div class="stat-val" id="statStreak">0</div><div class="stat-lbl">Best Streak</div></div>
                 <div class="stat-box"><div class="stat-val">#${myRank || '-'}</div><div class="stat-lbl">Your Rank</div></div>
               </div>
               <div>${list}</div>
               <div style="display:flex;gap:8px;margin-top:12px;">
-                ${isHost ? '<button class="mp-btn mp-btn-primary" onclick="window.rematch()">🔄 Rematch</button>' : ''}
+                ${isHost ? '<button class="mp-btn mp-btn-primary pulse-cta" onclick="window.rematch()">🔄 Rematch</button>' : ''}
                 <button class="mp-btn mp-btn-outline" onclick="window.leaveRoom()">Leave</button>
               </div>
             </div>
@@ -2516,6 +2957,19 @@ async function joinRoom() {
 
             launchConfetti();
             playSound('victory');
+            animateNumberEl(document.getElementById('statStreak'), longestStreak, 600);
+            const accEl = document.getElementById('statAccuracy');
+            if (accEl) {
+                if (prefersReducedMotion()) { accEl.textContent = accuracy + '%'; } else {
+                    const t0 = performance.now();
+                    const dur = 700;
+                    (function stepAcc(t) {
+                        const p = Math.min(1, (t - t0) / dur);
+                        if (accEl.isConnected) accEl.textContent = Math.round(accuracy * p) + '%';
+                        if (p < 1 && accEl.isConnected) requestAnimationFrame(stepAcc);
+                    })(t0);
+                }
+            }
             if (me) {
                 achievementQueue = achievementQueue.concat(computeAchievements(me));
                 queueRankAchievements(myRank);
@@ -2607,6 +3061,8 @@ async function joinRoom() {
             if (unsubscribe) unsubscribe();
             if (questionTimer) { clearInterval(questionTimer);
                 questionTimer = null; }
+            if (snapshotDebounceTimer) { clearTimeout(snapshotDebounceTimer); snapshotDebounceTimer = null; }
+            pendingSnapshotData = null;
             clearActiveRoom();
             roomId = null;
             roomCode = null;
@@ -2615,8 +3071,10 @@ async function joinRoom() {
             previousPlayers = null;
             revealActive = false;
             previousScores = {};
+            previousRanks = {};
             qrRendered = false;
             achievementQueue = [];
+            recentlyRejoinedUids = new Set();
             waitingRoomFullyRendered = false;
             prevSnapshotStatus = null;
             prevSnapshotQuestionIndex = -1;
@@ -2628,6 +3086,7 @@ async function joinRoom() {
         async function rematch() {
             if (!isHost || !roomId) return;
             previousScores = {};
+            previousRanks = {};
             waitingRoomFullyRendered = false;
             prevSnapshotStatus = null;
             prevSnapshotQuestionIndex = -1;
@@ -2699,7 +3158,9 @@ async function joinRoom() {
                     }
                     if (selectedAnswer >= 0) {
                         const correctIdx = data.questions[currentQuestionIndex]?.correct;
-                        playSound(selectedAnswer === correctIdx ? 'correct' : 'wrong');
+                        const wasCorrect = selectedAnswer === correctIdx;
+                        playSound(wasCorrect ? 'correct' : 'wrong');
+                        if (wasCorrect) flashCorrectFX();
                     }
 
                     if (isHost && roomId && !scoringInProgress) {
@@ -2774,7 +3235,14 @@ async function joinRoom() {
                 '#fb923c', '#f472b6'
             ]; return colors[uid.charCodeAt(0) % colors.length]; }
 
-        function showError(msg) { const el = document.getElementById('errorMsg'); if (el) el.textContent = msg; }
+        function showError(msg) {
+            const el = document.getElementById('errorMsg');
+            if (!el) return;
+            el.textContent = msg;
+            el.classList.remove('mp-error-shake');
+            void el.offsetWidth;
+            el.classList.add('mp-error-shake');
+        }
 
         async function saveMatchHistory(data) {
             try {
@@ -2907,6 +3375,7 @@ async function joinRoom() {
             const now = Date.now();
             const updates = {};
             const onlineUids = [];
+            const uidsToRemove = [];
             Object.entries(players).forEach(([uid, p]) => {
                 const lastSeenMs = (p.lastSeen && typeof p.lastSeen.toMillis === 'function') ? p.lastSeen
                     .toMillis() : null;
@@ -2916,6 +3385,12 @@ async function joinRoom() {
                     updates[`players.${uid}.online`] = false;
                 } else if (p.online) {
                     onlineUids.push(uid);
+                }
+                // Prune players who have been offline for a long time while still in the
+                // waiting room, so the lobby list doesn't accumulate ghost entries.
+                if (!p.online && data.status === 'waiting' && lastSeenMs && (now - lastSeenMs > INACTIVE_REMOVE_MS) &&
+                    uid !== currentUser.uid) {
+                    uidsToRemove.push(uid);
                 }
             });
             const hostEntry = players[data.hostId];
@@ -2936,8 +3411,16 @@ async function joinRoom() {
                 updates.forcedWinner = onlineUids[0];
                 updates.hostId = onlineUids[0];
             }
+            // Only one client (deterministically the lowest sorted online uid, i.e. the
+            // acting host candidate) performs cleanup writes to avoid write storms.
+            const shouldActAsCleaner = onlineUids.length === 0 || [...onlineUids].sort()[0] === currentUser.uid;
+            if (uidsToRemove.length > 0 && shouldActAsCleaner && !presenceCleanupInFlight) {
+                uidsToRemove.forEach(uid => { updates[`players.${uid}`] = deleteField(); });
+            }
             if (Object.keys(updates).length > 0) {
+                presenceCleanupInFlight = true;
                 try { await updateDoc(doc(db, 'liveMatches', roomId), updates); } catch (e) {}
+                presenceCleanupInFlight = false;
             }
             if (onlineUids.length === 0 && Object.keys(players).length > 0) {
                 try { await deleteRoomCompletely(roomId); } catch (e) {}
@@ -2987,6 +3470,7 @@ async function joinRoom() {
         async function init() {
             updateMuteBtn();
             initParticles();
+            renderSkeleton();
             await initAuth();
             const params = new URLSearchParams(window.location.search);
             const urlRoomCode = params.get('room');
@@ -3008,6 +3492,7 @@ async function joinRoom() {
                             isHost = data.hostId === currentUser.uid;
                             previousPlayers = null;
                             previousScores = {};
+                            previousRanks = {};
                             qrRendered = false;
                             waitingRoomFullyRendered = false;
                             prevSnapshotStatus = null;
@@ -3030,6 +3515,7 @@ async function joinRoom() {
                             isHost = data.hostId === currentUser.uid;
                             previousPlayers = null;
                             previousScores = {};
+                            previousRanks = {};
                             qrRendered = false;
                             waitingRoomFullyRendered = false;
                             prevSnapshotStatus = null;
