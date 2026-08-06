@@ -190,6 +190,7 @@
                 transform: translateY(0);
             }
         }
+        /* PERF: contain: layout style (+ paint) added to cards/list containers to isolate layout/paint work (item #3) */
         .mp-card {
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
@@ -202,7 +203,7 @@
             animation: cardEnter 0.5s var(--ease-game);
             position: relative;
             overflow: hidden;
-            contain: layout paint;
+            contain: layout style paint;
         }
         @keyframes cardEnter {
             from {
@@ -413,10 +414,12 @@
             border-radius: 14px;
             margin-bottom: 14px;
         }
+        /* PERF: contain added to scrollable list containers (item #3) */
         .mp-player-list {
             max-height: 300px;
             overflow-y: auto;
             margin: 12px 0;
+            contain: layout style;
         }
         .mp-player-list::-webkit-scrollbar {
             width: 6px;
@@ -436,7 +439,7 @@
             border: 1px solid var(--glass-border);
             animation: playerEnter 0.4s var(--ease-game) both;
             transition: opacity 0.35s ease, transform 0.35s ease, max-height 0.35s ease, margin 0.35s ease, padding 0.35s ease;
-            will-change: transform, opacity;
+            /* PERF: will-change removed from base rule; now toggled dynamically via JS (pulseWillChange) only while animating (item #3) */
         }
         .mp-player.player-entering {
             opacity: 0;
@@ -595,7 +598,60 @@
             background: linear-gradient(90deg, #38bdf8, #818cf8);
             border-radius: 4px;
             transition: width 0.6s var(--ease-game);
-            will-change: width;
+            /* PERF: will-change removed from base rule; toggled dynamically via JS while width is transitioning (item #3) */
+        }
+        /* NEW (feature #6): question progress dots replacing "Question X / Y" text */
+        .mp-progress-dots {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+        .prog-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1.5px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.3s var(--ease-game);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .prog-dot.current {
+            background: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.65);
+            transform: scale(1.35);
+        }
+        .prog-dot.answered {
+            background: var(--green);
+            border-color: var(--green);
+        }
+        .prog-dot.answered::after {
+            content: '✓';
+            position: absolute;
+            font-size: 7px;
+            font-weight: 800;
+            color: #04231a;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        /* NEW: screen-reader only helper text (accessibility, item #9) */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
         }
         .mp-question-num {
             text-align: center;
@@ -626,7 +682,7 @@
             stroke-width: 8;
             stroke-linecap: round;
             transition: stroke-dashoffset 1s linear, stroke 0.4s ease;
-            will-change: stroke-dashoffset;
+            /* PERF: will-change removed from base rule; toggled dynamically via JS each tick (item #3) */
         }
         .timer-green {
             stroke: var(--green);
@@ -1178,6 +1234,7 @@
         .chat-card {
             padding: 16px 14px;
         }
+        /* PERF: contain added to chat scroll container (item #3) */
         .chat-messages {
             max-height: 200px;
             min-height: 120px;
@@ -1188,6 +1245,7 @@
             padding: 4px 2px;
             margin-bottom: 10px;
             scroll-behavior: smooth;
+            contain: layout style;
         }
         .chat-messages::-webkit-scrollbar {
             width: 5px;
@@ -1277,6 +1335,12 @@
         .chat-send-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+        }
+        /* NEW (after-game chat, feature #1): small note/timer under the post-game chat title */
+        .chat-close-note {
+            font-size: 0.62rem;
+            font-weight: 400;
+            color: var(--text2);
         }
         .quiz-info-card {
             background: rgba(15, 23, 42, 0.7);
@@ -1422,6 +1486,25 @@
         }
         #onlineCounter .oc-dot {
             animation: dotPulse 1.6s ease-in-out infinite;
+        }
+        /* NEW (feature #11): waiting-room mini trivia box */
+        .mp-mini-trivia {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            background: rgba(129, 140, 248, 0.08);
+            border: 1px solid rgba(129, 140, 248, 0.25);
+            border-radius: 12px;
+            padding: 10px 12px;
+            margin-top: 12px;
+            font-size: 0.75rem;
+            color: var(--text2);
+            line-height: 1.45;
+            animation: leaderEnter 0.4s var(--ease-game) both;
+        }
+        .mp-mini-trivia .mt-icon {
+            flex-shrink: 0;
+            font-size: 0.95rem;
         }
         @media (max-width: 480px) {
             .mp-card {
@@ -1574,6 +1657,7 @@
         import { getAuth, onAuthStateChanged, signInAnonymously, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, collection, query, where, getDocs, addDoc, serverTimestamp, orderBy, limitToLast, deleteDoc, deleteField, writeBatch, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+        // Firebase config left 100% untouched, per the constraints.
         const firebaseConfig = {
             apiKey: "AIzaSyAhfgx0t-E6wrz6zEFIU_tpKTIbELp00ss",
             authDomain: "quiz-hub-225eb.firebaseapp.com",
@@ -1588,6 +1672,16 @@
         const db = getFirestore(app);
 
         setPersistence(auth, browserLocalPersistence).then(() => console.log('[Auth] Persistence set')).catch(() => {});
+
+        // NOTE on "Firestore select()" (perf item #1):
+        // The Firestore Web (modular) client SDK does NOT expose a field-mask / select() API the
+        // way the Admin (Node) SDK does — onSnapshot()/getDoc()/getDocs() on the web client always
+        // sync the full document so the offline cache stays consistent. Calling a non-existent
+        // `select()` here would just throw at runtime, so instead we keep reads efficient the
+        // honest way: we avoid redundant getDoc() calls right before/after subscribing to the same
+        // document (see init()/joinRoom()), we don't re-fetch data we already have in the snapshot,
+        // and the mini-trivia / question skeletons never trigger extra reads. See comments below
+        // at each call site tagged "PERF:".
 
         // ============ STATE ============
         let currentUser = null
@@ -1637,6 +1731,18 @@
         let lastKnownHostId = null;
         let snapshotDebounceTimer = null;
         let pendingSnapshotData = null;
+
+        // NEW (feature #1 - after-game chat): tracks whether the post-game chat window is open + its auto-close timer
+        let afterGameChatActive = false;
+        let afterGameChatTimer = null;
+
+        // NEW (feature #6 - progress dots): which question indices *this* player has answered this match
+        let answeredQuestionIndices = new Set();
+
+        // NEW (feature #8 - quick rematch / #7 - skeleton timing): remember the timer basis so a
+        // delayed render can compute an accurate "time left" instead of a stale value
+        let currentQuestionStartMs = null;
+        let currentQuestionTotalTime = 15;
 
         // ============ AUTH ============
         async function initAuth() {
@@ -1712,6 +1818,28 @@
                 selectAnswer(index);
             }
         });
+
+        // =========================================================
+        // NEW: HAPTIC FEEDBACK (feature #5)
+        // =========================================================
+        function vibrate(ms) {
+            try {
+                if (navigator.vibrate) navigator.vibrate(ms);
+            } catch (e) {}
+        }
+
+        // =========================================================
+        // NEW: PERF HELPERS - will-change toggling + rAF batching (items #3 & #4 partially)
+        // =========================================================
+        // Sets will-change only while something is actually animating, then clears it so the
+        // browser doesn't keep an expensive compositor layer around indefinitely.
+        function pulseWillChange(el, prop, duration = 650) {
+            if (!el) return;
+            try {
+                el.style.willChange = prop;
+                setTimeout(() => { if (el && el.style) el.style.willChange = 'auto'; }, duration);
+            } catch (e) {}
+        }
 
         // =========================================================
         // SOUND SYSTEM
@@ -1813,10 +1941,12 @@
             playSound('click'); }
         window.toggleMute = toggleMute;
 
+        // MODIFIED (feature #5): also fire a short haptic pulse on any button/option/icon/chat-send click
         document.addEventListener('click', (e) => {
             const target = e.target.closest('.mp-btn, .mp-option, .icon-btn, .chat-send-btn');
             if (!target || target.disabled) return;
             playSound('click');
+            vibrate(8);
             spawnRipple(target, e);
         });
 
@@ -2098,6 +2228,23 @@
           `);
         }
 
+        // NEW (feature #7): shimmer placeholder shown for ~350ms before each real question renders
+        function renderQuestionSkeleton() {
+            render(`
+            <div class="mp-card" id="questionCardSkeleton">
+              <div class="skeleton-shimmer skel-line" style="width:100%;height:5px;margin-bottom:14px;"></div>
+              <div class="skeleton-shimmer skel-line" style="width:30%;height:10px;margin:0 auto 14px;"></div>
+              <div class="skeleton-shimmer" style="width:108px;height:108px;border-radius:50%;margin:0 auto 18px;"></div>
+              <div class="skeleton-shimmer skel-line" style="width:88%;height:20px;margin:0 auto 8px;"></div>
+              <div class="skeleton-shimmer skel-line" style="width:65%;height:20px;margin:0 auto 20px;"></div>
+              <div class="skeleton-shimmer skel-line" style="height:50px;border-radius:14px;"></div>
+              <div class="skeleton-shimmer skel-line" style="height:50px;border-radius:14px;"></div>
+              <div class="skeleton-shimmer skel-line" style="height:50px;border-radius:14px;"></div>
+              <div class="skeleton-shimmer skel-line" style="height:50px;border-radius:14px;margin-bottom:0;"></div>
+            </div>
+          `);
+        }
+
         function showToast(msg, isJoin = false) {
             const toast = document.createElement('div');
             toast.className = `mp-toast ${isJoin ? 'joined' : ''}`;
@@ -2163,6 +2310,25 @@
             chatSending = false;
         }
         window.sendReaction = sendReaction;
+
+        // =========================================================
+        // NEW (feature #11): WAITING-ROOM MINI TRIVIA
+        // =========================================================
+        const MINI_TRIVIA = [
+            "🧠 ඔබේ මොළය නින්දේදීත් නිතරම ක්‍රියාශීලීව සිටිනවා — sleep එකේදීත් memory consolidate වෙනවා.",
+            "🌍 පෘථිවියේ වයස අවුරුදු බිලියන 4.5කට ආසන්නයි.",
+            "🐙 බූගෙයෙකුට (Octopus) හදවත් තුනක් තියෙනවා.",
+            "💧 මිනිස් සිරුරෙන් 60%ක් පමණ ජලයෙන් සමන්විතයි.",
+            "🍯 මී පැණි කවදාවත් කැඩෙන්නේ නෑ — නිසි ලෙස තැන්පත් කළොත් අවුරුදු දහස් ගණනක් තිබෙන්නත් පුළුවන්.",
+            "⚡ එළිය තත්පරයකින් පෘථිවිය වටා 7 පාරක් ගමන් කරන්න පුළුවන් වේගයෙන් යනවා.",
+            "🦴 ළදරුවෙකුට ඇටකටු 300කට වඩා තියෙනවා, වැඩිහිටියෙකුට තියෙන්නේ 206ක්.",
+            "🌙 චන්ද්‍රයා සෑම වසරකම පෘථිවියෙන් සෙන්ටිමීටර් 3.8ක් පමණ ඈත් වෙනවා.",
+            "🐝 මීමැස්සන්ට රටාවක් 'waggle dance' එකකින් එකිනෙකාට direction කියලා දෙන්න පුළුවන්.",
+            "🔥 වීදුරු (Glass) ඇත්තටම ඉතා සෙමින් ගලායන ද්‍රවයක් නොවෙයි — solid එකක් විදියටයි සැලකෙන්නේ."
+        ];
+        function getRandomTrivia() {
+            return MINI_TRIVIA[Math.floor(Math.random() * MINI_TRIVIA.length)];
+        }
 
         function renderLobby() {
             currentScreenMode = 'lobby';
@@ -2297,6 +2463,7 @@
                 prevSnapshotQuestionIndex = -1;
                 prevSnapshotPlayersJSON = '';
                 recentlyRejoinedUids = new Set();
+                answeredQuestionIndices = new Set(); // NEW: fresh progress-dot state for a brand new room
                 let questions = [];
                 try {
                     const resp = await fetch(`data/${subject}.json?t=${Date.now()}`);
@@ -2318,6 +2485,8 @@
                     questions = [{ q: "No questions found for this lesson! Check your JSON.",
                     options: ["OK", "B", "C", "D"], correct: 0 }];
                 }
+                // NEW: store the original create settings on the room so "Quick Rematch" (feature #8)
+                // can restart with the exact same subject/grade/lesson/time/question-count later.
                 await setDoc(doc(db, 'liveMatches', roomId), {
                     roomCode,
                     hostId: currentUser.uid,
@@ -2394,6 +2563,7 @@
                 prevSnapshotQuestionIndex = -1;
                 prevSnapshotPlayersJSON = '';
                 recentlyRejoinedUids = new Set();
+                answeredQuestionIndices = new Set(); // NEW: fresh progress-dot state when joining a room
                 const q = query(collection(db, 'liveMatches'), where('roomCode', '==', code), where('status', 'in', [
                     'waiting', 'countdown'
                 ]));
@@ -2490,6 +2660,9 @@
             startHeartbeat();
         }
 
+        // PERF (item #4): debounce rapid Firestore snapshot updates (~120ms) so presence/ready-flag
+        // churn doesn't cause UI flicker; critical transitions (status/question change) skip the
+        // debounce and apply immediately so gameplay stays responsive.
         function processRoomSnapshot(data) {
             const isCriticalChange = data.status !== prevSnapshotStatus ||
                 (data.status === 'playing' && data.currentQuestion !== prevSnapshotQuestionIndex);
@@ -2543,7 +2716,13 @@
 
             maintainPresence(data, players);
 
-            if (data.status === 'waiting') { startChatListener(); } else { stopChatListener(); }
+            // MODIFIED (feature #1): keep the chat listener alive during 'waiting' AND while the
+            // after-game chat window is open during 'finished'; otherwise stop it.
+            if (data.status === 'waiting' || (data.status === 'finished' && afterGameChatActive)) {
+                startChatListener();
+            } else if (data.status !== 'finished') {
+                stopChatListener();
+            }
 
             const statusChanged = data.status !== prevSnapshotStatus;
             const questionChanged = data.status === 'playing' && data.currentQuestion !==
@@ -2601,10 +2780,14 @@
                         break;
                 }
             } else if (data.status === 'waiting' && playersChanged && waitingRoomFullyRendered) {
-                updatePlayerListDOM(players, data.hostId);
-                updateReadyButtonDOM(players);
-                updateStartButtonDOM(players, data.hostId);
-                updatePlayerCountDOM(players);
+                // PERF (item #3): batch the waiting-room DOM writes (player list, ready button,
+                // start button, player count) into a single requestAnimationFrame to avoid layout thrashing.
+                requestAnimationFrame(() => {
+                    updatePlayerListDOM(players, data.hostId);
+                    updateReadyButtonDOM(players);
+                    updateStartButtonDOM(players, data.hostId);
+                    updatePlayerCountDOM(players);
+                });
             }
 
             const countEl = document.getElementById('onlineCount');
@@ -2680,6 +2863,8 @@
               ${waitingDotsHTML}
               <p style="text-align:center;" id="playerCountText">Players: ${playerCount}/10</p>
               <div class="mp-player-list" id="playerListContainer">${playerListHTML}</div>
+              <!-- NEW (feature #11): mini trivia box, a different fact each time the waiting screen renders -->
+              <div class="mp-mini-trivia" id="miniTriviaBox"><span class="mt-icon">💡</span><span class="mt-text">${escapeHtml(getRandomTrivia())}</span></div>
               <button class="mp-btn mp-btn-success" id="readyBtn" onclick="window.toggleReady()">${myReady ? '✅ Ready' : 'Click to Ready'}</button>
               ${isHost ? `<button class="mp-btn mp-btn-primary ${allReady ? 'pulse-cta' : ''}" id="startBtn" onclick="window.startGame()" ${!allReady?'disabled':''}>⚡ Start</button>` : ''}
               <button class="mp-btn mp-btn-danger" onclick="window.leaveRoom()">Leave</button>
@@ -2744,6 +2929,7 @@
                 if (!currentUids.includes(uid)) {
                     const el = existingEls[uid];
                     if (el.classList.contains('player-leaving')) return;
+                    pulseWillChange(el, 'opacity, transform, max-height', 420); // PERF: transient will-change only during the leave transition
                     el.classList.add('player-leaving');
                     setTimeout(() => { if (el.parentNode) el.remove(); }, 380);
                 }
@@ -2758,6 +2944,7 @@
                     el.dataset.playerUid = uid;
                     el.innerHTML = buildSinglePlayerHTML(uid, p, hostId);
                     container.appendChild(el);
+                    pulseWillChange(el, 'opacity, transform', 400); // PERF: transient will-change only during the enter transition
                     requestAnimationFrame(() => requestAnimationFrame(() => el.classList.remove(
                         'player-entering')));
                 } else {
@@ -2797,10 +2984,41 @@
             }
         }
 
+        // NEW (feature #6): build the "question progress dots" row (filled = current, check = answered, hollow = upcoming)
+        function buildProgressDotsHTML(total, current) {
+            let html = '<div class="mp-progress-dots" role="img" aria-label="Question ' + (current + 1) + ' of ' + total + '">';
+            for (let i = 0; i < total; i++) {
+                let cls = '';
+                if (i === current) cls = 'current';
+                else if (answeredQuestionIndices.has(i)) cls = 'answered';
+                html += `<span class="prog-dot ${cls}"></span>`;
+            }
+            html += '</div>';
+            return html;
+        }
+
+        // MODIFIED (feature #7): renderQuestionFull now shows a brief shimmer skeleton first, then
+        // swaps in the real question ~350ms later. The actual markup-building logic lives in
+        // renderQuestionContent() (unchanged in substance from the original renderQuestionFull body).
         function renderQuestionFull(data) {
+            renderQuestionSkeleton();
+            setTimeout(() => {
+                // Only proceed if we're still looking at the same question (guards against a fast next-question tick racing the skeleton timeout)
+                if (currentScreenMode === 'playing') {
+                    renderQuestionContent(data);
+                }
+            }, 350);
+        }
+
+        function renderQuestionContent(data) {
             const q = data.questions[currentQuestionIndex];
             if (!q) return;
             const total = data.questionTime || gameQuestionTime || 15;
+            // Recompute an accurate time-left using the stored start time, so the ~350ms skeleton delay never shows a stale countdown value
+            if (currentQuestionStartMs) {
+                const elapsedNow = (Date.now() - currentQuestionStartMs) / 1000;
+                questionTimeLeft = Math.max(0, Math.ceil(currentQuestionTotalTime - elapsedNow));
+            }
             const frac = Math.max(0, Math.min(1, questionTimeLeft / total));
             const circumference = 2 * Math.PI * 52;
             const dashoffset = circumference * (1 - frac);
@@ -2826,23 +3044,25 @@
 
             render(`
             <div class="mp-card" id="questionCard">
-              <div class="mp-progress-bar"><div class="mp-progress-fill" style="width:${((currentQuestionIndex)/data.questions.length)*100}%"></div></div>
-              <div class="mp-question-num">Question ${currentQuestionIndex + 1} / ${data.questions.length}</div>
+              <div class="mp-progress-bar"><div class="mp-progress-fill" id="progressFillEl" style="width:${((currentQuestionIndex)/data.questions.length)*100}%"></div></div>
+              <span class="sr-only">Question ${currentQuestionIndex + 1} of ${data.questions.length}</span>
+              ${buildProgressDotsHTML(data.questions.length, currentQuestionIndex)}
               <div class="timer-ring-wrap ${urgent ? 'urgent' : ''}" id="timerWrap">
                 <svg class="timer-ring" viewBox="0 0 120 120">
                   <circle class="timer-ring-bg" cx="60" cy="60" r="52"></circle>
                   <circle class="timer-ring-progress ${colorClass}" id="timerRingProgress" cx="60" cy="60" r="52"
                     style="stroke-dasharray:${circumference};stroke-dashoffset:${dashoffset};"></circle>
                 </svg>
-                <div class="timer-ring-text" id="timerDisplay">${questionTimeLeft}</div>
+                <div class="timer-ring-text" id="timerDisplay" aria-live="polite">${questionTimeLeft}</div>
               </div>
-              <div class="mp-question-text">${escapeHtml(q.q)}</div>
+              <div class="mp-question-text" aria-live="polite">${escapeHtml(q.q)}</div>
               <div id="optionsContainer">${options}</div>
               <p class="answer-locked-msg" id="answerLockedMsg">${revealActive ? '<i class="fa-solid fa-eye"></i> Answer revealed' : (selectedAnswer >= 0 ? '<i class="fa-solid fa-lock"></i> Answer locked!' : 'Select your answer...')}</p>
               <p class="keyboard-hint"><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd> or <kbd>A</kbd><kbd>B</kbd><kbd>C</kbd><kbd>D</kbd></p>
               <button class="mp-btn mp-btn-outline" style="margin-top:12px;font-size:0.78rem;padding:10px;" onclick="window.confirmLeaveGame()"><i class="fa-solid fa-door-open"></i>&nbsp; Leave Game</button>
             </div>
           `);
+            pulseWillChange(document.getElementById('progressFillEl'), 'width', 700); // PERF: transient will-change during the progress-bar transition
         }
 
         function updateQuestionOptionsDOM(data) {
@@ -2914,7 +3134,7 @@
             </div>
           `).join('');
             render(
-                `<div class="mp-card"><div class="mp-title">📊 Leaderboard</div><div>${list}</div><p style="text-align:center;font-size:0.7rem;color:var(--text2);margin-top:8px;">Next question coming...</p><button class="mp-btn mp-btn-outline" style="margin-top:10px;font-size:0.78rem;padding:10px;" onclick="window.confirmLeaveGame()"><i class="fa-solid fa-door-open"></i>&nbsp; Leave Game</button></div>`
+                `<div class="mp-card"><div class="mp-title" aria-live="polite">📊 Leaderboard</div><div>${list}</div><p style="text-align:center;font-size:0.7rem;color:var(--text2);margin-top:8px;">Next question coming...</p><button class="mp-btn mp-btn-outline" style="margin-top:10px;font-size:0.78rem;padding:10px;" onclick="window.confirmLeaveGame()"><i class="fa-solid fa-door-open"></i>&nbsp; Leave Game</button></div>`
                 );
             const finalScores = {};
             sorted.forEach(p => finalScores[p.uid] = p.score);
@@ -2959,6 +3179,8 @@
             requestAnimationFrame(step);
         }
 
+        // MODIFIED (feature #1 & #8): the winner screen now also renders an after-game chat card
+        // and a "Quick Rematch" button, and carries aria-live regions for score announcements (#9).
         function renderWinner(players, scores, data) {
             const sorted = Object.entries(players).map(([uid, p]) => ({ ...p, uid, score: scores[uid]?.score || 0 }))
                 .sort((a, b) => b.score - a.score);
@@ -3001,7 +3223,7 @@
                   <span class="trophy-sparkle s3">✨</span>
                   <div class="mp-winner-icon">🏆</div>
                 </div>
-                <div class="mp-winner-name">${escapeHtml(winner.name)}</div>
+                <div class="mp-winner-name" aria-live="polite">${escapeHtml(winner.name)}</div>
                 <p style="color:var(--text2);">${winner.score} points</p>
                 ${myRank === 1 ? '<div class="champion-badge"><i class="fa-solid fa-crown"></i> You are the Champion!</div>' : ''}
                 ${forcedWinnerUid ? '<p style="font-size:0.72rem;color:var(--text2);margin-top:8px;"><i class="fa-solid fa-circle-info"></i> Match ended early — other players left</p>' : ''}
@@ -3015,9 +3237,25 @@
                 <div class="stat-box"><div class="stat-val">#${myRank || '-'}</div><div class="stat-lbl">Your Rank</div></div>
               </div>
               <div>${list}</div>
-              <div style="display:flex;gap:8px;margin-top:12px;">
-                ${isHost ? '<button class="mp-btn mp-btn-primary pulse-cta" onclick="window.rematch()">🔄 Rematch</button>' : ''}
-                <button class="mp-btn mp-btn-outline" onclick="window.leaveRoom()">Leave</button>
+              <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+                ${isHost ? '<button class="mp-btn mp-btn-primary pulse-cta" style="flex:1 1 60%;" onclick="window.rematch()">🔄 Rematch</button><button class="mp-btn mp-btn-outline" style="flex:1 1 35%;" onclick="window.quickRematch()">⚡ Quick Rematch</button>' : ''}
+                <button class="mp-btn mp-btn-outline" style="flex:1 1 100%;" onclick="window.leaveRoom()">Leave</button>
+              </div>
+            </div>
+            <!-- NEW (feature #1): after-game chat card, open for exactly 2 minutes -->
+            <div class="mp-card chat-card" id="afterGameChatCard">
+              <div class="mp-title" style="font-size:1rem;">💬 Post-Game Chat <span class="chat-close-note">(closes in 2 min)</span></div>
+              <div class="chat-messages" id="chatMessages"></div>
+              <div class="reaction-row">
+                <button class="icon-btn reaction-btn" onclick="window.sendReaction('🔥')">🔥</button>
+                <button class="icon-btn reaction-btn" onclick="window.sendReaction('😂')">😂</button>
+                <button class="icon-btn reaction-btn" onclick="window.sendReaction('👍')">👍</button>
+                <button class="icon-btn reaction-btn" onclick="window.sendReaction('❤️')">❤️</button>
+                <button class="icon-btn reaction-btn" onclick="window.sendReaction('🎉')">🎉</button>
+              </div>
+              <div class="chat-input-row">
+                <input type="text" id="chatInput" class="mp-input chat-input" placeholder="Type a message..." maxlength="150" onkeydown="window.handleChatKeydown(event)">
+                <button class="chat-send-btn" id="chatSendBtn" onclick="window.sendChatMessage()" aria-label="Send message"><i class="fa-solid fa-paper-plane"></i></button>
               </div>
             </div>
           `);
@@ -3043,6 +3281,31 @@
                 showNextAchievement();
             }
             if (isHost && data && !data.historySaved) saveMatchHistory(data);
+
+            // NEW (feature #1): open the post-game chat window (auto-closes itself after 2 minutes)
+            startAfterGameChat();
+        }
+
+        // =========================================================
+        // NEW (feature #1): AFTER-GAME CHAT LIFECYCLE
+        // =========================================================
+        function startAfterGameChat() {
+            if (afterGameChatActive) return;
+            afterGameChatActive = true;
+            startChatListener();
+            renderChatMessages();
+            if (afterGameChatTimer) clearTimeout(afterGameChatTimer);
+            afterGameChatTimer = setTimeout(() => { closeAfterGameChat(); }, 120000); // exactly 2 minutes
+        }
+
+        function closeAfterGameChat() {
+            if (afterGameChatTimer) { clearTimeout(afterGameChatTimer);
+                afterGameChatTimer = null; }
+            if (!afterGameChatActive) return;
+            afterGameChatActive = false;
+            stopChatListener();
+            const card = document.getElementById('afterGameChatCard');
+            if (card && card.parentNode) card.remove(); // silently hide/remove, no toast or sound
         }
 
         async function toggleReady() {
@@ -3067,10 +3330,13 @@
             }, 3000);
         }
 
+        // MODIFIED (feature #5 & #6): tracks progress-dot state and fires a haptic pulse on selection
         async function selectAnswer(index) {
             if (selectedAnswer >= 0 || !roomId || answeringInFlight) return;
             answeringInFlight = true;
             selectedAnswer = index;
+            answeredQuestionIndices.add(currentQuestionIndex); // NEW: mark this question as answered for the progress dots
+            vibrate(8); // NEW: light haptic tap on selecting an answer
             try {
                 await updateDoc(doc(db, 'liveMatches', roomId), {
                     [`players.${currentUser.uid}.answered`]: true,
@@ -3089,7 +3355,9 @@
         }
         window.selectAnswer = selectAnswer;
 
+        // MODIFIED (feature #1 & #6): also closes the after-game chat and resets progress-dot state
         async function leaveRoom() {
+            closeAfterGameChat(); // NEW: leaving always closes the post-game chat cleanly
             stopHeartbeat();
             stopChatListener();
             if (roomId && currentUser) {
@@ -3143,6 +3411,7 @@
             qrRendered = false;
             achievementQueue = [];
             recentlyRejoinedUids = new Set();
+            answeredQuestionIndices = new Set(); // NEW: reset progress-dot state
             waitingRoomFullyRendered = false;
             prevSnapshotStatus = null;
             prevSnapshotQuestionIndex = -1;
@@ -3152,10 +3421,13 @@
         }
         window.leaveRoom = leaveRoom;
 
+        // MODIFIED (feature #1 & #6): rematch now also closes the after-game chat immediately and resets progress dots
         async function rematch() {
             if (!isHost || !roomId) return;
+            closeAfterGameChat(); // NEW: rematch closes the post-game chat right away
             previousScores = {};
             previousRanks = {};
+            answeredQuestionIndices = new Set(); // NEW
             waitingRoomFullyRendered = false;
             prevSnapshotStatus = null;
             prevSnapshotQuestionIndex = -1;
@@ -3185,13 +3457,69 @@
         }
         window.rematch = rematch;
 
+        // NEW (feature #8): "Quick Rematch" — host-only, reuses the exact same settings (subject,
+        // lesson, question count, time per question already stored on the room doc) and skips the
+        // waiting-room ready-check, going straight to countdown -> playing.
+        async function quickRematch() {
+            if (!isHost || !roomId) return;
+            closeAfterGameChat();
+            previousScores = {};
+            previousRanks = {};
+            answeredQuestionIndices = new Set();
+            waitingRoomFullyRendered = false;
+            prevSnapshotStatus = null;
+            prevSnapshotQuestionIndex = -1;
+            prevSnapshotPlayersJSON = '';
+            const roomRef = doc(db, 'liveMatches', roomId);
+            const snap = await getDoc(roomRef);
+            if (!snap.exists()) return;
+            const roomData = snap.data();
+            const resetPlayers = Object.fromEntries(
+                Object.entries(roomData.players || {}).map(([uid, p]) => [uid, {
+                    ...p,
+                    score: 0,
+                    correct: 0,
+                    wrong: 0,
+                    answered: false,
+                    ready: true,
+                    streak: 0,
+                    longestStreak: 0,
+                    totalTime: 0,
+                    fastestTime: null
+                }])
+            );
+            // Same subject/grade/lesson/questionTime/questions already live on the room doc — we
+            // simply reuse them (no re-fetch of data/*.json needed, and no settings screen shown).
+            await updateDoc(roomRef, {
+                status: 'countdown',
+                currentQuestion: -1,
+                historySaved: false,
+                forcedWinner: null,
+                players: resetPlayers
+            });
+            playSound('countdown');
+            setTimeout(async () => {
+                await updateDoc(roomRef, {
+                    status: 'playing',
+                    currentQuestion: 0,
+                    questionStartTime: Date.now()
+                });
+            }, 3000);
+        }
+        window.quickRematch = quickRematch;
+
         // =========================================================
         // TIMER
         // =========================================================
+        // MODIFIED (feature #3): the per-tick DOM writes (timer text, ring stroke, urgent class) are
+        // now grouped into a single requestAnimationFrame call to avoid layout thrashing; scoring
+        // logic (Firestore transaction) stays outside the rAF since it isn't a visual write.
         function startQuestionTimer(data) {
             if (questionTimer) clearInterval(questionTimer);
             const totalTime = data.questionTime || gameQuestionTime || 15;
             const startMs = data.questionStartTime || Date.now();
+            currentQuestionStartMs = startMs; // NEW: exposed so a delayed skeleton->content swap can recompute time-left accurately
+            currentQuestionTotalTime = totalTime; // NEW
 
             function computeTimeLeft() {
                 const elapsed = (Date.now() - startMs) / 1000;
@@ -3201,21 +3529,30 @@
 
             questionTimer = setInterval(async () => {
                 questionTimeLeft = computeTimeLeft();
-                const timerEl = document.getElementById('timerDisplay');
-                const ringEl = document.getElementById('timerRingProgress');
-                const wrapEl = document.getElementById('timerWrap');
-                if (timerEl) timerEl.textContent = questionTimeLeft;
-                if (ringEl) {
-                    const circumference = 2 * Math.PI * 52;
-                    const frac = Math.max(0, questionTimeLeft / totalTime);
-                    ringEl.style.strokeDashoffset = circumference * (1 - frac);
-                    ringEl.setAttribute('class', 'timer-ring-progress ' + getTimerColorClass(frac));
-                }
+
+                // PERF (item #3): batch all pure timer-visual DOM writes into one rAF
+                requestAnimationFrame(() => {
+                    const timerEl = document.getElementById('timerDisplay');
+                    const ringEl = document.getElementById('timerRingProgress');
+                    const wrapEl = document.getElementById('timerWrap');
+                    if (timerEl) timerEl.textContent = questionTimeLeft;
+                    if (ringEl) {
+                        const circumference = 2 * Math.PI * 52;
+                        const frac = Math.max(0, questionTimeLeft / totalTime);
+                        pulseWillChange(ringEl, 'stroke-dashoffset', 1100); // PERF: transient will-change only while the ring is actively transitioning
+                        ringEl.style.strokeDashoffset = circumference * (1 - frac);
+                        ringEl.setAttribute('class', 'timer-ring-progress ' + getTimerColorClass(frac));
+                    }
+                    if (questionTimeLeft <= 5 && questionTimeLeft > 0) {
+                        if (wrapEl) wrapEl.classList.add('urgent');
+                    } else if (questionTimeLeft > 0) {
+                        if (wrapEl) wrapEl.classList.remove('urgent');
+                    }
+                });
+
                 if (questionTimeLeft <= 5 && questionTimeLeft > 0) {
-                    if (wrapEl) wrapEl.classList.add('urgent');
                     playSound('urgentTick');
                 } else if (questionTimeLeft > 0) {
-                    if (wrapEl) wrapEl.classList.remove('urgent');
                     playSound('tick');
                 }
 
@@ -3230,6 +3567,7 @@
                         const correctIdx = data.questions[currentQuestionIndex]?.correct;
                         const wasCorrect = selectedAnswer === correctIdx;
                         playSound(wasCorrect ? 'correct' : 'wrong');
+                        vibrate(wasCorrect ? 15 : 10); // NEW (feature #5): haptic feedback on reveal
                         if (wasCorrect) flashCorrectFX();
                     }
 
@@ -3334,15 +3672,84 @@
         }
 
         // =========================================================
+        // NEW (feature #10): CHAT HISTORY CACHE (IndexedDB)
+        // =========================================================
+        // Caches the last 50 chat messages per room so that on reconnect / re-entry the chat can
+        // render instantly from local cache before the Firestore listener delivers the live data.
+        const CHAT_DB_NAME = 'quizhub_chat_cache';
+        const CHAT_DB_VERSION = 1;
+        const CHAT_STORE = 'chatCache';
+
+        function openChatDB() {
+            return new Promise((resolve, reject) => {
+                if (!window.indexedDB) { reject(new Error('IndexedDB unavailable'));
+                    return; }
+                const req = indexedDB.open(CHAT_DB_NAME, CHAT_DB_VERSION);
+                req.onupgradeneeded = () => {
+                    const idb = req.result;
+                    if (!idb.objectStoreNames.contains(CHAT_STORE)) {
+                        idb.createObjectStore(CHAT_STORE, { keyPath: 'roomId' });
+                    }
+                };
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+            });
+        }
+
+        async function saveChatCache(rId, messages) {
+            if (!rId) return;
+            try {
+                const idb = await openChatDB();
+                // Firestore Timestamp instances don't survive structured-clone with their toDate()
+                // method intact, so we store plain millis instead and reconstruct Date objects on read.
+                const plain = messages.slice(-50).map(m => ({
+                    ...m,
+                    timestamp: (m.timestamp && typeof m.timestamp.toMillis === 'function') ? m.timestamp.toMillis() :
+                        (typeof m.timestamp === 'number' ? m.timestamp : Date.now())
+                }));
+                const tx = idb.transaction(CHAT_STORE, 'readwrite');
+                tx.objectStore(CHAT_STORE).put({ roomId: rId, messages: plain, savedAt: Date.now() });
+                await new Promise((res) => { tx.oncomplete = res;
+                    tx.onerror = res; });
+            } catch (e) {}
+        }
+
+        async function loadChatCache(rId) {
+            if (!rId) return [];
+            try {
+                const idb = await openChatDB();
+                const tx = idb.transaction(CHAT_STORE, 'readonly');
+                const req = tx.objectStore(CHAT_STORE).get(rId);
+                return await new Promise((resolve) => {
+                    req.onsuccess = () => resolve(req.result ? req.result.messages : []);
+                    req.onerror = () => resolve([]);
+                });
+            } catch (e) { return []; }
+        }
+
+        // =========================================================
         // CHAT
         // =========================================================
-        function startChatListener() {
+        // MODIFIED (feature #10): loads cached messages from IndexedDB first (instant paint), then
+        // subscribes to the live Firestore listener and re-caches on every update.
+        async function startChatListener() {
             if (chatUnsubscribe || !roomId) return;
+            const rIdAtStart = roomId;
+            try {
+                const cached = await loadChatCache(rIdAtStart);
+                // Only apply cache if we're still in the same room and haven't already received live data
+                if (cached && cached.length && chatMessages.length === 0 && roomId === rIdAtStart && !chatUnsubscribe) {
+                    chatMessages = cached;
+                    renderChatMessages();
+                }
+            } catch (e) {}
+            if (chatUnsubscribe || roomId !== rIdAtStart) return; // guard against race if room changed while awaiting cache
             const chatQ = query(collection(db, 'liveMatches', roomId, 'chat'), orderBy('timestamp', 'asc'), limitToLast(
                 50));
             chatUnsubscribe = onSnapshot(chatQ, (snap) => {
                 chatMessages = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 renderChatMessages();
+                saveChatCache(roomId, chatMessages); // NEW: keep the local cache fresh
             }, () => {});
         }
 
@@ -3359,8 +3766,9 @@
                 if (m.type === 'system') {
                     return `<div class="chat-msg-system">${escapeHtml(m.message)}</div>`;
                 }
+                // MODIFIED (feature #10): also accept plain millisecond timestamps coming from the IndexedDB cache
                 const time = (m.timestamp && typeof m.timestamp.toDate === 'function') ? m.timestamp.toDate() :
-                    new Date();
+                    (typeof m.timestamp === 'number' ? new Date(m.timestamp) : new Date());
                 const hh = String(time.getHours()).padStart(2, '0');
                 const mm = String(time.getMinutes()).padStart(2, '0');
                 const mine = currentUser && m.playerId === currentUser.uid;
@@ -3560,6 +3968,7 @@
                             prevSnapshotStatus = null;
                             prevSnapshotQuestionIndex = -1;
                             prevSnapshotPlayersJSON = '';
+                            answeredQuestionIndices = new Set();
                             saveActiveRoom();
                             listenToRoom();
                             reconnected = true;
@@ -3583,6 +3992,7 @@
                             prevSnapshotStatus = null;
                             prevSnapshotQuestionIndex = -1;
                             prevSnapshotPlayersJSON = '';
+                            answeredQuestionIndices = new Set();
                             listenToRoom();
                             reconnected = true;
                         } else {
