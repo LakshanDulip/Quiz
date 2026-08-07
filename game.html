@@ -4402,17 +4402,18 @@
                     }
                 }
             } catch (e) { console.error('Reconnect check failed:', e); }
-            if (!reconnected) {
+                if (!reconnected) {
                 renderLobby();
                 if (urlRoomCode) {
                     setTimeout(() => {
                         const el = document.getElementById('roomCodeInput');
-                        if (el) { el.value = urlRoomCode;
-                            joinRoom(); }
+                        if (el) { 
+                            el.value = urlRoomCode;
+                            // මෙතන තිබුණු joinRoom(); කෑල්ල මකා දැමුවා
+                        }
                     }, 500);
                 }
             }
-        }
         init();
     </script>
 </body>
