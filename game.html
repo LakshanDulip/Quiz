@@ -65,7 +65,6 @@
             justify-content: center;
             padding: 20px;
             padding-top: calc(20px + var(--safe-top));
-            /* Extra bottom padding clears the fixed footer so it never covers the last card's content */
             padding-bottom: calc(84px + var(--safe-bottom));
             overflow-x: hidden;
             overflow-y: auto;
@@ -181,7 +180,6 @@
             position: relative;
             z-index: 1;
         }
-        /* Waiting Room + Chat must stay in normal flow, never clipped, so the page can scroll to reveal them fully */
         #waitingRoomCard,
         #chatCard {
             position: relative;
@@ -1601,16 +1599,6 @@
                 animation: none !important;
             }
         }
-
-        /* =========================================================
-           LOW-END DEVICE PERFORMANCE MODE
-           Applied via body.low-end (JS-detected: low deviceMemory /
-           low hardwareConcurrency on a mobile UA). Reduces GPU-costly
-           effects (backdrop-filter blur, glows, continuous decorative
-           animation loops, drop-shadow filters) while keeping every
-           functional element (buttons, options, timer, player list,
-           chat, scores, leaderboard, correctness feedback) intact.
-           ========================================================= */
         body.low-end .bg-gradient,
         body.low-end .blob {
             animation: none !important;
@@ -1665,8 +1653,6 @@
         body.low-end .mp-winner-name {
             text-shadow: none;
         }
-        /* Pause purely decorative background animation while the tab is hidden,
-           regardless of device tier — saves CPU/GPU/battery when backgrounded. */
         body.tab-hidden .bg-gradient,
         body.tab-hidden .blob {
             animation-play-state: paused;
@@ -1713,7 +1699,6 @@
         import { getAuth, onAuthStateChanged, signInAnonymously, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, collection, query, where, getDocs, addDoc, serverTimestamp, orderBy, limitToLast, deleteDoc, deleteField, writeBatch, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        // Firebase config — untouched
         const firebaseConfig = {
             apiKey: "AIzaSyAhfgx0t-E6wrz6zEFIU_tpKTIbELp00ss",
             authDomain: "quiz-hub-225eb.firebaseapp.com",
@@ -1729,7 +1714,6 @@
 
         setPersistence(auth, browserLocalPersistence).catch(() => {});
 
-        // ============ STATE ============
         let currentUser = null;
         let deviceId = null;
         let roomId = null;
@@ -1785,9 +1769,6 @@
         let snapshotDebounceTimer = null;
         let pendingSnapshotData = null;
 
-        // Cache of the most recently applied full room snapshot. Used to avoid
-        // extra Firestore reads for UI updates that only need data we already have
-        // (e.g. rendering the just-picked answer state) — see selectAnswer().
         let latestRoomData = null;
 
         let afterGameChatActive = false;
@@ -1798,16 +1779,10 @@
         let currentQuestionStartMs = null;
         let currentQuestionTotalTime = 15;
 
-        // ============ REMATCH STATE ============
         let rematchPending = false;
         let rematchRequestedBy = null;
         let rematchRequestedByName = '';
 
-        // ============ LOW-END DEVICE DETECTION ============
-        // Conservative heuristic: only classifies as low-end when we have
-        // reasonably confident signals (low deviceMemory, or low core count on
-        // a mobile UA). Never blocks or alters functionality — only toggles a
-        // CSS class (see .low-end rules) and skips the decorative particle loop.
         function detectLowEndDevice() {
             try {
                 const mem = navigator.deviceMemory;
@@ -1823,9 +1798,6 @@
         }
         let isLowEndDevice = false;
 
-        // ============ QUIZ DATA CACHE ============
-        // Avoids re-downloading the same subject JSON every time the settings
-        // screen changes (lesson dropdown refresh) or when the room is created.
         const quizDataCache = {};
         async function fetchQuizData(subject) {
             if (quizDataCache[subject]) return quizDataCache[subject];
@@ -1836,7 +1808,6 @@
             return data;
         }
 
-        // ============ AUTH ============
         async function initAuth() {
             await new Promise(r => setTimeout(r, 500));
             return new Promise((resolve) => {
@@ -1883,7 +1854,8 @@
                     [`players.${currentUser.uid}.online`]: false
                 }).catch(() => {});
             }
-            stopHeartbeat(); stopHostLoop();
+            stopHeartbeat();
+            stopHostLoop();
             stopChatListener();
         });
 
@@ -1910,33 +1882,25 @@
             }
         });
 
-        // =========================================================
-        // VISIBILITY (pause decorative work while tab is backgrounded)
-        // =========================================================
         document.addEventListener('visibilitychange', () => {
             const hidden = document.hidden;
             document.body.classList.toggle('tab-hidden', hidden);
             if (hidden) {
                 particlesPaused = true;
-                if (particlesRafId) { cancelAnimationFrame(particlesRafId); particlesRafId = null; }
+                if (particlesRafId) { cancelAnimationFrame(particlesRafId);
+                    particlesRafId = null; }
             } else if (particlesPaused) {
                 particlesPaused = false;
                 if (particleTickFn) particlesRafId = requestAnimationFrame(particleTickFn);
             }
         });
 
-        // =========================================================
-        // HAPTIC
-        // =========================================================
         function vibrate(ms) {
             try {
                 if (navigator.vibrate) navigator.vibrate(ms);
             } catch (e) {}
         }
 
-        // =========================================================
-        // PERF HELPERS
-        // =========================================================
         function pulseWillChange(el, prop, duration = 650) {
             if (!el) return;
             try {
@@ -1945,9 +1909,6 @@
             } catch (e) {}
         }
 
-        // =========================================================
-        // SOUND
-        // =========================================================
         let audioCtx = null;
 
         function getAudioCtx() {
@@ -2069,9 +2030,6 @@
             } catch (err) {}
         }
 
-        // =========================================================
-        // PARTICLES
-        // =========================================================
         function prefersReducedMotion() {
             return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         }
@@ -2081,8 +2039,6 @@
         let particlesPaused = false;
 
         function initParticles() {
-            // Skip entirely on low-end devices / reduced-motion — this is a
-            // purely decorative background canvas animating every frame.
             if (prefersReducedMotion() || isLowEndDevice) return;
             const canvas = document.getElementById('bgParticles');
             if (!canvas) return;
@@ -2125,9 +2081,6 @@
             particlesRafId = requestAnimationFrame(tick);
         }
 
-        // =========================================================
-        // CONFETTI
-        // =========================================================
         function launchConfetti(particleCount = 140) {
             if (prefersReducedMotion()) return;
             const canvas = document.getElementById('confettiCanvas');
@@ -2180,9 +2133,6 @@
             } catch (e) {}
         }
 
-        // =========================================================
-        // ACHIEVEMENTS
-        // =========================================================
         function computeAchievements(player) {
             const list = [];
             const total = (player.correct || 0) + (player.wrong || 0);
@@ -2227,9 +2177,6 @@
             }, 3700);
         }
 
-        // =========================================================
-        // SHARE / INVITE / QR
-        // =========================================================
         function getInviteLink() {
             return `${window.location.origin}${window.location.pathname}?room=${roomCode}`;
         }
@@ -2314,9 +2261,6 @@
         window.shareWhatsApp = shareWhatsApp;
         window.toggleQRCode = toggleQRCode;
 
-        // =========================================================
-        // UI RENDER
-        // =========================================================
         function render(html) {
             const appEl = document.getElementById('app');
             if (!appEl) return;
@@ -2364,9 +2308,6 @@
             setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3000);
         }
 
-        // =========================================================
-        // CONFIRM MODAL
-        // =========================================================
         function showConfirmModal(title, msg, onConfirm) {
             const existing = document.getElementById('confirmOverlay');
             if (existing) existing.remove();
@@ -2400,9 +2341,6 @@
         }
         window.confirmLeaveGame = confirmLeaveGame;
 
-        // =========================================================
-        // REACTIONS
-        // =========================================================
         async function sendReaction(emoji) {
             if (!roomId || chatSending) return;
             const now = Date.now();
@@ -2671,7 +2609,7 @@
                 roomId = docData.id;
                 const roomData = docData.data();
                 const existingPlayers = roomData.players || {};
-                
+
                 let nameMatchUid = null;
                 let nameMatchPlayer = null;
                 for (const [uid, p] of Object.entries(existingPlayers)) {
@@ -2681,7 +2619,7 @@
                         break;
                     }
                 }
-                
+
                 let matchedUid = null;
                 if (nameMatchPlayer) {
                     if (nameMatchPlayer.online && nameMatchUid !== currentUser.uid) {
@@ -2691,8 +2629,9 @@
                             counter++;
                             newName = `${playerName}_${counter}`;
                         }
-                        
-                        const proceed = window.confirm(`The name "${playerName}" is already taken by an online player. Do you want to join as "${newName}"?`);
+                        const proceed = window.confirm(
+                            `The name "${playerName}" is already taken by an online player. Do you want to join as "${newName}"?`
+                            );
                         if (!proceed) {
                             roomId = null;
                             roomCode = null;
@@ -2726,12 +2665,12 @@
                         clonedPlayer.deviceId = deviceId;
                         clonedPlayer.online = true;
                         clonedPlayer.lastSeen = serverTimestamp();
-                        
+
                         const updates = {
                             [`players.${currentUser.uid}`]: clonedPlayer,
                             [`players.${uid}`]: deleteField()
                         };
-                        
+
                         if (roomData.hostId === uid) {
                             updates.hostId = currentUser.uid;
                             isHost = true;
@@ -2781,7 +2720,8 @@
 
         function listenToRoom() {
             if (unsubscribe) unsubscribe();
-            stopHeartbeat(); stopHostLoop();
+            stopHeartbeat();
+            stopHostLoop();
             prevSnapshotStatus = null;
             prevSnapshotQuestionIndex = -1;
             prevSnapshotPlayersJSON = '';
@@ -2804,7 +2744,8 @@
 
                 processRoomSnapshot(data);
             });
-            startHeartbeat(); startHostLoop();
+            startHeartbeat();
+            startHostLoop();
         }
 
         function processRoomSnapshot(data) {
@@ -2857,9 +2798,6 @@
                     }
                 });
             }
-            // Lightweight snapshot for join/leave toast comparisons — only
-            // online status + name are ever read from this, so avoid a full
-            // deep JSON clone of every player's stats/history each update.
             const lightPlayers = {};
             Object.keys(players).forEach(uid => {
                 lightPlayers[uid] = { online: players[uid].online, name: players[uid].name };
@@ -3133,7 +3071,8 @@
         }
 
         function buildProgressDotsHTML(total, current) {
-            let html = '<div class="mp-progress-dots" role="img" aria-label="Question ' + (current + 1) + ' of ' + total + '">';
+            let html = '<div class="mp-progress-dots" role="img" aria-label="Question ' + (current + 1) + ' of ' + total +
+                '">';
             for (let i = 0; i < total; i++) {
                 let cls = '';
                 if (i === current) cls = 'current';
@@ -3321,9 +3260,6 @@
             requestAnimationFrame(step);
         }
 
-        // =========================================================
-        // RENDER WINNER (with rematch UI)
-        // =========================================================
         function renderWinner(players, scores, data) {
             const sorted = Object.entries(players).map(([uid, p]) => ({ ...p, uid, score: scores[uid]?.score || 0 }))
                 .sort((a, b) => b.score - a.score);
@@ -3357,7 +3293,6 @@
                 's' : '—';
             const longestStreak = me?.longestStreak || 0;
 
-            // --- REMATCH STATE (from main doc) ---
             const rematch = data.rematch || { status: 'none', requestedBy: null, requestedByName: null };
             const rematchStatus = rematch.status || 'none';
             const requesterName = rematch.requestedByName || '';
@@ -3389,7 +3324,6 @@
               `;
                 }
             } else {
-                // 'none', 'declined', 'cancelled' — show request button for non-hosts
                 const onlineCount = Object.values(players).filter(p => p.online).length;
                 if (!isHost && onlineCount >= 2) {
                     rematchSectionHTML = `
@@ -3400,7 +3334,7 @@
                 </div>
               `;
                 } else if (isHost) {
-                    // Host sees their own buttons (handled below)
+                    // host buttons shown below
                 } else {
                     rematchSectionHTML = `
                 <div style="text-align:center;padding:8px 0;color:var(--text2);font-size:0.8rem;">
@@ -3419,7 +3353,6 @@
               </div>
             `;
             } else if (isHost && (rematchStatus === 'pending' || rematchStatus === 'accepted')) {
-                // hide host buttons while rematch is pending
                 hostButtonsHTML = '';
             }
 
@@ -3490,13 +3423,8 @@
             if (isHost && data && !data.historySaved) saveMatchHistory(data);
 
             startAfterGameChat();
-
-            // If rematch is 'accepted', the snapshot will transition to the new game
         }
 
-        // =========================================================
-        // AFTER-GAME CHAT
-        // =========================================================
         function startAfterGameChat() {
             if (afterGameChatActive) return;
             afterGameChatActive = true;
@@ -3516,9 +3444,6 @@
             if (card && card.parentNode) card.remove();
         }
 
-        // =========================================================
-        // TOGGLE READY
-        // =========================================================
         async function toggleReady() {
             if (!roomId) return;
             const roomRef = doc(db, 'liveMatches', roomId);
@@ -3528,18 +3453,13 @@
             if (!currentReady) playSound('ready');
         }
 
-        // =========================================================
-        // START GAME
-        // =========================================================
         async function startGame() {
             if (!isHost || !roomId) return;
             await addSystemChatMessage(roomId, 'Host started the game! 🚀');
-            await updateDoc(doc(db, 'liveMatches', roomId), { status: 'countdown', nextQuestionStartsAt: getServerTime() + 3000 });
+            await updateDoc(doc(db, 'liveMatches', roomId), { status: 'countdown', nextQuestionStartsAt: getServerTime() +
+                    3000 });
         }
 
-        // =========================================================
-        // SELECT ANSWER
-        // =========================================================
         async function selectAnswer(index) {
             if (selectedAnswer >= 0 || !roomId || answeringInFlight) return;
             answeringInFlight = true;
@@ -3552,9 +3472,6 @@
                     [`players.${currentUser.uid}.answer`]: index,
                     [`players.${currentUser.uid}.answerTime`]: getServerTime()
                 });
-                // Use the last known room snapshot instead of an extra Firestore
-                // read — the question set/options don't change mid-question, so
-                // this avoids a network round-trip on every single answer.
                 if (latestRoomData && latestRoomData.status === 'playing') {
                     updateQuestionOptionsDOM(latestRoomData);
                 }
@@ -3566,18 +3483,15 @@
         }
         window.selectAnswer = selectAnswer;
 
-        // =========================================================
-        // LEAVE ROOM
-        // =========================================================
         async function leaveRoom() {
             closeAfterGameChat();
-            // If there's a pending rematch request and this player is the requester, cancel it
             if (roomId && currentUser && rematchPending && rematchRequestedBy === currentUser.uid) {
                 try {
                     await cancelRematchRequest('cancelled', 'Rematch request cancelled — requester left.');
                 } catch (e) {}
             }
-            stopHeartbeat(); stopHostLoop();
+            stopHeartbeat();
+            stopHostLoop();
             stopChatListener();
             if (roomId && currentUser) {
                 try {
@@ -3602,7 +3516,6 @@
                                 [`players.${currentUser.uid}.online`]: false
                             });
                         } else if (isHost) {
-                            // Host leaving: cancel any pending rematch
                             const rematch = data.rematch || {};
                             if (rematch.status === 'pending') {
                                 await updateDoc(roomRef, {
@@ -3660,9 +3573,6 @@
         }
         window.leaveRoom = leaveRoom;
 
-        // =========================================================
-        // REMATCH (host-only, original)
-        // =========================================================
         async function rematch() {
             if (!isHost || !roomId) return;
             closeAfterGameChat();
@@ -3709,9 +3619,6 @@
         }
         window.rematch = rematch;
 
-        // =========================================================
-        // QUICK REMATCH (host-only, original)
-        // =========================================================
         async function quickRematch() {
             if (!isHost || !roomId) return;
             closeAfterGameChat();
@@ -3767,14 +3674,6 @@
         }
         window.quickRematch = quickRematch;
 
-        // =========================================================
-        // REMATCH REQUEST SYSTEM (direct main doc update — no subcollection)
-        // =========================================================
-
-        /**
-         * Request a rematch (called by non-host players)
-         * Updates the main document's rematch field directly.
-         */
         async function requestRematch() {
             if (!roomId || !currentUser) return;
             if (isHost) {
@@ -3811,12 +3710,10 @@
                     'rematch.requestedByName': playerName || 'Player',
                     'rematch.timestamp': serverTimestamp()
                 });
-                                rematchPending = true;
+                rematchPending = true;
                 rematchRequestedBy = currentUser.uid;
                 rematchRequestedByName = playerName || 'Player';
                 showToast('✅ Rematch request sent!');
-                // Chat notification is sent by the snapshot listener (host will see it and add system message)
-                // Actually, we add a system message manually for all players to see.
                 await addSystemChatMessage(roomId, `🔄 ${playerName || 'A player'} requested a rematch.`);
             } catch (e) {
                 console.error('Request rematch error:', e);
@@ -3825,9 +3722,6 @@
         }
         window.requestRematch = requestRematch;
 
-        /**
-         * Accept a rematch request (host only)
-         */
         async function acceptRematch() {
             if (!isHost || !roomId) return;
             const roomRef = doc(db, 'liveMatches', roomId);
@@ -3839,7 +3733,6 @@
                 showToast('No pending rematch request.');
                 return;
             }
-            // Reset everything
             const resetPlayers = Object.fromEntries(
                 Object.entries(data.players || {}).map(([uid, p]) => [uid, {
                     ...p,
@@ -3879,9 +3772,6 @@
         }
         window.acceptRematch = acceptRematch;
 
-        /**
-         * Decline a rematch request (host only)
-         */
         async function declineRematch() {
             if (!isHost || !roomId) return;
             const roomRef = doc(db, 'liveMatches', roomId);
@@ -3912,9 +3802,6 @@
         }
         window.declineRematch = declineRematch;
 
-        /**
-         * Cancel a rematch request (internal)
-         */
         async function cancelRematchRequest(status = 'cancelled', chatMsg = 'Rematch request cancelled.') {
             if (!roomId) return;
             const roomRef = doc(db, 'liveMatches', roomId);
@@ -3934,9 +3821,6 @@
             }
         }
 
-        // =========================================================
-        // TIMER
-        // =========================================================
         function startQuestionTimer(data) {
             if (questionTimer) clearInterval(questionTimer);
             const totalTime = data.questionTime || gameQuestionTime || 15;
@@ -3993,8 +3877,6 @@
                         vibrate(wasCorrect ? 15 : 10);
                         if (wasCorrect) flashCorrectFX();
                     }
-
-
                 }
             }, 1000);
         }
@@ -4041,9 +3923,6 @@
             } catch (e) {}
         }
 
-        // =========================================================
-        // CHAT CACHE (IndexedDB)
-        // =========================================================
         const CHAT_DB_NAME = 'quizhub_chat_cache';
         const CHAT_DB_VERSION = 1;
         const CHAT_STORE = 'chatCache';
@@ -4093,9 +3972,6 @@
             } catch (e) { return []; }
         }
 
-        // =========================================================
-        // CHAT
-        // =========================================================
         async function startChatListener() {
             if (chatUnsubscribe || !roomId) return;
             const rIdAtStart = roomId;
@@ -4147,16 +4023,11 @@
             return div;
         }
 
-        // Track which message ids are currently rendered as DOM nodes so we can
-        // append-only on new arrivals instead of rebuilding the whole chat log
-        // (keeps CPU/DOM work proportional to *new* messages, not total history).
         let renderedChatMessageIds = new Set();
 
         function renderChatMessages() {
             const box = document.getElementById('chatMessages');
             if (!box) return;
-            // A fresh box (e.g. screen just (re)rendered) has no children yet —
-            // reset local id tracking so we rebuild from the current message list.
             if (box.children.length === 0) renderedChatMessageIds = new Set();
 
             const trimmed = chatMessages.slice(-50);
@@ -4175,8 +4046,6 @@
                 }
             });
 
-            // Drop DOM nodes for messages that fell outside the trimmed window
-            // (keeps DOM/memory bounded to ~50 messages, per low-end requirements).
             renderedChatMessageIds.forEach(mid => {
                 if (!incomingIds.has(mid)) {
                     const el = box.querySelector(`[data-msg-id="${mid}"]`);
@@ -4236,23 +4105,21 @@
         }
         window.sendChatMessage = sendChatMessage;
         window.handleChatKeydown = handleChatKeydown;
-        // =========================================================
-        // HOST GAME LOOP
-        // =========================================================
+
         let hostLoopInterval = null;
         let hostLoopInFlight = false;
-        
+
         function startHostLoop() {
             if (!isHost) return;
             if (hostLoopInterval) clearInterval(hostLoopInterval);
             hostLoopInterval = setInterval(hostGameLoop, 250);
         }
-        
+
         function stopHostLoop() {
             if (hostLoopInterval) clearInterval(hostLoopInterval);
             hostLoopInterval = null;
         }
-        
+
         async function hostGameLoop() {
             if (!isHost || !roomId || hostLoopInFlight || !latestRoomData) return;
             hostLoopInFlight = true;
@@ -4268,8 +4135,8 @@
                         questionEndsAt: now + ((data.questionTime || gameQuestionTime || 15) * 1000),
                         nextQuestionStartsAt: null
                     });
-                }
-                else if (data.status === 'leaderboard' && data.nextQuestionStartsAt && now >= data.nextQuestionStartsAt) {
+                } else if (data.status === 'leaderboard' && data.nextQuestionStartsAt && now >= data
+                    .nextQuestionStartsAt) {
                     const nextQ = (data.currentQuestion || 0) + 1;
                     const totalQuestions = data.questions ? data.questions.length : 0;
                     if (nextQ >= totalQuestions) {
@@ -4282,8 +4149,7 @@
                             nextQuestionStartsAt: null
                         });
                     }
-                }
-                else if (data.status === 'playing' && data.questionEndsAt && now >= (data.questionEndsAt + 1500)) {
+                } else if (data.status === 'playing' && data.questionEndsAt && now >= (data.questionEndsAt + 1500)) {
                     if (!scoringInProgress) {
                         scoringInProgress = true;
                         try {
@@ -4293,26 +4159,37 @@
                                 if (!snap.exists()) return;
                                 const qData = snap.data();
                                 if (qData.status !== 'playing') return;
-                                
+
                                 const questions = qData.questions || [];
                                 const qIndex = qData.currentQuestion || 0;
                                 const correctAnswer = questions[qIndex]?.correct || 0;
-                                let updatePayload = { status: 'leaderboard', nextQuestionStartsAt: now + 4000 };
+                                let updatePayload = { status: 'leaderboard', nextQuestionStartsAt: now +
+                                    4000 };
                                 Object.entries(qData.players || {}).forEach(([uid, p]) => {
                                     if (p.online && p.answered) {
                                         const isCorrect = p.answer === correctAnswer;
-                                        updatePayload[`players.${uid}.score`] = (p.score || 0) + (isCorrect ? 10 : 0);
-                                        updatePayload[`players.${uid}.correct`] = (p.correct || 0) + (isCorrect ? 1 : 0);
-                                        updatePayload[`players.${uid}.wrong`] = (p.wrong || 0) + (isCorrect ? 0 : 1);
+                                        updatePayload[`players.${uid}.score`] = (p.score || 0) + (
+                                            isCorrect ? 10 : 0);
+                                        updatePayload[`players.${uid}.correct`] = (p.correct || 0) +
+                                            (isCorrect ? 1 : 0);
+                                        updatePayload[`players.${uid}.wrong`] = (p.wrong || 0) + (
+                                            isCorrect ? 0 : 1);
                                         const newStreak = isCorrect ? (p.streak || 0) + 1 : 0;
                                         updatePayload[`players.${uid}.streak`] = newStreak;
-                                        updatePayload[`players.${uid}.longestStreak`] = Math.max(p.longestStreak || 0, newStreak);
+                                        updatePayload[`players.${uid}.longestStreak`] = Math.max(p
+                                            .longestStreak || 0, newStreak);
                                         if (p.answerTime && qData.questionEndsAt) {
-                                            const questionStartMs = qData.questionEndsAt - ((qData.questionTime || gameQuestionTime || 15) * 1000);
-                                            const respSec = Math.max(0, (p.answerTime - questionStartMs) / 1000);
-                                            updatePayload[`players.${uid}.totalTime`] = (p.totalTime || 0) + respSec;
+                                            const questionStartMs = qData.questionEndsAt - ((qData
+                                                .questionTime || gameQuestionTime || 15) *
+                                            1000);
+                                            const respSec = Math.max(0, (p.answerTime -
+                                                questionStartMs) / 1000);
+                                            updatePayload[`players.${uid}.totalTime`] = (p.totalTime ||
+                                                0) + respSec;
                                             const prevFastest = p.fastestTime;
-                                            updatePayload[`players.${uid}.fastestTime`] = (prevFastest === undefined || prevFastest === null || respSec < prevFastest) ? respSec : prevFastest;
+                                            updatePayload[`players.${uid}.fastestTime`] = (prevFastest ===
+                                                undefined || prevFastest === null || respSec <
+                                                prevFastest) ? respSec : prevFastest;
                                         }
                                     }
                                     updatePayload[`players.${uid}.answered`] = false;
@@ -4333,12 +4210,10 @@
                 hostLoopInFlight = false;
             }
         }
-        
-        // =========================================================
-        // PRESENCE
-        // =========================================================
+
         function startHeartbeat() {
-            stopHeartbeat(); stopHostLoop();
+            stopHeartbeat();
+            stopHostLoop();
             heartbeatInterval = setInterval(() => {
                 if (roomId && currentUser) {
                     updateDoc(doc(db, 'liveMatches', roomId), {
@@ -4409,7 +4284,6 @@
                 try { await deleteRoomCompletely(roomId); } catch (e) {}
             }
 
-            // Rematch cleanup: if host or requester goes offline while pending
             const rematch = data.rematch || {};
             if (rematch.status === 'pending') {
                 const requesterUid = rematch.requestedBy;
@@ -4435,9 +4309,6 @@
             try { await deleteDoc(doc(db, 'liveMatches', rId)); } catch (e) {}
         }
 
-        // =========================================================
-        // RECONNECT
-        // =========================================================
         function saveActiveRoom() {
             try { localStorage.setItem('quizhub_active_room', JSON.stringify({ roomId, roomCode })); } catch (e) {}
         }
@@ -4459,9 +4330,6 @@
         window.startGame = startGame;
         window.toggleMute = toggleMute;
 
-        // =========================================================
-        // INIT
-        // =========================================================
         async function init() {
             isLowEndDevice = detectLowEndDevice();
             if (isLowEndDevice) document.body.classList.add('low-end');
