@@ -1601,6 +1601,76 @@
                 animation: none !important;
             }
         }
+
+        /* =========================================================
+           LOW-END DEVICE PERFORMANCE MODE
+           Applied via body.low-end (JS-detected: low deviceMemory /
+           low hardwareConcurrency on a mobile UA). Reduces GPU-costly
+           effects (backdrop-filter blur, glows, continuous decorative
+           animation loops, drop-shadow filters) while keeping every
+           functional element (buttons, options, timer, player list,
+           chat, scores, leaderboard, correctness feedback) intact.
+           ========================================================= */
+        body.low-end .bg-gradient,
+        body.low-end .blob {
+            animation: none !important;
+        }
+        body.low-end .blob {
+            filter: blur(36px);
+            opacity: 0.16;
+        }
+        body.low-end #bgParticles {
+            display: none;
+        }
+        body.low-end .mp-card,
+        body.low-end .home-link,
+        body.low-end .mute-btn,
+        body.low-end #onlineCounter,
+        body.low-end .mp-toast,
+        body.low-end .achievement-popup,
+        body.low-end .confirm-overlay,
+        body.low-end .confirm-modal {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+        body.low-end .mp-card {
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+        }
+        body.low-end .mp-room-code {
+            animation: none;
+            text-shadow: 0 0 8px rgba(56, 189, 248, 0.35);
+        }
+        body.low-end .status-dot.online,
+        body.low-end .crown-sparkle,
+        body.low-end .trophy-sparkle,
+        body.low-end .pulse-cta {
+            animation: none !important;
+        }
+        body.low-end .mp-option.selected,
+        body.low-end .mp-option.correct,
+        body.low-end .mp-option.wrong,
+        body.low-end .mp-leaderboard-item.top-1,
+        body.low-end .mp-leaderboard-item.top-2,
+        body.low-end .mp-leaderboard-item.top-3,
+        body.low-end .champion-badge,
+        body.low-end .achievement-popup,
+        body.low-end .mp-rank.gold {
+            box-shadow: none !important;
+            text-shadow: none !important;
+        }
+        body.low-end .mp-winner-icon {
+            filter: none;
+            animation-iteration-count: 1;
+        }
+        body.low-end .mp-winner-name {
+            text-shadow: none;
+        }
+        /* Pause purely decorative background animation while the tab is hidden,
+           regardless of device tier — saves CPU/GPU/battery when backgrounded. */
+        body.tab-hidden .bg-gradient,
+        body.tab-hidden .blob {
+            animation-play-state: paused;
+        }
     </style>
 </head>
 <body>
@@ -1708,6 +1778,11 @@
         let snapshotDebounceTimer = null;
         let pendingSnapshotData = null;
 
+        // Cache of the most recently applied full room snapshot. Used to avoid
+        // extra Firestore reads for UI updates that only need data we already have
+        // (e.g. rendering the just-picked answer state) — see selectAnswer().
+        let latestRoomData = null;
+
         let afterGameChatActive = false;
         let afterGameChatTimer = null;
 
@@ -1720,6 +1795,39 @@
         let rematchPending = false;
         let rematchRequestedBy = null;
         let rematchRequestedByName = '';
+
+        // ============ LOW-END DEVICE DETECTION ============
+        // Conservative heuristic: only classifies as low-end when we have
+        // reasonably confident signals (low deviceMemory, or low core count on
+        // a mobile UA). Never blocks or alters functionality — only toggles a
+        // CSS class (see .low-end rules) and skips the decorative particle loop.
+        function detectLowEndDevice() {
+            try {
+                const mem = navigator.deviceMemory;
+                const cores = navigator.hardwareConcurrency;
+                const ua = navigator.userAgent || '';
+                const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(ua);
+                if (typeof mem === 'number' && mem > 0 && mem <= 4) return true;
+                if (isMobile && typeof cores === 'number' && cores > 0 && cores <= 4) return true;
+                return false;
+            } catch (e) {
+                return false;
+            }
+        }
+        let isLowEndDevice = false;
+
+        // ============ QUIZ DATA CACHE ============
+        // Avoids re-downloading the same subject JSON every time the settings
+        // screen changes (lesson dropdown refresh) or when the room is created.
+        const quizDataCache = {};
+        async function fetchQuizData(subject) {
+            if (quizDataCache[subject]) return quizDataCache[subject];
+            const resp = await fetch(`data/${subject}.json`);
+            if (!resp.ok) throw new Error('Failed to load JSON');
+            const data = await resp.json();
+            quizDataCache[subject] = data;
+            return data;
+        }
 
         // ============ AUTH ============
         async function initAuth() {
@@ -1792,6 +1900,21 @@
             if (index >= 0) {
                 e.preventDefault();
                 selectAnswer(index);
+            }
+        });
+
+        // =========================================================
+        // VISIBILITY (pause decorative work while tab is backgrounded)
+        // =========================================================
+        document.addEventListener('visibilitychange', () => {
+            const hidden = document.hidden;
+            document.body.classList.toggle('tab-hidden', hidden);
+            if (hidden) {
+                particlesPaused = true;
+                if (particlesRafId) { cancelAnimationFrame(particlesRafId); particlesRafId = null; }
+            } else if (particlesPaused) {
+                particlesPaused = false;
+                if (particleTickFn) particlesRafId = requestAnimationFrame(particleTickFn);
             }
         });
 
@@ -1946,8 +2069,14 @@
             return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         }
 
+        let particlesRafId = null;
+        let particleTickFn = null;
+        let particlesPaused = false;
+
         function initParticles() {
-            if (prefersReducedMotion()) return;
+            // Skip entirely on low-end devices / reduced-motion — this is a
+            // purely decorative background canvas animating every frame.
+            if (prefersReducedMotion() || isLowEndDevice) return;
             const canvas = document.getElementById('bgParticles');
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
@@ -1969,9 +2098,9 @@
                 };
             }
             const particles = Array.from({ length: count }, () => spawn(canvas));
-            let raf;
 
             function tick() {
+                if (particlesPaused || document.hidden) return;
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 particles.forEach(p => {
                     p.y -= p.vy;
@@ -1983,9 +2112,10 @@
                     ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
                     ctx.fill();
                 });
-                raf = requestAnimationFrame(tick);
+                particlesRafId = requestAnimationFrame(tick);
             }
-            tick();
+            particleTickFn = tick;
+            particlesRafId = requestAnimationFrame(tick);
         }
 
         // =========================================================
@@ -2348,9 +2478,7 @@
             if (!select) return;
             select.innerHTML = '<option value="">Loading...</option>';
             try {
-                const resp = await fetch(`data/${subject}.json?t=${Date.now()}`);
-                if (!resp.ok) throw new Error('Failed to load JSON');
-                const data = await resp.json();
+                const data = await fetchQuizData(subject);
                 let lessons = [];
                 if (data.grades?.[grade]?.lessons) {
                     lessons = data.grades[grade].lessons;
@@ -2424,8 +2552,7 @@
                 rematchRequestedByName = '';
                 let questions = [];
                 try {
-                    const resp = await fetch(`data/${subject}.json?t=${Date.now()}`);
-                    const data = await resp.json();
+                    const data = await fetchQuizData(subject);
                     let lessons = [];
                     if (data.grades?.[grade]?.lessons) { lessons = data.grades[grade].lessons; } else if (data[
                             subject]?.grades?.[grade]?.lessons) { lessons = data[subject].grades[grade].lessons; } else if (
@@ -2639,6 +2766,7 @@
         }
 
         function applyRoomSnapshot(data) {
+            latestRoomData = data;
             const players = data.players || {};
             isHost = data.hostId === currentUser.uid;
             if (players[currentUser.uid]) players[currentUser.uid].online = true;
@@ -2667,7 +2795,14 @@
                     }
                 });
             }
-            previousPlayers = JSON.parse(JSON.stringify(players));
+            // Lightweight snapshot for join/leave toast comparisons — only
+            // online status + name are ever read from this, so avoid a full
+            // deep JSON clone of every player's stats/history each update.
+            const lightPlayers = {};
+            Object.keys(players).forEach(uid => {
+                lightPlayers[uid] = { online: players[uid].online, name: players[uid].name };
+            });
+            previousPlayers = lightPlayers;
             lastKnownPlayers = players;
             lastKnownHostId = data.hostId;
 
@@ -3270,7 +3405,7 @@
             </div>
           `);
 
-            launchConfetti();
+            launchConfetti(isLowEndDevice ? 60 : 140);
             playSound('victory');
             animateNumberEl(document.getElementById('statStreak'), longestStreak, 600);
             const accEl = document.getElementById('statAccuracy');
@@ -3362,9 +3497,11 @@
                     [`players.${currentUser.uid}.answer`]: index,
                     [`players.${currentUser.uid}.answerTime`]: Date.now()
                 });
-                const data = (await getDoc(doc(db, 'liveMatches', roomId))).data();
-                if (data && data.status === 'playing') {
-                    updateQuestionOptionsDOM(data);
+                // Use the last known room snapshot instead of an extra Firestore
+                // read — the question set/options don't change mid-question, so
+                // this avoids a network round-trip on every single answer.
+                if (latestRoomData && latestRoomData.status === 'playing') {
+                    updateQuestionOptionsDOM(latestRoomData);
                 }
             } catch (e) {
                 selectedAnswer = -1;
@@ -3437,6 +3574,7 @@
             if (snapshotDebounceTimer) { clearTimeout(snapshotDebounceTimer);
                 snapshotDebounceTimer = null; }
             pendingSnapshotData = null;
+            latestRoomData = null;
             clearActiveRoom();
             roomId = null;
             roomCode = null;
@@ -3979,27 +4117,72 @@
             if (chatUnsubscribe) { chatUnsubscribe();
                 chatUnsubscribe = null; }
             chatMessages = [];
+            renderedChatMessageIds = new Set();
         }
+
+        function formatChatTimeParts(m) {
+            const time = (m.timestamp && typeof m.timestamp.toDate === 'function') ? m.timestamp.toDate() :
+                (typeof m.timestamp === 'number' ? new Date(m.timestamp) : new Date());
+            const hh = String(time.getHours()).padStart(2, '0');
+            const mm = String(time.getMinutes()).padStart(2, '0');
+            return `${hh}:${mm}`;
+        }
+
+        function buildChatMsgNode(m) {
+            if (m.type === 'system') {
+                const div = document.createElement('div');
+                div.className = 'chat-msg-system';
+                div.textContent = m.message || '';
+                return div;
+            }
+            const mine = currentUser && m.playerId === currentUser.uid;
+            const div = document.createElement('div');
+            div.className = `chat-msg ${mine ? 'mine' : ''}`;
+            div.innerHTML =
+                `<div class="chat-msg-meta"><span class="chat-msg-name">${escapeHtml(m.playerName || 'Player')}</span><span class="chat-msg-time">${formatChatTimeParts(m)}</span></div>` +
+                `<div class="chat-msg-bubble">${escapeHtml(m.message || '')}</div>`;
+            return div;
+        }
+
+        // Track which message ids are currently rendered as DOM nodes so we can
+        // append-only on new arrivals instead of rebuilding the whole chat log
+        // (keeps CPU/DOM work proportional to *new* messages, not total history).
+        let renderedChatMessageIds = new Set();
 
         function renderChatMessages() {
             const box = document.getElementById('chatMessages');
             if (!box) return;
-            box.innerHTML = chatMessages.map(m => {
-                if (m.type === 'system') {
-                    return `<div class="chat-msg-system">${escapeHtml(m.message)}</div>`;
+            // A fresh box (e.g. screen just (re)rendered) has no children yet —
+            // reset local id tracking so we rebuild from the current message list.
+            if (box.children.length === 0) renderedChatMessageIds = new Set();
+
+            const trimmed = chatMessages.slice(-50);
+            const incomingIds = new Set();
+            let appendedAny = false;
+
+            trimmed.forEach((m, idx) => {
+                const mid = m.id || `idx${idx}`;
+                incomingIds.add(mid);
+                if (!renderedChatMessageIds.has(mid)) {
+                    const node = buildChatMsgNode(m);
+                    node.dataset.msgId = mid;
+                    box.appendChild(node);
+                    renderedChatMessageIds.add(mid);
+                    appendedAny = true;
                 }
-                const time = (m.timestamp && typeof m.timestamp.toDate === 'function') ? m.timestamp.toDate() :
-                    (typeof m.timestamp === 'number' ? new Date(m.timestamp) : new Date());
-                const hh = String(time.getHours()).padStart(2, '0');
-                const mm = String(time.getMinutes()).padStart(2, '0');
-                const mine = currentUser && m.playerId === currentUser.uid;
-                return `
-              <div class="chat-msg ${mine ? 'mine' : ''}">
-                <div class="chat-msg-meta"><span class="chat-msg-name">${escapeHtml(m.playerName || 'Player')}</span><span class="chat-msg-time">${hh}:${mm}</span></div>
-                <div class="chat-msg-bubble">${escapeHtml(m.message || '')}</div>
-              </div>`;
-            }).join('');
-            box.scrollTop = box.scrollHeight;
+            });
+
+            // Drop DOM nodes for messages that fell outside the trimmed window
+            // (keeps DOM/memory bounded to ~50 messages, per low-end requirements).
+            renderedChatMessageIds.forEach(mid => {
+                if (!incomingIds.has(mid)) {
+                    const el = box.querySelector(`[data-msg-id="${mid}"]`);
+                    if (el && el.parentNode) el.parentNode.removeChild(el);
+                    renderedChatMessageIds.delete(mid);
+                }
+            });
+
+            if (appendedAny) box.scrollTop = box.scrollHeight;
         }
 
         async function addSystemChatMessage(rId, text) {
@@ -4175,6 +4358,8 @@
         // INIT
         // =========================================================
         async function init() {
+            isLowEndDevice = detectLowEndDevice();
+            if (isLowEndDevice) document.body.classList.add('low-end');
             updateMuteBtn();
             initParticles();
             renderSkeleton();
