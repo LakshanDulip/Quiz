@@ -48,7 +48,8 @@
         }
         html,
         body {
-            height: 100%;
+            min-height: 100%;
+            height: auto;
         }
         html {
             scroll-behavior: smooth;
@@ -57,13 +58,17 @@
             font-family: 'Inter', 'Noto Sans Sinhala', sans-serif;
             color: var(--text);
             min-height: 100vh;
+            min-height: 100dvh;
+            height: auto;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
             padding-top: calc(20px + var(--safe-top));
-            padding-bottom: calc(20px + var(--safe-bottom));
+            /* Extra bottom padding clears the fixed footer so it never covers the last card's content */
+            padding-bottom: calc(84px + var(--safe-bottom));
             overflow-x: hidden;
+            overflow-y: auto;
             position: relative;
             background: #0a0e1a;
         }
@@ -171,9 +176,18 @@
         .mp-container {
             max-width: 480px;
             width: 100%;
+            min-height: 0;
             margin: 0 auto;
             position: relative;
             z-index: 1;
+        }
+        /* Waiting Room + Chat must stay in normal flow, never clipped, so the page can scroll to reveal them fully */
+        #waitingRoomCard,
+        #chatCard {
+            position: relative;
+            height: auto;
+            min-height: 0;
+            overflow: visible;
         }
         #app {
             will-change: opacity, transform;
@@ -1478,24 +1492,6 @@
         #onlineCounter .oc-dot {
             animation: dotPulse 1.6s ease-in-out infinite;
         }
-        .mp-mini-trivia {
-            display: flex;
-            align-items: flex-start;
-            gap: 8px;
-            background: rgba(129, 140, 248, 0.08);
-            border: 1px solid rgba(129, 140, 248, 0.25);
-            border-radius: 12px;
-            padding: 10px 12px;
-            margin-top: 12px;
-            font-size: 0.75rem;
-            color: var(--text2);
-            line-height: 1.45;
-            animation: leaderEnter 0.4s var(--ease-game) both;
-        }
-        .mp-mini-trivia .mt-icon {
-            flex-shrink: 0;
-            font-size: 0.95rem;
-        }
         @media (max-width: 480px) {
             .mp-card {
                 padding: 20px 16px;
@@ -2289,26 +2285,6 @@
         }
         window.sendReaction = sendReaction;
 
-        // =========================================================
-        // MINI TRIVIA
-        // =========================================================
-        const MINI_TRIVIA = [
-            "🧠 ඔබේ මොළය නින්දේදීත් නිතරම ක්‍රියාශීලීව සිටිනවා — sleep එකේදීත් memory consolidate වෙනවා.",
-            "🌍 පෘථිවියේ වයස අවුරුදු බිලියන 4.5කට ආසන්නයි.",
-            "🐙 බූගෙයෙකුට (Octopus) හදවත් තුනක් තියෙනවා.",
-            "💧 මිනිස් සිරුරෙන් 60%ක් පමණ ජලයෙන් සමන්විතයි.",
-            "🍯 මී පැණි කවදාවත් කැඩෙන්නේ නෑ — නිසි ලෙස තැන්පත් කළොත් අවුරුදු දහස් ගණනක් තිබෙන්නත් පුළුවන්.",
-            "⚡ එළිය තත්පරයකින් පෘථිවිය වටා 7 පාරක් ගමන් කරන්න පුළුවන් වේගයෙන් යනවා.",
-            "🦴 ළදරුවෙකුට ඇටකටු 300කට වඩා තියෙනවා, වැඩිහිටියෙකුට තියෙන්නේ 206ක්.",
-            "🌙 චන්ද්‍රයා සෑම වසරකම පෘථිවියෙන් සෙන්ටිමීටර් 3.8ක් පමණ ඈත් වෙනවා.",
-            "🐝 මීමැස්සන්ට රටාවක් 'waggle dance' එකකින් එකිනෙකාට direction කියලා දෙන්න පුළුවන්.",
-            "🔥 වීදුරු (Glass) ඇත්තටම ඉතා සෙමින් ගලායන ද්‍රවයක් නොවෙයි — solid එකක් විදියටයි සැලකෙන්නේ."
-        ];
-
-        function getRandomTrivia() {
-            return MINI_TRIVIA[Math.floor(Math.random() * MINI_TRIVIA.length)];
-        }
-
         function renderLobby() {
             currentScreenMode = 'lobby';
             waitingRoomFullyRendered = false;
@@ -2840,7 +2816,6 @@
               ${waitingDotsHTML}
               <p style="text-align:center;" id="playerCountText">Players: ${playerCount}/10</p>
               <div class="mp-player-list" id="playerListContainer">${playerListHTML}</div>
-              <div class="mp-mini-trivia" id="miniTriviaBox"><span class="mt-icon">💡</span><span class="mt-text">${escapeHtml(getRandomTrivia())}</span></div>
               <button class="mp-btn mp-btn-success" id="readyBtn" onclick="window.toggleReady()">${myReady ? '✅ Ready' : 'Click to Ready'}</button>
               ${isHost ? `<button class="mp-btn mp-btn-primary ${allReady ? 'pulse-cta' : ''}" id="startBtn" onclick="window.startGame()" ${!allReady?'disabled':''}>⚡ Start</button>` : ''}
               <button class="mp-btn mp-btn-danger" onclick="window.leaveRoom()">Leave</button>
