@@ -1763,6 +1763,13 @@
         let scoringInProgress = false;
         let heartbeatInterval = null;
         let presenceCleanupInFlight = false;
+        let serverTimeOffset = 0;
+        let syncStartTime = 0;
+        let isClockSynced = false;
+
+        function getServerTime() {
+            return Date.now() + serverTimeOffset;
+        }
         const PRESENCE_STALE_MS = 30000;
         const INACTIVE_REMOVE_MS = 120000;
 
@@ -1876,7 +1883,7 @@
                     [`players.${currentUser.uid}.online`]: false
                 }).catch(() => {});
             }
-            stopHeartbeat();
+            stopHeartbeat(); stopHostLoop();
             stopChatListener();
         });
 
@@ -2570,6 +2577,8 @@
                     questions = [{ q: "No questions found for this lesson! Check your JSON.",
                     options: ["OK", "B", "C", "D"], correct: 0 }];
                 }
+                syncStartTime = Date.now();
+                isClockSynced = false;
                 await setDoc(doc(db, 'liveMatches', roomId), {
                     roomCode,
                     hostId: currentUser.uid,
@@ -2639,6 +2648,8 @@
                 if (!code) return showError('Room code enter කරන්න!');
                 roomCode = code;
                 previousPlayers = null;
+                syncStartTime = Date.now();
+                isClockSynced = false;
                 previousScores = {};
                 previousRanks = {};
                 qrRendered = false;
@@ -2660,40 +2671,77 @@
                 roomId = docData.id;
                 const roomData = docData.data();
                 const existingPlayers = roomData.players || {};
-                const existingEntry = Object.entries(existingPlayers).find(([uid, p]) => p.deviceId === deviceId);
-                const matchedUid = existingEntry ? existingEntry[0] : null;
+                
+                let nameMatchUid = null;
+                let nameMatchPlayer = null;
+                for (const [uid, p] of Object.entries(existingPlayers)) {
+                    if (p.name === playerName) {
+                        nameMatchUid = uid;
+                        nameMatchPlayer = p;
+                        break;
+                    }
+                }
+                
+                let matchedUid = null;
+                if (nameMatchPlayer) {
+                    if (nameMatchPlayer.online && nameMatchUid !== currentUser.uid) {
+                        let counter = 2;
+                        let newName = `${playerName}_${counter}`;
+                        while (Object.values(existingPlayers).some(p => p.name === newName)) {
+                            counter++;
+                            newName = `${playerName}_${counter}`;
+                        }
+                        
+                        const proceed = window.confirm(`The name "${playerName}" is already taken by an online player. Do you want to join as "${newName}"?`);
+                        if (!proceed) {
+                            roomId = null;
+                            roomCode = null;
+                            return;
+                        } else {
+                            playerName = newName;
+                            const nameInput = document.getElementById('playerName');
+                            if (nameInput) nameInput.value = newName;
+                            nameMatchUid = null;
+                            nameMatchPlayer = null;
+                        }
+                    } else if (!nameMatchPlayer.online) {
+                        matchedUid = nameMatchUid;
+                    } else if (nameMatchUid === currentUser.uid) {
+                        matchedUid = nameMatchUid;
+                    }
+                }
+
+                if (!matchedUid) {
+                    const existingEntry = Object.entries(existingPlayers).find(([uid, p]) => p.deviceId === deviceId);
+                    matchedUid = existingEntry ? existingEntry[0] : null;
+                }
+
                 if (matchedUid || existingPlayers[currentUser.uid]) {
                     const uid = matchedUid || currentUser.uid;
                     isHost = roomData.hostId === uid;
                     playerName = existingPlayers[uid].name || playerName;
                     recentlyRejoinedUids.add(currentUser.uid);
-                    if (matchedUid && matchedUid !== currentUser.uid) {
-                        await updateDoc(doc(db, 'liveMatches', roomId), {
-                            [`players.${currentUser.uid}`]: {
-                                name: playerName,
-                                deviceId: deviceId,
-                                score: existingPlayers[matchedUid].score || 0,
-                                correct: existingPlayers[matchedUid].correct || 0,
-                                wrong: existingPlayers[matchedUid].wrong || 0,
-                                answered: false,
-                                ready: existingPlayers[matchedUid].ready || false,
-                                online: true,
-                                joinedAt: existingPlayers[matchedUid].joinedAt || new Date().toISOString(),
-                                streak: existingPlayers[matchedUid].streak || 0,
-                                longestStreak: existingPlayers[matchedUid].longestStreak || 0,
-                                totalTime: existingPlayers[matchedUid].totalTime || 0,
-                                fastestTime: existingPlayers[matchedUid].fastestTime || null,
-                                lastSeen: serverTimestamp()
-                            }
-                        });
-                        await updateDoc(doc(db, 'liveMatches', roomId), {
-                            [`players.${matchedUid}`]: null
-                        });
+                    if (uid !== currentUser.uid) {
+                        const clonedPlayer = { ...existingPlayers[uid] };
+                        clonedPlayer.deviceId = deviceId;
+                        clonedPlayer.online = true;
+                        clonedPlayer.lastSeen = serverTimestamp();
+                        
+                        const updates = {
+                            [`players.${currentUser.uid}`]: clonedPlayer,
+                            [`players.${uid}`]: deleteField()
+                        };
+                        
+                        if (roomData.hostId === uid) {
+                            updates.hostId = currentUser.uid;
+                            isHost = true;
+                        }
+
+                        await updateDoc(doc(db, 'liveMatches', roomId), updates);
                     } else {
                         await updateDoc(doc(db, 'liveMatches', roomId), {
                             [`players.${uid}.online`]: true,
-                            [`players.${uid}.lastSeen`]: serverTimestamp(),
-                            [`players.${uid}.ready`]: existingPlayers[uid].ready || false
+                            [`players.${uid}.lastSeen`]: serverTimestamp()
                         });
                     }
                     addSystemChatMessage(roomId, `${playerName} rejoined the game`);
@@ -2733,7 +2781,7 @@
 
         function listenToRoom() {
             if (unsubscribe) unsubscribe();
-            stopHeartbeat();
+            stopHeartbeat(); stopHostLoop();
             prevSnapshotStatus = null;
             prevSnapshotQuestionIndex = -1;
             prevSnapshotPlayersJSON = '';
@@ -2742,9 +2790,21 @@
             unsubscribe = onSnapshot(doc(db, 'liveMatches', roomId), (snapshot) => {
                 if (!snapshot.exists()) { leaveRoom(); return; }
                 const data = snapshot.data();
+
+                if (!isClockSynced && !snapshot.metadata.hasPendingWrites && currentUser) {
+                    const myPlayer = data.players && data.players[currentUser.uid];
+                    if (myPlayer && myPlayer.lastSeen && typeof myPlayer.lastSeen.toMillis === 'function') {
+                        const serverMs = myPlayer.lastSeen.toMillis();
+                        const endLocal = Date.now();
+                        const latency = Math.max(0, (endLocal - syncStartTime) / 2);
+                        serverTimeOffset = serverMs - (syncStartTime + latency);
+                        isClockSynced = true;
+                    }
+                }
+
                 processRoomSnapshot(data);
             });
-            startHeartbeat();
+            startHeartbeat(); startHostLoop();
         }
 
         function processRoomSnapshot(data) {
@@ -2769,6 +2829,8 @@
             latestRoomData = data;
             const players = data.players || {};
             isHost = data.hostId === currentUser.uid;
+            if (isHost && !hostLoopInterval) startHostLoop();
+            else if (!isHost && hostLoopInterval) stopHostLoop();
             if (players[currentUser.uid]) players[currentUser.uid].online = true;
 
             if (previousPlayers && data.status !== 'waiting') {
@@ -3472,14 +3534,7 @@
         async function startGame() {
             if (!isHost || !roomId) return;
             await addSystemChatMessage(roomId, 'Host started the game! 🚀');
-            await updateDoc(doc(db, 'liveMatches', roomId), { status: 'countdown' });
-            setTimeout(async () => {
-                await updateDoc(doc(db, 'liveMatches', roomId), {
-                    status: 'playing',
-                    currentQuestion: 0,
-                    questionStartTime: Date.now()
-                });
-            }, 3000);
+            await updateDoc(doc(db, 'liveMatches', roomId), { status: 'countdown', nextQuestionStartsAt: getServerTime() + 3000 });
         }
 
         // =========================================================
@@ -3495,7 +3550,7 @@
                 await updateDoc(doc(db, 'liveMatches', roomId), {
                     [`players.${currentUser.uid}.answered`]: true,
                     [`players.${currentUser.uid}.answer`]: index,
-                    [`players.${currentUser.uid}.answerTime`]: Date.now()
+                    [`players.${currentUser.uid}.answerTime`]: getServerTime()
                 });
                 // Use the last known room snapshot instead of an extra Firestore
                 // read — the question set/options don't change mid-question, so
@@ -3522,7 +3577,7 @@
                     await cancelRematchRequest('cancelled', 'Rematch request cancelled — requester left.');
                 } catch (e) {}
             }
-            stopHeartbeat();
+            stopHeartbeat(); stopHostLoop();
             stopChatListener();
             if (roomId && currentUser) {
                 try {
@@ -3559,7 +3614,12 @@
                                 await addSystemChatMessage(roomId, 'Rematch request cancelled — host left.');
                             }
                             await updateDoc(roomRef, {
-                                hostId: otherOnline.sort()[0],
+                                hostId: otherOnline.sort((a, b) => {
+                                    const timeA = new Date(players[a].joinedAt || 0).getTime();
+                                    const timeB = new Date(players[b].joinedAt || 0).getTime();
+                                    if (timeA !== timeB) return timeA - timeB;
+                                    return a.localeCompare(b);
+                                })[0],
                                 [`players.${currentUser.uid}.online`]: false
                             });
                         } else {
@@ -3685,6 +3745,7 @@
             );
             await updateDoc(roomRef, {
                 status: 'countdown',
+                nextQuestionStartsAt: getServerTime() + 3000,
                 currentQuestion: -1,
                 historySaved: false,
                 forcedWinner: null,
@@ -3700,7 +3761,7 @@
                 await updateDoc(roomRef, {
                     status: 'playing',
                     currentQuestion: 0,
-                    questionStartTime: Date.now()
+                    questionEndsAt: getServerTime() + (gameQuestionTime * 1000)
                 });
             }, 3000);
         }
@@ -3750,7 +3811,7 @@
                     'rematch.requestedByName': playerName || 'Player',
                     'rematch.timestamp': serverTimestamp()
                 });
-                rematchPending = true;
+                                rematchPending = true;
                 rematchRequestedBy = currentUser.uid;
                 rematchRequestedByName = playerName || 'Player';
                 showToast('✅ Rematch request sent!');
@@ -3796,6 +3857,7 @@
             try {
                 await updateDoc(roomRef, {
                     status: 'countdown',
+                    nextQuestionStartsAt: getServerTime() + 3000,
                     currentQuestion: -1,
                     historySaved: false,
                     forcedWinner: null,
@@ -3808,18 +3870,12 @@
                 rematchPending = false;
                 rematchRequestedBy = null;
                 rematchRequestedByName = '';
-                await addSystemChatMessage(roomId, `✅ Host accepted the rematch. 🎮 New game starting...`);
+                await addSystemChatMessage(roomId, `✅ Host accepted the rematch. 🚀 New game starting...`);
                 playSound('countdown');
-                setTimeout(async () => {
-                    await updateDoc(roomRef, {
-                        status: 'playing',
-                        currentQuestion: 0,
-                        questionStartTime: Date.now()
-                    });
-                }, 3000);
             } catch (e) {
                 console.error('Accept rematch error:', e);
                 showToast('❌ Failed to accept rematch.');
+            }
             }
         }
         window.acceptRematch = acceptRematch;
@@ -3885,13 +3941,13 @@
         function startQuestionTimer(data) {
             if (questionTimer) clearInterval(questionTimer);
             const totalTime = data.questionTime || gameQuestionTime || 15;
-            const startMs = data.questionStartTime || Date.now();
-            currentQuestionStartMs = startMs;
+            const endMs = data.questionEndsAt || (getServerTime() + totalTime * 1000);
+            currentQuestionStartMs = endMs - (totalTime * 1000);
             currentQuestionTotalTime = totalTime;
 
             function computeTimeLeft() {
-                const elapsed = (Date.now() - startMs) / 1000;
-                return Math.max(0, Math.ceil(totalTime - elapsed));
+                const remaining = (endMs - getServerTime()) / 1000;
+                return Math.max(0, Math.ceil(remaining));
             }
             questionTimeLeft = computeTimeLeft();
 
@@ -3905,7 +3961,8 @@
                     if (timerEl) timerEl.textContent = questionTimeLeft;
                     if (ringEl) {
                         const circumference = 2 * Math.PI * 52;
-                        const frac = Math.max(0, questionTimeLeft / totalTime);
+                        const remainingUnrounded = Math.max(0, (endMs - getServerTime()) / 1000);
+                        const frac = Math.max(0, remainingUnrounded / totalTime);
                         pulseWillChange(ringEl, 'stroke-dashoffset', 1100);
                         ringEl.style.strokeDashoffset = circumference * (1 - frac);
                         ringEl.setAttribute('class', 'timer-ring-progress ' + getTimerColorClass(frac));
@@ -3938,60 +3995,7 @@
                         if (wasCorrect) flashCorrectFX();
                     }
 
-                    if (isHost && roomId && !scoringInProgress) {
-                        scoringInProgress = true;
-                        const qRef = doc(db, 'liveMatches', roomId);
-                        try {
-                            let scoredQIndex = null;
-                            let totalQuestions = 0;
-                            await runTransaction(db, async (tx) => {
-                                const snap = await tx.get(qRef);
-                                if (!snap.exists()) return;
-                                const qData = snap.data();
-                                if (qData.status !== 'playing') return;
-                                const questions = qData.questions || [];
-                                const qIndex = qData.currentQuestion || 0;
-                                const correctAnswer = questions[qIndex]?.correct || 0;
-                                let updatePayload = { status: 'leaderboard' };
-                                Object.entries(qData.players || {}).forEach(([uid, p]) => {
-                                    if (p.online && p.answered) {
-                                        const isCorrect = p.answer === correctAnswer;
-                                        updatePayload[`players.${uid}.score`] = (p.score || 0) + (
-                                            isCorrect ? 10 : 0);
-                                        updatePayload[`players.${uid}.correct`] = (p.correct || 0) + (
-                                            isCorrect ? 1 : 0);
-                                        updatePayload[`players.${uid}.wrong`] = (p.wrong || 0) + (isCorrect ? 0 :
-                                            1);
-                                        const newStreak = isCorrect ? (p.streak || 0) + 1 : 0;
-                                        updatePayload[`players.${uid}.streak`] = newStreak;
-                                        updatePayload[`players.${uid}.longestStreak`] = Math.max(p.longestStreak ||
-                                            0, newStreak);
-                                        if (p.answerTime && qData.questionStartTime) {
-                                            const respSec = Math.max(0, (p.answerTime - qData.questionStartTime) /
-                                                1000);
-                                            updatePayload[`players.${uid}.totalTime`] = (p.totalTime || 0) + respSec;
-                                            const prevFastest = p.fastestTime;
-                                            updatePayload[`players.${uid}.fastestTime`] = (prevFastest ===
-                                                undefined || prevFastest === null || respSec <
-                                                prevFastest) ? respSec : prevFastest;
-                                        }
-                                    }
-                                    updatePayload[`players.${uid}.answered`] = false;
-                                });
-                                tx.update(qRef, updatePayload);
-                                scoredQIndex = qIndex;
-                                totalQuestions = questions.length;
-                            });
-                            if (scoredQIndex !== null) {
-                                setTimeout(async () => {
-                                    const nextQ = scoredQIndex + 1;
-                                    if (nextQ >= totalQuestions) await updateDoc(qRef, { status: 'finished' });
-                                    else await updateDoc(qRef, { status: 'playing', currentQuestion: nextQ,
-                                        questionStartTime: Date.now() });
-                                }, 4000);
-                            }
-                        } catch (e) { console.error(e); } finally { scoringInProgress = false; }
-                    }
+
                 }
             }, 1000);
         }
@@ -4233,12 +4237,109 @@
         }
         window.sendChatMessage = sendChatMessage;
         window.handleChatKeydown = handleChatKeydown;
+        // =========================================================
+        // HOST GAME LOOP
+        // =========================================================
+        let hostLoopInterval = null;
+        let hostLoopInFlight = false;
+        
+        function startHostLoop() {
+            if (!isHost) return;
+            if (hostLoopInterval) clearInterval(hostLoopInterval);
+            hostLoopInterval = setInterval(hostGameLoop, 250);
+        }
+        
+        function stopHostLoop() {
+            if (hostLoopInterval) clearInterval(hostLoopInterval);
+            hostLoopInterval = null;
+        }
+        
+        async function hostGameLoop() {
+            if (!isHost || !roomId || hostLoopInFlight || !latestRoomData) return;
+            hostLoopInFlight = true;
+            try {
+                const data = latestRoomData;
+                const now = getServerTime();
+                const roomRef = doc(db, 'liveMatches', roomId);
 
+                if (data.status === 'countdown' && data.nextQuestionStartsAt && now >= data.nextQuestionStartsAt) {
+                    await updateDoc(roomRef, {
+                        status: 'playing',
+                        currentQuestion: Math.max(0, data.currentQuestion || 0),
+                        questionEndsAt: now + ((data.questionTime || gameQuestionTime || 15) * 1000),
+                        nextQuestionStartsAt: null
+                    });
+                }
+                else if (data.status === 'leaderboard' && data.nextQuestionStartsAt && now >= data.nextQuestionStartsAt) {
+                    const nextQ = (data.currentQuestion || 0) + 1;
+                    const totalQuestions = data.questions ? data.questions.length : 0;
+                    if (nextQ >= totalQuestions) {
+                        await updateDoc(roomRef, { status: 'finished', nextQuestionStartsAt: null });
+                    } else {
+                        await updateDoc(roomRef, {
+                            status: 'playing',
+                            currentQuestion: nextQ,
+                            questionEndsAt: now + ((data.questionTime || gameQuestionTime || 15) * 1000),
+                            nextQuestionStartsAt: null
+                        });
+                    }
+                }
+                else if (data.status === 'playing' && data.questionEndsAt && now >= (data.questionEndsAt + 1500)) {
+                    if (!scoringInProgress) {
+                        scoringInProgress = true;
+                        try {
+                            let scoredQIndex = null;
+                            await runTransaction(db, async (tx) => {
+                                const snap = await tx.get(roomRef);
+                                if (!snap.exists()) return;
+                                const qData = snap.data();
+                                if (qData.status !== 'playing') return;
+                                
+                                const questions = qData.questions || [];
+                                const qIndex = qData.currentQuestion || 0;
+                                const correctAnswer = questions[qIndex]?.correct || 0;
+                                let updatePayload = { status: 'leaderboard', nextQuestionStartsAt: now + 4000 };
+                                Object.entries(qData.players || {}).forEach(([uid, p]) => {
+                                    if (p.online && p.answered) {
+                                        const isCorrect = p.answer === correctAnswer;
+                                        updatePayload[`players.${uid}.score`] = (p.score || 0) + (isCorrect ? 10 : 0);
+                                        updatePayload[`players.${uid}.correct`] = (p.correct || 0) + (isCorrect ? 1 : 0);
+                                        updatePayload[`players.${uid}.wrong`] = (p.wrong || 0) + (isCorrect ? 0 : 1);
+                                        const newStreak = isCorrect ? (p.streak || 0) + 1 : 0;
+                                        updatePayload[`players.${uid}.streak`] = newStreak;
+                                        updatePayload[`players.${uid}.longestStreak`] = Math.max(p.longestStreak || 0, newStreak);
+                                        if (p.answerTime && qData.questionEndsAt) {
+                                            const questionStartMs = qData.questionEndsAt - ((qData.questionTime || gameQuestionTime || 15) * 1000);
+                                            const respSec = Math.max(0, (p.answerTime - questionStartMs) / 1000);
+                                            updatePayload[`players.${uid}.totalTime`] = (p.totalTime || 0) + respSec;
+                                            const prevFastest = p.fastestTime;
+                                            updatePayload[`players.${uid}.fastestTime`] = (prevFastest === undefined || prevFastest === null || respSec < prevFastest) ? respSec : prevFastest;
+                                        }
+                                    }
+                                    updatePayload[`players.${uid}.answered`] = false;
+                                });
+                                tx.update(roomRef, updatePayload);
+                                scoredQIndex = qIndex;
+                            });
+                        } catch (e) {
+                            console.error("Scoring error:", e);
+                        } finally {
+                            scoringInProgress = false;
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error("Host loop error:", e);
+            } finally {
+                hostLoopInFlight = false;
+            }
+        }
+        
         // =========================================================
         // PRESENCE
         // =========================================================
         function startHeartbeat() {
-            stopHeartbeat();
+            stopHeartbeat(); stopHostLoop();
             heartbeatInterval = setInterval(() => {
                 if (roomId && currentUser) {
                     updateDoc(doc(db, 'liveMatches', roomId), {
@@ -4281,7 +4382,12 @@
             const hostLooksGone = !hostEntry || !hostEntry.online || (hostLastSeenMs && (now - hostLastSeenMs >
                 PRESENCE_STALE_MS));
             if (hostLooksGone && onlineUids.length > 0) {
-                const nextHost = [...onlineUids].sort()[0];
+                const nextHost = [...onlineUids].sort((a, b) => {
+                    const timeA = new Date(players[a].joinedAt || 0).getTime();
+                    const timeB = new Date(players[b].joinedAt || 0).getTime();
+                    if (timeA !== timeB) return timeA - timeB;
+                    return a.localeCompare(b);
+                })[0];
                 if (nextHost === currentUser.uid && data.hostId !== currentUser.uid) {
                     updates.hostId = currentUser.uid;
                 }
