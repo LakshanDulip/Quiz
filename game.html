@@ -2412,12 +2412,7 @@
         }
 
         function createRoom() {
-            const nameInput = document.getElementById('playerName')?.value.trim();
-            if (!nameInput) {
-                showError('Please enter your name first!');
-                return;
-            }
-            playerName = nameInput;
+            playerName = document.getElementById('playerName')?.value.trim() || 'Player';
             renderCreateSettings();
         }
 
@@ -2455,14 +2450,6 @@
 
         async function confirmCreateRoom() {
             if (creatingRoom) return;
-
-            const nameInput = document.getElementById('playerName')?.value.trim();
-            if (!nameInput) {
-                showError('Please enter your name!');
-                return;
-            }
-            playerName = nameInput;
-
             try {
                 const fp = await FingerprintJS.load();
                 const result = await fp.get();
@@ -2577,14 +2564,6 @@
 
         async function joinRoom() {
             if (joining) return;
-
-            const nameInput = document.getElementById('playerName')?.value.trim();
-            if (!nameInput) {
-                showError('Please enter your name!');
-                return;
-            }
-            playerName = nameInput;
-
             const joinBtn = document.querySelector('#app .mp-btn-outline');
             let joinBtnOriginalHTML = null;
             joining = true;
@@ -2603,6 +2582,7 @@
                     localStorage.setItem('quizhub_device_id', deviceId);
                 }
                 const code = document.getElementById('roomCodeInput')?.value.trim().toUpperCase();
+                playerName = document.getElementById('playerName')?.value.trim() || 'Player';
                 if (!code) return showError('Room code enter කරන්න!');
                 roomCode = code;
                 previousPlayers = null;
@@ -2658,8 +2638,8 @@
                             return;
                         } else {
                             playerName = newName;
-                            const nameInputEl = document.getElementById('playerName');
-                            if (nameInputEl) nameInputEl.value = newName;
+                            const nameInput = document.getElementById('playerName');
+                            if (nameInput) nameInput.value = newName;
                             nameMatchUid = null;
                             nameMatchPlayer = null;
                         }
@@ -2789,10 +2769,7 @@
         function applyRoomSnapshot(data) {
             latestRoomData = data;
             const players = data.players || {};
-            const newHostId = data.hostId;
-            const hostChanged = newHostId !== lastKnownHostId;
-
-            isHost = newHostId === currentUser.uid;
+            isHost = data.hostId === currentUser.uid;
             if (isHost && !hostLoopInterval) startHostLoop();
             else if (!isHost && hostLoopInterval) stopHostLoop();
             if (players[currentUser.uid]) players[currentUser.uid].online = true;
@@ -2827,7 +2804,7 @@
             });
             previousPlayers = lightPlayers;
             lastKnownPlayers = players;
-            lastKnownHostId = newHostId;
+            lastKnownHostId = data.hostId;
 
             maintainPresence(data, players);
 
@@ -2852,9 +2829,7 @@
                     questionTimer = null; }
             }
 
-            const shouldReRenderWaitingRoom = data.status === 'waiting' && (statusChanged || (hostChanged && !statusChanged));
-
-            if (statusChanged || questionChanged || shouldReRenderWaitingRoom) {
+            if (statusChanged || questionChanged) {
                 waitingRoomFullyRendered = false;
                 currentScreenMode = data.status;
                 gameState = data.status;
@@ -2938,8 +2913,6 @@
                 `<p class="waiting-dots">Waiting for more players <span class="dot"></span><span class="dot"></span><span class="dot"></span></p>` :
                 '';
 
-            const startBtnStyle = isHost ? '' : 'display:none;';
-
             render(`
             <div class="mp-card" id="waitingRoomCard">
               <div class="mp-title">⏳ Waiting Room</div>
@@ -2979,7 +2952,7 @@
               <p style="text-align:center;" id="playerCountText">Players: ${playerCount}/10</p>
               <div class="mp-player-list" id="playerListContainer">${playerListHTML}</div>
               <button class="mp-btn mp-btn-success" id="readyBtn" onclick="window.toggleReady()">${myReady ? '✅ Ready' : 'Click to Ready'}</button>
-              <button class="mp-btn mp-btn-primary ${allReady ? 'pulse-cta' : ''}" id="startBtn" onclick="window.startGame()" ${!allReady?'disabled':''} style="${startBtnStyle}">⚡ Start</button>
+              ${isHost ? `<button class="mp-btn mp-btn-primary ${allReady ? 'pulse-cta' : ''}" id="startBtn" onclick="window.startGame()" ${!allReady?'disabled':''}>⚡ Start</button>` : ''}
               <button class="mp-btn mp-btn-danger" onclick="window.leaveRoom()">Leave</button>
             </div>
             <div class="mp-card chat-card" id="chatCard">
@@ -3075,37 +3048,12 @@
 
         function updateStartButtonDOM(players, hostId) {
             const btn = document.getElementById('startBtn');
+            if (!btn && !isHost) return;
             const playerCount = Object.values(players).filter(p => p.online).length;
             const allReady = playerCount >= 2 && Object.values(players).filter(p => p.online).every(p => p.ready);
-
-            if (isHost) {
-                if (!btn) {
-                    const container = document.getElementById('playerListContainer');
-                    const parent = container?.parentNode;
-                    if (parent) {
-                        const newBtn = document.createElement('button');
-                        newBtn.className = `mp-btn mp-btn-primary ${allReady ? 'pulse-cta' : ''}`;
-                        newBtn.id = 'startBtn';
-                        newBtn.onclick = window.startGame;
-                        newBtn.disabled = !allReady;
-                        newBtn.textContent = '⚡ Start';
-                        newBtn.style.display = '';
-                        const leaveBtn = parent.querySelector('.mp-btn-danger');
-                        if (leaveBtn) {
-                            parent.insertBefore(newBtn, leaveBtn);
-                        } else {
-                            parent.appendChild(newBtn);
-                        }
-                    }
-                } else {
-                    btn.disabled = !allReady;
-                    btn.classList.toggle('pulse-cta', allReady);
-                    btn.style.display = '';
-                }
-            } else {
-                if (btn) {
-                    btn.style.display = 'none';
-                }
+            if (btn) {
+                btn.disabled = !allReady;
+                btn.classList.toggle('pulse-cta', allReady);
             }
         }
 
@@ -3385,7 +3333,9 @@
                   </button>
                 </div>
               `;
-                } else if (isHost) {} else {
+                } else if (isHost) {
+                    // host buttons shown below
+                } else {
                     rematchSectionHTML = `
                 <div style="text-align:center;padding:8px 0;color:var(--text2);font-size:0.8rem;">
                   <i class="fa-solid fa-users-slash"></i> Need at least 2 players for a rematch
@@ -4390,10 +4340,9 @@
             const params = new URLSearchParams(window.location.search);
             const urlRoomCode = params.get('room');
             let reconnected = false;
-
-            if (urlRoomCode) {
-                const code = urlRoomCode.trim().toUpperCase();
-                try {
+            try {
+                if (urlRoomCode) {
+                    const code = urlRoomCode.trim().toUpperCase();
                     const q = query(collection(db, 'liveMatches'), where('roomCode', '==', code), where('status', 'in', [
                         'waiting', 'countdown', 'playing', 'leaderboard'
                     ]));
@@ -4404,7 +4353,7 @@
                         if (data.players && data.players[currentUser.uid]) {
                             roomId = docSnap.id;
                             roomCode = data.roomCode;
-                            playerName = data.players[currentUser.uid].name || '';
+                            playerName = data.players[currentUser.uid].name || playerName;
                             isHost = data.hostId === currentUser.uid;
                             previousPlayers = null;
                             previousScores = {};
@@ -4421,18 +4370,9 @@
                             saveActiveRoom();
                             listenToRoom();
                             reconnected = true;
-                        } else {
-                            playerName = '';
                         }
-                    } else {
-                        playerName = '';
                     }
-                } catch (e) {
-                    console.error('Room lookup error:', e);
-                    playerName = '';
-                }
-            } else {
-                try {
+                } else {
                     const saved = loadActiveRoom();
                     if (saved && saved.roomId) {
                         const roomSnap = await getDoc(doc(db, 'liveMatches', saved.roomId));
@@ -4460,81 +4400,20 @@
                             clearActiveRoom();
                         }
                     }
-                } catch (e) {
-                    console.error('Reconnect check failed:', e);
                 }
-            }
-
+            } catch (e) { console.error('Reconnect check failed:', e); }
             if (!reconnected) {
                 renderLobby();
                 if (urlRoomCode) {
                     setTimeout(() => {
                         const el = document.getElementById('roomCodeInput');
-                        if (el) {
-                            el.value = urlRoomCode.trim().toUpperCase();
-                        }
+                        if (el) { el.value = urlRoomCode;
+                            joinRoom(); }
                     }, 500);
                 }
             }
         }
         init();
     </script>
-    <script>
-document.addEventListener('DOMContentLoaded', () => {
-  // Find the Create Room button by common ids/attributes or by visible text
-  const selectors = [
-    '#createRoomBtn',
-    '[data-action="create-room"]',
-    '[data-action="createRoom"]',
-    '.create-room',
-    '.createRoom'
-  ];
-  let btn = selectors.map(s => document.querySelector(s)).find(Boolean)
-    || Array.from(document.querySelectorAll('button, a, [role="button"]'))
-      .find(el => /create\s*room/i.test(el.textContent || el.getAttribute('aria-label') || ''));
-
-  if (!btn) {
-    console.warn('Create room button not found (fallback script).');
-    return;
-  }
-
-  // If it's a button inside a form and missing type, set type="button" to avoid submit
-  if (btn.tagName === 'BUTTON' && !btn.hasAttribute('type')) {
-    btn.setAttribute('type', 'button');
-  }
-
-  // Prevent duplicate handlers: mark when we attach
-  if (btn.__createRoomFallbackAttached) return;
-  btn.__createRoomFallbackAttached = true;
-
-  btn.addEventListener('click', (e) => {
-    try {
-      // If your app has a global createRoom() function, call it
-      if (typeof window.createRoom === 'function') {
-        window.createRoom(e);
-        return;
-      }
-      // Try common alternative names
-      if (typeof window.create_room === 'function') {
-        window.create_room(e);
-        return;
-      }
-      if (typeof window.handleCreateRoom === 'function') {
-        window.handleCreateRoom(e);
-        return;
-      }
-
-      // Otherwise dispatch a custom event so existing code can listen
-      const ev = new CustomEvent('app:create-room', { bubbles: true, detail: { source: 'fallback' } });
-      btn.dispatchEvent(ev);
-
-      // If nothing handled it, show a helpful console message
-      console.info('Create room click dispatched (fallback). If nothing happened, implement window.createRoom or listen for "app:create-room" on the button.');
-    } catch (err) {
-      console.error('Error in create room fallback handler:', err);
-    }
-  }, { passive: false });
-});
-</script>
 </body>
 </html>
