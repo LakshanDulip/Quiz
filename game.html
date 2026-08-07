@@ -65,6 +65,7 @@
             justify-content: center;
             padding: 20px;
             padding-top: calc(20px + var(--safe-top));
+            /* Extra bottom padding clears the fixed footer so it never covers the last card's content */
             padding-bottom: calc(84px + var(--safe-bottom));
             overflow-x: hidden;
             overflow-y: auto;
@@ -180,6 +181,7 @@
             position: relative;
             z-index: 1;
         }
+        /* Waiting Room + Chat must stay in normal flow, never clipped, so the page can scroll to reveal them fully */
         #waitingRoomCard,
         #chatCard {
             position: relative;
@@ -1599,6 +1601,16 @@
                 animation: none !important;
             }
         }
+
+        /* =========================================================
+           LOW-END DEVICE PERFORMANCE MODE
+           Applied via body.low-end (JS-detected: low deviceMemory /
+           low hardwareConcurrency on a mobile UA). Reduces GPU-costly
+           effects (backdrop-filter blur, glows, continuous decorative
+           animation loops, drop-shadow filters) while keeping every
+           functional element (buttons, options, timer, player list,
+           chat, scores, leaderboard, correctness feedback) intact.
+           ========================================================= */
         body.low-end .bg-gradient,
         body.low-end .blob {
             animation: none !important;
@@ -1653,6 +1665,8 @@
         body.low-end .mp-winner-name {
             text-shadow: none;
         }
+        /* Pause purely decorative background animation while the tab is hidden,
+           regardless of device tier — saves CPU/GPU/battery when backgrounded. */
         body.tab-hidden .bg-gradient,
         body.tab-hidden .blob {
             animation-play-state: paused;
@@ -1699,6 +1713,7 @@
         import { getAuth, onAuthStateChanged, signInAnonymously, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot, collection, query, where, getDocs, addDoc, serverTimestamp, orderBy, limitToLast, deleteDoc, deleteField, writeBatch, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+        // Firebase config — untouched
         const firebaseConfig = {
             apiKey: "AIzaSyAhfgx0t-E6wrz6zEFIU_tpKTIbELp00ss",
             authDomain: "quiz-hub-225eb.firebaseapp.com",
@@ -1714,6 +1729,7 @@
 
         setPersistence(auth, browserLocalPersistence).catch(() => {});
 
+        // ============ STATE ============
         let currentUser = null;
         let deviceId = null;
         let roomId = null;
@@ -1747,13 +1763,6 @@
         let scoringInProgress = false;
         let heartbeatInterval = null;
         let presenceCleanupInFlight = false;
-        let serverTimeOffset = 0;
-        let syncStartTime = 0;
-        let isClockSynced = false;
-
-        function getServerTime() {
-            return Date.now() + serverTimeOffset;
-        }
         const PRESENCE_STALE_MS = 30000;
         const INACTIVE_REMOVE_MS = 120000;
 
@@ -1769,6 +1778,9 @@
         let snapshotDebounceTimer = null;
         let pendingSnapshotData = null;
 
+        // Cache of the most recently applied full room snapshot. Used to avoid
+        // extra Firestore reads for UI updates that only need data we already have
+        // (e.g. rendering the just-picked answer state) — see selectAnswer().
         let latestRoomData = null;
 
         let afterGameChatActive = false;
@@ -1779,10 +1791,16 @@
         let currentQuestionStartMs = null;
         let currentQuestionTotalTime = 15;
 
+        // ============ REMATCH STATE ============
         let rematchPending = false;
         let rematchRequestedBy = null;
         let rematchRequestedByName = '';
 
+        // ============ LOW-END DEVICE DETECTION ============
+        // Conservative heuristic: only classifies as low-end when we have
+        // reasonably confident signals (low deviceMemory, or low core count on
+        // a mobile UA). Never blocks or alters functionality — only toggles a
+        // CSS class (see .low-end rules) and skips the decorative particle loop.
         function detectLowEndDevice() {
             try {
                 const mem = navigator.deviceMemory;
@@ -1798,6 +1816,9 @@
         }
         let isLowEndDevice = false;
 
+        // ============ QUIZ DATA CACHE ============
+        // Avoids re-downloading the same subject JSON every time the settings
+        // screen changes (lesson dropdown refresh) or when the room is created.
         const quizDataCache = {};
         async function fetchQuizData(subject) {
             if (quizDataCache[subject]) return quizDataCache[subject];
@@ -1808,6 +1829,7 @@
             return data;
         }
 
+        // ============ AUTH ============
         async function initAuth() {
             await new Promise(r => setTimeout(r, 500));
             return new Promise((resolve) => {
@@ -1855,7 +1877,6 @@
                 }).catch(() => {});
             }
             stopHeartbeat();
-            stopHostLoop();
             stopChatListener();
         });
 
@@ -1882,25 +1903,33 @@
             }
         });
 
+        // =========================================================
+        // VISIBILITY (pause decorative work while tab is backgrounded)
+        // =========================================================
         document.addEventListener('visibilitychange', () => {
             const hidden = document.hidden;
             document.body.classList.toggle('tab-hidden', hidden);
             if (hidden) {
                 particlesPaused = true;
-                if (particlesRafId) { cancelAnimationFrame(particlesRafId);
-                    particlesRafId = null; }
+                if (particlesRafId) { cancelAnimationFrame(particlesRafId); particlesRafId = null; }
             } else if (particlesPaused) {
                 particlesPaused = false;
                 if (particleTickFn) particlesRafId = requestAnimationFrame(particleTickFn);
             }
         });
 
+        // =========================================================
+        // HAPTIC
+        // =========================================================
         function vibrate(ms) {
             try {
                 if (navigator.vibrate) navigator.vibrate(ms);
             } catch (e) {}
         }
 
+        // =========================================================
+        // PERF HELPERS
+        // =========================================================
         function pulseWillChange(el, prop, duration = 650) {
             if (!el) return;
             try {
@@ -1909,6 +1938,9 @@
             } catch (e) {}
         }
 
+        // =========================================================
+        // SOUND
+        // =========================================================
         let audioCtx = null;
 
         function getAudioCtx() {
@@ -2030,6 +2062,9 @@
             } catch (err) {}
         }
 
+        // =========================================================
+        // PARTICLES
+        // =========================================================
         function prefersReducedMotion() {
             return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         }
@@ -2039,6 +2074,8 @@
         let particlesPaused = false;
 
         function initParticles() {
+            // Skip entirely on low-end devices / reduced-motion — this is a
+            // purely decorative background canvas animating every frame.
             if (prefersReducedMotion() || isLowEndDevice) return;
             const canvas = document.getElementById('bgParticles');
             if (!canvas) return;
@@ -2081,6 +2118,9 @@
             particlesRafId = requestAnimationFrame(tick);
         }
 
+        // =========================================================
+        // CONFETTI
+        // =========================================================
         function launchConfetti(particleCount = 140) {
             if (prefersReducedMotion()) return;
             const canvas = document.getElementById('confettiCanvas');
@@ -2133,6 +2173,9 @@
             } catch (e) {}
         }
 
+        // =========================================================
+        // ACHIEVEMENTS
+        // =========================================================
         function computeAchievements(player) {
             const list = [];
             const total = (player.correct || 0) + (player.wrong || 0);
@@ -2177,6 +2220,9 @@
             }, 3700);
         }
 
+        // =========================================================
+        // SHARE / INVITE / QR
+        // =========================================================
         function getInviteLink() {
             return `${window.location.origin}${window.location.pathname}?room=${roomCode}`;
         }
@@ -2261,6 +2307,9 @@
         window.shareWhatsApp = shareWhatsApp;
         window.toggleQRCode = toggleQRCode;
 
+        // =========================================================
+        // UI RENDER
+        // =========================================================
         function render(html) {
             const appEl = document.getElementById('app');
             if (!appEl) return;
@@ -2308,6 +2357,9 @@
             setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3000);
         }
 
+        // =========================================================
+        // CONFIRM MODAL
+        // =========================================================
         function showConfirmModal(title, msg, onConfirm) {
             const existing = document.getElementById('confirmOverlay');
             if (existing) existing.remove();
@@ -2341,6 +2393,9 @@
         }
         window.confirmLeaveGame = confirmLeaveGame;
 
+        // =========================================================
+        // REACTIONS
+        // =========================================================
         async function sendReaction(emoji) {
             if (!roomId || chatSending) return;
             const now = Date.now();
@@ -2515,8 +2570,6 @@
                     questions = [{ q: "No questions found for this lesson! Check your JSON.",
                     options: ["OK", "B", "C", "D"], correct: 0 }];
                 }
-                syncStartTime = Date.now();
-                isClockSynced = false;
                 await setDoc(doc(db, 'liveMatches', roomId), {
                     roomCode,
                     hostId: currentUser.uid,
@@ -2586,8 +2639,6 @@
                 if (!code) return showError('Room code enter කරන්න!');
                 roomCode = code;
                 previousPlayers = null;
-                syncStartTime = Date.now();
-                isClockSynced = false;
                 previousScores = {};
                 previousRanks = {};
                 qrRendered = false;
@@ -2609,78 +2660,40 @@
                 roomId = docData.id;
                 const roomData = docData.data();
                 const existingPlayers = roomData.players || {};
-
-                let nameMatchUid = null;
-                let nameMatchPlayer = null;
-                for (const [uid, p] of Object.entries(existingPlayers)) {
-                    if (p.name === playerName) {
-                        nameMatchUid = uid;
-                        nameMatchPlayer = p;
-                        break;
-                    }
-                }
-
-                let matchedUid = null;
-                if (nameMatchPlayer) {
-                    if (nameMatchPlayer.online && nameMatchUid !== currentUser.uid) {
-                        let counter = 2;
-                        let newName = `${playerName}_${counter}`;
-                        while (Object.values(existingPlayers).some(p => p.name === newName)) {
-                            counter++;
-                            newName = `${playerName}_${counter}`;
-                        }
-                        const proceed = window.confirm(
-                            `The name "${playerName}" is already taken by an online player. Do you want to join as "${newName}"?`
-                            );
-                        if (!proceed) {
-                            roomId = null;
-                            roomCode = null;
-                            return;
-                        } else {
-                            playerName = newName;
-                            const nameInput = document.getElementById('playerName');
-                            if (nameInput) nameInput.value = newName;
-                            nameMatchUid = null;
-                            nameMatchPlayer = null;
-                        }
-                    } else if (!nameMatchPlayer.online) {
-                        matchedUid = nameMatchUid;
-                    } else if (nameMatchUid === currentUser.uid) {
-                        matchedUid = nameMatchUid;
-                    }
-                }
-
-                if (!matchedUid) {
-                    const existingEntry = Object.entries(existingPlayers).find(([uid, p]) => p.deviceId === deviceId);
-                    matchedUid = existingEntry ? existingEntry[0] : null;
-                }
-
+                const existingEntry = Object.entries(existingPlayers).find(([uid, p]) => p.deviceId === deviceId);
+                const matchedUid = existingEntry ? existingEntry[0] : null;
                 if (matchedUid || existingPlayers[currentUser.uid]) {
                     const uid = matchedUid || currentUser.uid;
                     isHost = roomData.hostId === uid;
                     playerName = existingPlayers[uid].name || playerName;
                     recentlyRejoinedUids.add(currentUser.uid);
-                    if (uid !== currentUser.uid) {
-                        const clonedPlayer = { ...existingPlayers[uid] };
-                        clonedPlayer.deviceId = deviceId;
-                        clonedPlayer.online = true;
-                        clonedPlayer.lastSeen = serverTimestamp();
-
-                        const updates = {
-                            [`players.${currentUser.uid}`]: clonedPlayer,
-                            [`players.${uid}`]: deleteField()
-                        };
-
-                        if (roomData.hostId === uid) {
-                            updates.hostId = currentUser.uid;
-                            isHost = true;
-                        }
-
-                        await updateDoc(doc(db, 'liveMatches', roomId), updates);
+                    if (matchedUid && matchedUid !== currentUser.uid) {
+                        await updateDoc(doc(db, 'liveMatches', roomId), {
+                            [`players.${currentUser.uid}`]: {
+                                name: playerName,
+                                deviceId: deviceId,
+                                score: existingPlayers[matchedUid].score || 0,
+                                correct: existingPlayers[matchedUid].correct || 0,
+                                wrong: existingPlayers[matchedUid].wrong || 0,
+                                answered: false,
+                                ready: existingPlayers[matchedUid].ready || false,
+                                online: true,
+                                joinedAt: existingPlayers[matchedUid].joinedAt || new Date().toISOString(),
+                                streak: existingPlayers[matchedUid].streak || 0,
+                                longestStreak: existingPlayers[matchedUid].longestStreak || 0,
+                                totalTime: existingPlayers[matchedUid].totalTime || 0,
+                                fastestTime: existingPlayers[matchedUid].fastestTime || null,
+                                lastSeen: serverTimestamp()
+                            }
+                        });
+                        await updateDoc(doc(db, 'liveMatches', roomId), {
+                            [`players.${matchedUid}`]: null
+                        });
                     } else {
                         await updateDoc(doc(db, 'liveMatches', roomId), {
                             [`players.${uid}.online`]: true,
-                            [`players.${uid}.lastSeen`]: serverTimestamp()
+                            [`players.${uid}.lastSeen`]: serverTimestamp(),
+                            [`players.${uid}.ready`]: existingPlayers[uid].ready || false
                         });
                     }
                     addSystemChatMessage(roomId, `${playerName} rejoined the game`);
@@ -2721,7 +2734,6 @@
         function listenToRoom() {
             if (unsubscribe) unsubscribe();
             stopHeartbeat();
-            stopHostLoop();
             prevSnapshotStatus = null;
             prevSnapshotQuestionIndex = -1;
             prevSnapshotPlayersJSON = '';
@@ -2730,22 +2742,9 @@
             unsubscribe = onSnapshot(doc(db, 'liveMatches', roomId), (snapshot) => {
                 if (!snapshot.exists()) { leaveRoom(); return; }
                 const data = snapshot.data();
-
-                if (!isClockSynced && !snapshot.metadata.hasPendingWrites && currentUser) {
-                    const myPlayer = data.players && data.players[currentUser.uid];
-                    if (myPlayer && myPlayer.lastSeen && typeof myPlayer.lastSeen.toMillis === 'function') {
-                        const serverMs = myPlayer.lastSeen.toMillis();
-                        const endLocal = Date.now();
-                        const latency = Math.max(0, (endLocal - syncStartTime) / 2);
-                        serverTimeOffset = serverMs - (syncStartTime + latency);
-                        isClockSynced = true;
-                    }
-                }
-
                 processRoomSnapshot(data);
             });
             startHeartbeat();
-            startHostLoop();
         }
 
         function processRoomSnapshot(data) {
@@ -2770,8 +2769,6 @@
             latestRoomData = data;
             const players = data.players || {};
             isHost = data.hostId === currentUser.uid;
-            if (isHost && !hostLoopInterval) startHostLoop();
-            else if (!isHost && hostLoopInterval) stopHostLoop();
             if (players[currentUser.uid]) players[currentUser.uid].online = true;
 
             if (previousPlayers && data.status !== 'waiting') {
@@ -2798,6 +2795,9 @@
                     }
                 });
             }
+            // Lightweight snapshot for join/leave toast comparisons — only
+            // online status + name are ever read from this, so avoid a full
+            // deep JSON clone of every player's stats/history each update.
             const lightPlayers = {};
             Object.keys(players).forEach(uid => {
                 lightPlayers[uid] = { online: players[uid].online, name: players[uid].name };
@@ -3071,8 +3071,7 @@
         }
 
         function buildProgressDotsHTML(total, current) {
-            let html = '<div class="mp-progress-dots" role="img" aria-label="Question ' + (current + 1) + ' of ' + total +
-                '">';
+            let html = '<div class="mp-progress-dots" role="img" aria-label="Question ' + (current + 1) + ' of ' + total + '">';
             for (let i = 0; i < total; i++) {
                 let cls = '';
                 if (i === current) cls = 'current';
@@ -3260,6 +3259,9 @@
             requestAnimationFrame(step);
         }
 
+        // =========================================================
+        // RENDER WINNER (with rematch UI)
+        // =========================================================
         function renderWinner(players, scores, data) {
             const sorted = Object.entries(players).map(([uid, p]) => ({ ...p, uid, score: scores[uid]?.score || 0 }))
                 .sort((a, b) => b.score - a.score);
@@ -3293,6 +3295,7 @@
                 's' : '—';
             const longestStreak = me?.longestStreak || 0;
 
+            // --- REMATCH STATE (from main doc) ---
             const rematch = data.rematch || { status: 'none', requestedBy: null, requestedByName: null };
             const rematchStatus = rematch.status || 'none';
             const requesterName = rematch.requestedByName || '';
@@ -3324,6 +3327,7 @@
               `;
                 }
             } else {
+                // 'none', 'declined', 'cancelled' — show request button for non-hosts
                 const onlineCount = Object.values(players).filter(p => p.online).length;
                 if (!isHost && onlineCount >= 2) {
                     rematchSectionHTML = `
@@ -3334,7 +3338,7 @@
                 </div>
               `;
                 } else if (isHost) {
-                    // host buttons shown below
+                    // Host sees their own buttons (handled below)
                 } else {
                     rematchSectionHTML = `
                 <div style="text-align:center;padding:8px 0;color:var(--text2);font-size:0.8rem;">
@@ -3353,6 +3357,7 @@
               </div>
             `;
             } else if (isHost && (rematchStatus === 'pending' || rematchStatus === 'accepted')) {
+                // hide host buttons while rematch is pending
                 hostButtonsHTML = '';
             }
 
@@ -3423,8 +3428,13 @@
             if (isHost && data && !data.historySaved) saveMatchHistory(data);
 
             startAfterGameChat();
+
+            // If rematch is 'accepted', the snapshot will transition to the new game
         }
 
+        // =========================================================
+        // AFTER-GAME CHAT
+        // =========================================================
         function startAfterGameChat() {
             if (afterGameChatActive) return;
             afterGameChatActive = true;
@@ -3444,6 +3454,9 @@
             if (card && card.parentNode) card.remove();
         }
 
+        // =========================================================
+        // TOGGLE READY
+        // =========================================================
         async function toggleReady() {
             if (!roomId) return;
             const roomRef = doc(db, 'liveMatches', roomId);
@@ -3453,13 +3466,25 @@
             if (!currentReady) playSound('ready');
         }
 
+        // =========================================================
+        // START GAME
+        // =========================================================
         async function startGame() {
             if (!isHost || !roomId) return;
             await addSystemChatMessage(roomId, 'Host started the game! 🚀');
-            await updateDoc(doc(db, 'liveMatches', roomId), { status: 'countdown', nextQuestionStartsAt: getServerTime() +
-                    3000 });
+            await updateDoc(doc(db, 'liveMatches', roomId), { status: 'countdown' });
+            setTimeout(async () => {
+                await updateDoc(doc(db, 'liveMatches', roomId), {
+                    status: 'playing',
+                    currentQuestion: 0,
+                    questionStartTime: Date.now()
+                });
+            }, 3000);
         }
 
+        // =========================================================
+        // SELECT ANSWER
+        // =========================================================
         async function selectAnswer(index) {
             if (selectedAnswer >= 0 || !roomId || answeringInFlight) return;
             answeringInFlight = true;
@@ -3470,8 +3495,11 @@
                 await updateDoc(doc(db, 'liveMatches', roomId), {
                     [`players.${currentUser.uid}.answered`]: true,
                     [`players.${currentUser.uid}.answer`]: index,
-                    [`players.${currentUser.uid}.answerTime`]: getServerTime()
+                    [`players.${currentUser.uid}.answerTime`]: Date.now()
                 });
+                // Use the last known room snapshot instead of an extra Firestore
+                // read — the question set/options don't change mid-question, so
+                // this avoids a network round-trip on every single answer.
                 if (latestRoomData && latestRoomData.status === 'playing') {
                     updateQuestionOptionsDOM(latestRoomData);
                 }
@@ -3483,15 +3511,18 @@
         }
         window.selectAnswer = selectAnswer;
 
+        // =========================================================
+        // LEAVE ROOM
+        // =========================================================
         async function leaveRoom() {
             closeAfterGameChat();
+            // If there's a pending rematch request and this player is the requester, cancel it
             if (roomId && currentUser && rematchPending && rematchRequestedBy === currentUser.uid) {
                 try {
                     await cancelRematchRequest('cancelled', 'Rematch request cancelled — requester left.');
                 } catch (e) {}
             }
             stopHeartbeat();
-            stopHostLoop();
             stopChatListener();
             if (roomId && currentUser) {
                 try {
@@ -3516,6 +3547,7 @@
                                 [`players.${currentUser.uid}.online`]: false
                             });
                         } else if (isHost) {
+                            // Host leaving: cancel any pending rematch
                             const rematch = data.rematch || {};
                             if (rematch.status === 'pending') {
                                 await updateDoc(roomRef, {
@@ -3527,12 +3559,7 @@
                                 await addSystemChatMessage(roomId, 'Rematch request cancelled — host left.');
                             }
                             await updateDoc(roomRef, {
-                                hostId: otherOnline.sort((a, b) => {
-                                    const timeA = new Date(players[a].joinedAt || 0).getTime();
-                                    const timeB = new Date(players[b].joinedAt || 0).getTime();
-                                    if (timeA !== timeB) return timeA - timeB;
-                                    return a.localeCompare(b);
-                                })[0],
+                                hostId: otherOnline.sort()[0],
                                 [`players.${currentUser.uid}.online`]: false
                             });
                         } else {
@@ -3573,6 +3600,9 @@
         }
         window.leaveRoom = leaveRoom;
 
+        // =========================================================
+        // REMATCH (host-only, original)
+        // =========================================================
         async function rematch() {
             if (!isHost || !roomId) return;
             closeAfterGameChat();
@@ -3619,6 +3649,9 @@
         }
         window.rematch = rematch;
 
+        // =========================================================
+        // QUICK REMATCH (host-only, original)
+        // =========================================================
         async function quickRematch() {
             if (!isHost || !roomId) return;
             closeAfterGameChat();
@@ -3652,7 +3685,6 @@
             );
             await updateDoc(roomRef, {
                 status: 'countdown',
-                nextQuestionStartsAt: getServerTime() + 3000,
                 currentQuestion: -1,
                 historySaved: false,
                 forcedWinner: null,
@@ -3668,12 +3700,20 @@
                 await updateDoc(roomRef, {
                     status: 'playing',
                     currentQuestion: 0,
-                    questionEndsAt: getServerTime() + (gameQuestionTime * 1000)
+                    questionStartTime: Date.now()
                 });
             }, 3000);
         }
         window.quickRematch = quickRematch;
 
+        // =========================================================
+        // REMATCH REQUEST SYSTEM (direct main doc update — no subcollection)
+        // =========================================================
+
+        /**
+         * Request a rematch (called by non-host players)
+         * Updates the main document's rematch field directly.
+         */
         async function requestRematch() {
             if (!roomId || !currentUser) return;
             if (isHost) {
@@ -3714,6 +3754,8 @@
                 rematchRequestedBy = currentUser.uid;
                 rematchRequestedByName = playerName || 'Player';
                 showToast('✅ Rematch request sent!');
+                // Chat notification is sent by the snapshot listener (host will see it and add system message)
+                // Actually, we add a system message manually for all players to see.
                 await addSystemChatMessage(roomId, `🔄 ${playerName || 'A player'} requested a rematch.`);
             } catch (e) {
                 console.error('Request rematch error:', e);
@@ -3722,6 +3764,9 @@
         }
         window.requestRematch = requestRematch;
 
+        /**
+         * Accept a rematch request (host only)
+         */
         async function acceptRematch() {
             if (!isHost || !roomId) return;
             const roomRef = doc(db, 'liveMatches', roomId);
@@ -3733,6 +3778,7 @@
                 showToast('No pending rematch request.');
                 return;
             }
+            // Reset everything
             const resetPlayers = Object.fromEntries(
                 Object.entries(data.players || {}).map(([uid, p]) => [uid, {
                     ...p,
@@ -3750,7 +3796,6 @@
             try {
                 await updateDoc(roomRef, {
                     status: 'countdown',
-                    nextQuestionStartsAt: getServerTime() + 3000,
                     currentQuestion: -1,
                     historySaved: false,
                     forcedWinner: null,
@@ -3763,8 +3808,15 @@
                 rematchPending = false;
                 rematchRequestedBy = null;
                 rematchRequestedByName = '';
-                await addSystemChatMessage(roomId, `✅ Host accepted the rematch. 🚀 New game starting...`);
+                await addSystemChatMessage(roomId, `✅ Host accepted the rematch. 🎮 New game starting...`);
                 playSound('countdown');
+                setTimeout(async () => {
+                    await updateDoc(roomRef, {
+                        status: 'playing',
+                        currentQuestion: 0,
+                        questionStartTime: Date.now()
+                    });
+                }, 3000);
             } catch (e) {
                 console.error('Accept rematch error:', e);
                 showToast('❌ Failed to accept rematch.');
@@ -3772,6 +3824,9 @@
         }
         window.acceptRematch = acceptRematch;
 
+        /**
+         * Decline a rematch request (host only)
+         */
         async function declineRematch() {
             if (!isHost || !roomId) return;
             const roomRef = doc(db, 'liveMatches', roomId);
@@ -3802,6 +3857,9 @@
         }
         window.declineRematch = declineRematch;
 
+        /**
+         * Cancel a rematch request (internal)
+         */
         async function cancelRematchRequest(status = 'cancelled', chatMsg = 'Rematch request cancelled.') {
             if (!roomId) return;
             const roomRef = doc(db, 'liveMatches', roomId);
@@ -3821,16 +3879,19 @@
             }
         }
 
+        // =========================================================
+        // TIMER
+        // =========================================================
         function startQuestionTimer(data) {
             if (questionTimer) clearInterval(questionTimer);
             const totalTime = data.questionTime || gameQuestionTime || 15;
-            const endMs = data.questionEndsAt || (getServerTime() + totalTime * 1000);
-            currentQuestionStartMs = endMs - (totalTime * 1000);
+            const startMs = data.questionStartTime || Date.now();
+            currentQuestionStartMs = startMs;
             currentQuestionTotalTime = totalTime;
 
             function computeTimeLeft() {
-                const remaining = (endMs - getServerTime()) / 1000;
-                return Math.max(0, Math.ceil(remaining));
+                const elapsed = (Date.now() - startMs) / 1000;
+                return Math.max(0, Math.ceil(totalTime - elapsed));
             }
             questionTimeLeft = computeTimeLeft();
 
@@ -3844,8 +3905,7 @@
                     if (timerEl) timerEl.textContent = questionTimeLeft;
                     if (ringEl) {
                         const circumference = 2 * Math.PI * 52;
-                        const remainingUnrounded = Math.max(0, (endMs - getServerTime()) / 1000);
-                        const frac = Math.max(0, remainingUnrounded / totalTime);
+                        const frac = Math.max(0, questionTimeLeft / totalTime);
                         pulseWillChange(ringEl, 'stroke-dashoffset', 1100);
                         ringEl.style.strokeDashoffset = circumference * (1 - frac);
                         ringEl.setAttribute('class', 'timer-ring-progress ' + getTimerColorClass(frac));
@@ -3876,6 +3936,61 @@
                         playSound(wasCorrect ? 'correct' : 'wrong');
                         vibrate(wasCorrect ? 15 : 10);
                         if (wasCorrect) flashCorrectFX();
+                    }
+
+                    if (isHost && roomId && !scoringInProgress) {
+                        scoringInProgress = true;
+                        const qRef = doc(db, 'liveMatches', roomId);
+                        try {
+                            let scoredQIndex = null;
+                            let totalQuestions = 0;
+                            await runTransaction(db, async (tx) => {
+                                const snap = await tx.get(qRef);
+                                if (!snap.exists()) return;
+                                const qData = snap.data();
+                                if (qData.status !== 'playing') return;
+                                const questions = qData.questions || [];
+                                const qIndex = qData.currentQuestion || 0;
+                                const correctAnswer = questions[qIndex]?.correct || 0;
+                                let updatePayload = { status: 'leaderboard' };
+                                Object.entries(qData.players || {}).forEach(([uid, p]) => {
+                                    if (p.online && p.answered) {
+                                        const isCorrect = p.answer === correctAnswer;
+                                        updatePayload[`players.${uid}.score`] = (p.score || 0) + (
+                                            isCorrect ? 10 : 0);
+                                        updatePayload[`players.${uid}.correct`] = (p.correct || 0) + (
+                                            isCorrect ? 1 : 0);
+                                        updatePayload[`players.${uid}.wrong`] = (p.wrong || 0) + (isCorrect ? 0 :
+                                            1);
+                                        const newStreak = isCorrect ? (p.streak || 0) + 1 : 0;
+                                        updatePayload[`players.${uid}.streak`] = newStreak;
+                                        updatePayload[`players.${uid}.longestStreak`] = Math.max(p.longestStreak ||
+                                            0, newStreak);
+                                        if (p.answerTime && qData.questionStartTime) {
+                                            const respSec = Math.max(0, (p.answerTime - qData.questionStartTime) /
+                                                1000);
+                                            updatePayload[`players.${uid}.totalTime`] = (p.totalTime || 0) + respSec;
+                                            const prevFastest = p.fastestTime;
+                                            updatePayload[`players.${uid}.fastestTime`] = (prevFastest ===
+                                                undefined || prevFastest === null || respSec <
+                                                prevFastest) ? respSec : prevFastest;
+                                        }
+                                    }
+                                    updatePayload[`players.${uid}.answered`] = false;
+                                });
+                                tx.update(qRef, updatePayload);
+                                scoredQIndex = qIndex;
+                                totalQuestions = questions.length;
+                            });
+                            if (scoredQIndex !== null) {
+                                setTimeout(async () => {
+                                    const nextQ = scoredQIndex + 1;
+                                    if (nextQ >= totalQuestions) await updateDoc(qRef, { status: 'finished' });
+                                    else await updateDoc(qRef, { status: 'playing', currentQuestion: nextQ,
+                                        questionStartTime: Date.now() });
+                                }, 4000);
+                            }
+                        } catch (e) { console.error(e); } finally { scoringInProgress = false; }
                     }
                 }
             }, 1000);
@@ -3923,6 +4038,9 @@
             } catch (e) {}
         }
 
+        // =========================================================
+        // CHAT CACHE (IndexedDB)
+        // =========================================================
         const CHAT_DB_NAME = 'quizhub_chat_cache';
         const CHAT_DB_VERSION = 1;
         const CHAT_STORE = 'chatCache';
@@ -3972,6 +4090,9 @@
             } catch (e) { return []; }
         }
 
+        // =========================================================
+        // CHAT
+        // =========================================================
         async function startChatListener() {
             if (chatUnsubscribe || !roomId) return;
             const rIdAtStart = roomId;
@@ -4023,11 +4144,16 @@
             return div;
         }
 
+        // Track which message ids are currently rendered as DOM nodes so we can
+        // append-only on new arrivals instead of rebuilding the whole chat log
+        // (keeps CPU/DOM work proportional to *new* messages, not total history).
         let renderedChatMessageIds = new Set();
 
         function renderChatMessages() {
             const box = document.getElementById('chatMessages');
             if (!box) return;
+            // A fresh box (e.g. screen just (re)rendered) has no children yet —
+            // reset local id tracking so we rebuild from the current message list.
             if (box.children.length === 0) renderedChatMessageIds = new Set();
 
             const trimmed = chatMessages.slice(-50);
@@ -4046,6 +4172,8 @@
                 }
             });
 
+            // Drop DOM nodes for messages that fell outside the trimmed window
+            // (keeps DOM/memory bounded to ~50 messages, per low-end requirements).
             renderedChatMessageIds.forEach(mid => {
                 if (!incomingIds.has(mid)) {
                     const el = box.querySelector(`[data-msg-id="${mid}"]`);
@@ -4106,114 +4234,11 @@
         window.sendChatMessage = sendChatMessage;
         window.handleChatKeydown = handleChatKeydown;
 
-        let hostLoopInterval = null;
-        let hostLoopInFlight = false;
-
-        function startHostLoop() {
-            if (!isHost) return;
-            if (hostLoopInterval) clearInterval(hostLoopInterval);
-            hostLoopInterval = setInterval(hostGameLoop, 250);
-        }
-
-        function stopHostLoop() {
-            if (hostLoopInterval) clearInterval(hostLoopInterval);
-            hostLoopInterval = null;
-        }
-
-        async function hostGameLoop() {
-            if (!isHost || !roomId || hostLoopInFlight || !latestRoomData) return;
-            hostLoopInFlight = true;
-            try {
-                const data = latestRoomData;
-                const now = getServerTime();
-                const roomRef = doc(db, 'liveMatches', roomId);
-
-                if (data.status === 'countdown' && data.nextQuestionStartsAt && now >= data.nextQuestionStartsAt) {
-                    await updateDoc(roomRef, {
-                        status: 'playing',
-                        currentQuestion: Math.max(0, data.currentQuestion || 0),
-                        questionEndsAt: now + ((data.questionTime || gameQuestionTime || 15) * 1000),
-                        nextQuestionStartsAt: null
-                    });
-                } else if (data.status === 'leaderboard' && data.nextQuestionStartsAt && now >= data
-                    .nextQuestionStartsAt) {
-                    const nextQ = (data.currentQuestion || 0) + 1;
-                    const totalQuestions = data.questions ? data.questions.length : 0;
-                    if (nextQ >= totalQuestions) {
-                        await updateDoc(roomRef, { status: 'finished', nextQuestionStartsAt: null });
-                    } else {
-                        await updateDoc(roomRef, {
-                            status: 'playing',
-                            currentQuestion: nextQ,
-                            questionEndsAt: now + ((data.questionTime || gameQuestionTime || 15) * 1000),
-                            nextQuestionStartsAt: null
-                        });
-                    }
-                } else if (data.status === 'playing' && data.questionEndsAt && now >= (data.questionEndsAt + 1500)) {
-                    if (!scoringInProgress) {
-                        scoringInProgress = true;
-                        try {
-                            let scoredQIndex = null;
-                            await runTransaction(db, async (tx) => {
-                                const snap = await tx.get(roomRef);
-                                if (!snap.exists()) return;
-                                const qData = snap.data();
-                                if (qData.status !== 'playing') return;
-
-                                const questions = qData.questions || [];
-                                const qIndex = qData.currentQuestion || 0;
-                                const correctAnswer = questions[qIndex]?.correct || 0;
-                                let updatePayload = { status: 'leaderboard', nextQuestionStartsAt: now +
-                                    4000 };
-                                Object.entries(qData.players || {}).forEach(([uid, p]) => {
-                                    if (p.online && p.answered) {
-                                        const isCorrect = p.answer === correctAnswer;
-                                        updatePayload[`players.${uid}.score`] = (p.score || 0) + (
-                                            isCorrect ? 10 : 0);
-                                        updatePayload[`players.${uid}.correct`] = (p.correct || 0) +
-                                            (isCorrect ? 1 : 0);
-                                        updatePayload[`players.${uid}.wrong`] = (p.wrong || 0) + (
-                                            isCorrect ? 0 : 1);
-                                        const newStreak = isCorrect ? (p.streak || 0) + 1 : 0;
-                                        updatePayload[`players.${uid}.streak`] = newStreak;
-                                        updatePayload[`players.${uid}.longestStreak`] = Math.max(p
-                                            .longestStreak || 0, newStreak);
-                                        if (p.answerTime && qData.questionEndsAt) {
-                                            const questionStartMs = qData.questionEndsAt - ((qData
-                                                .questionTime || gameQuestionTime || 15) *
-                                            1000);
-                                            const respSec = Math.max(0, (p.answerTime -
-                                                questionStartMs) / 1000);
-                                            updatePayload[`players.${uid}.totalTime`] = (p.totalTime ||
-                                                0) + respSec;
-                                            const prevFastest = p.fastestTime;
-                                            updatePayload[`players.${uid}.fastestTime`] = (prevFastest ===
-                                                undefined || prevFastest === null || respSec <
-                                                prevFastest) ? respSec : prevFastest;
-                                        }
-                                    }
-                                    updatePayload[`players.${uid}.answered`] = false;
-                                });
-                                tx.update(roomRef, updatePayload);
-                                scoredQIndex = qIndex;
-                            });
-                        } catch (e) {
-                            console.error("Scoring error:", e);
-                        } finally {
-                            scoringInProgress = false;
-                        }
-                    }
-                }
-            } catch (e) {
-                console.error("Host loop error:", e);
-            } finally {
-                hostLoopInFlight = false;
-            }
-        }
-
+        // =========================================================
+        // PRESENCE
+        // =========================================================
         function startHeartbeat() {
             stopHeartbeat();
-            stopHostLoop();
             heartbeatInterval = setInterval(() => {
                 if (roomId && currentUser) {
                     updateDoc(doc(db, 'liveMatches', roomId), {
@@ -4256,12 +4281,7 @@
             const hostLooksGone = !hostEntry || !hostEntry.online || (hostLastSeenMs && (now - hostLastSeenMs >
                 PRESENCE_STALE_MS));
             if (hostLooksGone && onlineUids.length > 0) {
-                const nextHost = [...onlineUids].sort((a, b) => {
-                    const timeA = new Date(players[a].joinedAt || 0).getTime();
-                    const timeB = new Date(players[b].joinedAt || 0).getTime();
-                    if (timeA !== timeB) return timeA - timeB;
-                    return a.localeCompare(b);
-                })[0];
+                const nextHost = [...onlineUids].sort()[0];
                 if (nextHost === currentUser.uid && data.hostId !== currentUser.uid) {
                     updates.hostId = currentUser.uid;
                 }
@@ -4284,6 +4304,7 @@
                 try { await deleteRoomCompletely(roomId); } catch (e) {}
             }
 
+            // Rematch cleanup: if host or requester goes offline while pending
             const rematch = data.rematch || {};
             if (rematch.status === 'pending') {
                 const requesterUid = rematch.requestedBy;
@@ -4309,6 +4330,9 @@
             try { await deleteDoc(doc(db, 'liveMatches', rId)); } catch (e) {}
         }
 
+        // =========================================================
+        // RECONNECT
+        // =========================================================
         function saveActiveRoom() {
             try { localStorage.setItem('quizhub_active_room', JSON.stringify({ roomId, roomCode })); } catch (e) {}
         }
@@ -4330,6 +4354,9 @@
         window.startGame = startGame;
         window.toggleMute = toggleMute;
 
+        // =========================================================
+        // INIT
+        // =========================================================
         async function init() {
             isLowEndDevice = detectLowEndDevice();
             if (isLowEndDevice) document.body.classList.add('low-end');
