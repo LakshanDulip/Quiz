@@ -4479,5 +4479,62 @@
         }
         init();
     </script>
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Find the Create Room button by common ids/attributes or by visible text
+  const selectors = [
+    '#createRoomBtn',
+    '[data-action="create-room"]',
+    '[data-action="createRoom"]',
+    '.create-room',
+    '.createRoom'
+  ];
+  let btn = selectors.map(s => document.querySelector(s)).find(Boolean)
+    || Array.from(document.querySelectorAll('button, a, [role="button"]'))
+      .find(el => /create\s*room/i.test(el.textContent || el.getAttribute('aria-label') || ''));
+
+  if (!btn) {
+    console.warn('Create room button not found (fallback script).');
+    return;
+  }
+
+  // If it's a button inside a form and missing type, set type="button" to avoid submit
+  if (btn.tagName === 'BUTTON' && !btn.hasAttribute('type')) {
+    btn.setAttribute('type', 'button');
+  }
+
+  // Prevent duplicate handlers: mark when we attach
+  if (btn.__createRoomFallbackAttached) return;
+  btn.__createRoomFallbackAttached = true;
+
+  btn.addEventListener('click', (e) => {
+    try {
+      // If your app has a global createRoom() function, call it
+      if (typeof window.createRoom === 'function') {
+        window.createRoom(e);
+        return;
+      }
+      // Try common alternative names
+      if (typeof window.create_room === 'function') {
+        window.create_room(e);
+        return;
+      }
+      if (typeof window.handleCreateRoom === 'function') {
+        window.handleCreateRoom(e);
+        return;
+      }
+
+      // Otherwise dispatch a custom event so existing code can listen
+      const ev = new CustomEvent('app:create-room', { bubbles: true, detail: { source: 'fallback' } });
+      btn.dispatchEvent(ev);
+
+      // If nothing handled it, show a helpful console message
+      console.info('Create room click dispatched (fallback). If nothing happened, implement window.createRoom or listen for "app:create-room" on the button.');
+    } catch (err) {
+      console.error('Error in create room fallback handler:', err);
+    }
+  }, { passive: false });
+});
+</script>
 </body>
 </html>
