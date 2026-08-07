@@ -2615,9 +2615,6 @@
             }
         }
 
-        // =====================================================================
-        // joinRoom – enhanced with name-based reconnect & conflict handling
-        // =====================================================================
         async function joinRoom() {
             if (joining) return;
             const joinBtn = document.querySelector('#app .mp-btn-outline');
@@ -2629,7 +2626,6 @@
                 joinBtn.innerHTML = '<span class="btn-spinner"></span>Joining...';
             }
             try {
-                // Get deviceId
                 try {
                     const fp = await FingerprintJS.load();
                     const result = await fp.get();
@@ -2638,279 +2634,9 @@
                     deviceId = localStorage.getItem('quizhub_device_id') || 'device_' + Date.now();
                     localStorage.setItem('quizhub_device_id', deviceId);
                 }
-
                 const code = document.getElementById('roomCodeInput')?.value.trim().toUpperCase();
-                let enteredName = document.getElementById('playerName')?.value.trim() || 'Player';
+                playerName = document.getElementById('playerName')?.value.trim() || 'Player';
                 if (!code) return showError('Room code enter කරන්න!');
-                roomCode = code;
-                // We'll set playerName later after possible conflict resolution
-
-                // Query room by code (no status filter — we'll validate later)
-                const q = query(collection(db, 'liveMatches'), where('roomCode', '==', code));
-                const snapshot = await getDocs(q);
-                if (snapshot.empty) return showError('Room not found!');
-
-                const docSnap = snapshot.docs[0];
-                const rId = docSnap.id;
-                const roomData = docSnap.data();
-                const players = roomData.players || {};
-                const status = roomData.status || 'waiting';
-
-                // Helper: check if a player with given name is online (excluding a specific uid)
-                function isNameOnlineExcluding(name, excludeUid) {
-                    for (const [uid, p] of Object.entries(players)) {
-                        if (uid !== excludeUid && p.online && p.name === name) return true;
-                    }
-                    return false;
-                }
-
-                // Helper: generate unique name with suffix
-                function generateUniqueName(base, excludeUid) {
-                    let suffix = 2;
-                    let candidate = base + '_' + suffix;
-                    while (isNameOnlineExcluding(candidate, excludeUid)) {
-                        suffix++;
-                        candidate = base + '_' + suffix;
-                    }
-                    return candidate;
-                }
-
-                // ---- 1. Check if currentUser already has an entry by uid or deviceId ----
-                const existingByUid = players[currentUser.uid];
-                let matchedByDeviceUid = null;
-                for (const [uid, p] of Object.entries(players)) {
-                    if (p.deviceId === deviceId) {
-                        matchedByDeviceUid = uid;
-                        break;
-                    }
-                }
-
-                // If we already have a match (uid or device), handle as normal rejoin
-                if (existingByUid || matchedByDeviceUid) {
-                    const matchedUid = existingByUid ? currentUser.uid : matchedByDeviceUid;
-                    // If matched by device but not by uid, we may need to migrate to current uid later? Not needed.
-                    // Existing logic: if matchedUid || existingPlayers[currentUser.uid] -> rejoin.
-                    // We'll keep that logic but with updated transaction for safety.
-                    // However, we want to keep the same behaviour: update online status etc.
-                    // We'll reuse the existing block but wrap in transaction? For simplicity, keep existing code.
-                    // But we must also handle host reassignment if needed.
-                    // To avoid duplicating, we'll call the same code that was originally here.
-                    // We'll refactor by extracting a helper? Since we need to modify, we'll copy the existing logic
-                    // and place it after the name-based reconnect attempt? Actually, we want name-based reconnect to take
-                    // precedence only if there is no uid/device match. So if uid or device match exists, we use that.
-                    // So we check that first.
-                    // If we have a match, we proceed with existing logic (update online, etc.) and return.
-                    // We'll copy the existing code block from the original joinRoom and place it here.
-                    // But we need to also handle the case where the matched player is offline (we set online true).
-                    // We'll do exactly that.
-                    // However, we must be careful to not overwrite any properties. We'll just set online and lastSeen.
-                    try {
-                        const wasHost = roomData.hostId === matchedUid;
-                        if (matchedUid !== currentUser.uid) {
-                            // Migrate: copy all data from matchedUid to currentUser.uid and delete old
-                            const oldData = players[matchedUid];
-                            const newData = { ...oldData };
-                            newData.deviceId = deviceId;
-                            newData.online = true;
-                            newData.lastSeen = serverTimestamp();
-                            // Also update name if entered name differs? We'll keep the existing name.
-                            // But we might want to update name if the user entered a new name? The original code didn't.
-                            // We'll keep the existing name.
-                            const updateData = {
-                                [`players.${currentUser.uid}`]: newData,
-                                [`players.${matchedUid}`]: deleteField()
-                            };
-                            if (wasHost) {
-                                updateData.hostId = currentUser.uid;
-                                isHost = true;
-                            } else {
-                                isHost = false;
-                            }
-                            await updateDoc(doc(db, 'liveMatches', rId), updateData);
-                            // Set playerName to the name from the migrated data.
-                            playerName = newData.name || enteredName;
-                        } else {
-                            // Update online status and lastSeen
-                            await updateDoc(doc(db, 'liveMatches', rId), {
-                                [`players.${currentUser.uid}.online`]: true,
-                                [`players.${currentUser.uid}.lastSeen`]: serverTimestamp()
-                            });
-                            playerName = players[currentUser.uid].name || enteredName;
-                            isHost = roomData.hostId === currentUser.uid;
-                        }
-                        // Set room state
-                        roomId = rId;
-                        roomCode = code;
-                        previousPlayers = null;
-                        previousScores = {};
-                        previousRanks = {};
-                        qrRendered = false;
-                        waitingRoomFullyRendered = false;
-                        prevSnapshotStatus = null;
-                        prevSnapshotQuestionIndex = -1;
-                        prevSnapshotPlayersJSON = '';
-                        answeredQuestionIndices = new Set();
-                        rematchPending = false;
-                        rematchRequestedBy = null;
-                        rematchRequestedByName = '';
-                        recentlyRejoinedUids.add(currentUser.uid);
-                        await addSystemChatMessage(roomId, `${playerName} rejoined the game`);
-                        saveActiveRoom();
-                        listenToRoom();
-                        return; // done
-                    } catch (e) {
-                        console.error('Rejoin transaction failed:', e);
-                        showError('Failed to rejoin. Please try again.');
-                        return;
-                    }
-                }
-
-                // ---- 2. No uid/device match — try name-based reconnect ----
-                // Find an offline player with the exact entered name (case-sensitive)
-                let offlinePlayerUid = null;
-                let offlinePlayerData = null;
-                for (const [uid, p] of Object.entries(players)) {
-                    if (p.name === enteredName && !p.online) {
-                        offlinePlayerUid = uid;
-                        offlinePlayerData = p;
-                        break;
-                    }
-                }
-
-                if (offlinePlayerUid) {
-                    // Found an offline player with the same name
-                    // Check for name conflict with online players (excluding this offline one)
-                    let conflict = false;
-                    for (const [uid, p] of Object.entries(players)) {
-                        if (uid !== offlinePlayerUid && p.online && p.name === enteredName) {
-                            conflict = true;
-                            break;
-                        }
-                    }
-                    let finalName = enteredName;
-                    if (conflict) {
-                        // Generate unique name
-                        finalName = generateUniqueName(enteredName, offlinePlayerUid);
-                        // Ask user with confirm
-                        const userConfirmed = window.confirm(
-                            `A player with name "${enteredName}" is currently online. Would you like to join as "${finalName}"?`
-                            );
-                        if (!userConfirmed) {
-                            showError('Join cancelled.');
-                            return;
-                        }
-                    }
-
-                    // Perform transaction to reconnect
-                    try {
-                        const wasHost = roomData.hostId === offlinePlayerUid;
-                        await runTransaction(db, async (tx) => {
-                            const roomRef = doc(db, 'liveMatches', rId);
-                            const snap = await tx.get(roomRef);
-                            if (!snap.exists()) throw new Error('Room no longer exists');
-                            const data = snap.data();
-                            const p = data.players[offlinePlayerUid];
-                            if (!p || p.online) {
-                                throw new Error('Player state changed');
-                            }
-                            // Clone the entire player object
-                            const cloned = { ...p };
-                            // Update required fields
-                            cloned.name = finalName; // in case conflict changed
-                            cloned.deviceId = deviceId;
-                            cloned.online = true;
-                            cloned.lastSeen = serverTimestamp();
-                            // Build update payload
-                            const updateData = {
-                                [`players.${currentUser.uid}`]: cloned,
-                                [`players.${offlinePlayerUid}`]: deleteField()
-                            };
-                            if (wasHost) {
-                                updateData.hostId = currentUser.uid;
-                            }
-                            tx.update(roomRef, updateData);
-                        });
-
-                        // Success
-                        roomId = rId;
-                        roomCode = code;
-                        playerName = finalName;
-                        isHost = wasHost;
-                        previousPlayers = null;
-                        previousScores = {};
-                        previousRanks = {};
-                        qrRendered = false;
-                        waitingRoomFullyRendered = false;
-                        prevSnapshotStatus = null;
-                        prevSnapshotQuestionIndex = -1;
-                        prevSnapshotPlayersJSON = '';
-                        answeredQuestionIndices = new Set();
-                        rematchPending = false;
-                        rematchRequestedBy = null;
-                        rematchRequestedByName = '';
-                        recentlyRejoinedUids.add(currentUser.uid);
-                        await addSystemChatMessage(roomId, `${playerName} reconnected to the game.`);
-                        saveActiveRoom();
-                        listenToRoom();
-                        return;
-                    } catch (e) {
-                        console.error('Reconnection transaction failed:', e);
-                        showError('Failed to reconnect. Please try again.');
-                        return;
-                    }
-                }
-
-                // ---- 3. No existing player found ----
-                // Only allow joining if status is waiting or countdown (or maybe we allow if status is waiting only?)
-                if (status !== 'waiting' && status !== 'countdown') {
-                    showError('This game has already started or finished.');
-                    return;
-                }
-                if (Object.keys(players).length >= 10) return showError('Room is full (max 10)!');
-
-                // Check for name conflict with online players (for new player)
-                let nameConflict = false;
-                for (const [uid, p] of Object.entries(players)) {
-                    if (p.online && p.name === enteredName) {
-                        nameConflict = true;
-                        break;
-                    }
-                }
-                let finalNewName = enteredName;
-                if (nameConflict) {
-                    // Generate unique name
-                    finalNewName = generateUniqueName(enteredName, null);
-                    const userConfirmed = window.confirm(
-                        `A player with name "${enteredName}" is already online. Would you like to join as "${finalNewName}"?`
-                        );
-                    if (!userConfirmed) {
-                        showError('Join cancelled.');
-                        return;
-                    }
-                }
-
-                // Create new player
-                isHost = false;
-                await updateDoc(doc(db, 'liveMatches', rId), {
-                    [`players.${currentUser.uid}`]: {
-                        name: finalNewName,
-                        deviceId: deviceId,
-                        score: 0,
-                        correct: 0,
-                        wrong: 0,
-                        answered: false,
-                        ready: false,
-                        online: true,
-                        joinedAt: new Date().toISOString(),
-                        streak: 0,
-                        longestStreak: 0,
-                        totalTime: 0,
-                        fastestTime: null,
-                        lastSeen: serverTimestamp()
-                    }
-                });
-                playerName = finalNewName;
-                roomId = rId;
                 roomCode = code;
                 previousPlayers = null;
                 previousScores = {};
@@ -2920,15 +2646,82 @@
                 prevSnapshotStatus = null;
                 prevSnapshotQuestionIndex = -1;
                 prevSnapshotPlayersJSON = '';
+                recentlyRejoinedUids = new Set();
                 answeredQuestionIndices = new Set();
                 rematchPending = false;
                 rematchRequestedBy = null;
                 rematchRequestedByName = '';
-                await addSystemChatMessage(roomId, `${playerName} joined the game`);
+                const q = query(collection(db, 'liveMatches'), where('roomCode', '==', code), where('status', 'in', [
+                    'waiting', 'countdown'
+                ]));
+                const snapshot = await getDocs(q);
+                if (snapshot.empty) return showError('Room not found!');
+                const docData = snapshot.docs[0];
+                roomId = docData.id;
+                const roomData = docData.data();
+                const existingPlayers = roomData.players || {};
+                const existingEntry = Object.entries(existingPlayers).find(([uid, p]) => p.deviceId === deviceId);
+                const matchedUid = existingEntry ? existingEntry[0] : null;
+                if (matchedUid || existingPlayers[currentUser.uid]) {
+                    const uid = matchedUid || currentUser.uid;
+                    isHost = roomData.hostId === uid;
+                    playerName = existingPlayers[uid].name || playerName;
+                    recentlyRejoinedUids.add(currentUser.uid);
+                    if (matchedUid && matchedUid !== currentUser.uid) {
+                        await updateDoc(doc(db, 'liveMatches', roomId), {
+                            [`players.${currentUser.uid}`]: {
+                                name: playerName,
+                                deviceId: deviceId,
+                                score: existingPlayers[matchedUid].score || 0,
+                                correct: existingPlayers[matchedUid].correct || 0,
+                                wrong: existingPlayers[matchedUid].wrong || 0,
+                                answered: false,
+                                ready: existingPlayers[matchedUid].ready || false,
+                                online: true,
+                                joinedAt: existingPlayers[matchedUid].joinedAt || new Date().toISOString(),
+                                streak: existingPlayers[matchedUid].streak || 0,
+                                longestStreak: existingPlayers[matchedUid].longestStreak || 0,
+                                totalTime: existingPlayers[matchedUid].totalTime || 0,
+                                fastestTime: existingPlayers[matchedUid].fastestTime || null,
+                                lastSeen: serverTimestamp()
+                            }
+                        });
+                        await updateDoc(doc(db, 'liveMatches', roomId), {
+                            [`players.${matchedUid}`]: null
+                        });
+                    } else {
+                        await updateDoc(doc(db, 'liveMatches', roomId), {
+                            [`players.${uid}.online`]: true,
+                            [`players.${uid}.lastSeen`]: serverTimestamp(),
+                            [`players.${uid}.ready`]: existingPlayers[uid].ready || false
+                        });
+                    }
+                    addSystemChatMessage(roomId, `${playerName} rejoined the game`);
+                } else {
+                    if (Object.keys(existingPlayers).length >= 10) return showError('Room is full (max 10)!');
+                    isHost = false;
+                    await updateDoc(doc(db, 'liveMatches', roomId), {
+                        [`players.${currentUser.uid}`]: {
+                            name: playerName,
+                            deviceId: deviceId,
+                            score: 0,
+                            correct: 0,
+                            wrong: 0,
+                            answered: false,
+                            ready: false,
+                            online: true,
+                            joinedAt: new Date().toISOString(),
+                            streak: 0,
+                            longestStreak: 0,
+                            totalTime: 0,
+                            fastestTime: null,
+                            lastSeen: serverTimestamp()
+                        }
+                    });
+                    addSystemChatMessage(roomId, `${playerName} joined the game`);
+                }
                 saveActiveRoom();
                 listenToRoom();
-                return;
-
             } finally {
                 joining = false;
                 if (joinBtn) {
@@ -2937,11 +2730,6 @@
                 }
             }
         }
-        window.joinRoom = joinRoom;
-
-        // =====================================================================
-        // End of joinRoom modifications
-        // =====================================================================
 
         function listenToRoom() {
             if (unsubscribe) unsubscribe();
@@ -4561,6 +4349,7 @@
         window.createRoom = createRoom;
         window.updateSettingsLessons = updateSettingsLessons;
         window.confirmCreateRoom = confirmCreateRoom;
+        window.joinRoom = joinRoom;
         window.toggleReady = toggleReady;
         window.startGame = startGame;
         window.toggleMute = toggleMute;
@@ -4581,7 +4370,9 @@
             try {
                 if (urlRoomCode) {
                     const code = urlRoomCode.trim().toUpperCase();
-                    const q = query(collection(db, 'liveMatches'), where('roomCode', '==', code));
+                    const q = query(collection(db, 'liveMatches'), where('roomCode', '==', code), where('status', 'in', [
+                        'waiting', 'countdown', 'playing', 'leaderboard'
+                    ]));
                     const snap = await getDocs(q);
                     if (!snap.empty) {
                         const docSnap = snap.docs[0];
