@@ -12,7 +12,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js">
     </script>
     <style>
-        /* ─── RESET & BASE ─── */
+        /* All existing styles remain unchanged */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -45,12 +45,11 @@
             --safe-bottom: env(safe-area-inset-bottom, 0px);
             --safe-left: env(safe-area-inset-left, 0px);
             --safe-right: env(safe-area-inset-right, 0px);
-            /* footer height */
-            --footer-h: 60px;
         }
         html,
         body {
-            height: 100%;
+            min-height: 100%;
+            height: auto;
         }
         html {
             scroll-behavior: smooth;
@@ -59,18 +58,20 @@
             font-family: 'Inter', 'Noto Sans Sinhala', sans-serif;
             color: var(--text);
             min-height: 100vh;
+            min-height: 100dvh;
+            height: auto;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
             padding-top: calc(20px + var(--safe-top));
-            padding-bottom: calc(20px + var(--safe-bottom));
+            /* Extra bottom padding clears the fixed footer so it never covers the last card's content */
+            padding-bottom: calc(84px + var(--safe-bottom));
             overflow-x: hidden;
+            overflow-y: auto;
             position: relative;
             background: #0a0e1a;
         }
-
-        /* ─── BG ─── */
         .bg-gradient {
             position: fixed;
             inset: 0;
@@ -160,7 +161,6 @@
                 transform: translate(-40px, 60px) scale(1.2);
             }
         }
-
         #bgParticles,
         #confettiCanvas {
             position: fixed;
@@ -173,18 +173,22 @@
         #confettiCanvas {
             z-index: 999;
         }
-
-        /* ─── CONTAINER ─── */
         .mp-container {
             max-width: 480px;
             width: 100%;
+            min-height: 0;
             margin: 0 auto;
             position: relative;
             z-index: 1;
-            /* ← CRITICAL FIX: room for fixed footer */
-            padding-bottom: calc(var(--footer-h) + 24px);
         }
-
+        /* Waiting Room + Chat must stay in normal flow, never clipped, so the page can scroll to reveal them fully */
+        #waitingRoomCard,
+        #chatCard {
+            position: relative;
+            height: auto;
+            min-height: 0;
+            overflow: visible;
+        }
         #app {
             will-change: opacity, transform;
         }
@@ -201,8 +205,6 @@
                 transform: translateY(0);
             }
         }
-
-        /* ─── CARDS ─── */
         .mp-card {
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
@@ -227,56 +229,158 @@
                 transform: translateY(0) scale(1);
             }
         }
-
-        /* ─── ROOM CODE ─── */
-        .mp-room-code-wrap {
+        .mp-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
             text-align: center;
-            margin: 6px 0 4px;
+            margin-bottom: 18px;
+            background: linear-gradient(135deg, #38bdf8, #818cf8 55%, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 0.3px;
+        }
+        .mp-input,
+        .mp-select {
+            width: 100%;
+            padding: 13px 16px;
+            border: 2px solid var(--border);
+            border-radius: 14px;
+            background: rgba(15, 23, 42, 0.6);
+            color: var(--text);
+            font-size: 1rem;
+            font-family: inherit;
+            margin-bottom: 12px;
+            transition: border-color 0.25s, box-shadow 0.25s;
+        }
+        .mp-input:focus,
+        .mp-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15);
+        }
+        .mp-select {
+            font-size: 0.9rem;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            background-size: 16px 12px;
+        }
+        .mp-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 14px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            transition: transform 0.18s var(--ease-game), box-shadow 0.25s, filter 0.2s;
+            margin-bottom: 8px;
+            position: relative;
+            overflow: hidden;
+            min-height: 48px;
+        }
+        .mp-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            filter: brightness(1.06);
+        }
+        .mp-btn:active:not(:disabled) {
+            transform: scale(0.96);
+        }
+        .mp-btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .mp-btn:focus-visible,
+        .mp-option:focus-visible,
+        .icon-btn:focus-visible {
+            outline: 3px solid var(--primary);
+            outline-offset: 2px;
+        }
+        .mp-btn-primary {
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            color: #fff;
+            box-shadow: 0 4px 18px rgba(56, 189, 248, 0.35);
+        }
+        .mp-btn-success {
+            background: linear-gradient(135deg, #34d399, #10b981);
+            color: #04231a;
+            box-shadow: 0 4px 18px rgba(52, 211, 153, 0.3);
+        }
+        .mp-btn-danger {
+            background: linear-gradient(135deg, #f87171, #ef4444);
+            color: #fff;
+            box-shadow: 0 4px 18px rgba(248, 113, 113, 0.3);
+        }
+        .mp-btn-outline {
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid var(--border);
+            color: var(--text);
+        }
+        .mp-btn-outline:hover:not(:disabled) {
+            border-color: var(--primary);
+        }
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            transform: scale(0);
+            background: rgba(255, 255, 255, 0.5);
+            pointer-events: none;
+            animation: rippleAnim 0.6s ease-out forwards;
+        }
+        @keyframes rippleAnim {
+            to {
+                transform: scale(3.2);
+                opacity: 0;
+            }
+        }
+        .btn-spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.35);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            vertical-align: middle;
+            margin-right: 7px;
         }
         .mp-room-code {
-            display: inline-block;
+            text-align: center;
             font-family: 'Space Grotesk', sans-serif;
-            font-size: 2.4rem;
+            font-size: 2.1rem;
             font-weight: 800;
-            letter-spacing: 8px;
-            padding: 8px 20px;
-            border-radius: 14px;
-            background: rgba(56, 189, 248, 0.10);
-            border: 2px solid rgba(56, 189, 248, 0.25);
+            letter-spacing: 7px;
+            margin: 8px 0 2px;
             color: var(--primary);
-            text-shadow: 0 0 24px rgba(56, 189, 248, 0.55);
+            text-shadow: 0 0 18px rgba(56, 189, 248, 0.5);
             cursor: pointer;
             animation: codeGlow 2.4s ease-in-out infinite;
             user-select: all;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .mp-room-code:hover {
-            transform: scale(1.02);
-            box-shadow: 0 0 30px rgba(56, 189, 248, 0.30);
-        }
-        .mp-room-code:active {
-            transform: scale(0.96);
         }
         @keyframes codeGlow {
             0%,
             100% {
-                text-shadow: 0 0 18px rgba(56, 189, 248, 0.45);
+                text-shadow: 0 0 14px rgba(56, 189, 248, 0.4);
             }
             50% {
-                text-shadow: 0 0 32px rgba(56, 189, 248, 0.80);
+                text-shadow: 0 0 26px rgba(56, 189, 248, 0.75);
             }
         }
         .mp-copy-hint {
             text-align: center;
             font-size: 0.7rem;
             color: var(--text2);
-            margin-bottom: 12px;
+            margin-bottom: 14px;
         }
         .mp-copy-hint i {
             margin-right: 4px;
         }
-
-        /* ─── INVITE ACTIONS ─── */
         .invite-actions {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -307,11 +411,15 @@
             color: var(--primary);
             transform: translateY(-2px);
         }
+        .icon-btn:active,
+        .mp-option:active,
+        .mp-btn:active {
+            -webkit-tap-highlight-color: transparent;
+        }
         .icon-btn.whatsapp:hover {
             border-color: #25D366;
             color: #25D366;
         }
-
         .qr-wrap {
             display: none;
             justify-content: center;
@@ -320,8 +428,6 @@
             border-radius: 14px;
             margin-bottom: 14px;
         }
-
-        /* ─── PLAYER LIST ─── */
         .mp-player-list {
             max-height: 300px;
             overflow-y: auto;
@@ -370,7 +476,6 @@
                 transform: translateX(0);
             }
         }
-
         .mp-player-avatar {
             width: 38px;
             height: 38px;
@@ -410,7 +515,6 @@
                 box-shadow: 0 0 0 4px rgba(52, 211, 153, 0);
             }
         }
-
         .mp-player-info {
             flex: 1;
             min-width: 0;
@@ -432,7 +536,6 @@
             color: var(--primary);
             font-family: 'Space Grotesk', sans-serif;
         }
-
         .mp-badge {
             display: inline-block;
             padding: 3px 10px;
@@ -479,7 +582,6 @@
                 transform: scale(1);
             }
         }
-
         .crown-sparkle {
             display: inline-block;
             margin-left: 2px;
@@ -496,8 +598,6 @@
                 transform: scale(1.15) rotate(12deg);
             }
         }
-
-        /* ─── PROGRESS ─── */
         .mp-progress-bar {
             height: 5px;
             border-radius: 4px;
@@ -551,8 +651,17 @@
             left: 50%;
             transform: translate(-50%, -50%);
         }
-
-        /* ─── QUESTION ─── */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
         .mp-question-num {
             text-align: center;
             font-size: 0.78rem;
@@ -615,7 +724,6 @@
                 transform: scale(1.08);
             }
         }
-
         .mp-question-text {
             text-align: center;
             font-size: 1.15rem;
@@ -637,7 +745,6 @@
                 transform: translateX(0);
             }
         }
-
         .mp-option {
             width: 100%;
             text-align: left;
@@ -708,7 +815,6 @@
             background: rgba(248, 113, 113, 0.3);
             color: var(--red);
         }
-
         @keyframes correctPop {
             0% {
                 transform: scale(1);
@@ -738,7 +844,6 @@
                 transform: translateX(5px);
             }
         }
-
         .correct-flash {
             position: fixed;
             inset: 0;
@@ -755,7 +860,6 @@
                 opacity: 0;
             }
         }
-
         .answer-locked-msg {
             text-align: center;
             font-size: 0.72rem;
@@ -783,8 +887,6 @@
             font-size: 0.7rem;
             margin: 0 2px;
         }
-
-        /* ─── LEADERBOARD ─── */
         .mp-leaderboard-item {
             display: flex;
             align-items: center;
@@ -819,7 +921,6 @@
                 transform: translateY(0);
             }
         }
-
         .mp-rank {
             font-family: 'Space Grotesk', sans-serif;
             font-size: 1.2rem;
@@ -851,8 +952,6 @@
         .rank-change.same {
             color: var(--text2);
         }
-
-        /* ─── WINNER ─── */
         .mp-winner {
             text-align: center;
             padding: 10px 0 20px;
@@ -945,8 +1044,6 @@
             text-transform: uppercase;
             letter-spacing: 0.4px;
         }
-
-        /* ─── ACHIEVEMENT ─── */
         .achievement-popup {
             position: fixed;
             top: calc(70px + var(--safe-top));
@@ -993,8 +1090,6 @@
                 transform: translate(-50%, -10px) scale(0.9);
             }
         }
-
-        /* ─── COUNTDOWN ─── */
         .mp-countdown {
             position: fixed;
             inset: 0;
@@ -1024,119 +1119,128 @@
                 opacity: 1;
             }
         }
-
-        /* ─── INPUTS / BUTTONS ─── */
-        .mp-input,
-        .mp-select {
-            width: 100%;
-            padding: 13px 16px;
-            border: 2px solid var(--border);
-            border-radius: 14px;
-            background: rgba(15, 23, 42, 0.6);
-            color: var(--text);
-            font-size: 1rem;
-            font-family: inherit;
-            margin-bottom: 12px;
-            transition: border-color 0.25s, box-shadow 0.25s;
+        .mp-error {
+            color: var(--red);
+            font-size: 0.8rem;
+            text-align: center;
+            margin-top: 8px;
+            min-height: 1em;
         }
-        .mp-input:focus,
-        .mp-select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15);
+        .mp-error-shake {
+            animation: shake 0.4s;
         }
-        .mp-select {
-            font-size: 0.9rem;
-            cursor: pointer;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 14px center;
-            background-size: 16px 12px;
-        }
-
-        .mp-btn {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 14px;
-            font-size: 0.95rem;
-            font-weight: 700;
-            font-family: inherit;
-            cursor: pointer;
-            transition: transform 0.18s var(--ease-game), box-shadow 0.25s, filter 0.2s;
-            margin-bottom: 8px;
+        .mp-divider {
+            text-align: center;
+            color: var(--text2);
+            margin: 14px 0;
+            font-size: 0.8rem;
             position: relative;
-            overflow: hidden;
-            min-height: 48px;
         }
-        .mp-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            filter: brightness(1.06);
-        }
-        .mp-btn:active:not(:disabled) {
-            transform: scale(0.96);
-        }
-        .mp-btn:disabled {
-            opacity: 0.45;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .mp-btn-primary {
-            background: linear-gradient(135deg, #38bdf8, #818cf8);
-            color: #fff;
-            box-shadow: 0 4px 18px rgba(56, 189, 248, 0.35);
-        }
-        .mp-btn-success {
-            background: linear-gradient(135deg, #34d399, #10b981);
-            color: #04231a;
-            box-shadow: 0 4px 18px rgba(52, 211, 153, 0.3);
-        }
-        .mp-btn-danger {
-            background: linear-gradient(135deg, #f87171, #ef4444);
-            color: #fff;
-            box-shadow: 0 4px 18px rgba(248, 113, 113, 0.3);
-        }
-        .mp-btn-outline {
-            background: rgba(255, 255, 255, 0.03);
-            border: 2px solid var(--border);
-            color: var(--text);
-        }
-        .mp-btn-outline:hover:not(:disabled) {
-            border-color: var(--primary);
-        }
-
-        .btn-spinner {
-            display: inline-block;
-            width: 14px;
-            height: 14px;
-            border: 2px solid rgba(255, 255, 255, 0.35);
-            border-top-color: #fff;
-            border-radius: 50%;
-            animation: spin 0.7s linear infinite;
-            vertical-align: middle;
-            margin-right: 7px;
-        }
-
-        .ripple {
+        .mp-divider::before,
+        .mp-divider::after {
+            content: '';
             position: absolute;
-            border-radius: 50%;
-            transform: scale(0);
-            background: rgba(255, 255, 255, 0.5);
-            pointer-events: none;
-            animation: rippleAnim 0.6s ease-out forwards;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background: var(--border);
         }
-        @keyframes rippleAnim {
-            to {
-                transform: scale(3.2);
+        .mp-divider::before {
+            left: 0;
+        }
+        .mp-divider::after {
+            right: 0;
+        }
+        .home-link {
+            position: fixed;
+            top: calc(12px + var(--safe-top));
+            left: calc(12px + var(--safe-left));
+            z-index: 100;
+            padding: 9px 15px;
+            border-radius: 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.25s;
+            font-family: 'Inter', sans-serif;
+        }
+        .home-link:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-1px);
+        }
+        .mute-btn {
+            position: fixed;
+            top: calc(12px + var(--safe-top));
+            right: calc(12px + var(--safe-right));
+            z-index: 100;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.25s;
+        }
+        .mute-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .mute-btn:active {
+            transform: scale(0.9);
+        }
+        .mp-toast {
+            position: fixed;
+            top: calc(60px + var(--safe-top));
+            right: calc(20px + var(--safe-right));
+            background: var(--glass-bg-strong);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-left: 4px solid #f87171;
+            padding: 12px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+            color: var(--text);
+            z-index: 1000;
+            font-size: 0.88rem;
+            font-weight: 600;
+            animation: slideIn 0.3s var(--ease-game), fadeOut 0.3s ease-in 2.7s forwards;
+            max-width: 80vw;
+        }
+        .mp-toast.joined {
+            border-left-color: #34d399;
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateX(110%);
                 opacity: 0;
             }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
-
-        /* ─── CHAT ─── */
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+        }
         .chat-card {
             padding: 16px 14px;
-            margin-bottom: 16px;
         }
         .chat-messages {
             max-height: 200px;
@@ -1244,20 +1348,6 @@
             font-weight: 400;
             color: var(--text2);
         }
-
-        .reaction-row {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 10px;
-        }
-        .reaction-btn {
-            flex: 1;
-            font-size: 1.15rem;
-            padding: 8px 4px;
-            min-height: 40px;
-        }
-
-        /* ─── QUIZ INFO ─── */
         .quiz-info-card {
             background: rgba(15, 23, 42, 0.7);
             border: 1px solid var(--glass-border);
@@ -1292,8 +1382,6 @@
         .qi-value i {
             font-size: 0.9rem;
         }
-
-        /* ─── WAITING DOTS ─── */
         .waiting-dots {
             text-align: center;
             font-size: 0.78rem;
@@ -1329,7 +1417,6 @@
                 opacity: 1;
             }
         }
-
         .pulse-cta {
             animation: pulseCta 1.5s ease-in-out infinite;
         }
@@ -1342,7 +1429,6 @@
                 box-shadow: 0 4px 30px rgba(56, 189, 248, 0.7), 0 0 0 4px rgba(56, 189, 248, 0.12);
             }
         }
-
         .count-bump {
             animation: countBump 0.35s var(--ease-game);
         }
@@ -1358,8 +1444,6 @@
                 transform: scale(1);
             }
         }
-
-        /* ─── SKELETON ─── */
         .skeleton-shimmer {
             background: linear-gradient(100deg, rgba(255, 255, 255, 0.04) 20%, rgba(255, 255, 255, 0.11) 40%, rgba(255, 255, 255, 0.04) 60%);
             background-size: 200% 100%;
@@ -1405,147 +1489,52 @@
             border-radius: 14px;
             margin-top: 16px;
         }
-
-        /* ─── MINI TRIVIA ─── */
-        .mp-mini-trivia {
-            display: flex;
-            align-items: flex-start;
-            gap: 8px;
-            background: rgba(129, 140, 248, 0.08);
-            border: 1px solid rgba(129, 140, 248, 0.25);
-            border-radius: 12px;
-            padding: 10px 12px;
-            margin-top: 12px;
-            font-size: 0.75rem;
-            color: var(--text2);
-            line-height: 1.45;
-            animation: leaderEnter 0.4s var(--ease-game) both;
-        }
-        .mp-mini-trivia .mt-icon {
-            flex-shrink: 0;
-            font-size: 0.95rem;
-        }
-
-        /* ─── TOP BAR ─── */
         #onlineCounter .oc-dot {
             animation: dotPulse 1.6s ease-in-out infinite;
         }
-        .home-link {
-            position: fixed;
-            top: calc(12px + var(--safe-top));
-            left: calc(12px + var(--safe-left));
-            z-index: 100;
-            padding: 6px 14px;
-            border-radius: 20px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            color: var(--text);
-            text-decoration: none;
-            font-size: 0.8rem;
-            font-weight: 600;
-            transition: all 0.25s;
-            font-family: 'Inter', sans-serif;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .home-link:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-            transform: translateY(-1px);
-        }
-        .home-link .logo-text {
-            display: flex;
-            flex-direction: column;
-            line-height: 1.1;
-        }
-        .home-link .logo-text .top {
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 700;
-            font-size: 0.75rem;
-            background: linear-gradient(135deg, #38bdf8, #818cf8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .home-link .logo-text .sub {
-            font-size: 0.4rem;
-            color: var(--text2);
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            font-weight: 700;
-        }
-
-        .mute-btn {
-            position: fixed;
-            top: calc(12px + var(--safe-top));
-            right: calc(12px + var(--safe-right));
-            z-index: 100;
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            color: var(--text);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 0.95rem;
-            transition: all 0.25s;
-        }
-        .mute-btn:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-        .mute-btn:active {
-            transform: scale(0.9);
-        }
-
-        /* ─── TOAST ─── */
-        .mp-toast {
-            position: fixed;
-            top: calc(60px + var(--safe-top));
-            right: calc(20px + var(--safe-right));
-            background: var(--glass-bg-strong);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--border);
-            border-left: 4px solid #f87171;
-            padding: 12px 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
-            color: var(--text);
-            z-index: 1000;
-            font-size: 0.88rem;
-            font-weight: 600;
-            animation: slideIn 0.3s var(--ease-game), fadeOut 0.3s ease-in 2.7s forwards;
-            max-width: 80vw;
-        }
-        .mp-toast.joined {
-            border-left-color: #34d399;
-        }
-        @keyframes slideIn {
-            from {
-                transform: translateX(110%);
-                opacity: 0;
+        @media (max-width: 480px) {
+            .mp-card {
+                padding: 20px 16px;
             }
-            to {
-                transform: translateX(0);
-                opacity: 1;
+            .mp-title {
+                font-size: 1.25rem;
+            }
+            .mp-room-code {
+                font-size: 1.6rem;
+                letter-spacing: 5px;
+            }
+            .timer-ring {
+                width: 92px;
+                height: 92px;
+            }
+            .timer-ring-text {
+                font-size: 1.7rem;
+            }
+            .invite-actions {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 6px;
+            }
+            .icon-btn {
+                font-size: 0.58rem;
+                padding: 8px 4px;
+            }
+            .chat-messages {
+                max-height: 160px;
             }
         }
-        @keyframes fadeOut {
-            from {
-                opacity: 1;
+        @media (max-height: 560px) and (orientation: landscape) {
+            body {
+                align-items: flex-start;
+                padding-top: 50px;
             }
-            to {
-                opacity: 0;
-                transform: translateX(20px);
+            .mp-winner-icon {
+                font-size: 3rem;
+            }
+            .timer-ring {
+                width: 72px;
+                height: 72px;
             }
         }
-
-        /* ─── CONFIRM ─── */
         .confirm-overlay {
             position: fixed;
             inset: 0;
@@ -1587,149 +1576,17 @@
         .confirm-modal-actions .mp-btn {
             margin-bottom: 0;
         }
-
-        /* ─── REMATCH ─── */
-        .rematch-section {
-            background: rgba(251, 191, 36, 0.08);
-            border: 1px solid rgba(251, 191, 36, 0.25);
-            border-radius: 12px;
-            padding: 14px;
-            margin: 12px 0;
-            text-align: center;
-        }
-        .rematch-section .rematch-title {
-            font-weight: 600;
-            color: var(--yellow);
-        }
-        .rematch-section .rematch-actions {
+        .reaction-row {
             display: flex;
-            gap: 8px;
-            margin-top: 12px;
+            gap: 6px;
+            margin-bottom: 10px;
         }
-        .rematch-section .rematch-actions .mp-btn {
+        .reaction-btn {
             flex: 1;
-            margin-bottom: 0;
+            font-size: 1.15rem;
+            padding: 8px 4px;
+            min-height: 40px;
         }
-
-        /* ─── ERRORS ─── */
-        .mp-error {
-            color: var(--red);
-            font-size: 0.8rem;
-            text-align: center;
-            margin-top: 8px;
-            min-height: 1em;
-        }
-        .mp-error-shake {
-            animation: shake 0.4s;
-        }
-        .mp-divider {
-            text-align: center;
-            color: var(--text2);
-            margin: 14px 0;
-            font-size: 0.8rem;
-            position: relative;
-        }
-        .mp-divider::before,
-        .mp-divider::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            width: 40%;
-            height: 1px;
-            background: var(--border);
-        }
-        .mp-divider::before {
-            left: 0;
-        }
-        .mp-divider::after {
-            right: 0;
-        }
-
-        /* ─── FOOTER ─── */
-        footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            text-align: center;
-            padding: 10px 12px;
-            color: var(--text2);
-            font-size: 0.7rem;
-            opacity: 0.75;
-            z-index: 10;
-            background: rgba(10, 14, 26, 0.80);
-            backdrop-filter: blur(6px);
-            -webkit-backdrop-filter: blur(6px);
-            border-top: 1px solid var(--glass-border);
-            height: var(--footer-h);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            line-height: 1.4;
-        }
-        footer p {
-            margin: 0;
-        }
-        footer .dev-name {
-            font-weight: 600;
-            color: var(--primary);
-            margin-top: 1px;
-        }
-
-        /* ─── RESPONSIVE ─── */
-        @media (max-width: 480px) {
-            .mp-card {
-                padding: 20px 16px;
-            }
-            .mp-title {
-                font-size: 1.25rem;
-            }
-            .mp-room-code {
-                font-size: 1.8rem;
-                letter-spacing: 5px;
-                padding: 6px 14px;
-            }
-            .timer-ring {
-                width: 92px;
-                height: 92px;
-            }
-            .timer-ring-text {
-                font-size: 1.7rem;
-            }
-            .invite-actions {
-                grid-template-columns: repeat(4, 1fr);
-                gap: 6px;
-            }
-            .icon-btn {
-                font-size: 0.58rem;
-                padding: 8px 4px;
-            }
-            .chat-messages {
-                max-height: 160px;
-            }
-            .mp-container {
-                padding-bottom: calc(var(--footer-h) + 18px);
-            }
-        }
-        @media (max-height: 560px) and (orientation: landscape) {
-            body {
-                align-items: flex-start;
-                padding-top: 50px;
-            }
-            .mp-winner-icon {
-                font-size: 3rem;
-            }
-            .timer-ring {
-                width: 72px;
-                height: 72px;
-            }
-            .mp-container {
-                padding-bottom: calc(var(--footer-h) + 12px);
-            }
-        }
-
-        /* ─── REDUCED MOTION ─── */
         @media (prefers-reduced-motion: reduce) {
             *,
             *::before,
@@ -1743,17 +1600,6 @@
             .blob {
                 animation: none !important;
             }
-        }
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border: 0;
         }
     </style>
 </head>
@@ -1771,25 +1617,25 @@
         <span class="oc-dot" style="width:8px;height:8px;border-radius:50%;background:var(--green);"></span>
         <span id="onlineCount">0</span> online
     </div>
-    <a href="index.html" class="home-link">
+    <a href="index.html" class="home-link" style="display:flex;align-items:center;gap:8px;padding:6px 14px;text-decoration:none;">
         <svg viewBox="0 0 40 40" width="22" height="22" style="flex-shrink:0;animation:spin 16s linear infinite;">
             <circle cx="20" cy="20" r="3.4" fill="#38bdf8" />
             <ellipse cx="20" cy="20" rx="17" ry="7" fill="none" stroke="#38bdf8" stroke-width="2.2" />
             <ellipse cx="20" cy="20" rx="17" ry="7" fill="none" stroke="#38bdf8" stroke-width="2.2" transform="rotate(60 20 20)" />
             <ellipse cx="20" cy="20" rx="17" ry="7" fill="none" stroke="#38bdf8" stroke-width="2.2" transform="rotate(120 20 20)" />
         </svg>
-        <div class="logo-text">
-            <span class="top">Quiz Hub</span>
-            <span class="sub">Learn • Play • Grow</span>
+        <div style="display:flex;flex-direction:column;line-height:1.1;">
+            <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:0.75rem;background:linear-gradient(135deg,#38bdf8,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Quiz Hub</span>
+            <span style="font-size:0.4rem;color:var(--text2);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;">Learn • Play • Grow</span>
         </div>
     </a>
     <button class="mute-btn" id="muteBtn" onclick="window.toggleMute()" title="Mute / Unmute sounds" aria-label="Toggle sound"><i class="fa-solid fa-volume-high"></i></button>
 
     <div class="mp-container" id="app"></div>
 
-    <footer>
+    <footer style="position:fixed;bottom:0;left:0;right:0;text-align:center;padding:12px;color:var(--text2);font-size:0.7rem;opacity:0.6;z-index:10;background:rgba(10,14,26,0.7);backdrop-filter:blur(6px);border-top:1px solid var(--glass-border);">
         <p>Learning Quiz Hub</p>
-        <p class="dev-name">🦊 Developed by Lakshan Dulip</p>
+        <p style="font-weight:600;color:var(--primary);margin-top:2px;">🦊 Developed by Lakshan Dulip</p>
     </footer>
 
     <script type="module">
@@ -1870,6 +1716,7 @@
         let currentQuestionStartMs = null;
         let currentQuestionTotalTime = 15;
 
+        // ============ REMATCH STATE ============
         let rematchPending = false;
         let rematchRequestedBy = null;
         let rematchRequestedByName = '';
@@ -2438,26 +2285,6 @@
         }
         window.sendReaction = sendReaction;
 
-        // =========================================================
-        // MINI TRIVIA
-        // =========================================================
-        const MINI_TRIVIA = [
-            "🧠 ඔබේ මොළය නින්දේදීත් නිතරම ක්‍රියාශීලීව සිටිනවා — sleep එකේදීත් memory consolidate වෙනවා.",
-            "🌍 පෘථිවියේ වයස අවුරුදු බිලියන 4.5කට ආසන්නයි.",
-            "🐙 බූගෙයෙකුට (Octopus) හදවත් තුනක් තියෙනවා.",
-            "💧 මිනිස් සිරුරෙන් 60%ක් පමණ ජලයෙන් සමන්විතයි.",
-            "🍯 මී පැණි කවදාවත් කැඩෙන්නේ නෑ — නිසි ලෙස තැන්පත් කළොත් අවුරුදු දහස් ගණනක් තිබෙන්නත් පුළුවන්.",
-            "⚡ එළිය තත්පරයකින් පෘථිවිය වටා 7 පාරක් ගමන් කරන්න පුළුවන් වේගයෙන් යනවා.",
-            "🦴 ළදරුවෙකුට ඇටකටු 300කට වඩා තියෙනවා, වැඩිහිටියෙකුට තියෙන්නේ 206ක්.",
-            "🌙 චන්ද්‍රයා සෑම වසරකම පෘථිවියෙන් සෙන්ටිමීටර් 3.8ක් පමණ ඈත් වෙනවා.",
-            "🐝 මීමැස්සන්ට රටාවක් 'waggle dance' එකකින් එකිනෙකාට direction කියලා දෙන්න පුළුවන්.",
-            "🔥 වීදුරු (Glass) ඇත්තටම ඉතා සෙමින් ගලායන ද්‍රවයක් නොවෙයි — solid එකක් විදියටයි සැලකෙන්නේ."
-        ];
-
-        function getRandomTrivia() {
-            return MINI_TRIVIA[Math.floor(Math.random() * MINI_TRIVIA.length)];
-        }
-
         function renderLobby() {
             currentScreenMode = 'lobby';
             waitingRoomFullyRendered = false;
@@ -2954,9 +2781,7 @@
             render(`
             <div class="mp-card" id="waitingRoomCard">
               <div class="mp-title">⏳ Waiting Room</div>
-              <div class="mp-room-code-wrap">
-                <div class="mp-room-code" onclick="window.copyRoomCode()" title="Tap to copy">${roomCode || '------'}</div>
-              </div>
+              <div class="mp-room-code" onclick="window.copyRoomCode()" title="Tap to copy">${roomCode}</div>
               <div class="mp-copy-hint"><i class="fa-regular fa-copy"></i>Tap the code to copy</div>
               <div class="quiz-info-card">
                 <div class="quiz-info-item">
@@ -2991,7 +2816,6 @@
               ${waitingDotsHTML}
               <p style="text-align:center;" id="playerCountText">Players: ${playerCount}/10</p>
               <div class="mp-player-list" id="playerListContainer">${playerListHTML}</div>
-              <div class="mp-mini-trivia" id="miniTriviaBox"><span class="mt-icon">💡</span><span class="mt-text">${escapeHtml(getRandomTrivia())}</span></div>
               <button class="mp-btn mp-btn-success" id="readyBtn" onclick="window.toggleReady()">${myReady ? '✅ Ready' : 'Click to Ready'}</button>
               ${isHost ? `<button class="mp-btn mp-btn-primary ${allReady ? 'pulse-cta' : ''}" id="startBtn" onclick="window.startGame()" ${!allReady?'disabled':''}>⚡ Start</button>` : ''}
               <button class="mp-btn mp-btn-danger" onclick="window.leaveRoom()">Leave</button>
@@ -3336,6 +3160,7 @@
                 's' : '—';
             const longestStreak = me?.longestStreak || 0;
 
+            // --- REMATCH STATE (from main doc) ---
             const rematch = data.rematch || { status: 'none', requestedBy: null, requestedByName: null };
             const rematchStatus = rematch.status || 'none';
             const requesterName = rematch.requestedByName || '';
@@ -3351,11 +3176,11 @@
             } else if (rematchStatus === 'pending') {
                 if (isHost) {
                     rematchSectionHTML = `
-                <div class="rematch-section">
-                  <div class="rematch-title"><i class="fa-solid fa-rotate"></i> ${escapeHtml(requesterName)} requested a rematch</div>
-                  <div class="rematch-actions">
-                    <button class="mp-btn mp-btn-success" onclick="window.acceptRematch()">✅ Accept</button>
-                    <button class="mp-btn mp-btn-danger" onclick="window.declineRematch()">❌ Decline</button>
+                <div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);border-radius:12px;padding:14px;margin:12px 0;text-align:center;">
+                  <p style="font-weight:600;color:var(--yellow);"><i class="fa-solid fa-rotate"></i> ${escapeHtml(requesterName)} requested a rematch</p>
+                  <div style="display:flex;gap:8px;margin-top:12px;">
+                    <button class="mp-btn mp-btn-success" style="flex:1;" onclick="window.acceptRematch()">✅ Accept</button>
+                    <button class="mp-btn mp-btn-danger" style="flex:1;" onclick="window.declineRematch()">❌ Decline</button>
                   </div>
                 </div>
               `;
@@ -3367,6 +3192,7 @@
               `;
                 }
             } else {
+                // 'none', 'declined', 'cancelled' — show request button for non-hosts
                 const onlineCount = Object.values(players).filter(p => p.online).length;
                 if (!isHost && onlineCount >= 2) {
                     rematchSectionHTML = `
@@ -3376,7 +3202,9 @@
                   </button>
                 </div>
               `;
-                } else if (isHost) {} else {
+                } else if (isHost) {
+                    // Host sees their own buttons (handled below)
+                } else {
                     rematchSectionHTML = `
                 <div style="text-align:center;padding:8px 0;color:var(--text2);font-size:0.8rem;">
                   <i class="fa-solid fa-users-slash"></i> Need at least 2 players for a rematch
@@ -3393,7 +3221,10 @@
                 <button class="mp-btn mp-btn-outline" style="flex:1 1 35%;" onclick="window.quickRematch()">⚡ Quick Rematch</button>
               </div>
             `;
-            } else if (isHost && (rematchStatus === 'pending' || rematchStatus === 'accepted')) {}
+            } else if (isHost && (rematchStatus === 'pending' || rematchStatus === 'accepted')) {
+                // hide host buttons while rematch is pending
+                hostButtonsHTML = '';
+            }
 
             render(`
             <div class="mp-card">
@@ -3462,6 +3293,8 @@
             if (isHost && data && !data.historySaved) saveMatchHistory(data);
 
             startAfterGameChat();
+
+            // If rematch is 'accepted', the snapshot will transition to the new game
         }
 
         // =========================================================
@@ -3546,6 +3379,7 @@
         // =========================================================
         async function leaveRoom() {
             closeAfterGameChat();
+            // If there's a pending rematch request and this player is the requester, cancel it
             if (roomId && currentUser && rematchPending && rematchRequestedBy === currentUser.uid) {
                 try {
                     await cancelRematchRequest('cancelled', 'Rematch request cancelled — requester left.');
@@ -3576,6 +3410,7 @@
                                 [`players.${currentUser.uid}.online`]: false
                             });
                         } else if (isHost) {
+                            // Host leaving: cancel any pending rematch
                             const rematch = data.rematch || {};
                             if (rematch.status === 'pending') {
                                 await updateDoc(roomRef, {
@@ -3734,8 +3569,13 @@
         window.quickRematch = quickRematch;
 
         // =========================================================
-        // REMATCH REQUEST SYSTEM
+        // REMATCH REQUEST SYSTEM (direct main doc update — no subcollection)
         // =========================================================
+
+        /**
+         * Request a rematch (called by non-host players)
+         * Updates the main document's rematch field directly.
+         */
         async function requestRematch() {
             if (!roomId || !currentUser) return;
             if (isHost) {
@@ -3776,6 +3616,8 @@
                 rematchRequestedBy = currentUser.uid;
                 rematchRequestedByName = playerName || 'Player';
                 showToast('✅ Rematch request sent!');
+                // Chat notification is sent by the snapshot listener (host will see it and add system message)
+                // Actually, we add a system message manually for all players to see.
                 await addSystemChatMessage(roomId, `🔄 ${playerName || 'A player'} requested a rematch.`);
             } catch (e) {
                 console.error('Request rematch error:', e);
@@ -3784,6 +3626,9 @@
         }
         window.requestRematch = requestRematch;
 
+        /**
+         * Accept a rematch request (host only)
+         */
         async function acceptRematch() {
             if (!isHost || !roomId) return;
             const roomRef = doc(db, 'liveMatches', roomId);
@@ -3795,6 +3640,7 @@
                 showToast('No pending rematch request.');
                 return;
             }
+            // Reset everything
             const resetPlayers = Object.fromEntries(
                 Object.entries(data.players || {}).map(([uid, p]) => [uid, {
                     ...p,
@@ -3840,6 +3686,9 @@
         }
         window.acceptRematch = acceptRematch;
 
+        /**
+         * Decline a rematch request (host only)
+         */
         async function declineRematch() {
             if (!isHost || !roomId) return;
             const roomRef = doc(db, 'liveMatches', roomId);
@@ -3870,6 +3719,9 @@
         }
         window.declineRematch = declineRematch;
 
+        /**
+         * Cancel a rematch request (internal)
+         */
         async function cancelRematchRequest(status = 'cancelled', chatMsg = 'Rematch request cancelled.') {
             if (!roomId) return;
             const roomRef = doc(db, 'liveMatches', roomId);
@@ -4269,6 +4121,7 @@
                 try { await deleteRoomCompletely(roomId); } catch (e) {}
             }
 
+            // Rematch cleanup: if host or requester goes offline while pending
             const rematch = data.rematch || {};
             if (rematch.status === 'pending') {
                 const requesterUid = rematch.requestedBy;
