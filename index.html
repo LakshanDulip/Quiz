@@ -52,8 +52,6 @@
 
 <!-- ===== FIREBASE AUTH START ===== -->
 <!-- Firebase SDK -->
-<!-- ===== FIREBASE AUTH START ===== -->
-<!-- Firebase SDK -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
    import { 
@@ -4518,17 +4516,6 @@ window.performanceManager = new PerformanceManager();
     appState.streak = 0; 
   }
 
-  // ... (rest of the existing code continues exactly as it was - PWA, Audio Manager, App State, etc.)
-
-  // I'll now continue with the rest of the existing code, which remains UNCHANGED
-  // from the original. Due to the massive size, I'll include the critical sections
-  // that need the Firebase sync hooks added.
-
-  // ============ CONTINUING WITH EXISTING CODE (UNCHANGED SECTIONS) ============
-  // [All existing code between the authentication system and the quiz rendering
-  //  remains exactly as it was in the original. I'm only showing the key functions
-  //  that need minor Firebase sync additions.]
-
   // ============ PWA ============
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
@@ -4815,7 +4802,7 @@ window.performanceManager = new PerformanceManager();
   
   function confirmLiteMode() {
     liteMode = true;
-    localStorage.setItem('liteMode', liteMode);
+    localStorage.setItem('liteMode', 'true');
     document.getElementById('liteConfirmModal').classList.remove('active');
     applyLiteMode();
     audioManager.playClick();
@@ -4840,7 +4827,7 @@ window.performanceManager = new PerformanceManager();
   
   function turnOffLiteMode() {
     liteMode = false;
-    localStorage.setItem('liteMode', liteMode);
+    localStorage.setItem('liteMode', 'false');
     document.body.classList.remove('lite-mode');
     const banner = document.getElementById('liteBanner');
     const btn = document.getElementById('perfBtn');
@@ -5517,6 +5504,7 @@ window.performanceManager = new PerformanceManager();
   }
   // Auto trigger emotion for quiz answers
   function triggerMascotEmotion(emotion, type, isStreak) {
+    if (liteMode) return; // 🚀 Skip in Lite Mode
     const container = document.getElementById('mascotContainer');
     if (!container) return;
     
@@ -5558,11 +5546,13 @@ window.performanceManager = new PerformanceManager();
   
   // Keep old mascotReact for compatibility
   function mascotReact(isCorrect, isStreak) {
+    if (liteMode) return;
     const emotion = isCorrect ? (isStreak ? 'dance' : 'smile') : 'crying';
     triggerMascotEmotion(emotion, isCorrect ? 'correct' : 'wrong', isStreak);
   }
   
   function mascotCelebrate() {
+    if (liteMode) return;
     const container = document.getElementById('mascotContainer');
     if (!container) return;
     container.classList.add('dance');
@@ -5666,6 +5656,7 @@ window.performanceManager = new PerformanceManager();
   let mascotSpeechTimeout = null;
   
   function showMascotSpeech(message, duration = 3000) {
+    if (liteMode) return; // 🚀 Skip in Lite Mode
     const speech = document.getElementById('mascotSpeech');
     if (!speech) return;
     
@@ -5689,6 +5680,7 @@ window.performanceManager = new PerformanceManager();
   }
   
   function mascotCelebrate() {
+    if (liteMode) return;
     const container = document.getElementById('mascotContainer');
     if (!container) return;
     
@@ -5701,6 +5693,7 @@ window.performanceManager = new PerformanceManager();
   }
   
   function mascotSad() {
+    if (liteMode) return;
     const container = document.getElementById('mascotContainer');
     if (!container) return;
     
@@ -5713,6 +5706,7 @@ window.performanceManager = new PerformanceManager();
   }
   
   function mascotReact(isCorrect, isStreak = false) {
+    if (liteMode) return;
     const container = document.getElementById('mascotContainer');
     if (!container) return;
     
@@ -5732,6 +5726,7 @@ window.performanceManager = new PerformanceManager();
   }
   
   function handleMascotClick() {
+    if (liteMode) return; // 🚀 Disable in Lite Mode
     const container = document.getElementById('mascotContainer');
     if (!container) return;
     
@@ -5805,6 +5800,7 @@ window.performanceManager = new PerformanceManager();
   }
   
   function spawnClickHearts() {
+    if (liteMode) return;
     const container = document.getElementById('mascotContainer');
     if (!container) return;
     
@@ -5842,7 +5838,7 @@ window.performanceManager = new PerformanceManager();
   const chatEnabled = false; // ← true කරාම chat enable වෙනවා
   
   function openMascotChat() {
-    if (!chatEnabled) return;
+    if (!chatEnabled || liteMode) return;
     const chatEl = document.getElementById('mascotChat');
     const input = document.getElementById('mascotChatInput');
     if (chatEl) {
@@ -5861,6 +5857,7 @@ window.performanceManager = new PerformanceManager();
   }
   
   function sendMascotChat() {
+    if (liteMode) return;
     const input = document.getElementById('mascotChatInput');
     if (!input) return;
     
@@ -5959,6 +5956,7 @@ window.performanceManager = new PerformanceManager();
   }
   
   function spawnClickHearts() {
+    if (liteMode) return;
     const container = document.getElementById('mascotContainer');
     if (!container) return;
     
@@ -6041,24 +6039,28 @@ window.performanceManager = new PerformanceManager();
   
   // Show welcome message on load
   setTimeout(() => {
-    const welcomeMsg = mascotMessages.welcome[Math.floor(Math.random() * mascotMessages.welcome.length)];
-    showMascotSpeech(welcomeMsg, 5000);
+    if (!liteMode) {
+      const welcomeMsg = mascotMessages.welcome[Math.floor(Math.random() * mascotMessages.welcome.length)];
+      showMascotSpeech(welcomeMsg, 5000);
+    }
   }, 3000);
   
-  // Random idle messages
+  // Random idle messages - reduced frequency for performance
   setInterval(() => {
+    if (liteMode) return;
     const speech = document.getElementById('mascotSpeech');
     if (!speech || speech.style.display === 'block') return;
     if (Math.random() < 0.3) {
       showMascotSpeech(getRandomMessage('idle'), 3000);
     }
-  }, 30000);// Every 30 seconds
+  }, 60000); // Increased from 30s to 60s
   
   // Auto sleep after 5 seconds of inactivity
   let mascotInactivityTimer = null;
   let mascotIsSleeping = false;
   
   function resetMascotInactivity() {
+    if (liteMode) return;
     if (mascotIsSleeping) {
       // Wake up
       const container = document.getElementById('mascotContainer');
@@ -6074,6 +6076,7 @@ window.performanceManager = new PerformanceManager();
     if (mascotInactivityTimer) clearTimeout(mascotInactivityTimer);
     
     mascotInactivityTimer = setTimeout(() => {
+      if (liteMode) return;
       // Go to sleep
       const container = document.getElementById('mascotContainer');
       if (container) {
@@ -6085,9 +6088,10 @@ window.performanceManager = new PerformanceManager();
     }, 5000);
   }
   
-  // Debounced activity tracking (performance)
+  // Debounced activity tracking (performance) - REMOVED mousemove
   let activityDebounce = null;
   function handleActivity() {
+    if (liteMode) return;
     if (activityDebounce) return;
     activityDebounce = setTimeout(() => {
       activityDebounce = null;
@@ -6095,7 +6099,7 @@ window.performanceManager = new PerformanceManager();
     }, 500);
   }
   
-  ['click', 'touchstart', 'keydown', 'scroll', 'mousemove'].forEach(event => {
+  ['click', 'touchstart', 'keydown'].forEach(event => {
     document.addEventListener(event, handleActivity, { passive: true });
   });
   
@@ -6504,7 +6508,7 @@ window.performanceManager = new PerformanceManager();
     }, 'ringAnimation');
 
     if (r.name !== 'quiz' && timerInterval) {
-      cancelAnimationFrame(timerInterval);
+      clearInterval(timerInterval);
       timerInterval = null;
     }
   }
@@ -6740,12 +6744,22 @@ window.performanceManager = new PerformanceManager();
   // ============ IMAGE HELPERS ============
   function renderQuestionImage(image) {
     if (!image) return '';
+    
+    // 🚀 Lite Mode: show placeholder instead of image
+    if (liteMode) {
+      return `<div class="question-image-placeholder" style="display:flex;padding:20px 15px;background:var(--bg-main);border-radius:8px;border:1px solid var(--border-color);">
+        <i class="fas fa-image" style="font-size:1.4rem;opacity:0.3;"></i>
+        <span style="font-size:0.7rem;color:var(--text-secondary);">රූපය</span>
+      </div>`;
+    }
+    
     const safeSrc = escapeHtml(image);
     return `
       <div class="question-image-wrap" onclick="openImageModal('${safeSrc}')" title="Click to zoom 🔍">
         <img src="${safeSrc}"
              alt="ප්‍රශ්නයට අදාළ රූපය"
              loading="lazy"
+             decoding="async"
              onerror="this.closest('.question-image-wrap').classList.add('img-error')">
         <div class="question-image-placeholder">
           <i class="fas fa-image"></i>
@@ -6767,7 +6781,7 @@ window.performanceManager = new PerformanceManager();
     if (!appState.quiz || appState.quiz.lessonId !== lessonId) {
       if (appState.quiz && appState.quiz.autoAdvanceTimer) clearTimeout(appState.quiz.autoAdvanceTimer);
       if (timerInterval) {
-        cancelAnimationFrame(timerInterval);
+        clearInterval(timerInterval);
         timerInterval = null;
       }
       appState.quiz = {
@@ -6859,7 +6873,7 @@ window.performanceManager = new PerformanceManager();
 
     if (qz.showResult) {
       if (timerInterval) {
-        cancelAnimationFrame(timerInterval);
+        clearInterval(timerInterval);
         timerInterval = null;
       }
       if (qz.autoAdvanceTimer) { 
@@ -7158,65 +7172,56 @@ window.performanceManager = new PerformanceManager();
     }
   }
 
-  // ============ TIMER ============
+  // ============ OPTIMIZED TIMER ============
   function startTimer() {
     if (timerInterval) {
-      cancelAnimationFrame(timerInterval);
+      clearInterval(timerInterval);
       timerInterval = null;
     }
     
     const qz = appState.quiz;
     if (!qz || qz.showResult || qz.gameOver) return;
 
-    let lastTime = performance.now();
-    
-    function tick() {
+    // Use setInterval for 1-second ticks - much lighter on CPU
+    timerInterval = setInterval(() => {
       if (!appState.quiz || appState.quiz.showResult || appState.quiz.gameOver || appState.quiz.answeredCurrent) {
+        clearInterval(timerInterval);
         timerInterval = null;
         return;
       }
-      
-      const now = performance.now();
-      const delta = now - lastTime;
-      
-      if (delta >= 1000) {
-        lastTime = now;
-        qz.timer--;
-        
-        const timerEl = document.getElementById('timerValue');
-        if (timerEl) timerEl.textContent = qz.timer + 's';
-        
-        const timerDisplay = document.getElementById('timerDisplay');
-        if (timerDisplay && qz.timer <= 5) {
-          timerDisplay.classList.add('warning');
-          if (qz.timer <= 3) audioManager.playTimerTick(qz.timer);
-        }
-        
-        if (qz.timer <= 0) {
-          if (!qz.answeredCurrent) {
-            audioManager.playTimeUp();
-            qz.answeredCurrent = true;
-            qz.wrong++;
-            appState.streak = 0;
-            qz.lives--;
-            if (qz.lives <= 0) {
-              qz.gameOver = true;
-              renderMain();
-              return;
-            }
+
+      qz.timer--;
+
+      // Direct DOM update - no re-render!
+      const timerEl = document.getElementById('timerValue');
+      if (timerEl) timerEl.textContent = qz.timer + 's';
+
+      const timerDisplay = document.getElementById('timerDisplay');
+      if (timerDisplay && qz.timer <= 5) {
+        timerDisplay.classList.add('warning');
+        if (qz.timer <= 3) audioManager.playTimerTick(qz.timer);
+      }
+
+      if (qz.timer <= 0) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        if (!qz.answeredCurrent) {
+          audioManager.playTimeUp();
+          qz.answeredCurrent = true;
+          qz.wrong++;
+          appState.streak = 0;
+          qz.lives--;
+          if (qz.lives <= 0) {
+            qz.gameOver = true;
             renderMain();
-            showModal(false, "⏰ කාලය අවසානයි!", "කාලය අවසන් විය. නිවැරදි පිළිතුර පෙන්වා ඇත. 💪");
-            scheduleAutoAdvance(1500);
+            return;
           }
-          timerInterval = null;
-          return;
+          renderMain();
+          showModal(false, "⏰ කාලය අවසානයි!", "කාලය අවසන් විය. නිවැරදි පිළිතුර පෙන්වා ඇත. 💪");
+          scheduleAutoAdvance(1500);
         }
       }
-      
-      timerInterval = requestAnimationFrame(tick);
-    }
-    
-    timerInterval = requestAnimationFrame(tick);
+    }, 1000);
   }
 
   // ============ AUTO-ADVANCE ============
@@ -7236,7 +7241,7 @@ window.performanceManager = new PerformanceManager();
     if (!qz.answeredCurrent) return;
 
     if (qz.autoAdvanceTimer) { clearTimeout(qz.autoAdvanceTimer); qz.autoAdvanceTimer = null; }
-    if (timerInterval) { cancelAnimationFrame(timerInterval); timerInterval = null; }
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
 
     const modal = document.getElementById('explainModal');
     if (modal) modal.classList.remove('active');
@@ -7269,7 +7274,7 @@ window.performanceManager = new PerformanceManager();
     const isCorrect = selectedIndex === correctIndex;
 
     if (timerInterval) {
-      cancelAnimationFrame(timerInterval);
+      clearInterval(timerInterval);
       timerInterval = null;
     }
 
@@ -7280,7 +7285,6 @@ window.performanceManager = new PerformanceManager();
       qz.score++;
       appState.totalScore++;
       appState.streak++;
-      // Mascot react
       // Mascot react - Correct = happy emotions
       const correctEmotions = ['smile', 'dance', 'singing', 'happy', 'cool'];
       const randomEmotion = correctEmotions[Math.floor(Math.random() * correctEmotions.length)];
@@ -7295,7 +7299,6 @@ window.performanceManager = new PerformanceManager();
     } else {
       qz.wrong++;
       appState.streak = 0;
-      // Mascot react
       // Mascot react - Wrong = sad emotions (based on lives left)
       if (isGame) {
         qz.lives--;
@@ -7408,7 +7411,7 @@ window.performanceManager = new PerformanceManager();
     audioManager.playPowerupSkip();
 
     if (timerInterval) {
-      cancelAnimationFrame(timerInterval);
+      clearInterval(timerInterval);
       timerInterval = null;
     }
 
@@ -7432,7 +7435,7 @@ window.performanceManager = new PerformanceManager();
     document.getElementById('goPct').textContent = pct + '%';
     document.getElementById('gameOverModal').classList.add('active');
     if (timerInterval) {
-      cancelAnimationFrame(timerInterval);
+      clearInterval(timerInterval);
       timerInterval = null;
     }
   }
@@ -7469,7 +7472,7 @@ window.performanceManager = new PerformanceManager();
   function closeGameOverAndHome() {
     document.getElementById('gameOverModal').classList.remove('active');
     if (appState.quiz && appState.quiz.autoAdvanceTimer) clearTimeout(appState.quiz.autoAdvanceTimer);
-    if (timerInterval) cancelAnimationFrame(timerInterval);
+    if (timerInterval) clearInterval(timerInterval);
     appState.quiz = null;
     navigate('#/');
   }
@@ -7696,7 +7699,7 @@ window.performanceManager = new PerformanceManager();
   // ============ CLEANUP ============
   window.addEventListener('beforeunload', () => {
     if (timerInterval) {
-      cancelAnimationFrame(timerInterval);
+      clearInterval(timerInterval);
       timerInterval = null;
     }
     if (appState.quiz && appState.quiz.autoAdvanceTimer) {
