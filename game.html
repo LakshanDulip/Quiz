@@ -1751,8 +1751,40 @@
         let syncStartTime = 0;
         let isClockSynced = false;
 
+        // ── BUG 1 FIX: safe helper to resolve questionEndsAt to a plain ms number ──
+        // Firestore Timestamps have .toMillis(); plain numbers are already ms.
+        // This prevents a Timestamp object from being used directly in arithmetic
+        // and producing the 8-9 digit second value (seconds since epoch) instead of ms.
+        function resolveQuestionEndsAtMs(questionEndsAt) {
+            if (questionEndsAt === null || questionEndsAt === undefined) return null;
+            // Firestore Timestamp object
+            if (typeof questionEndsAt === 'object' && typeof questionEndsAt.toMillis === 'function') {
+                return questionEndsAt.toMillis();
+            }
+            // Plain number — treat as ms if > year-2000 epoch, else invalid
+            if (typeof questionEndsAt === 'number') {
+                // A seconds-epoch value would be ~1.7e9; a ms-epoch value is ~1.7e12.
+                // If it looks like seconds (< 1e11), convert to ms.
+                if (questionEndsAt > 0 && questionEndsAt < 1e11) {
+                    return questionEndsAt * 1000;
+                }
+                return questionEndsAt;
+            }
+            return null;
+        }
+
+        // Clamp a computed seconds value so it is always an integer in [0, maxTime].
+        // Returns maxTime as the safe fallback if anything looks wrong.
+        function safeClampSeconds(value, maxTime) {
+            if (typeof value !== 'number' || !isFinite(value) || isNaN(value)) return maxTime;
+            return Math.max(0, Math.min(maxTime, Math.ceil(value)));
+        }
+        // ── end BUG 1 helpers ──
+
         function getServerTime() {
-            return Date.now() + serverTimeOffset;
+            // Guard: if offset is NaN/Infinity/undefined, fall back to local time
+            const offset = (typeof serverTimeOffset === 'number' && isFinite(serverTimeOffset)) ? serverTimeOffset : 0;
+            return Date.now() + offset;
         }
         const PRESENCE_STALE_MS = 30000;
         const INACTIVE_REMOVE_MS = 120000;
@@ -1778,6 +1810,8 @@
 
         let currentQuestionStartMs = null;
         let currentQuestionTotalTime = 15;
+        // Track which interval ID is the "current" one so stale intervals can be detected
+        let currentQuestionTimerToken = 0;
 
         let rematchPending = false;
         let rematchRequestedBy = null;
@@ -2218,7 +2252,7 @@
                 '',
                 '1️⃣ පහත *Join Link* එක Open කරන්න.',
                 '2️⃣ ඔබගේ *Username* එක ඇතුළත් කරන්න.',
-                '3️⃣ ඉහත *Room Code* එක ලබා දෙන්න.',
+                '3️⃣ ඉහල *Room Code* එක ලබා දෙන්න.',
                 '4️⃣ 🚀 Game එකට Join වෙලා Quiz Battle එක ආරම්භ කරන්න!',
                 '',
                 '🔗 *Join Link*',
@@ -2360,17 +2394,17 @@
         }
         window.sendReaction = sendReaction;
 
-        function renderLobby() {
+        function renderLobby(prefillCode) {
             currentScreenMode = 'lobby';
             waitingRoomFullyRendered = false;
             updateMuteBtn();
             render(`
             <div class="mp-card">
               <div class="mp-title"> Quiz Hub Multiplayer</div>
-              <input type="text" class="mp-input" id="playerName" placeholder="ඔබේ නම..." maxlength="20" value="${escapeHtml(playerName)}">
+              <input type="text" class="mp-input" id="playerName" placeholder="ඔබේ නම (Enter your name)..." maxlength="20" value="${escapeHtml(playerName)}">
               <button class="mp-btn mp-btn-primary" onclick="window.createRoom()"><i class="fa-solid fa-house"></i>&nbsp; Create Room</button>
               <div class="mp-divider">OR</div>
-              <input type="text" class="mp-input" id="roomCodeInput" placeholder="Room Code" maxlength="6" style="text-align:center;letter-spacing:4px;text-transform:uppercase;font-size:1.2rem;">
+              <input type="text" class="mp-input" id="roomCodeInput" placeholder="Room Code" maxlength="6" style="text-align:center;letter-spacing:4px;text-transform:uppercase;font-size:1.2rem;" value="${escapeHtml(prefillCode || '')}">
               <button class="mp-btn mp-btn-outline" onclick="window.joinRoom()"><i class="fa-solid fa-door-open"></i>&nbsp; Join Room</button>
               <div class="mp-error" id="errorMsg"></div>
             </div>
@@ -2412,7 +2446,13 @@
         }
 
         function createRoom() {
-            playerName = document.getElementById('playerName')?.value.trim() || 'Player';
+            // BUG 2 FIX: validate name before proceeding
+            const nameVal = document.getElementById('playerName')?.value.trim() || '';
+            if (!nameVal) {
+                showError('Please enter your name before creating a room.');
+                return;
+            }
+            playerName = nameVal;
             renderCreateSettings();
         }
 
@@ -2582,7 +2622,16 @@
                     localStorage.setItem('quizhub_device_id', deviceId);
                 }
                 const code = document.getElementById('roomCodeInput')?.value.trim().toUpperCase();
-                playerName = document.getElementById('playerName')?.value.trim() || 'Player';
+
+                // ── BUG 2 FIX: validate name — never silently fall back to "Player" ──
+                const nameVal = document.getElementById('playerName')?.value.trim() || '';
+                if (!nameVal) {
+                    showError('Please enter your name before joining.');
+                    return;
+                }
+                playerName = nameVal;
+                // ── end BUG 2 name validation ──
+
                 if (!code) return showError('Room code enter කරන්න!');
                 roomCode = code;
                 previousPlayers = null;
@@ -3096,15 +3145,24 @@
             const q = data.questions[currentQuestionIndex];
             if (!q) return;
             const total = data.questionTime || gameQuestionTime || 15;
-            if (currentQuestionStartMs) {
-                const elapsedNow = (Date.now() - currentQuestionStartMs) / 1000;
-                questionTimeLeft = Math.max(0, Math.ceil(currentQuestionTotalTime - elapsedNow));
+
+            // ── BUG 1 FIX: compute remaining time safely ──
+            const endMs = resolveQuestionEndsAtMs(data.questionEndsAt);
+            let displaySeconds;
+            if (endMs !== null && isFinite(endMs)) {
+                const rawRemaining = (endMs - getServerTime()) / 1000;
+                displaySeconds = safeClampSeconds(rawRemaining, total);
+            } else {
+                // No valid end time available — show full time as safe fallback
+                displaySeconds = safeClampSeconds(questionTimeLeft, total);
             }
-            const frac = Math.max(0, Math.min(1, questionTimeLeft / total));
+            // ── end BUG 1 fix ──
+
+            const frac = Math.max(0, Math.min(1, displaySeconds / total));
             const circumference = 2 * Math.PI * 52;
             const dashoffset = circumference * (1 - frac);
             const colorClass = getTimerColorClass(frac);
-            const urgent = questionTimeLeft <= 5;
+            const urgent = displaySeconds <= 5;
             const correctIdx = q.correct;
 
             const options = q.options.map((opt, i) => {
@@ -3134,7 +3192,7 @@
                   <circle class="timer-ring-progress ${colorClass}" id="timerRingProgress" cx="60" cy="60" r="52"
                     style="stroke-dasharray:${circumference};stroke-dashoffset:${dashoffset};"></circle>
                 </svg>
-                <div class="timer-ring-text" id="timerDisplay" aria-live="polite">${questionTimeLeft}</div>
+                <div class="timer-ring-text" id="timerDisplay" aria-live="polite">${displaySeconds}</div>
               </div>
               <div class="mp-question-text" aria-live="polite">${escapeHtml(q.q)}</div>
               <div id="optionsContainer">${options}</div>
@@ -3821,31 +3879,74 @@
             }
         }
 
+        // ══════════════════════════════════════════════════════════════
+        // BUG 1 FIX — startQuestionTimer
+        // All timer calculations now go through resolveQuestionEndsAtMs()
+        // and safeClampSeconds() to ensure we never display a raw timestamp.
+        // ══════════════════════════════════════════════════════════════
         function startQuestionTimer(data) {
-            if (questionTimer) clearInterval(questionTimer);
-            const totalTime = data.questionTime || gameQuestionTime || 15;
-            const endMs = data.questionEndsAt || (getServerTime() + totalTime * 1000);
-            currentQuestionStartMs = endMs - (totalTime * 1000);
+            // Cancel any existing timer immediately, and bump the token so a
+            // stale interval closure can detect that it is no longer current.
+            if (questionTimer) {
+                clearInterval(questionTimer);
+                questionTimer = null;
+            }
+            currentQuestionTimerToken++;
+            const myToken = currentQuestionTimerToken;
+
+            const totalTime = Math.max(1, data.questionTime || gameQuestionTime || 15);
+
+            // Resolve questionEndsAt to a plain millisecond timestamp
+            const endMs = resolveQuestionEndsAtMs(data.questionEndsAt);
+
+            // If we have a valid server end time, derive start from it;
+            // otherwise fall back to "started right now".
+            if (endMs !== null && isFinite(endMs)) {
+                currentQuestionStartMs = endMs - (totalTime * 1000);
+            } else {
+                currentQuestionStartMs = getServerTime();
+            }
             currentQuestionTotalTime = totalTime;
 
+            // Helper: compute remaining seconds defensively
             function computeTimeLeft() {
-                const remaining = (endMs - getServerTime()) / 1000;
-                return Math.max(0, Math.ceil(remaining));
+                if (endMs !== null && isFinite(endMs)) {
+                    const rawRemaining = (endMs - getServerTime()) / 1000;
+                    return safeClampSeconds(rawRemaining, totalTime);
+                }
+                // No valid endMs — count down from totalTime using local start
+                const elapsed = (getServerTime() - currentQuestionStartMs) / 1000;
+                const rawRemaining = totalTime - elapsed;
+                return safeClampSeconds(rawRemaining, totalTime);
             }
+
+            // Set the initial value immediately
             questionTimeLeft = computeTimeLeft();
 
             questionTimer = setInterval(async () => {
+                // Stale interval guard: if a new question started, this interval
+                // should stop itself.
+                if (myToken !== currentQuestionTimerToken) {
+                    clearInterval(questionTimer);
+                    questionTimer = null;
+                    return;
+                }
+
                 questionTimeLeft = computeTimeLeft();
 
                 requestAnimationFrame(() => {
                     const timerEl = document.getElementById('timerDisplay');
                     const ringEl = document.getElementById('timerRingProgress');
                     const wrapEl = document.getElementById('timerWrap');
-                    if (timerEl) timerEl.textContent = questionTimeLeft;
+
+                    if (timerEl) {
+                        // Final safety: only write a value that is a sane integer
+                        const display = safeClampSeconds(questionTimeLeft, totalTime);
+                        timerEl.textContent = display;
+                    }
                     if (ringEl) {
                         const circumference = 2 * Math.PI * 52;
-                        const remainingUnrounded = Math.max(0, (endMs - getServerTime()) / 1000);
-                        const frac = Math.max(0, remainingUnrounded / totalTime);
+                        const frac = Math.max(0, Math.min(1, questionTimeLeft / totalTime));
                         pulseWillChange(ringEl, 'stroke-dashoffset', 1100);
                         ringEl.style.strokeDashoffset = circumference * (1 - frac);
                         ringEl.setAttribute('class', 'timer-ring-progress ' + getTimerColorClass(frac));
@@ -3880,6 +3981,9 @@
                 }
             }, 1000);
         }
+        // ══════════════════════════════════════════════════════════════
+        // End BUG 1 FIX
+        // ══════════════════════════════════════════════════════════════
 
         function getScores(players) {
             const scores = {};
@@ -4179,17 +4283,15 @@
                                         updatePayload[`players.${uid}.longestStreak`] = Math.max(p
                                             .longestStreak || 0, newStreak);
                                         if (p.answerTime && qData.questionEndsAt) {
-                                            const questionStartMs = qData.questionEndsAt - ((qData
-                                                .questionTime || gameQuestionTime || 15) *
-                                            1000);
-                                            const respSec = Math.max(0, (p.answerTime -
-                                                questionStartMs) / 1000);
-                                            updatePayload[`players.${uid}.totalTime`] = (p.totalTime ||
-                                                0) + respSec;
-                                            const prevFastest = p.fastestTime;
-                                            updatePayload[`players.${uid}.fastestTime`] = (prevFastest ===
-                                                undefined || prevFastest === null || respSec <
-                                                prevFastest) ? respSec : prevFastest;
+                                            // Resolve questionEndsAt safely for scoring calculation too
+                                            const qEndsAtMs = resolveQuestionEndsAtMs(qData.questionEndsAt);
+                                            if (qEndsAtMs !== null) {
+                                                const questionStartMs = qEndsAtMs - ((qData.questionTime || gameQuestionTime || 15) * 1000);
+                                                const respSec = Math.max(0, (p.answerTime - questionStartMs) / 1000);
+                                                updatePayload[`players.${uid}.totalTime`] = (p.totalTime || 0) + respSec;
+                                                const prevFastest = p.fastestTime;
+                                                updatePayload[`players.${uid}.fastestTime`] = (prevFastest === undefined || prevFastest === null || respSec < prevFastest) ? respSec : prevFastest;
+                                            }
                                         }
                                     }
                                     updatePayload[`players.${uid}.answered`] = false;
@@ -4330,6 +4432,18 @@
         window.startGame = startGame;
         window.toggleMute = toggleMute;
 
+        // ══════════════════════════════════════════════════════════════
+        // BUG 2 FIX — init()
+        //
+        // For a URL room code with a NEW player (not an existing/reconnecting
+        // player), we now:
+        //   1. Show the lobby with the room code pre-filled.
+        //   2. Do NOT auto-call joinRoom().
+        //   3. Wait for the user to enter their name and press Join Room.
+        //
+        // Existing-player reconnection (by Firebase UID or deviceId match)
+        // is preserved exactly as before.
+        // ══════════════════════════════════════════════════════════════
         async function init() {
             isLowEndDevice = detectLowEndDevice();
             if (isLowEndDevice) document.body.classList.add('low-end');
@@ -4340,9 +4454,12 @@
             const params = new URLSearchParams(window.location.search);
             const urlRoomCode = params.get('room');
             let reconnected = false;
+
             try {
                 if (urlRoomCode) {
                     const code = urlRoomCode.trim().toUpperCase();
+                    // Query for the room — include all active statuses so a
+                    // reconnecting player in mid-game is found too.
                     const q = query(collection(db, 'liveMatches'), where('roomCode', '==', code), where('status', 'in', [
                         'waiting', 'countdown', 'playing', 'leaderboard'
                     ]));
@@ -4350,11 +4467,32 @@
                     if (!snap.empty) {
                         const docSnap = snap.docs[0];
                         const data = docSnap.data();
-                        if (data.players && data.players[currentUser.uid]) {
+
+                        // ── Check if this Firebase UID is already a player ──
+                        const alreadyInRoom = data.players && data.players[currentUser.uid];
+
+                        // ── Check if this device ID matches any existing player ──
+                        let deviceMatchUid = null;
+                        try {
+                            const fp = await FingerprintJS.load();
+                            const fpResult = await fp.get();
+                            deviceId = fpResult.visitorId;
+                        } catch (e) {
+                            deviceId = localStorage.getItem('quizhub_device_id') || 'device_' + Date.now();
+                            localStorage.setItem('quizhub_device_id', deviceId);
+                        }
+                        if (!alreadyInRoom && data.players) {
+                            const entry = Object.entries(data.players).find(([uid, p]) => p.deviceId === deviceId);
+                            if (entry) deviceMatchUid = entry[0];
+                        }
+
+                        if (alreadyInRoom || deviceMatchUid) {
+                            // Genuine reconnection — proceed automatically
                             roomId = docSnap.id;
                             roomCode = data.roomCode;
-                            playerName = data.players[currentUser.uid].name || playerName;
-                            isHost = data.hostId === currentUser.uid;
+                            const uid = deviceMatchUid || currentUser.uid;
+                            playerName = (data.players[uid] || data.players[currentUser.uid])?.name || playerName;
+                            isHost = data.hostId === uid || data.hostId === currentUser.uid;
                             previousPlayers = null;
                             previousScores = {};
                             previousRanks = {};
@@ -4367,12 +4505,16 @@
                             rematchPending = false;
                             rematchRequestedBy = null;
                             rematchRequestedByName = '';
+                            syncStartTime = Date.now();
+                            isClockSynced = false;
                             saveActiveRoom();
                             listenToRoom();
                             reconnected = true;
                         }
+                        // else: new player — fall through to show lobby with code pre-filled
                     }
                 } else {
+                    // No URL code — try to restore from localStorage
                     const saved = loadActiveRoom();
                     if (saved && saved.roomId) {
                         const roomSnap = await getDoc(doc(db, 'liveMatches', saved.roomId));
@@ -4394,6 +4536,8 @@
                             rematchPending = false;
                             rematchRequestedBy = null;
                             rematchRequestedByName = '';
+                            syncStartTime = Date.now();
+                            isClockSynced = false;
                             listenToRoom();
                             reconnected = true;
                         } else {
@@ -4402,17 +4546,17 @@
                     }
                 }
             } catch (e) { console.error('Reconnect check failed:', e); }
+
             if (!reconnected) {
-                renderLobby();
-                if (urlRoomCode) {
-                    setTimeout(() => {
-                        const el = document.getElementById('roomCodeInput');
-                        if (el) { el.value = urlRoomCode;
-                            joinRoom(); }
-                    }, 500);
-                }
+                // Show the lobby. If there's a URL room code, pre-fill the field
+                // but do NOT auto-join — let the user enter their name first.
+                renderLobby(urlRoomCode ? urlRoomCode.trim().toUpperCase() : '');
             }
         }
+        // ══════════════════════════════════════════════════════════════
+        // End BUG 2 FIX
+        // ══════════════════════════════════════════════════════════════
+
         init();
     </script>
 </body>
