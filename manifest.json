@@ -1,6 +1,6 @@
 {
   "name": "Quiz Hub - Learn with Quizzes",
-  "short_name": "QuizHub.lk",
+  "short_name": "QuizHub",
   "description": "Learn, play and challenge yourself with interactive quizzes.",
   "start_url": "/",
   "scope": "/",
