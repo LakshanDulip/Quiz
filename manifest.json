@@ -1,13 +1,30 @@
 {
-  "name": "Quiz Hub",
-  "short_name": "QuizHub",
-  "description": "Learn with Quizzes",
+  "name": "Quiz Hub - Learn with Quizzes",
+  "short_name": "QuizHub.lk",
+  "description": "Learn, play and challenge yourself with interactive quizzes.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#0d1815",
-  "theme_color": "#0d1815",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "categories": [
+    "education",
+    "games"
+  ],
+  "lang": "en",
   "icons": [
-    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png" }
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ]
 }
