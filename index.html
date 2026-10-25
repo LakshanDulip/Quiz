@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8"> 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QuizHub</title>
 
 <meta name="google-site-verification" content="PmN9uHYZMiygxKHn56hCMyQWLt8-Q5md-TV1NpxjxWc" />
 <meta name="google-adsense-account" content="ca-pub-2721654257567222">  
@@ -3906,7 +3905,7 @@ window.performanceManager = new PerformanceManager();
   function initUM() {
     class UpdateManager {
       constructor() {
-        this.currentVersion = '2.0.0';
+        this.currentVersion = '2.0.1';
         this.versionUrl = 'version.json';
         this.checkInterval = 300000;
         this.isChecking = false;
@@ -6167,7 +6166,7 @@ window.performanceManager = new PerformanceManager();
           <div style="font-size:0.8rem; color:var(--text-secondary);">Developed by</div>
           <div class="name">🦊 ${escapeHtml(info.developer || 'Lakshan Dulip')}</div>
           <div style="font-size:0.7rem; color:var(--text-secondary); margin-top:4px;">
-            Version ${escapeHtml(info.version || '2.0.0')}
+            Version ${escapeHtml(info.version || '2.0.1')}
           </div>
           ${info.contact ? `
             <div style="font-size:0.78rem; color:var(--primary-color); margin-top:4px;">
@@ -6347,7 +6346,7 @@ window.performanceManager = new PerformanceManager();
       }
       
       return [];
-    } catch (e) { return []; }
+    } catch (e) { throw e; }
   }
 
   async function findLesson(subject, grade, lessonId) { 
@@ -6371,49 +6370,39 @@ window.performanceManager = new PerformanceManager();
     maths: 'data/maths.json'
   };
   
+  // Share in-flight requests across grade counts, lessons and quiz rendering.
+  const subjectRequests = new Map();
   async function loadSubjectData(subject) {
     const file = subjectFiles[subject];
     if (!file) return null;
-    
-    // Check cache
     const cacheKey = `subject_${subject}`;
     const cached = window.cacheManager?.get(cacheKey);
     if (cached) return cached;
-    
-    try {
-      const response = await fetch(file);
-      if (!response.ok) throw new Error('Failed to load');
-      const data = await response.json();
-      window.cacheManager?.set(cacheKey, data, 600000);
-      return data;
-    } catch (error) {
-      console.error(`[Load] ${subject} failed:`, error);
-      return null;
-    }
-  }
-  
+    if (subjectRequests.has(subject)) return subjectRequests.get(subject);
 
-  async function loadData() {
-    try {
-      // Load both subjects
-      const [scienceData, mathsData] = await Promise.all([
-        loadSubjectData('science'),
-        loadSubjectData('maths')
-      ]);
-      
-      appState.content = { subjects: {} };
-      if (scienceData) appState.content.subjects['science'] = scienceData;
-      if (mathsData) appState.content.subjects['maths'] = mathsData;
-      
-      appState.loading = false;
-      render();
-    } catch (error) {
-      appState.error = 'දත්ත ලබාගැනීමේ දෝෂයකි.';
-      appState.loading = false;
-      render();
-    }
+    const request = (async () => {
+      try {
+        const response = await fetch(file);
+        if (!response.ok) throw new Error('Failed to load');
+        const data = await response.json();
+        window.cacheManager?.set(cacheKey, data, 600000);
+        return data;
+      } finally {
+        subjectRequests.delete(subject);
+      }
+    })();
+    subjectRequests.set(subject, request);
+    return request;
   }
-  
+
+  function loadData() {
+    // Home contains subject metadata only. Download questions on selection.
+    appState.content = { subjects: {} };
+    appState.loading = false;
+    appState.route = parseHash();
+    render();
+  }
+
   // Load other subject when needed
   async function loadOtherSubject(subject) {
     if (appState.content?.subjects?.[subject]) return;
@@ -6447,7 +6436,9 @@ window.performanceManager = new PerformanceManager();
   });
 
   // ============ RENDER ============
+  let renderGeneration = 0;
   async function render() {
+    const generation = ++renderGeneration;
     const app = document.getElementById('app');
     if (appState.loading) {
       app.innerHTML = renderShell(`
@@ -6476,12 +6467,26 @@ window.performanceManager = new PerformanceManager();
 
     const r = appState.route;
     let body = '';
-    if (r.name === 'home') body = renderHome();
-    else if (r.name === 'grades') body = await renderGrades(r.subject);
-    else if (r.name === 'lessons') body = await renderLessons(r.subject, r.grade);
-    else if (r.name === 'quiz') body = await renderQuiz(r.subject, r.grade, r.lessonId);
-    else body = renderHome();
-    
+    if (r.subject && !appState.content?.subjects?.[r.subject]) {
+      app.innerHTML = renderShell('<div class="card" role="status" style="text-align:center;margin:40px auto;">දත්ත පූරණය වෙමින් පවතී…</div>');
+    }
+    try {
+      if (r.name === 'home') body = renderHome();
+      else if (r.name === 'grades') body = await renderGrades(r.subject);
+      else if (r.name === 'lessons') body = await renderLessons(r.subject, r.grade);
+      else if (r.name === 'quiz') body = await renderQuiz(r.subject, r.grade, r.lessonId);
+      else body = renderHome();
+    } catch (error) {
+      console.error('[Render] Data unavailable:', error);
+      body = `<div class="card" style="text-align:center;margin:40px auto;">
+        <h2>දත්ත පූරණය අසාර්ථකයි</h2>
+        <p>අන්තර්ජාල සම්බන්ධතාවය පරීක්ෂා කර නැවත උත්සාහ කරන්න.</p>
+        <button class="btn btn-primary" onclick="render()">නැවත උත්සාහ කරන්න</button>
+        <a class="btn btn-outline" href="#/">Home</a>
+      </div>`;
+    }
+    // A slower previous route must never overwrite a newer navigation.
+    if (generation !== renderGeneration) return;
     app.innerHTML = renderShell(body);
     window.scrollTo(0, 0);
     updateFullscreenBtn();
@@ -6694,7 +6699,8 @@ window.performanceManager = new PerformanceManager();
   async function renderGrades(subject) {
     const meta = subjectMeta(subject);
     await loadOtherSubject(subject);
-    const lessonsData = appState.content?.subjects?.[subject]?.grades || {};
+    const data = appState.content?.subjects?.[subject];
+    const lessonsData = data?.[subject]?.grades || data?.grades || data?.subjects?.[subject]?.grades || {};
     const sorted = [...GRADES].sort((a, b) => parseInt(a) - parseInt(b));
     return `
       <div class="breadcrumb"><a href="#/" onclick="audioManager.playClick()">Home</a> <span>/</span> ${escapeHtml(meta.sinhala)}</div>
@@ -7090,9 +7096,9 @@ window.performanceManager = new PerformanceManager();
     let body = '';
     if (r.name === 'home') body = renderHome();
     else if (r.name === 'grades') body = await renderGrades(r.subject);
-    else if (r.name === 'lessons') body = await renderLessons(r.subject, r.grade);
-    else if (r.name === 'quiz') body = await renderQuiz(r.subject, r.grade, r.lessonId);
-    else body = renderHome();
+      else if (r.name === 'lessons') body = await renderLessons(r.subject, r.grade);
+      else if (r.name === 'quiz') body = await renderQuiz(r.subject, r.grade, r.lessonId);
+      else body = renderHome();
 
     const fragment = document.createDocumentFragment();
     const temp = document.createElement('div');
@@ -7573,7 +7579,7 @@ window.performanceManager = new PerformanceManager();
         showDeveloperPopup(e);
       }, 3000);
     }
-  }, { passive: false });
+  }, { passive: true });
   
   document.addEventListener('touchend', () => {
     if (longPressTimer) {
