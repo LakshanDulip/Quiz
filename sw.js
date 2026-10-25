@@ -1,29 +1,20 @@
 // ============ SERVICE WORKER - QUIZ HUB ============
 // Enhanced service worker with cache management, versioning, and update handling
 
-const CACHE_NAME = 'quizhub-v2';
-const RUNTIME_CACHE = 'quizhub-runtime-v2';
-const VERSION = '2.0.0';
+const CACHE_NAME = 'quizhub-v3';
+const RUNTIME_CACHE = 'quizhub-runtime-v3';
+const VERSION = '2.0.1';
 
 // Assets to cache on install
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
-  '/data/science.json',
-  '/data/maths.json',
+  '/game.html',
   '/version.json',
   '/manifest.json',
   '/icon-192.png',
-  '/icon-512.png',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
-  'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Noto+Sans+Sinhala:wght@400;500;700&display=swap'
+  '/icon-512.png'
 ];
-// Optional audio files
-const OPTIONAL_ASSETS = [
-  '/voice/15correct.mp3',
-  '/voice/100score.mp3'
-];
-
 // ✅ External domains that should NOT be cached
 const EXTERNAL_DOMAINS = [
   'ibb.co',
@@ -42,15 +33,15 @@ function isExternalUrl(url) {
   
   // Check against known external domains
   for (const domain of EXTERNAL_DOMAINS) {
-    if (hostname.includes(domain)) return true;
+    if ((hostname === domain || hostname.endsWith('.' + domain))) return true;
   }
   
   // Check if it's not our own domain
-  if (self.location.hostname && !hostname.includes(self.location.hostname)) {
+  if (self.location.hostname && hostname !== self.location.hostname) {
     // Allow CDN fonts and icons
-    if (hostname.includes('cdnjs.cloudflare.com')) return false;
-    if (hostname.includes('fonts.googleapis.com')) return false;
-    if (hostname.includes('fonts.gstatic.com')) return false;
+    if (hostname === 'cdnjs.cloudflare.com') return false;
+    if (hostname === 'fonts.googleapis.com') return false;
+    if (hostname === 'fonts.gstatic.com') return false;
     return true;
   }
   
@@ -70,18 +61,11 @@ self.addEventListener('install', (event) => {
         await cache.addAll(PRECACHE_ASSETS);
         console.log('[SW] Critical assets cached successfully');
         
-        // Cache optional assets (won't fail if missing)
-        try {
-          await cache.addAll(OPTIONAL_ASSETS);
-          console.log('[SW] Optional assets cached');
-        } catch (err) {
-          console.log('[SW] Optional assets not available (will fetch on demand)');
-        }
-        
         // Force activation
         await self.skipWaiting();
       } catch (error) {
         console.error('[SW] Pre-cache failed:', error);
+        throw error;
       }
     })()
   );
@@ -99,7 +83,7 @@ self.addEventListener('activate', (event) => {
         
         // Delete old caches
         const deletePromises = cacheNames
-          .filter(name => name !== CACHE_NAME && name !== RUNTIME_CACHE)
+          .filter(name => name.startsWith('quizhub-') && name !== CACHE_NAME && name !== RUNTIME_CACHE)
           .map(name => {
             console.log('[SW] Deleting old cache:', name);
             return caches.delete(name);
@@ -144,15 +128,15 @@ self.addEventListener('fetch', (event) => {
              url.pathname.endsWith('.svg') || 
              url.pathname.endsWith('.gif')) {
     // Images - Cache first with network update
-    event.respondWith(cacheFirstStrategy(request));
+    event.respondWith(cacheFirstStrategy(request, event));
   } else if (url.pathname.endsWith('.mp3') || url.pathname.endsWith('.ogg')) {
     // Audio files - Cache first
-    event.respondWith(cacheFirstStrategy(request));
+    event.respondWith(cacheFirstStrategy(request, event));
   } else if (url.origin === 'https://cdnjs.cloudflare.com' || 
              url.origin === 'https://fonts.googleapis.com' || 
              url.origin === 'https://fonts.gstatic.com') {
     // External CDN resources - Cache first
-    event.respondWith(cacheFirstStrategy(request));
+    event.respondWith(cacheFirstStrategy(request, event));
   } else {
     // HTML and other requests - Network first
     event.respondWith(networkFirstStrategy(request));
@@ -168,21 +152,24 @@ async function networkFirstStrategy(request) {
     // Cache the response if valid
     if (networkResponse && networkResponse.ok) {
       const cache = await caches.open(RUNTIME_CACHE);
-      cache.put(request, networkResponse.clone());
+      await cache.put(request, networkResponse.clone()).catch(error => {
+        console.warn('[SW] Cache write skipped:', error);
+      });
     }
     
     return networkResponse;
   } catch (error) {
     // Network failed, try cache
     console.log('[SW] Network failed, using cache for:', request.url);
-    const cachedResponse = await caches.match(request);
+    const cachedResponse = await (await caches.open(RUNTIME_CACHE)).match(request)
+      || await (await caches.open(CACHE_NAME)).match(request);
     
     if (cachedResponse) {
       return cachedResponse;
     }
     
     // If HTML request and no cache, return offline page
-    if (request.headers.get('Accept').includes('text/html')) {
+    if ((request.headers.get('Accept') || '').includes('text/html')) {
       return new Response(
         '<html><body style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;background:#0d1815;color:#f2f7ee;"><div style="text-align:center;"><h1>📡 Offline</h1><p>Please check your internet connection</p><button onclick="location.reload()" style="padding:10px 20px;border-radius:20px;background:#facc15;color:#000;border:none;cursor:pointer;">Retry</button></div></body></html>',
         {
@@ -197,22 +184,20 @@ async function networkFirstStrategy(request) {
 }
 
 // Cache first strategy (for static assets)
-async function cacheFirstStrategy(request) {
+async function cacheFirstStrategy(request, event) {
   // Check cache first
-  const cachedResponse = await caches.match(request);
+  const cachedResponse = await (await caches.open(RUNTIME_CACHE)).match(request)
+      || await (await caches.open(CACHE_NAME)).match(request);
   
   if (cachedResponse) {
     // Update cache in background (stale-while-revalidate)
-    fetch(request).then(response => {
+    event.waitUntil(fetch(request).then(async response => {
       if (response && response.ok) {
-        caches.open(RUNTIME_CACHE).then(cache => {
-          cache.put(request, response);
-        });
+        const cache = await caches.open(RUNTIME_CACHE);
+        await cache.put(request, response);
       }
-    }).catch(() => {
-      // Silently fail for background updates
-    });
-    
+    }).catch(() => {}));
+
     return cachedResponse;
   }
   
@@ -223,7 +208,9 @@ async function cacheFirstStrategy(request) {
     // Cache the response
     if (networkResponse && networkResponse.ok) {
       const cache = await caches.open(RUNTIME_CACHE);
-      cache.put(request, networkResponse.clone());
+      await cache.put(request, networkResponse.clone()).catch(error => {
+        console.warn('[SW] Cache write skipped:', error);
+      });
     }
     
     return networkResponse;
@@ -235,7 +222,7 @@ async function cacheFirstStrategy(request) {
 
 // Message handler for cache management
 self.addEventListener('message', (event) => {
-  const { type, payload } = event.data;
+  const { type, payload } = event.data || {};
   
   switch (type) {
     case 'SKIP_WAITING':
@@ -243,9 +230,9 @@ self.addEventListener('message', (event) => {
       break;
       
     case 'CLEAR_CACHE':
-      clearAllCaches().then(() => {
+      event.waitUntil(clearAllCaches().then(() => {
         event.ports[0]?.postMessage({ success: true });
-      });
+      }));
       break;
       
     case 'GET_VERSION':
@@ -253,9 +240,9 @@ self.addEventListener('message', (event) => {
       break;
       
     case 'UPDATE_CACHE':
-      updateCache(payload?.urls || []).then(() => {
+      event.waitUntil(updateCache(payload?.urls || []).then(() => {
         event.ports[0]?.postMessage({ success: true });
-      });
+      }));
       break;
       
     default:
@@ -266,7 +253,7 @@ self.addEventListener('message', (event) => {
 // Clear all caches
 async function clearAllCaches() {
   const cacheNames = await caches.keys();
-  const deletePromises = cacheNames.map(name => caches.delete(name));
+  const deletePromises = cacheNames.filter(name => name.startsWith('quizhub-')).map(name => caches.delete(name));
   await Promise.all(deletePromises);
   console.log('[SW] All caches cleared');
 }
